@@ -138,7 +138,7 @@ const renderTransactionRow = (transaction: Transaction) => {
       return assertUnreachable(transaction.status);
   }
 
-  const slotText = `${transaction.slot || "-"}`
+  const slotText = `${transaction.slot || "-"}`;
 
   return (
     <tr key={transaction.signature}>

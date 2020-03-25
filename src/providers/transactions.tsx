@@ -68,7 +68,11 @@ function reducer(state: State, action: Action): State {
     case ActionType.UpdateStatus: {
       let transaction = state.transactions[action.id];
       if (transaction) {
-        transaction = { ...transaction, status: action.status, slot: action.slot };
+        transaction = {
+          ...transaction,
+          status: action.status,
+          slot: action.slot
+        };
         const transactions = {
           ...state.transactions,
           [action.id]: transaction
@@ -140,16 +144,14 @@ export async function checkTransactionStatus(
   let status;
   let slot;
   try {
-    const result = await new Connection(url).getSignatureStatus(
-      signature
-    );
+    const result = await new Connection(url).getSignatureStatus(signature);
 
     if (result === null) {
       status = Status.Missing;
     } else {
       slot = result.slot;
       if ("Ok" in result.status) {
-      status = Status.Success;
+        status = Status.Success;
       } else {
         status = Status.Failure;
       }
