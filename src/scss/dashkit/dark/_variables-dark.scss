@@ -1,31 +1,33 @@
-//
+// 
 // variables-dark.scss
 // Dashkit dark version
 //
 
-//
+// 
 // Bootstrap Overrides ===================================
 //
+
 
 //
 // Color system
 //
 
-$white: #ffffff !default;
-$gray-300: #e3ebf6 !default;
-$gray-600: #95aac9 !default;
-$gray-700: #6e84a3 !default;
-$gray-900: #283e59 !default;
-$black: #12263f !default;
+$white: #FFFFFF !default;
+$gray-300: #E3EBF6 !default;
+$gray-600: #95AAC9 !default;
+$gray-700: #6E84A3 !default;
+$gray-900: #283E59 !default;
+$black: #12263F !default;
 
 $gray-600-dark: #244166 !default;
-$gray-700-dark: #1e3a5c !default;
-$gray-800-dark: #152e4d !default;
-$gray-900-dark: #132a46 !default;
-$black-dark: #12263f !default;
+$gray-700-dark: #1E3A5C !default;
+$gray-800-dark: #152E4D !default;
+$gray-900-dark: #132A46 !default;
+$black-dark: #12263F !default;
 
 $light: $gray-800-dark !default;
 $lighter: $gray-900-dark !default;
+
 
 // Body
 //
@@ -34,17 +36,20 @@ $lighter: $gray-900-dark !default;
 $body-bg: $black-dark !default;
 $body-color: $white !default;
 
+
 // Components
 //
 // Define common padding and border radius sizes and more.
 
 $border-color: $gray-700-dark !default;
 
+
 // Fonts
 //
 // Font, line-height, and color for body text, headings, and more.
 
 $text-muted: $gray-700 !default;
+
 
 // Tables
 //
@@ -61,6 +66,7 @@ $table-active-bg: $gray-900-dark !default;
 $table-bg-level: 0 !default;
 $table-border-level: 0 !default;
 
+
 // Forms
 
 $input-bg: $gray-700-dark !default;
@@ -72,6 +78,7 @@ $input-placeholder-color: $gray-600 !default;
 
 $custom-control-indicator-bg: $gray-600-dark !default;
 
+
 // Dropdowns
 //
 // Dropdown menu container and contents.
@@ -82,6 +89,7 @@ $dropdown-divider-bg: $black !default;
 
 $dropdown-link-color: $text-muted !default;
 $dropdown-link-hover-color: $white !default;
+
 
 // Navbar
 
@@ -104,6 +112,7 @@ $navbar-light-active-color: $white !default;
 $navbar-light-input-bg: $gray-700-dark !default;
 $navbar-light-input-border-color: $black-dark !default;
 
+
 // Pagination
 
 $pagination-color: $white !default;
@@ -117,38 +126,48 @@ $pagination-hover-border-color: $gray-700-dark !default;
 $pagination-disabled-bg: $gray-900-dark !default;
 $pagination-disabled-border-color: $gray-700-dark !default;
 
+
 // Jumbotron
 
 $jumbotron-bg: $gray-800-dark !default;
+
 
 // Cards
 
 $card-bg: $gray-800-dark !default;
 $card-border-color: $border-color !default;
 
+
 // Tooltips
 
 $tooltip-bg: $gray-800-dark !default;
 $tooltip-color: $white !default;
+
 
 // Popovers
 
 $popover-bg: $gray-800-dark !default;
 $popover-border-color: $black !default;
 
+
 // Toasts
 
 $toast-background-color: $gray-800-dark !default;
+;
+
+
 // Modals
 
 $modal-content-bg: $gray-800-dark !default;
 $modal-content-border-color: $black !default;
 
+
 // Progress bars
 
 $progress-bg: $gray-600-dark !default;
 
-//
+
+// 
 // Dashkit =====================================
 //
 
@@ -156,36 +175,44 @@ $progress-bg: $gray-600-dark !default;
 
 $auth-bg: $body-bg !default;
 
+
 // Avatar
 
 $avatar-title-bg: $gray-600-dark !default;
+
 
 // Badges
 
 $badge-soft-bg-level: 10 !default;
 
+
 // Cards
 
 $card-outline-color: $gray-800-dark !default;
-$card-box-shadow: 0 0.75rem 1.5rem transparentize($black-dark, 0.5) !default;
+$card-box-shadow: 0 .75rem 1.5rem transparentize($black-dark, .5) !default;
+
 
 // Comment
 
 $comment-body-bg: $gray-700-dark;
 
+
 // Header
 
 $header-body-border-color-dark: $border-color !default;
+
 
 // Navbar
 
 $navbar-light-bg: $gray-800-dark !default;
 $navbar-light-border-color: $gray-800-dark !default;
 
+
 // Switch
 
 $custom-switch-indicator-bg: $gray-800-dark !default;
 $custom-switch-indicator-active-bg: $white !default;
+
 
 // Backgrounds
 

@@ -15,14 +15,14 @@
   // Loads mask images so they don't lag on hover
 
   &:after {
-    content: "";
+    content: '';
     position: absolute;
     width: 0;
     height: 0;
     background-image: url(#{$path-to-img}/masks/avatar-status.svg),
-      url(#{$path-to-img}/masks/avatar-group.svg),
-      url(#{$path-to-img}/masks/avatar-group-hover.svg),
-      url(#{$path-to-img}/masks/avatar-group-hover-last.svg);
+    url(#{$path-to-img}/masks/avatar-group.svg),
+    url(#{$path-to-img}/masks/avatar-group-hover.svg),
+    url(#{$path-to-img}/masks/avatar-group-hover-last.svg);
   }
 }
 
@@ -43,12 +43,14 @@
   color: $avatar-title-color;
 }
 
+
 // Status
 
 .avatar-online,
 .avatar-offline {
+
   &::before {
-    content: "";
+    content: '';
     position: absolute;
     bottom: 5%;
     right: 5%;
@@ -70,6 +72,7 @@
 .avatar-offline::before {
   background-color: $gray-500;
 }
+
 
 // Sizing
 
@@ -109,6 +112,7 @@
   }
 }
 
+
 // Ratio
 
 .avatar.avatar-4by3 {
@@ -134,6 +138,7 @@
 .avatar-xxl.avatar-4by3 {
   width: $avatar-size-xxl * 4 / 3;
 }
+
 
 // Group
 
@@ -188,4 +193,5 @@
       }
     }
   }
+
 }

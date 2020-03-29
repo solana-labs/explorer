@@ -1,9 +1,9 @@
-//
+// 
 // badge.scss
 // Extended from Bootstrap
 //
 
-//
+// 
 // Bootstrap Overrides =====================================
 //
 
@@ -16,16 +16,13 @@
   top: -2px;
 }
 
-//
+// 
 // Dashkit =====================================
 //
 
 // Creates the "soft" badge variant
 @each $color, $value in $theme-colors {
   .badge-soft-#{$color} {
-    @include badge-variant-soft(
-      theme-color-level($color, $badge-soft-bg-level),
-      $value
-    );
+    @include badge-variant-soft(theme-color-level($color, $badge-soft-bg-level), $value);
   }
 }

@@ -24,12 +24,14 @@
   height: calc(#{$chart-height-sm} - #{$chart-legend-height});
 }
 
+
 // Sparkline
 
 .chart-sparkline {
   width: $chart-sparkline-width;
   height: $chart-sparkline-height;
 }
+
 
 // Legend
 //
@@ -55,11 +57,12 @@
 
 .chart-legend-indicator {
   display: inline-block;
-  width: 0.5rem;
-  height: 0.5rem;
+  width: .5rem;
+  height: .5rem;
   margin-right: 0.375rem;
   border-radius: 50%;
 }
+
 
 // Tooltip
 //
@@ -72,5 +75,5 @@
 #chart-tooltip .arrow {
   top: 100%;
   left: 50%;
-  transform: translateX(-50%) translateX(-0.5rem);
+  transform: translateX(-50%) translateX(-.5rem);
 }

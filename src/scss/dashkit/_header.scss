@@ -12,8 +12,7 @@
 }
 
 .header-img-top {
-  width: 100%;
-  height: auto;
+  width: 100%; height: auto;
 }
 
 .header-body {
@@ -34,7 +33,7 @@
 
 .header-pretitle {
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: .08em;
   color: $text-muted;
 }
 

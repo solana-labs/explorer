@@ -23,13 +23,13 @@
   }
 
   .flatpickr-months {
-    padding-top: 0.625rem;
-    padding-bottom: 0.625rem;
+    padding-top: .625rem;
+    padding-bottom: .625rem;
   }
 
   .flatpickr-prev-month,
   .flatpickr-next-month {
-    top: 0.625rem;
+    top: .625rem;
   }
 
   .flatpickr-current-month {
@@ -65,4 +65,5 @@
     border-radius: 0;
     box-shadow: -5px 0 0 $light, 5px 0 0 $light;
   }
+
 }

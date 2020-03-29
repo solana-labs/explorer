@@ -26,11 +26,13 @@
   max-width: $kanban-col-width;
 }
 
+
 // Category
 
 .kanban-category {
   min-height: 1rem;
 }
+
 
 // Item
 
@@ -40,7 +42,7 @@
 }
 
 .kanban-item.draggable-source--is-dragging {
-  opacity: 0.2;
+  opacity: .2;
 }
 
 .kanban-item.draggable-mirror {
@@ -51,11 +53,13 @@
   transform: rotateZ(-3deg);
 }
 
+
 // Card
 
 .kanban-item > .card[data-toggle="modal"] {
   cursor: pointer;
 }
+
 
 // Add form
 

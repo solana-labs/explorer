@@ -5,23 +5,23 @@
  * to ensure cascade of styles.
  */
 
-// Icon font
+ // Icon font
 @import "../fonts/feather/feather";
 
 // Bootstrap functions
-@import "~bootstrap/scss/functions.scss";
+@import '~bootstrap/scss/functions.scss';
 
 // Custom variables
-@import "solana-variables";
+@import 'solana-variables';
 
 // Dashkit variables
-@import "dashkit/variables";
+@import 'dashkit/variables';
 
 // Bootstrap core
-@import "~bootstrap/scss/bootstrap.scss";
+@import '~bootstrap/scss/bootstrap.scss';
 
 // Dashkit core
-@import "dashkit/dashkit";
+@import 'dashkit/dashkit';
 
 // Custom core
-@import "solana";
+@import 'solana';

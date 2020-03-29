@@ -5,7 +5,7 @@ import { TransactionsProvider } from "./providers/transactions";
 import NetworkStatusButton from "./components/NetworkStatusButton";
 import TransactionsCard from "./components/TransactionsCard";
 import NetworkModal from "./components/NetworkModal";
-import Logo from "./img/logos-solana/light-explorer-logo.svg"
+import Logo from "./img/logos-solana/light-explorer-logo.svg";
 
 function App() {
   const [showModal, setShowModal] = React.useState(false);

@@ -3,7 +3,7 @@
 // Extended from Bootstrap
 //
 
-//
+// 
 // Bootstrap Overrides =====================================
 //
 
@@ -19,11 +19,7 @@
 
 @each $color, $value in $theme-colors {
   .alert-#{$color} {
-    @include alert-variant(
-      theme-color-level($color, $alert-bg-level),
-      theme-color-level($color, $alert-border-level),
-      color-yiq(theme-color-level($color, $alert-bg-level))
-    );
+    @include alert-variant(theme-color-level($color, $alert-bg-level), theme-color-level($color, $alert-border-level), color-yiq(theme-color-level($color, $alert-bg-level)));
     .close,
     .alert-link {
       color: color-yiq(theme-color-level($color, $alert-bg-level));
