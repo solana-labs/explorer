@@ -6,25 +6,25 @@
  */
 
 // Bootstrap functions
-@import '~bootstrap/scss/functions.scss';
+@import "~bootstrap/scss/functions.scss";
 
 // Custom variables
-@import 'solana-variables';
+@import "solana-variables";
 
 // Dark mode variables
-@import 'dashkit/dark/variables-dark';
+@import "dashkit/dark/variables-dark";
 
 // Dashkit variables
-@import 'dashkit/variables';
+@import "dashkit/variables";
 
 // Bootstrap core
-@import '~bootstrap/scss/bootstrap.scss';
+@import "~bootstrap/scss/bootstrap.scss";
 
 // Dashkit core
-@import 'dashkit/dashkit';
+@import "dashkit/dashkit";
 
 // Dark mode overrides
-@import 'dashkit/dark/overrides-dark';
+@import "dashkit/dark/overrides-dark";
 
 // Custom core
-@import 'solana';
+@import "solana";

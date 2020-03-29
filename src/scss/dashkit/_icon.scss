@@ -37,8 +37,10 @@
     &::after {
       content: "";
       position: absolute;
-      top: 10%; right: 20%;
-      width: 20%; height: 20%;
+      top: 10%;
+      right: 20%;
+      width: 20%;
+      height: 20%;
       border-radius: 50%;
       background-color: $primary;
     }

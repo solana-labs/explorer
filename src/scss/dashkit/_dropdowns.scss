@@ -1,7 +1,7 @@
 //
 // dropdowns.scss
 // Extended from Bootstrap
-// 
+//
 
 //
 // Bootstrap overrides ==================================
@@ -12,46 +12,41 @@
 // Replace original arrows with Feather icons
 
 .dropdown-toggle {
-
   &::after {
     width: auto;
     height: auto;
     border: none !important;
     vertical-align: middle;
-    font-family: 'Feather';
+    font-family: "Feather";
   }
 
   &::after {
-    content: '\e92e';
+    content: "\e92e";
   }
 }
 
 .dropup > .dropdown-toggle {
-
   &::after {
-    content: '\e931';
+    content: "\e931";
   }
 }
 
 .dropright > .dropdown-toggle {
-
   &::after {
-    content: '\e930';
+    content: "\e930";
   }
 }
 
 .dropleft > .dropdown-toggle {
-
   &::before {
-    content: '\e92f';
+    content: "\e92f";
     width: auto;
     height: auto;
     border: none !important;
     vertical-align: middle;
-    font-family: 'Feather';
+    font-family: "Feather";
   }
 }
-
 
 // Dropdown toggle
 //
@@ -62,13 +57,12 @@
   justify-content: space-between;
 }
 
-
 // Dropdown menu animation
 //
 // Animate dropdown menu appearance
 
 .dropdown-menu {
-  animation: dropdownMenu .15s;
+  animation: dropdownMenu 0.15s;
 }
 
 @keyframes dropdownMenu {
@@ -81,12 +75,9 @@
   }
 }
 
-
-
 //
 // Dashkit ===================================
 //
-
 
 // Dropdown ellipses
 //
@@ -100,7 +91,6 @@
 .dropdown-ellipses::after {
   display: none;
 }
-
 
 // Dropdown card
 //

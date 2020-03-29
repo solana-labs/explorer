@@ -2,19 +2,20 @@
 // borders.scss
 //
 
-
 // Sizing
 
 $border-sizing: () !default;
-$border-sizing: map-merge((
-  "2": 2,
-  "3": 3,
-  "4": 4,
-  "5": 5
-), $border-sizing);
+$border-sizing: map-merge(
+  (
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5
+  ),
+  $border-sizing
+);
 
 @each $size, $value in $border-sizing {
-
   .border-#{$size} {
     border-width: $border-width * $value !important;
   }
@@ -33,9 +34,8 @@ $border-sizing: map-merge((
 
   .border-left-#{$size} {
     border-left-width: $border-width * $value !important;
-  } 
+  }
 }
-
 
 // Contextual classes
 

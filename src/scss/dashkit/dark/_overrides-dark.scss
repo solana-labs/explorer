@@ -13,10 +13,10 @@
 // 5. Select2
 //
 
-
 // Buttons
 
-.btn-white, .btn-light {
+.btn-white,
+.btn-light {
   @include button-variant($gray-800-dark, $gray-600-dark);
 
   &:not(:disabled):not(.disabled):hover,
@@ -32,20 +32,17 @@
   }
 }
 
-
 // Forms
 
 .form-control {
   border-color: $input-bg;
 }
 
-
 // Input groups
 
 .input-group .input-group-text {
   border-color: $input-bg;
 }
-
 
 // Quill
 

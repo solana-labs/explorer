@@ -38,7 +38,7 @@
 }
 
 .dropzone-single.dz-max-files-reached .dz-message {
-  background-color: fade-out($black, .1);
+  background-color: fade-out($black, 0.1);
   color: white;
   opacity: 0;
 
@@ -49,19 +49,26 @@
 
 .dz-preview-single {
   position: absolute;
-  top: 0; right: 0; bottom: 0; left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   border-radius: $border-radius;
 }
 
 .dz-preview-cover {
   position: absolute;
-  top: 0; right: 0; bottom: 0; left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   border-radius: $border-radius;
 }
 
 .dz-preview-img {
   object-fit: cover;
-  width: 100%; height: 100%;
+  width: 100%;
+  height: 100%;
   border-radius: $border-radius;
 }
 

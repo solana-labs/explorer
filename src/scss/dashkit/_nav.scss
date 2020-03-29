@@ -1,16 +1,15 @@
-// 
+//
 // nav.scss
 // Extended from Bootstrap
 //
 
-// 
+//
 // Bootstrap Overrides =====================================
 //
 
 // Changing nav tabs to be bottom highlight style
 
 .nav-tabs {
-
   .nav-item {
     margin-left: $nav-tabs-link-margin-x;
     margin-right: $nav-tabs-link-margin-x;
@@ -22,7 +21,7 @@
     border-left-width: 0;
     border-right-width: 0;
     border-top-width: 0;
-    
+
     &:not(.active) {
       color: $gray-600;
 
@@ -30,7 +29,6 @@
         color: $gray-700;
       }
     }
-
   }
 
   .nav-item:first-child {
@@ -45,11 +43,9 @@
   .nav-item.show .nav-link {
     border-color: transparent;
   }
-
 }
 
-
-// 
+//
 // Dashkit =====================================
 //
 
@@ -70,7 +66,6 @@
   }
 }
 
-
 // Creates a small version of the .nav-tabs
 
 .nav-tabs-sm {
@@ -80,30 +75,31 @@
     margin-left: $nav-tabs-sm-link-margin-x;
     margin-right: $nav-tabs-sm-link-margin-x;
   }
-  
+
   .nav-link {
     // Calculates the exact padding necessary to vertically fill the .card-header
-    padding-top: (($font-size-base / $nav-tabs-sm-font-size) * $nav-tabs-link-padding-y);
-    padding-bottom: (($font-size-base / $nav-tabs-sm-font-size) * $nav-tabs-link-padding-y);
+    padding-top: (
+      ($font-size-base / $nav-tabs-sm-font-size) * $nav-tabs-link-padding-y
+    );
+    padding-bottom: (
+      ($font-size-base / $nav-tabs-sm-font-size) * $nav-tabs-link-padding-y
+    );
   }
 }
 
 // Creates a small version of the .nab
 
 .nav-sm {
-
   .nav-link {
     font-size: $font-size-sm;
   }
 }
-
 
 // Nav + button group
 //
 // Change the look of .btn-white when .active
 
 .nav.btn-group {
-
   .btn-white.active {
     background-color: $primary;
     border-color: $primary;

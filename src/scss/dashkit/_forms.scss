@@ -14,14 +14,14 @@
   margin-bottom: $label-margin-bottom;
 }
 
-
 // Form validation
 
-.was-validated .form-control:valid:focus, .form-control.is-valid:focus,
-.was-validated .form-control:invalid:focus, .form-control.is-invalid:focus {
+.was-validated .form-control:valid:focus,
+.form-control.is-valid:focus,
+.was-validated .form-control:invalid:focus,
+.form-control.is-invalid:focus {
   box-shadow: none;
 }
-
 
 //
 // Dashkit ===================================
@@ -39,7 +39,6 @@
   resize: none;
 }
 
-
 // Form control auto
 //
 // Sets the height of the input to auto
@@ -50,7 +49,6 @@
   padding-bottom: 0;
 }
 
-
 // Form control rounded
 //
 // Makes input border radius round
@@ -59,13 +57,11 @@
   border-radius: 20rem;
 }
 
-
 // Input group merge
 //
 // Makes input group text and form control visually the same element
 
 .input-group.input-group-merge {
-
   > .form-control {
     border-radius: $input-border-radius;
 
@@ -73,7 +69,6 @@
       box-shadow: none;
 
       ~ [class*="input-group"] {
-
         > .input-group-text {
           border-color: $input-focus-border-color;
         }
@@ -116,7 +111,6 @@
   }
 
   > .input-group-append {
-
     > .input-group-text {
       padding-left: $input-padding-x / 2;
       border-top-right-radius: $input-border-radius;
@@ -128,23 +122,19 @@
 }
 
 .input-group-lg.input-group-merge {
-
   > .form-control {
     border-radius: $input-border-radius-lg;
   }
 
   > .form-control-prepended {
     padding-left: $input-padding-x-lg / 2;
-
   }
 
   > .form-control-appended {
     padding-right: $input-padding-x-lg / 2;
-
   }
 
   > .input-group-prepend {
-
     > .input-group-text {
       padding-right: $input-padding-x-lg / 2;
       border-top-left-radius: $input-border-radius-lg;
@@ -153,7 +143,6 @@
   }
 
   > .input-group-append {
-
     > .input-group-text {
       padding-left: $input-padding-x-lg / 2;
       border-top-right-radius: $input-border-radius-lg;
@@ -163,14 +152,12 @@
 }
 
 .input-group-sm.input-group-merge {
-
   > .form-control {
     border-radius: $input-border-radius-sm;
   }
 
   > .form-control-prepended {
     padding-left: $input-padding-x-sm / 2;
-
   }
 
   > .form-control-appended {
@@ -178,7 +165,6 @@
   }
 
   > .input-group-prepend {
-
     > .input-group-text {
       padding-right: $input-padding-x-sm / 2;
       border-top-left-radius: $input-border-radius-sm;
@@ -187,7 +173,6 @@
   }
 
   > .input-group-append {
-
     > .input-group-text {
       padding-left: $input-padding-x-sm / 2;
       border-top-right-radius: $input-border-radius-sm;
@@ -197,13 +182,11 @@
 }
 
 .input-group-rounded.input-group-merge {
-
   > .form-control {
     border-radius: 20rem;
   }
 
   > .input-group-prepend {
-
     > .input-group-text {
       border-top-left-radius: 20rem;
       border-bottom-left-radius: 20rem;
@@ -211,7 +194,6 @@
   }
 
   > .input-group-append {
-
     > .input-group-text {
       border-top-right-radius: 20rem;
       border-bottom-right-radius: 20rem;
@@ -220,7 +202,6 @@
 }
 
 .input-group-flush {
-
   > .form-control {
     padding-top: 0;
     padding-bottom: 0;
@@ -230,7 +211,6 @@
 
   > .input-group-prepend,
   > .input-group-append {
-
     > .input-group-text {
       padding: 0;
       border-width: 0;
@@ -239,12 +219,14 @@
   }
 }
 
-
 // Font size
 
 .form-control {
-
-  &.h1, &.h2, &.h3, &.h4, &.h5 {
+  &.h1,
+  &.h2,
+  &.h3,
+  &.h4,
+  &.h5 {
     margin-bottom: 0;
     font-weight: $headings-font-weight;
     letter-spacing: $headings-letter-spacing;

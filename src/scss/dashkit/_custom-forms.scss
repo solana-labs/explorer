@@ -13,7 +13,6 @@
   min-height: $custom-switch-height;
 
   .custom-control-label {
-
     &::before {
       top: 0;
       height: $custom-switch-height;
@@ -22,16 +21,19 @@
 
     &::after {
       top: $custom-switch-spacing;
-      left: $custom-switch-spacing - $custom-control-gutter - $custom-switch-width;
+      left: $custom-switch-spacing - $custom-control-gutter -
+        $custom-switch-width;
       background-color: $custom-switch-indicator-bg;
     }
   }
 
   .custom-control-input:checked ~ .custom-control-label {
-
     &::after {
       background-color: $custom-switch-indicator-active-bg;
-      transform: translateX($custom-switch-width - $custom-switch-spacing * 2 - $custom-switch-indicator-size);
+      transform: translateX(
+        $custom-switch-width - $custom-switch-spacing * 2 -
+          $custom-switch-indicator-size
+      );
     }
   }
 }

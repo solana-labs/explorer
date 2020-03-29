@@ -1,9 +1,9 @@
-// 
+//
 // card.scss
 // Extended from Bootstrap
 //
 
-// 
+//
 // Bootstrap Overrides =====================================
 //
 
@@ -38,7 +38,6 @@
   margin-bottom: $card-spacer-y / 2;
 }
 
-
 //
 // Dashkit ===================================
 //
@@ -60,10 +59,13 @@
 }
 
 .card-header-tabs .nav-link {
-  padding-top: calc((#{$card-header-height} - 1em * #{$line-height-base}) / 2) !important;
-  padding-bottom: calc((#{$card-header-height} - 1em * #{$line-height-base}) / 2) !important;
+  padding-top: calc(
+    (#{$card-header-height} - 1em * #{$line-height-base}) / 2
+  ) !important;
+  padding-bottom: calc(
+    (#{$card-header-height} - 1em * #{$line-height-base}) / 2
+  ) !important;
 }
-
 
 // Card table
 //
@@ -79,7 +81,6 @@
 
 .card-table thead th,
 .card-table tbody td {
-
   &:first-child {
     padding-left: $card-spacer-x !important;
   }
@@ -91,15 +92,13 @@
 
 .card > .card-table:first-child,
 .card > .table-responsive:first-child > .card-table {
-
-  > thead, > tbody, > tfoot {
-
+  > thead,
+  > tbody,
+  > tfoot {
     &:first-child {
-
       > tr:first-child {
-
-        > th, > td {
-
+        > th,
+        > td {
           &:first-child {
             border-top-left-radius: $card-border-radius;
           }
@@ -112,7 +111,6 @@
     }
   }
 }
-
 
 // Card avatar
 //
@@ -149,7 +147,6 @@
   margin-top: -($card-spacer-x + $avatar-size-xxl / 2);
 }
 
-
 // Card dropdown
 //
 // Places dropdowns in the top right corner
@@ -159,7 +156,6 @@
   top: $card-spacer-x;
   right: $card-spacer-x;
 }
-
 
 // Card inactive
 //
@@ -172,7 +168,6 @@
   box-shadow: none;
 }
 
-
 // Card flush
 //
 // Removes borders and background
@@ -183,7 +178,6 @@
   box-shadow: none;
 }
 
-
 // Card sizing
 //
 // Affects card padding
@@ -192,7 +186,6 @@
 .card-sm .card-footer-boxed {
   padding: $card-spacer-x-sm;
 }
-
 
 // Card header flush
 //
@@ -205,7 +198,6 @@
 .card-header-flush + .card-body {
   padding-top: 0;
 }
-
 
 // Card fill
 //
@@ -224,11 +216,8 @@
 // Responsive
 
 .card-fill {
-
   @each $breakpoint, $value in $grid-breakpoints {
-
     &-#{$breakpoint} {
-
       @include media-breakpoint-up(#{$breakpoint}) {
         height: calc(100% - #{$card-margin-bottom});
 
@@ -241,7 +230,6 @@
     }
   }
 }
-
 
 // Card adjust
 //
@@ -264,11 +252,8 @@
 // Responsive
 
 .card-adjust {
-
   @each $breakpoint, $value in $grid-breakpoints {
-
     &-#{$breakpoint} {
-
       @include media-breakpoint-up(#{$breakpoint}) {
         height: 0;
         min-height: 100%;
@@ -285,7 +270,6 @@
     }
   }
 }
-
 
 // Card footer boxed
 
