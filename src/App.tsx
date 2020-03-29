@@ -18,7 +18,7 @@ function App() {
             <div className="header-body">
               <div className="row align-items-end">
                 <div className="col">
-                  <img src={Logo} width="250" />
+                  <img src={Logo} width="250" alt="Solana Explorer" />
                 </div>
                 <div className="col-auto">
                   <NetworkStatusButton onClick={() => setShowModal(true)} />
