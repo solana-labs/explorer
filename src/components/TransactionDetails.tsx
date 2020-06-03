@@ -11,7 +11,8 @@ import { useCluster, useClusterModal } from "providers/cluster";
 import {
   TransactionSignature,
   SystemProgram,
-  StakeProgram
+  StakeProgram,
+  SystemInstruction
 } from "@solana/web3.js";
 import ClusterStatusButton from "components/ClusterStatusButton";
 import { lamportsToSolString } from "utils";
@@ -138,6 +139,12 @@ function StatusCard({ signature }: Props) {
 
   const fee = details?.transaction?.meta?.fee;
   const blockhash = details?.transaction?.transaction.recentBlockhash;
+  const ix = details?.transaction?.transaction.instructions[0];
+  const isNonce =
+    ix &&
+    SystemProgram.programId.equals(ix.programId) &&
+    SystemInstruction.decodeInstructionType(ix) === "AdvanceNonceAccount";
+
   return (
     <div className="card">
       <div className="card-header align-items-center">
@@ -187,9 +194,13 @@ function StatusCard({ signature }: Props) {
         {blockhash && (
           <tr>
             <td>
-              <InfoTooltip text="Transactions use a previously confirmed blockhash as a nonce prevent double spends">
-                Nonce
-              </InfoTooltip>
+              {isNonce ? (
+                "Nonce"
+              ) : (
+                <InfoTooltip text="Transactions use a previously confirmed blockhash as a nonce prevent double spends">
+                  Recent Blockhash
+                </InfoTooltip>
+              )}
             </td>
             <td className="text-right">
               <code>{blockhash}</code>
