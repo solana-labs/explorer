@@ -197,7 +197,7 @@ function StatusCard({ signature }: Props) {
               {isNonce ? (
                 "Nonce"
               ) : (
-                <InfoTooltip text="Transactions use a previously confirmed blockhash as a nonce prevent double spends">
+                <InfoTooltip text="Transactions use a previously confirmed blockhash as a nonce to prevent double spends">
                   Recent Blockhash
                 </InfoTooltip>
               )}
