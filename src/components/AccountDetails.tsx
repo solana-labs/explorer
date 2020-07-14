@@ -32,8 +32,7 @@ export default function AccountDetails({ address }: Props) {
   try {
     pubkey = new PublicKey(address);
   } catch (err) {
-    console.error(err);
-    // TODO handle bad addresses
+    // Bad address
   }
 
   const updateAddress = () => {
@@ -91,8 +90,16 @@ export default function AccountDetails({ address }: Props) {
           </button>
         </div>
       </div>
-      {pubkey && <AccountCards pubkey={pubkey} />}
-      {pubkey && <HistoryCard pubkey={pubkey} />}
+      {(() => {
+        if(pubkey){
+          return <>
+            <AccountCards pubkey={pubkey} />
+            <HistoryCard pubkey={pubkey} />
+          </>
+        }
+
+        return <ErrorCard  text="Invalid public key" />
+      })()}
     </div>
   );
 }
