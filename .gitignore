@@ -11,6 +11,9 @@
 # production
 /build
 
+# pycharm
+.idea/*
+
 # misc
 .DS_Store
 .env.local
