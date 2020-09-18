@@ -1,5 +1,4 @@
 import React from "react";
-import * as Sentry from "@sentry/react";
 import {
   Connection,
   TransactionSignature,
@@ -10,6 +9,7 @@ import { RetrieveSignature } from '@theronin/solarweave';
 import { useCluster, Cluster } from "../cluster";
 import * as Cache from "providers/cache";
 import { ActionType, FetchStatus } from "providers/cache";
+import { reportError } from "utils/sentry";
 
 export const SolarweaveDatabase = 'solarweave-cache-devnet-testrun4-index';
 
@@ -125,7 +125,7 @@ async function fetchDetails(
     fetchStatus = FetchStatus.Fetched;
   } catch (error) {
     if (cluster !== Cluster.Custom) {
-      Sentry.captureException(error, { tags: { url } });
+      reportError(error, { url });
     }
     fetchStatus = FetchStatus.FetchFailed;
   }
