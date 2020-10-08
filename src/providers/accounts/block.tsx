@@ -5,7 +5,7 @@ import { RetrieveSlot, RetrieveBlockhash } from "@theronin/solarweave";
 import { useCluster, Cluster } from "../cluster";
 import { ActionType, FetchStatus } from "providers/cache";
 import { HistoryProvider } from "./history";
-import { TokensProvider, TOKEN_PROGRAM_ID } from "./tokens";
+import { TokensProvider } from "./tokens";
 
 type State = Cache.State<Block>;
 type Dispatch = Cache.Dispatch<Block>;
@@ -111,6 +111,6 @@ export function useFetchBlock() {
         fetchBlock(dispatch, url, solarweave, cluster, key, type);
       }
     },
-    [state, dispatch, cluster, url]
+    [state, dispatch, cluster, url, solarweave]
   );
 }
