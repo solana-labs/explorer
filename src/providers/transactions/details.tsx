@@ -11,8 +11,6 @@ import * as Cache from "providers/cache";
 import { ActionType, FetchStatus } from "providers/cache";
 import { reportError } from "utils/sentry";
 
-export const SolarweaveDatabase = "solarweave-cache-devnet-testrun4-index";
-
 export interface Details {
   transaction?: ParsedConfirmedTransaction | null;
 }
