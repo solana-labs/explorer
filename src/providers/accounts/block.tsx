@@ -1,7 +1,7 @@
 import React from "react";
 import * as Sentry from "@sentry/react";
 import * as Cache from "providers/cache";
-import { RetrieveSlot, RetrieveBlockhash } from '@theronin/solarweave';
+import { RetrieveSlot, RetrieveBlockhash } from "@theronin/solarweave";
 import { useCluster, Cluster } from "../cluster";
 import { ActionType, FetchStatus } from "providers/cache";
 import { HistoryProvider } from "./history";
@@ -49,7 +49,14 @@ export function useBlock(key: string): Cache.CacheEntry<Block> | undefined {
   return context.entries[key];
 }
 
-export async function fetchBlock(dispatch: Dispatch, url: string, solarweave: string, cluster: Cluster, key: string, type: string) {
+export async function fetchBlock(
+  dispatch: Dispatch,
+  url: string,
+  solarweave: string,
+  cluster: Cluster,
+  key: string,
+  type: string
+) {
   dispatch({
     type: ActionType.Update,
     status: FetchStatus.Fetching,
@@ -61,7 +68,7 @@ export async function fetchBlock(dispatch: Dispatch, url: string, solarweave: st
   let status = FetchStatus.Fetching;
 
   try {
-    if (type === 'slot') {
+    if (type === "slot") {
       result = await RetrieveSlot(key, solarweave);
     } else {
       result = await RetrieveBlockhash(key, solarweave);
@@ -94,12 +101,11 @@ export function useFetchBlock() {
   const dispatch = React.useContext(DispatchContext);
 
   if (!state || !dispatch) {
-    throw new Error(
-      `useBlock must be used within a BlockProvider`
-    );
+    throw new Error(`useBlock must be used within a BlockProvider`);
   }
 
-  return React.useCallback((key: string, type: string) => {
+  return React.useCallback(
+    (key: string, type: string) => {
       const entry = state.entries[key];
       if (!entry) {
         fetchBlock(dispatch, url, solarweave, cluster, key, type);

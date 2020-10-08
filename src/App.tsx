@@ -48,14 +48,14 @@ function App() {
             exact
             path={"/slot/:slot"}
             render={({ match }) => (
-              <BlockDetailsPage slot={match.params.slot} blockhash={''}/>
+              <BlockDetailsPage slot={match.params.slot} blockhash={""} />
             )}
           />
           <Route
             exact
             path={"/blockhash/:blockhash"}
             render={({ match }) => (
-              <BlockDetailsPage slot={''} blockhash={match.params.blockhash}/>
+              <BlockDetailsPage slot={""} blockhash={match.params.blockhash} />
             )}
           />
           <Route

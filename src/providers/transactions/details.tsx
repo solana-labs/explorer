@@ -5,13 +5,13 @@ import {
   ParsedConfirmedTransaction,
   PublicKey,
 } from "@solana/web3.js";
-import { RetrieveSignature } from '@theronin/solarweave';
+import { RetrieveSignature } from "@theronin/solarweave";
 import { useCluster, Cluster } from "../cluster";
 import * as Cache from "providers/cache";
 import { ActionType, FetchStatus } from "providers/cache";
 import { reportError } from "utils/sentry";
 
-export const SolarweaveDatabase = 'solarweave-cache-devnet-testrun4-index';
+export const SolarweaveDatabase = "solarweave-cache-devnet-testrun4-index";
 
 export interface Details {
   transaction?: ParsedConfirmedTransaction | null;
@@ -45,7 +45,7 @@ export function DetailsProvider({ children }: DetailsProviderProps) {
 
 function ParseAsTransaction(tx: any, signature: string) {
   let slot = -1;
-  
+
   let meta = {
     err: null,
     fee: -1,
@@ -57,34 +57,40 @@ function ParseAsTransaction(tx: any, signature: string) {
     message: {
       accountKeys: [],
       instructions: [],
-      recentBlockhash: '',
+      recentBlockhash: "",
     },
     signatures: [],
   };
 
   tx.Tags.forEach((tag: any) => {
-    if (tag.name === 'slot') {
+    if (tag.name === "slot") {
       slot = Number(tag.value);
     }
   });
 
   tx.BlockData.transactions.forEach((t: any) => {
     if (t.transaction.signatures.indexOf(signature) !== -1) {
-      transaction.message.accountKeys = t.transaction.message.accountKeys.map((key: string) => {
-        return { pubkey: new PublicKey(key), signer: false, writable: false };
-      });
+      transaction.message.accountKeys = t.transaction.message.accountKeys.map(
+        (key: string) => {
+          return { pubkey: new PublicKey(key), signer: false, writable: false };
+        }
+      );
 
-      transaction.message.instructions = t.transaction.message.instructions.map((i: any) => {
-        const accounts = i.accounts.map((a: number) => {
-          return transaction.message.accountKeys[a]['pubkey'];
-        });
-        const data = i.data;
-        const programId = transaction.message.accountKeys[i.programIdIndex]['pubkey'];
+      transaction.message.instructions = t.transaction.message.instructions.map(
+        (i: any) => {
+          const accounts = i.accounts.map((a: number) => {
+            return transaction.message.accountKeys[a]["pubkey"];
+          });
+          const data = i.data;
+          const programId =
+            transaction.message.accountKeys[i.programIdIndex]["pubkey"];
 
-        return { accounts, data, programId };
-      });
+          return { accounts, data, programId };
+        }
+      );
 
-      transaction.message.recentBlockhash = t.transaction.message.recentBlockhash;
+      transaction.message.recentBlockhash =
+        t.transaction.message.recentBlockhash;
 
       transaction.signatures = t.transaction.signatures;
 
@@ -100,7 +106,7 @@ async function fetchDetails(
   signature: TransactionSignature,
   cluster: Cluster,
   url: string,
-  solarweave: string,
+  solarweave: string
 ) {
   dispatch({
     type: ActionType.Update,
@@ -115,13 +121,13 @@ async function fetchDetails(
     const tx = await RetrieveSignature(signature, `${solarweave}-index`);
 
     if (tx) {
-      transaction = ParseAsTransaction(tx, signature);  
+      transaction = ParseAsTransaction(tx, signature);
     } else {
       transaction = await new Connection(url).getParsedConfirmedTransaction(
         signature
       );
     }
-    
+
     fetchStatus = FetchStatus.Fetched;
   } catch (error) {
     if (cluster !== Cluster.Custom) {

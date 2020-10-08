@@ -189,15 +189,15 @@ function buildOptions(search: string, cluster: Cluster) {
     options.push(tokenOptions);
   }
 
-  if(!isNaN(Number(search))) {
+  if (!isNaN(Number(search))) {
     options.push({
       label: "Slot",
       options: [
         {
           label: `Slot #${search}`,
           value: search,
-          pathname: `/slot/${search}`
-        }
+          pathname: `/slot/${search}`,
+        },
       ],
     });
   }
@@ -209,8 +209,8 @@ function buildOptions(search: string, cluster: Cluster) {
         {
           label: `Blockhash ${search}`,
           value: search,
-          pathname: `/blockhash/${search}`
-        }
+          pathname: `/blockhash/${search}`,
+        },
       ],
     });
   }

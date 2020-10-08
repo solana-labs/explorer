@@ -70,11 +70,11 @@ export function clusterUrl(cluster: Cluster, customUrl: string): string {
 export function solarweaveUrl(cluster: Cluster, solarweaveUrl: string): string {
   switch (cluster) {
     case Cluster.Devnet:
-      return 'solana-devnet-solarweave';
+      return "solana-devnet-solarweave";
     case Cluster.MainnetBeta:
-      return 'solana-mainnet-solarweave';
+      return "solana-mainnet-solarweave";
     case Cluster.Testnet:
-      return 'solana-testnet-solarweave';
+      return "solana-testnet-solarweave";
     case Cluster.Custom:
       return solarweaveUrl;
   }
@@ -182,7 +182,7 @@ async function updateCluster(
   dispatch: Dispatch,
   cluster: Cluster,
   customUrl: string,
-  solarweaveUrl: string,
+  solarweaveUrl: string
 ) {
   dispatch({
     status: ClusterStatus.Connecting,
@@ -205,7 +205,12 @@ async function updateCluster(
     if (cluster !== Cluster.Custom) {
       reportError(error, { clusterUrl: clusterUrl(cluster, customUrl) });
     }
-    dispatch({ status: ClusterStatus.Failure, cluster, customUrl, solarweaveUrl });
+    dispatch({
+      status: ClusterStatus.Failure,
+      cluster,
+      customUrl,
+      solarweaveUrl,
+    });
   }
 }
 

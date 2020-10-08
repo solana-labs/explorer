@@ -66,13 +66,16 @@ function CustomClusterInput({ activeSuffix, active }: InputProps) {
     };
   };
 
-  const onUrlInput = useDebounceCallback((url: string, solarweaveUrl: string) => {
-    updateCustomUrl(url, solarweaveUrl);
-    if (url.length > 0) {
-      query.set("cluster", "custom");
-      history.push({ ...location, search: query.toString() });
-    }
-  }, 500);
+  const onUrlInput = useDebounceCallback(
+    (url: string, solarweaveUrl: string) => {
+      updateCustomUrl(url, solarweaveUrl);
+      if (url.length > 0) {
+        query.set("cluster", "custom");
+        history.push({ ...location, search: query.toString() });
+      }
+    },
+    500
+  );
 
   const inputTextClass = editing ? "" : "text-muted";
   return (
