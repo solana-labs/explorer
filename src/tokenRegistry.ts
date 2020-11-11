@@ -54,30 +54,44 @@ const MAINNET_TOKENS: { [key: string]: TokenDetails } = {
   "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E": {
     symbol: "BTC",
     name: "Wrapped Bitcoin",
+    logo: "/tokens/bitcoin.svg",
+    icon: "/tokens/bitcoin.svg",
   },
   "2FPyTwcZLUg1MDrwsyoP4D6s1tM7hAkHYRjkNb5w6Pxk": {
     symbol: "ETH",
     name: "Wrapped Ethereum",
+    logo: "/tokens/ethereum.svg",
+    icon: "/tokens/ethereum.svg",
   },
   AGFEad2et2ZJif9jaGpdMixQqvW5i81aBdvKe7PHNfz3: {
     symbol: "FTT",
     name: "Wrapped FTT",
+    logo: "/tokens/ftt.svg",
+    icon: "/tokens/ftt.svg",
   },
   "3JSf5tPeuscJGtaCp5giEiDhv51gQ4v3zWg8DGgyLfAB": {
     symbol: "YFI",
     name: "Wrapped YFI",
+    logo: "/tokens/yfi.svg",
+    icon: "/tokens/yfi.svg",
   },
   CWE8jPTUYhdCTZYWPTe1o5DFqfdjzWKc9WKz6rSjQUdG: {
     symbol: "LINK",
     name: "Wrapped Chainlink",
+    logo: "/tokens/link.svg",
+    icon: "/tokens/link.svg",
   },
   Ga2AXHpfAF6mv2ekZwcsJFqu7wB4NV331qNH7fW9Nst8: {
     symbol: "XRP",
     name: "Wrapped XRP",
+    logo: "/tokens/xrp.svg",
+    icon: "/tokens/xrp.svg",
   },
   BQcdHdAQW1hczDbBi9hiegXAR7A98Q9jx3X3iBBBDiq4: {
     symbol: "USDT",
     name: "Wrapped USDT",
+    logo: "/tokens/usdt.svg",
+    icon: "/tokens/usdt.svg",
   },
   BXXkv6z8ykpG1yuvUDPgh732wzVHB69RnB9YgSYh3itW: {
     symbol: "USDC",
@@ -90,6 +104,8 @@ const MAINNET_TOKENS: { [key: string]: TokenDetails } = {
   SF3oTvfWzEP3DTwGSvUXRrGTvr75pdZNnBLAH9bzMuX: {
     symbol: "SXP",
     name: "Wrapped Swipe",
+    logo: "/tokens/sxp.svg",
+    icon: "/tokens/sxp.svg",
   },
   BtZQfWqDGbk9Wf2rXEiWyQBdBY1etnUUn6zEphvVS7yN: {
     symbol: "HGET",
@@ -106,6 +122,8 @@ const MAINNET_TOKENS: { [key: string]: TokenDetails } = {
   "5Fu5UUgbjpUvdBveb3a1JTNirL8rXtiYeSMWvKjtUNQv": {
     symbol: "CREAM",
     name: "Wrapped Cream Finance",
+    logo: "/tokens/cream.svg",
+    icon: "/tokens/cream.svg",
   },
   HqB7uswoVg4suaQiDP3wjxob1G5WdZ144zhdStwMCq7e: {
     symbol: "HNT",
