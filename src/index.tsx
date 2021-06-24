@@ -1,9 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { BrowserRouter as Router } from "react-router-dom";
+import { MemoryRouter as Router } from "react-router-dom";
 import * as Sentry from "@sentry/react";
 import "./scss/theme-dark.scss";
 import App from "./App";
+import { AccountDetailsPage } from "pages/AccountDetailsPage";
 import { ClusterProvider } from "./providers/cluster";
 import { RichListProvider } from "./providers/richList";
 import { SupplyProvider } from "./providers/supply";
