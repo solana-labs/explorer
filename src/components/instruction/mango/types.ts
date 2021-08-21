@@ -2,8 +2,17 @@ import {
   Config,
   GroupConfig,
   MangoInstructionLayout,
+  PerpMarket,
+  PerpMarketConfig,
+  PerpMarketLayout,
+  SpotMarketConfig,
 } from "@blockworks-foundation/mango-client";
-import { AccountMeta, TransactionInstruction } from "@solana/web3.js";
+import { Market } from "@project-serum/serum";
+import {
+  AccountMeta,
+  Connection,
+  TransactionInstruction,
+} from "@solana/web3.js";
 
 const mainnetGroupConfig = Config.ids().getGroup(
   "mainnet",
@@ -194,6 +203,11 @@ export const decodeCancelPerpOrder = (
   return cancelPerpOrder;
 };
 
+export type OrderLotDetails = {
+  price: number;
+  size: number;
+};
+
 ////
 
 export function logAllKeys(keys: AccountMeta[]) {
@@ -230,4 +244,32 @@ export function getSpotMarketFromInstruction(
   return mainnetGroupConfig.spotMarkets.filter((mangoSpotMarket) =>
     spotMarket.pubkey.equals(mangoSpotMarket.publicKey)
   )[0];
+}
+
+export async function getSpotMarketFromSpotMarketConfig(
+  clusterUrl: string,
+  mangoSpotMarketConfig: SpotMarketConfig
+): Promise<Market> {
+  const connection = new Connection(clusterUrl);
+  return await Market.load(
+    connection,
+    mangoSpotMarketConfig.publicKey,
+    undefined,
+    mainnetGroupConfig.serumProgramId
+  );
+}
+
+export async function getPerpMarketFromPerpMarketConfig(
+  clusterUrl: string,
+  mangoPerpMarketConfig: PerpMarketConfig
+): Promise<PerpMarket> {
+  const connection = new Connection(clusterUrl);
+  const acc = await connection.getAccountInfo(mangoPerpMarketConfig.publicKey);
+  const decoded = PerpMarketLayout.decode(acc?.data);
+  return new PerpMarket(
+    mangoPerpMarketConfig.publicKey,
+    mangoPerpMarketConfig.baseDecimals,
+    mangoPerpMarketConfig.quoteDecimals,
+    decoded
+  );
 }

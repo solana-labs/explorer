@@ -1,9 +1,13 @@
 import { SignatureResult, TransactionInstruction } from "@solana/web3.js";
+import BN from "bn.js";
 import { Address } from "components/common/Address";
+import { useCluster } from "providers/cluster";
+import { useEffect, useState } from "react";
 import { InstructionCard } from "../InstructionCard";
 import {
   getPerpMarketFromInstruction,
-  logAllKeys,
+  getPerpMarketFromPerpMarketConfig,
+  OrderLotDetails,
   PlacePerpOrder,
 } from "./types";
 
@@ -16,19 +20,31 @@ export function PlacePerpOrderDetailsCard(props: {
   childIndex?: number;
 }) {
   const { ix, index, result, info, innerCards, childIndex } = props;
-
-  logAllKeys(ix.keys);
   const mangoAccount = ix.keys[1];
+  const mangoPerpMarketConfig = getPerpMarketFromInstruction(ix, 4);
 
-  const mangoPerpMarket = getPerpMarketFromInstruction(ix, 4);
-
-  // const baseToken = groupConfig.tokens.filter(
-  //   (token) => token.symbol === mangoPerpMarket.baseSymbol
-  // )[0];
-  // const baseQty = info.quantity / Math.pow(10, baseToken.decimals);
-
-  // todo
-  // for me it's often really hard to know which of the accounts is the margin account or the market etc.
+  const cluster = useCluster();
+  const [orderLotDetails, setOrderLotDetails] =
+    useState<OrderLotDetails | null>(null);
+  useEffect(() => {
+    async function getOrderLotDetails() {
+      const mangoPerpMarket = await getPerpMarketFromPerpMarketConfig(
+        cluster.url,
+        mangoPerpMarketConfig
+      );
+      const maxBaseQuantity = mangoPerpMarket.baseLotsToNumber(
+        new BN(info.quantity.toString())
+      );
+      const limitPrice = mangoPerpMarket.priceLotsToNumber(
+        new BN(info.price.toString())
+      );
+      setOrderLotDetails({
+        price: limitPrice,
+        size: maxBaseQuantity,
+      } as OrderLotDetails);
+    }
+    getOrderLotDetails();
+  }, []);
 
   return (
     <InstructionCard
@@ -49,13 +65,13 @@ export function PlacePerpOrderDetailsCard(props: {
 
       <tr>
         <td>Perp Market</td>
-        <td className="text-lg-right">{mangoPerpMarket.name}</td>
+        <td className="text-lg-right">{mangoPerpMarketConfig.name}</td>
       </tr>
 
       <tr>
         <td>Perp Market Address</td>
         <td>
-          <Address pubkey={mangoPerpMarket.publicKey} alignRight link />
+          <Address pubkey={mangoPerpMarketConfig.publicKey} alignRight link />
         </td>
       </tr>
 
@@ -77,12 +93,12 @@ export function PlacePerpOrderDetailsCard(props: {
 
       <tr>
         <td>Price</td>
-        <td className="text-lg-right">{info.price}</td>
+        <td className="text-lg-right">{orderLotDetails?.price} USDC</td>
       </tr>
 
       <tr>
         <td>Quantity</td>
-        <td className="text-lg-right">{info.quantity}</td>
+        <td className="text-lg-right">{orderLotDetails?.size}</td>
       </tr>
     </InstructionCard>
   );

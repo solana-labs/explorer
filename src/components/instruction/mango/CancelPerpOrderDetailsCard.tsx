@@ -12,9 +12,7 @@ export function CancelPerpOrderDetailsCard(props: {
   childIndex?: number;
 }) {
   const { ix, index, result, info, innerCards, childIndex } = props;
-
   const mangoAccount = ix.keys[1];
-
   const mangoPerpMarket = getPerpMarketFromInstruction(ix, 3);
 
   return (

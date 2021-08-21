@@ -32,10 +32,6 @@ export function MangoDetailsCard(props: {
   try {
     title = parseMangoInstructionTitle(ix);
 
-    //todo
-    // fix price and qty scaling
-    // make address links for spot and perp market addresses
-
     switch (title) {
       case "PlaceSpotOrder":
         return (
@@ -90,8 +86,6 @@ export function MangoDetailsCard(props: {
       signature: signature,
     });
   }
-
-  console.log(`Mango: ${title}`);
 
   return (
     <InstructionCard

@@ -1,7 +1,7 @@
 import { SignatureResult, TransactionInstruction } from "@solana/web3.js";
 import { Address } from "components/common/Address";
 import { InstructionCard } from "../InstructionCard";
-import { getPerpMarketFromInstruction, logAllKeys } from "./types";
+import { getPerpMarketFromInstruction } from "./types";
 
 export function GenericPerpMngoDetailsCard(props: {
   ix: TransactionInstruction;
@@ -23,8 +23,6 @@ export function GenericPerpMngoDetailsCard(props: {
     innerCards,
     childIndex,
   } = props;
-
-  logAllKeys(ix.keys);
   const mangoAccount = ix.keys[mangoAccountKeyLocation];
   const mangoPerpMarket = getPerpMarketFromInstruction(
     ix,

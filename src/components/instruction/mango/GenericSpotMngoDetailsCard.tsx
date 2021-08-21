@@ -1,7 +1,7 @@
 import { SignatureResult, TransactionInstruction } from "@solana/web3.js";
 import { Address } from "components/common/Address";
 import { InstructionCard } from "../InstructionCard";
-import { getSpotMarketFromInstruction, logAllKeys } from "./types";
+import { getSpotMarketFromInstruction } from "./types";
 
 export function GenericSpotMngoDetailsCard(props: {
   ix: TransactionInstruction;
@@ -23,8 +23,6 @@ export function GenericSpotMngoDetailsCard(props: {
     innerCards,
     childIndex,
   } = props;
-
-  logAllKeys(ix.keys);
   const mangoAccount = ix.keys[accountKeyLocation];
   const mangoSpotMarket = getSpotMarketFromInstruction(
     ix,

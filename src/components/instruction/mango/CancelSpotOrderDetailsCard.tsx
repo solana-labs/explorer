@@ -12,9 +12,8 @@ export function CancelSpotOrderDetailsCard(props: {
   childIndex?: number;
 }) {
   const { ix, index, result, info, innerCards, childIndex } = props;
-
-  const mangoSpotMarket = getSpotMarketFromInstruction(ix, 4);
   const mangoAccount = ix.keys[2];
+  const mangoSpotMarket = getSpotMarketFromInstruction(ix, 4);
 
   return (
     <InstructionCard

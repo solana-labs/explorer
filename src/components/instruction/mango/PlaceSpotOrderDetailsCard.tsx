@@ -1,9 +1,13 @@
 import { SignatureResult, TransactionInstruction } from "@solana/web3.js";
+import BN from "bn.js";
 import { Address } from "components/common/Address";
+import { useCluster } from "providers/cluster";
+import { useEffect, useState } from "react";
 import { InstructionCard } from "../InstructionCard";
 import {
   getSpotMarketFromInstruction,
-  logAllKeys,
+  getSpotMarketFromSpotMarketConfig,
+  OrderLotDetails,
   PlaceSpotOrder,
 } from "./types";
 
@@ -16,21 +20,31 @@ export function PlaceSpotOrderDetailsCard(props: {
   childIndex?: number;
 }) {
   const { ix, index, result, info, innerCards, childIndex } = props;
-
-  logAllKeys(ix.keys);
   const mangoAccount = ix.keys[1];
+  const mangoSpotMarketConfig = getSpotMarketFromInstruction(ix, 5);
 
-  const mangoSpotMarket = getSpotMarketFromInstruction(ix, 5);
-
-  // const baseToken = groupConfig.tokens.filter(
-  //   (token) => token.symbol === mangoSpotMarket.baseSymbol
-  // )[0];
-  // const baseQty = info.maxBaseQuantity / Math.pow(10, baseToken.decimals);
-
-  // const quoteToken = groupConfig.tokens.filter(
-  //   (token) => token.symbol === "USDC"
-  // )[0];
-  // const quoteQty = info.maxQuoteQuantity / Math.pow(10, quoteToken.decimals);
+  const cluster = useCluster();
+  const [orderLotDetails, setOrderLotDetails] =
+    useState<OrderLotDetails | null>(null);
+  useEffect(() => {
+    async function getOrderLotDetails() {
+      const mangoSpotMarket = await getSpotMarketFromSpotMarketConfig(
+        cluster.url,
+        mangoSpotMarketConfig
+      );
+      const maxBaseQuantity = mangoSpotMarket.baseSizeLotsToNumber(
+        new BN(info.maxBaseQuantity.toString())
+      );
+      const limitPrice = mangoSpotMarket.priceLotsToNumber(
+        new BN(info.limitPrice.toString())
+      );
+      setOrderLotDetails({
+        price: limitPrice,
+        size: maxBaseQuantity,
+      } as OrderLotDetails);
+    }
+    getOrderLotDetails();
+  }, []);
 
   return (
     <InstructionCard
@@ -50,7 +64,13 @@ export function PlaceSpotOrderDetailsCard(props: {
       </tr>
       <tr>
         <td>Spot Market</td>
-        <td className="text-lg-right">{mangoSpotMarket.name}</td>
+        <td className="text-lg-right">{mangoSpotMarketConfig.name}</td>
+      </tr>
+      <tr>
+        <td>Spot Market Address</td>
+        <td>
+          <Address pubkey={mangoSpotMarketConfig.publicKey} alignRight link />
+        </td>
       </tr>
       <tr>
         <td>Order Type</td>
@@ -69,15 +89,11 @@ export function PlaceSpotOrderDetailsCard(props: {
       <tr>
         <td>Limit Price</td>
         {/* todo fix price */}
-        <td className="text-lg-right">{info.limitPrice}</td>
+        <td className="text-lg-right">{orderLotDetails?.price} USDC</td>
       </tr>
       <tr>
-        <td>Max Base Quantity</td>
-        <td className="text-lg-right">{info.maxBaseQuantity}</td>
-      </tr>
-      <tr>
-        <td>Max Quote Quantity</td>
-        <td className="text-lg-right">{info.maxQuoteQuantity}</td>
+        <td>Size</td>
+        <td className="text-lg-right">{orderLotDetails?.size}</td>
       </tr>
     </InstructionCard>
   );
