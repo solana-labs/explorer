@@ -247,10 +247,19 @@ export function getSpotMarketFromInstruction(
 }
 
 export async function getSpotMarketFromSpotMarketConfig(
+  ix: TransactionInstruction,
   clusterUrl: string,
   mangoSpotMarketConfig: SpotMarketConfig
 ): Promise<Market> {
   const connection = new Connection(clusterUrl);
+  if (ix.programId.equals(devnetGroupConfig.mangoProgramId)) {
+    return await Market.load(
+      connection,
+      mangoSpotMarketConfig.publicKey,
+      undefined,
+      devnetGroupConfig.serumProgramId
+    );
+  }
   return await Market.load(
     connection,
     mangoSpotMarketConfig.publicKey,

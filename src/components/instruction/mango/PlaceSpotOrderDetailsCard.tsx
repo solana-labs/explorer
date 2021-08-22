@@ -29,6 +29,7 @@ export function PlaceSpotOrderDetailsCard(props: {
   useEffect(() => {
     async function getOrderLotDetails() {
       const mangoSpotMarket = await getSpotMarketFromSpotMarketConfig(
+        ix,
         cluster.url,
         mangoSpotMarketConfig
       );
