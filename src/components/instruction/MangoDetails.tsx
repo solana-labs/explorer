@@ -38,6 +38,7 @@ export function MangoDetailsCard(props: {
     // 2) AddPerpMarket
     // 3) ChangePerpMarketParams (still needs to be released on npm)
     // i'll try to send you devnet TX for those, i'm doing some maintenance on our devnet setup today
+    // 4) ChangePerpMarketParams https://explorer.solana.com/tx/2onizWMGhFoghVJkkgVgpLDXAmcUpyTszhQqRgBxZnTaXmskDoLvENVWDN9UHJHVR4b5r5xf2psoifsztJJcc1Jd?cluster=devnet
 
     switch (title) {
       case "PlaceSpotOrder":
