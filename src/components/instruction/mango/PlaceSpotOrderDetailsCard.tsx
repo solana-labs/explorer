@@ -45,7 +45,7 @@ export function PlaceSpotOrderDetailsCard(props: {
       } as OrderLotDetails);
     }
     getOrderLotDetails();
-  }, []);
+  }, [cluster, info, ix, mangoSpotMarketConfig]);
 
   return (
     <InstructionCard

@@ -33,11 +33,11 @@ export function MangoDetailsCard(props: {
     title = parseMangoInstructionTitle(ix);
 
     // todo
-//     @microwavedcola could you add the following v3 instructions to your explorer PR? We'd like to vote on them in the coming weeks:
-// 1) AddSpotMarket
-// 2) AddPerpMarket
-// 3) ChangePerpMarketParams (still needs to be released on npm)
-// i'll try to send you devnet TX for those, i'm doing some maintenance on our devnet setup today
+    //     @microwavedcola could you add the following v3 instructions to your explorer PR? We'd like to vote on them in the coming weeks:
+    // 1) AddSpotMarket
+    // 2) AddPerpMarket
+    // 3) ChangePerpMarketParams (still needs to be released on npm)
+    // i'll try to send you devnet TX for those, i'm doing some maintenance on our devnet setup today
 
     switch (title) {
       case "PlaceSpotOrder":
