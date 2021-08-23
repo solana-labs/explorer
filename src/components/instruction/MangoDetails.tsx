@@ -2,6 +2,8 @@ import { SignatureResult, TransactionInstruction } from "@solana/web3.js";
 import { useCluster } from "providers/cluster";
 import { reportError } from "utils/sentry";
 import { InstructionCard } from "./InstructionCard";
+import { AddOracleDetailsCard } from "./mango/AddOracleDetailsCard";
+import { AddSpotMarketDetailsCard } from "./mango/AddSpotMarketDetailsCard";
 import { CancelPerpOrderDetailsCard } from "./mango/CancelPerpOrderDetailsCard";
 import { CancelSpotOrderDetailsCard } from "./mango/CancelSpotOrderDetailsCard";
 import { ChangePerpMarketParamsDetailsCard } from "./mango/ChangePerpMarketParamsDetailsCard";
@@ -10,6 +12,7 @@ import { GenericSpotMngoDetailsCard } from "./mango/GenericSpotMngoDetailsCard";
 import { PlacePerpOrderDetailsCard } from "./mango/PlacePerpOrderDetailsCard";
 import { PlaceSpotOrderDetailsCard } from "./mango/PlaceSpotOrderDetailsCard";
 import {
+  decodeAddSpotMarket,
   decodeCancelPerpOrder,
   decodeCancelSpotOrder,
   decodeChangePerpMarketParams,
@@ -93,6 +96,12 @@ export function MangoDetailsCard(props: {
             info={decodeChangePerpMarketParams(ix)}
             {...props}
           />
+        );
+      case "AddOracle":
+        return <AddOracleDetailsCard {...props} />;
+      case "AddSpotMarket":
+        return (
+          <AddSpotMarketDetailsCard info={decodeAddSpotMarket(ix)} {...props} />
         );
     }
   } catch (error) {

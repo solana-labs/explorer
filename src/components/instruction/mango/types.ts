@@ -256,6 +256,32 @@ export const decodeChangePerpMarketParams = (
   return changePerpMarketParams;
 };
 
+export type AddSpotMarket = {
+  marketIndex: number;
+  maintLeverage: number;
+  initLeverage: number;
+  liquidationFee: number;
+  optimalUtil: number;
+  optimalRate: number;
+  maxRate: number;
+};
+
+export const decodeAddSpotMarket = (
+  ix: TransactionInstruction
+): AddSpotMarket => {
+  const decoded = MangoInstructionLayout.decode(ix.data);
+  const addSpotMarket: AddSpotMarket = {
+    marketIndex: decoded.AddSpotMarket.marketIndex.toNumber(),
+    maintLeverage: decoded.AddSpotMarket.maintLeverage.toNumber(),
+    initLeverage: decoded.AddSpotMarket.initLeverage.toNumber(),
+    liquidationFee: decoded.AddSpotMarket.liquidationFee.toNumber(),
+    optimalUtil: decoded.AddSpotMarket.optimalUtil.toNumber(),
+    optimalRate: decoded.AddSpotMarket.optimalRate.toNumber(),
+    maxRate: decoded.AddSpotMarket.maxRate.toNumber(),
+  };
+  return addSpotMarket;
+};
+
 export type OrderLotDetails = {
   price: number;
   size: number;
@@ -270,7 +296,7 @@ export function logAllKeys(keys: AccountMeta[]) {
 export function getPerpMarketFromInstruction(
   ix: TransactionInstruction,
   keyLocation: number
-) {
+): PerpMarketConfig {
   const perpMarket = ix.keys[keyLocation];
 
   if (ix.programId.equals(devnetGroupConfig.mangoProgramId)) {
@@ -287,7 +313,7 @@ export function getPerpMarketFromInstruction(
 export function getSpotMarketFromInstruction(
   ix: TransactionInstruction,
   keyLocation: number
-) {
+): SpotMarketConfig {
   const spotMarket = ix.keys[keyLocation];
   if (ix.programId.equals(devnetGroupConfig.mangoProgramId)) {
     return devnetGroupConfig.spotMarkets.filter((mangoSpotMarket) =>
@@ -334,4 +360,26 @@ export async function getPerpMarketFromPerpMarketConfig(
     mangoPerpMarketConfig.quoteDecimals,
     decoded
   );
+}
+
+export function spotMarketFromIndex(
+  ix: TransactionInstruction,
+  marketIndex: number
+): String {
+  if (ix.programId.equals(devnetGroupConfig.mangoProgramId)) {
+    const spotMarketConfigs = devnetGroupConfig.spotMarkets.filter(
+      (spoartMarketConfig) => spoartMarketConfig.marketIndex === marketIndex
+    );
+    if (!spotMarketConfigs.length) {
+      return "UNKNOWN";
+    }
+    return spotMarketConfigs[0].name;
+  }
+  const spotMarketConfigs = mainnetGroupConfig.spotMarkets.filter(
+    (spoartMarketConfig) => spoartMarketConfig.marketIndex === marketIndex
+  );
+  if (!spotMarketConfigs.length) {
+    return "UNKNOWN";
+  }
+  return spotMarketConfigs[0].name;
 }
