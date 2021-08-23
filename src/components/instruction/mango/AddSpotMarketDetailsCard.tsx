@@ -23,38 +23,38 @@ export function AddSpotMarketDetailsCard(props: {
     >
       {spotMarketFromIndex(ix, info.marketIndex) !== "UNKNOWN" && (
         <tr>
-          <td>market</td>
+          <td>Market</td>
           <td className="text-lg-right">
             {spotMarketFromIndex(ix, info.marketIndex)}
           </td>
         </tr>
       )}
       <tr>
-        <td>marketIndex</td>
+        <td>Market Index</td>
         <td className="text-lg-right">{info.marketIndex}</td>
       </tr>
       <tr>
-        <td>maintLeverage</td>
+        <td>Maint Leverage</td>
         <td className="text-lg-right">{info.maintLeverage}</td>
       </tr>
       <tr>
-        <td>initLeverage</td>
+        <td>Init Leverage</td>
         <td className="text-lg-right">{info.initLeverage}</td>
       </tr>
       <tr>
-        <td>liquidationFee</td>
+        <td>Liquidation Fee</td>
         <td className="text-lg-right">{info.liquidationFee}</td>
       </tr>
       <tr>
-        <td>optimalUtil</td>
+        <td>Optimal Util</td>
         <td className="text-lg-right">{info.optimalUtil}</td>
       </tr>
       <tr>
-        <td>optimalRate</td>
+        <td>Optimal Rate</td>
         <td className="text-lg-right">{info.optimalRate}</td>
       </tr>
       <tr>
-        <td>maxRate</td>
+        <td>Max Rate</td>
         <td className="text-lg-right">{info.maxRate}</td>
       </tr>
     </InstructionCard>

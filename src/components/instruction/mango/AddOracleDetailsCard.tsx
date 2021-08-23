@@ -29,19 +29,6 @@ export function AddOracleDetailsCard(props: {
       title="Mango: AddOracle"
       innerCards={innerCards}
       childIndex={childIndex}
-    >
-      {/* <tr>
-        <td>Mango Account</td>
-        <td>
-          {" "}
-          <Address pubkey={mangoAccount.pubkey} alignRight link />
-        </td>
-      </tr>
-
-      <tr>
-        <td>Perp Market</td>
-        <td className="text-lg-right">{mangoPerpMarketConfig.name}</td>
-      </tr> */}
-    </InstructionCard>
+    ></InstructionCard>
   );
 }
