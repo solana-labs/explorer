@@ -253,7 +253,6 @@ export const decodeChangePerpMarketParams = (
     mngoPerPeriodOption: decoded.ChangePerpMarketParams.mngoPerPeriodOption,
     mngoPerPeriod: decoded.ChangePerpMarketParams.mngoPerPeriod.toString(),
   };
-  console.log(changePerpMarketParams);
   return changePerpMarketParams;
 };
 
