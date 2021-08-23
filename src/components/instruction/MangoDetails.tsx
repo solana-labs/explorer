@@ -4,6 +4,7 @@ import { reportError } from "utils/sentry";
 import { InstructionCard } from "./InstructionCard";
 import { CancelPerpOrderDetailsCard } from "./mango/CancelPerpOrderDetailsCard";
 import { CancelSpotOrderDetailsCard } from "./mango/CancelSpotOrderDetailsCard";
+import { ChangePerpMarketParamsDetailsCard } from "./mango/ChangePerpMarketParamsDetailsCard";
 import { GenericPerpMngoDetailsCard } from "./mango/GenericPerpMngoDetailsCard";
 import { GenericSpotMngoDetailsCard } from "./mango/GenericSpotMngoDetailsCard";
 import { PlacePerpOrderDetailsCard } from "./mango/PlacePerpOrderDetailsCard";
@@ -11,6 +12,7 @@ import { PlaceSpotOrderDetailsCard } from "./mango/PlaceSpotOrderDetailsCard";
 import {
   decodeCancelPerpOrder,
   decodeCancelSpotOrder,
+  decodeChangePerpMarketParams,
   decodePlacePerpOrder,
   decodePlaceSpotOrder,
   parseMangoInstructionTitle,
@@ -84,6 +86,13 @@ export function MangoDetailsCard(props: {
             mangoAccountKeyLocation={3}
             perpMarketKeyLocation={4}
             title={"RedeemMngo"}
+            {...props}
+          />
+        );
+      case "ChangePerpMarketParams":
+        return (
+          <ChangePerpMarketParamsDetailsCard
+            info={decodeChangePerpMarketParams(ix)}
             {...props}
           />
         );

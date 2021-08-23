@@ -14,6 +14,8 @@ import {
   TransactionInstruction,
 } from "@solana/web3.js";
 
+// todo: fix types in entire file
+
 const mainnetGroupConfig = Config.ids().getGroup(
   "mainnet",
   "mainnet.0"
@@ -69,6 +71,7 @@ export const INSTRUCTION_LOOKUP: { [key: number]: string } = {
   34: "AddMangoAccountInfo",
   35: "DepositMsrm",
   36: "WithdrawMsrm",
+  37: "ChangePerpMarketParams",
 };
 
 export const parseMangoInstructionTitle = (
@@ -201,6 +204,57 @@ export const decodeCancelPerpOrder = (
     invalidIdOk: decoded.CancelPerpOrder.invalidIdOk.toString(),
   };
   return cancelPerpOrder;
+};
+
+export type ChangePerpMarketParams = {
+  maintLeverageOption: Boolean;
+  maintLeverage: number;
+  initLeverageOption: Boolean;
+  initLeverage: number;
+  liquidationFeeOption: Boolean;
+  liquidationFee: number;
+  makerFeeOption: Boolean;
+  makerFee: number;
+  takerFeeOption: Boolean;
+  takerFee: number;
+  rateOption: Boolean;
+  rate: number;
+  maxDepthBpsOption: Boolean;
+  maxDepthBps: number;
+  targetPeriodLengthOption: Boolean;
+  targetPeriodLength: number;
+  mngoPerPeriodOption: Boolean;
+  mngoPerPeriod: number;
+};
+
+export const decodeChangePerpMarketParams = (
+  ix: TransactionInstruction
+): ChangePerpMarketParams => {
+  const decoded = MangoInstructionLayout.decode(ix.data);
+  const changePerpMarketParams: ChangePerpMarketParams = {
+    maintLeverageOption: decoded.ChangePerpMarketParams.maintLeverageOption,
+    maintLeverage: decoded.ChangePerpMarketParams.maintLeverage.toString(),
+    initLeverageOption: decoded.ChangePerpMarketParams.initLeverageOption,
+    initLeverage: decoded.ChangePerpMarketParams.initLeverage.toString(),
+    liquidationFeeOption: decoded.ChangePerpMarketParams.liquidationFeeOption,
+    liquidationFee: decoded.ChangePerpMarketParams.liquidationFee.toString(),
+    makerFeeOption: decoded.ChangePerpMarketParams.makerFeeOption,
+    makerFee: decoded.ChangePerpMarketParams.makerFee.toString(),
+    takerFeeOption: decoded.ChangePerpMarketParams.takerFeeOption,
+    takerFee: decoded.ChangePerpMarketParams.takerFee.toString(),
+    rateOption: decoded.ChangePerpMarketParams.rateOption,
+    rate: decoded.ChangePerpMarketParams.rate.toString(),
+    maxDepthBpsOption: decoded.ChangePerpMarketParams.maxDepthBpsOption,
+    maxDepthBps: decoded.ChangePerpMarketParams.maxDepthBps.toString(),
+    targetPeriodLengthOption:
+      decoded.ChangePerpMarketParams.targetPeriodLengthOption,
+    targetPeriodLength:
+      decoded.ChangePerpMarketParams.targetPeriodLength.toString(),
+    mngoPerPeriodOption: decoded.ChangePerpMarketParams.mngoPerPeriodOption,
+    mngoPerPeriod: decoded.ChangePerpMarketParams.mngoPerPeriod.toString(),
+  };
+  console.log(changePerpMarketParams);
+  return changePerpMarketParams;
 };
 
 export type OrderLotDetails = {
