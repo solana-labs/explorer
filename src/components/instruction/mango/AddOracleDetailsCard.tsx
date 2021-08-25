@@ -1,16 +1,5 @@
 import { SignatureResult, TransactionInstruction } from "@solana/web3.js";
-import BN from "bn.js";
-import { Address } from "components/common/Address";
-import { useCluster } from "providers/cluster";
-import { useEffect, useState } from "react";
 import { InstructionCard } from "../InstructionCard";
-import {
-  getPerpMarketFromInstruction,
-  getPerpMarketFromPerpMarketConfig,
-  logAllKeys,
-  OrderLotDetails,
-  PlacePerpOrder,
-} from "./types";
 
 export function AddOracleDetailsCard(props: {
   ix: TransactionInstruction;

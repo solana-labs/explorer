@@ -1,6 +1,6 @@
 import { SignatureResult, TransactionInstruction } from "@solana/web3.js";
 import { InstructionCard } from "../InstructionCard";
-import { AddSpotMarket, logAllKeys, spotMarketFromIndex } from "./types";
+import { AddSpotMarket, spotMarketFromIndex } from "./types";
 
 export function AddSpotMarketDetailsCard(props: {
   ix: TransactionInstruction;

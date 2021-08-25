@@ -1,6 +1,13 @@
 import { SignatureResult, TransactionInstruction } from "@solana/web3.js";
+import moment from "moment";
+import { useCluster } from "providers/cluster";
+import { useEffect, useState } from "react";
 import { InstructionCard } from "../InstructionCard";
-import { ChangePerpMarketParams } from "./types";
+import {
+  ChangePerpMarketParams,
+  getPerpMarketFromInstruction,
+  getPerpMarketFromPerpMarketConfig,
+} from "./types";
 
 export function ChangePerpMarketParamsDetailsCard(props: {
   ix: TransactionInstruction;
@@ -11,6 +18,26 @@ export function ChangePerpMarketParamsDetailsCard(props: {
   childIndex?: number;
 }) {
   const { ix, index, result, info, innerCards, childIndex } = props;
+
+  const mangoPerpMarketConfig = getPerpMarketFromInstruction(ix, 1);
+
+  const cluster = useCluster();
+  const [targetPeriodLength, setTargetPeriodLength] = useState<number | null>(
+    null
+  );
+  useEffect(() => {
+    async function getTargetPeriodLength() {
+      const mangoPerpMarket = await getPerpMarketFromPerpMarketConfig(
+        cluster.url,
+        mangoPerpMarketConfig
+      );
+
+      setTargetPeriodLength(
+        mangoPerpMarket.liquidityMiningInfo.targetPeriodLength.toNumber()
+      );
+    }
+    getTargetPeriodLength();
+  }, [cluster, info, mangoPerpMarketConfig]);
 
   return (
     <InstructionCard
@@ -47,10 +74,15 @@ export function ChangePerpMarketParamsDetailsCard(props: {
       )}
       {info.mngoPerPeriodOption && (
         <tr>
-          <td>Mngo per period</td>
-          <td className="text-lg-right">{info.mngoPerPeriod}</td>
+          <td>
+            MNGO per {moment.duration(targetPeriodLength, "seconds").humanize()}
+          </td>
+          <td className="text-lg-right">
+            {info.mngoPerPeriod} {}
+          </td>
         </tr>
       )}
+
       {info.maxDepthBpsOption && (
         <tr>
           <td>Max depth bps</td>
