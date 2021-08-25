@@ -25,19 +25,19 @@ export function CancelPerpOrderDetailsCard(props: {
       childIndex={childIndex}
     >
       <tr>
-        <td>Mango Account</td>
+        <td>Mango account</td>
         <td>
           <Address pubkey={mangoAccount.pubkey} alignRight link />
         </td>
       </tr>
 
       <tr>
-        <td>Perp Market</td>
+        <td>Perp market</td>
         <td className="text-lg-right">{mangoPerpMarket.name}</td>
       </tr>
 
       <tr>
-        <td>Perp Market Address</td>
+        <td>Perp market address</td>
         <td>
           <Address pubkey={mangoPerpMarket.publicKey} alignRight link />
         </td>

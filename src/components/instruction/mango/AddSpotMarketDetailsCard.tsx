@@ -30,31 +30,31 @@ export function AddSpotMarketDetailsCard(props: {
         </tr>
       )}
       <tr>
-        <td>Market Index</td>
+        <td>Market index</td>
         <td className="text-lg-right">{info.marketIndex}</td>
       </tr>
       <tr>
-        <td>Maint Leverage</td>
+        <td>Maint leverage</td>
         <td className="text-lg-right">{info.maintLeverage}</td>
       </tr>
       <tr>
-        <td>Init Leverage</td>
+        <td>Init leverage</td>
         <td className="text-lg-right">{info.initLeverage}</td>
       </tr>
       <tr>
-        <td>Liquidation Fee</td>
+        <td>Liquidation fee</td>
         <td className="text-lg-right">{info.liquidationFee}</td>
       </tr>
       <tr>
-        <td>Optimal Util</td>
+        <td>Optimal util</td>
         <td className="text-lg-right">{info.optimalUtil}</td>
       </tr>
       <tr>
-        <td>Optimal Rate</td>
+        <td>Optimal rate</td>
         <td className="text-lg-right">{info.optimalRate}</td>
       </tr>
       <tr>
-        <td>Max Rate</td>
+        <td>Max rate</td>
         <td className="text-lg-right">{info.maxRate}</td>
       </tr>
     </InstructionCard>

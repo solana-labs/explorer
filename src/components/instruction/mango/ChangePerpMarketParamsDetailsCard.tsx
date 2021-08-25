@@ -23,55 +23,55 @@ export function ChangePerpMarketParamsDetailsCard(props: {
     >
       {info.initLeverageOption && (
         <tr>
-          <td>initLeverage</td>
+          <td>Init leverage</td>
           <td className="text-lg-right">{info.initLeverage}</td>
         </tr>
       )}
       {info.liquidationFeeOption && (
         <tr>
-          <td>liquidationFee</td>
+          <td>Liquidation fee</td>
           <td className="text-lg-right">{info.liquidationFee}</td>
         </tr>
       )}
       {info.maintLeverageOption && (
         <tr>
-          <td>maintLeverage</td>
+          <td>Maint leverage</td>
           <td className="text-lg-right">{info.maintLeverage}</td>
         </tr>
       )}
       {info.makerFeeOption && (
         <tr>
-          <td>makerFee</td>
+          <td>Maker fee</td>
           <td className="text-lg-right">{info.makerFee}</td>
         </tr>
       )}
       {info.mngoPerPeriodOption && (
         <tr>
-          <td>mngoPerPeriodOption</td>
+          <td>Mngo per period</td>
           <td className="text-lg-right">{info.mngoPerPeriod}</td>
         </tr>
       )}
       {info.maxDepthBpsOption && (
         <tr>
-          <td>maxDepthBps</td>
+          <td>Max depth bps</td>
           <td className="text-lg-right">{info.maxDepthBps}</td>
         </tr>
       )}
       {info.rateOption && (
         <tr>
-          <td>rate</td>
+          <td>Rate</td>
           <td className="text-lg-right">{info.rate}</td>
         </tr>
       )}
       {info.takerFeeOption && (
         <tr>
-          <td>takerFee</td>
+          <td>Taker fee</td>
           <td className="text-lg-right">{info.takerFee}</td>
         </tr>
       )}
       {info.targetPeriodLengthOption && (
         <tr>
-          <td>targetPeriodLength</td>
+          <td>Target period length</td>
           <td className="text-lg-right">{info.targetPeriodLength}</td>
         </tr>
       )}

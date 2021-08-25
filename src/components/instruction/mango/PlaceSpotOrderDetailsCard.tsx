@@ -57,24 +57,24 @@ export function PlaceSpotOrderDetailsCard(props: {
       childIndex={childIndex}
     >
       <tr>
-        <td>Mango Account</td>
+        <td>Mango account</td>
         <td>
           {" "}
           <Address pubkey={mangoAccount.pubkey} alignRight link />
         </td>
       </tr>
       <tr>
-        <td>Spot Market</td>
+        <td>Spot market</td>
         <td className="text-lg-right">{mangoSpotMarketConfig.name}</td>
       </tr>
       <tr>
-        <td>Spot Market Address</td>
+        <td>Spot market address</td>
         <td>
           <Address pubkey={mangoSpotMarketConfig.publicKey} alignRight link />
         </td>
       </tr>
       <tr>
-        <td>Order Type</td>
+        <td>Order type</td>
         <td className="text-lg-right">{info.orderType}</td>
       </tr>
       {info.clientId !== "0" && (
@@ -88,7 +88,7 @@ export function PlaceSpotOrderDetailsCard(props: {
         <td className="text-lg-right">{info.side}</td>
       </tr>
       <tr>
-        <td>Limit Price</td>
+        <td>Limit price</td>
         {/* todo fix price */}
         <td className="text-lg-right">{orderLotDetails?.price} USDC</td>
       </tr>

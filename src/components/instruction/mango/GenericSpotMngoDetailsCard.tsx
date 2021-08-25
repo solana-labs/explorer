@@ -39,19 +39,19 @@ export function GenericSpotMngoDetailsCard(props: {
       childIndex={childIndex}
     >
       <tr>
-        <td>Mango Account</td>
+        <td>Mango account</td>
         <td>
           <Address pubkey={mangoAccount.pubkey} alignRight link />
         </td>
       </tr>
 
       <tr>
-        <td>Spot Market</td>
+        <td>Spot market</td>
         <td className="text-lg-right">{mangoSpotMarket.name}</td>
       </tr>
 
       <tr>
-        <td>Spot Market Address</td>
+        <td>Spot market address</td>
         <td>
           <Address pubkey={mangoSpotMarket.publicKey} alignRight link />
         </td>

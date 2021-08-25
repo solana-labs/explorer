@@ -56,7 +56,7 @@ export function PlacePerpOrderDetailsCard(props: {
       childIndex={childIndex}
     >
       <tr>
-        <td>Mango Account</td>
+        <td>Mango account</td>
         <td>
           {" "}
           <Address pubkey={mangoAccount.pubkey} alignRight link />
@@ -64,12 +64,12 @@ export function PlacePerpOrderDetailsCard(props: {
       </tr>
 
       <tr>
-        <td>Perp Market</td>
+        <td>Perp market</td>
         <td className="text-lg-right">{mangoPerpMarketConfig.name}</td>
       </tr>
 
       <tr>
-        <td>Perp Market Address</td>
+        <td>Perp market address</td>
         <td>
           <Address pubkey={mangoPerpMarketConfig.publicKey} alignRight link />
         </td>
@@ -77,27 +77,27 @@ export function PlacePerpOrderDetailsCard(props: {
 
       {info.clientOrderId !== "0" && (
         <tr>
-          <td>Client Order Id</td>
+          <td>Client order Id</td>
           <td className="text-lg-right">{info.clientOrderId}</td>
         </tr>
       )}
 
       <tr>
-        <td>Order Type</td>
+        <td>Order type</td>
         <td className="text-lg-right">{info.orderType}</td>
       </tr>
       <tr>
-        <td>Side</td>
+        <td>side</td>
         <td className="text-lg-right">{info.side}</td>
       </tr>
 
       <tr>
-        <td>Price</td>
+        <td>price</td>
         <td className="text-lg-right">{orderLotDetails?.price} USDC</td>
       </tr>
 
       <tr>
-        <td>Quantity</td>
+        <td>quantity</td>
         <td className="text-lg-right">{orderLotDetails?.size}</td>
       </tr>
     </InstructionCard>
