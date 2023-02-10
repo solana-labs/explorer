@@ -1,0 +1,12 @@
+//
+// root.scss
+// Extended from Bootstrap
+//
+
+:root {
+
+  // Chart variables
+  @each $color, $value in $chart-colors {
+    --bs-chart-#{$color}: #{$value};
+  }
+}
