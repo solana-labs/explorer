@@ -143,6 +143,19 @@ const TPS_CHART_OPTIONS = (historyMaxTps: number): ChartOptions => {
           ticks: {
             stepSize: 100,
             fontSize: 10,
+            maxTicksLimit: 10,
+            callback: (value, index, values) => {
+              const max = Math.max(...(values as any as number[]));
+              if (max < 5000) {
+                return `${value}`;
+              } else if (max < 1000000) {
+                return `${(value as number) / 1000}k`;
+              } else if (max < 5000000) {
+                return `${(value as number) / 1000000}m`;
+              } else {
+                return `${(value as number) / 1000000000}b`;
+              }
+            },
             fontColor: "#EEE",
             beginAtZero: true,
             display: true,
