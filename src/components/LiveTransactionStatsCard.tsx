@@ -149,11 +149,11 @@ const TPS_CHART_OPTIONS = (historyMaxTps: number): ChartOptions => {
               if (max < 5000) {
                 return `${value}`;
               } else if (max < 1000000) {
-                return `${(value as number) / 1000}k`;
+                return `${(value as number) / 1000}k`; // k as in `kilo`
               } else if (max < 5000000) {
-                return `${(value as number) / 1000000}m`;
+                return `${(value as number) / 1000000}m`; // m as in `mega`
               } else {
-                return `${(value as number) / 1000000000}b`;
+                return `${(value as number) / 1000000000}g`; // g as in `giga`
               }
             },
             fontColor: "#EEE",
