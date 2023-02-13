@@ -54,6 +54,8 @@ export enum PROGRAM_NAMES {
   BREAK_SOLANA = "Break Solana Program",
   CHAINLINK_ORACLE = "Chainlink OCR2 Oracle Program",
   CHAINLINK_STORE = "Chainlink Store Program",
+  CLOCKWORK_1 = "Clockwork Thread Program v1",
+  CLOCKWORK_2 = "Clockwork Thread Program v2",
   MANGO_GOVERNANCE = "Mango Governance Program",
   MANGO_ICO = "Mango ICO Program",
   MANGO_1 = "Mango Program v1",
@@ -425,6 +427,14 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
   [OPEN_BOOK_PROGRAM_ID]: {
     name: PROGRAM_NAMES.OPENBOOK_DEX,
     deployments: [Cluster.MainnetBeta],
+  },
+  "3XXuUFfweXBwFgFfYaejLvZE4cGZiHgKiGfMtdxNzYmv": {
+    name: PROGRAM_NAMES.CLOCKWORK_1,
+    deployments: [Cluster.MainnetBeta, Cluster.Devnet],
+  },
+  "CLoCKyJ6DXBJqqu2VWx9RLbgnwwR6BMHHuyasVmfMzBh": {
+    name: PROGRAM_NAMES.CLOCKWORK_2,
+    deployments: [Cluster.MainnetBeta, Cluster.Devnet],
   },
 };
 
