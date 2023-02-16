@@ -71,11 +71,13 @@ export function clusterUrl(cluster: Cluster, customUrl: string): string {
 
   switch (cluster) {
     case Cluster.Devnet:
-      return modifyUrl(DEVNET_URL);
+      return process.env.REACT_APP_DEVNET_RPC_URL ?? modifyUrl(DEVNET_URL);
     case Cluster.MainnetBeta:
-      return modifyUrl(MAINNET_BETA_URL);
+      return (
+        process.env.REACT_APP_MAINNET_RPC_URL ?? modifyUrl(MAINNET_BETA_URL)
+      );
     case Cluster.Testnet:
-      return modifyUrl(TESTNET_URL);
+      return process.env.REACT_APP_TESTNET_RPC_URL ?? modifyUrl(TESTNET_URL);
     case Cluster.Custom:
       return customUrl;
   }
