@@ -1,9 +1,9 @@
 import React from "react";
 import { ParsedInstruction, PublicKey, SignatureResult } from "@solana/web3.js";
-import { InstructionCard } from "./InstructionCard";
+import { InstructionCard } from "../InstructionCard";
 import { Address } from "components/common/Address";
 
-export function AssociatedTokenDetailsCard({
+export function CreateDetailsCard({
   ix,
   index,
   result,
