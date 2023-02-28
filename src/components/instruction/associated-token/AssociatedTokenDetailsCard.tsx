@@ -12,9 +12,11 @@ import { ParsedInfo } from "validators";
 import { create } from "superstruct";
 import { reportError } from "utils/sentry";
 import {
+  CreateIdempotentInfo,
   RecoverNestedInfo,
 
 } from "./types";
+import { CreateIdempotentDetailsCard } from "./CreateIdempotentDetailsCard";
 
 type DetailsProps = {
   tx: ParsedTransaction;
@@ -31,6 +33,10 @@ export function AssociatedTokenDetailsCard(props: DetailsProps) {
     switch (parsed.type) {
       case "create": {
         return <CreateDetailsCard {...props} />;
+      }
+      case "createIdempotent": {
+        const info = create(parsed.info, CreateIdempotentInfo);
+        return <CreateIdempotentDetailsCard info={info} {...props} />;
       }
       case "recoverNested": {
         const info = create(parsed.info, RecoverNestedInfo);
