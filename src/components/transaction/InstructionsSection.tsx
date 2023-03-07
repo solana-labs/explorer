@@ -37,7 +37,7 @@ import { Cluster, useCluster } from "providers/cluster";
 import { BpfUpgradeableLoaderDetailsCard } from "components/instruction/bpf-upgradeable-loader/BpfUpgradeableLoaderDetailsCard";
 import { VoteDetailsCard } from "components/instruction/vote/VoteDetailsCard";
 import { isWormholeInstruction } from "components/instruction/wormhole/types";
-import { AssociatedTokenDetailsCard } from "components/instruction/AssociatedTokenDetailsCard";
+import { AssociatedTokenDetailsCard } from "components/instruction/associated-token/AssociatedTokenDetailsCard";
 import { MangoDetailsCard } from "components/instruction/MangoDetails";
 import { isPythInstruction } from "components/instruction/pyth/types";
 import { PythDetailsCard } from "components/instruction/pyth/PythDetailsCard";
