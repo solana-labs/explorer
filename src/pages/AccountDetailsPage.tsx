@@ -168,7 +168,7 @@ export function AccountDetailsPage({ address, tab }: Props) {
 
   try {
     pubkey = new PublicKey(address);
-  } catch (err) {}
+  } catch (err) { }
 
   // Fetch account on load
   React.useEffect(() => {
@@ -228,16 +228,17 @@ export function AccountHeader({
     // Fall back to legacy token list when there is stub metadata (blank uri), updatable by default by the mint authority
     if (!parsedData?.nftData?.metadata.data.uri && tokenDetails) {
       token = tokenDetails;
-    } else if (parsedData?.nftData) {
+    } else if (parsedData?.nftData && parsedData?.nftData?.metadata.data.uri) {
       token = {
         logoURI: parsedData?.nftData?.json?.image,
         name:
           parsedData?.nftData?.json?.name ??
           parsedData?.nftData.metadata.data.name,
       };
-      unverified = true;
     } else if (tokenDetails) {
       token = tokenDetails;
+    } else {
+      unverified = true;
     }
 
     return (
