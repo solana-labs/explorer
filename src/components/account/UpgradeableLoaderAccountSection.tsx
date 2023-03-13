@@ -128,6 +128,8 @@ export function UpgradeableProgramSection({
               </td>
             </tr>
             <tr>
+              {/* Anchor Program Registry is no longer maintained, so the verified label has been removed */}
+              {/* 
               <td>
                 <LastVerifiedBuildLabel />
               </td>
@@ -145,7 +147,7 @@ export function UpgradeableProgramSection({
                     ))}
                   </>
                 )}
-              </td>
+              </td> */}
             </tr>
             <tr>
               <td>
