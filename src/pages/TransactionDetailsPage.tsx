@@ -60,7 +60,7 @@ export function TransactionDetailsPage({ signature: raw }: SignatureProps) {
     if (decoded.length === 64) {
       signature = raw;
     }
-  } catch (err) { }
+  } catch (err) {}
 
   const status = useTransactionStatus(signature);
   const [zeroConfirmationRetries, setZeroConfirmationRetries] =
@@ -184,8 +184,9 @@ function StatusCard({
     } else {
       const programError = getTransactionInstructionError(info.result.err);
       if (programError !== undefined) {
-        errorReason = `Program Error: "Instruction #${programError.index + 1
-          } Failed"`;
+        errorReason = `Program Error: "Instruction #${
+          programError.index + 1
+        } Failed"`;
       } else {
         errorReason = `Unknown Error: "${JSON.stringify(info.result.err)}"`;
       }
@@ -332,7 +333,7 @@ function StatusCard({
           </tr>
         )}
 
-        {computeUnitsConsumed && (
+        {computeUnitsConsumed !== undefined && (
           <tr>
             <td>Compute units consumed</td>
             <td className="text-lg-end">
