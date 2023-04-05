@@ -60,7 +60,7 @@ export function TransactionDetailsPage({ signature: raw }: SignatureProps) {
     if (decoded.length === 64) {
       signature = raw;
     }
-  } catch (err) {}
+  } catch (err) { }
 
   const status = useTransactionStatus(signature);
   const [zeroConfirmationRetries, setZeroConfirmationRetries] =
@@ -184,9 +184,8 @@ function StatusCard({
     } else {
       const programError = getTransactionInstructionError(info.result.err);
       if (programError !== undefined) {
-        errorReason = `Program Error: "Instruction #${
-          programError.index + 1
-        } Failed"`;
+        errorReason = `Program Error: "Instruction #${programError.index + 1
+          } Failed"`;
       } else {
         errorReason = `Unknown Error: "${JSON.stringify(info.result.err)}"`;
       }
@@ -195,6 +194,7 @@ function StatusCard({
 
   const transactionWithMeta = details?.data?.transactionWithMeta;
   const fee = transactionWithMeta?.meta?.fee;
+  const computeUnitsConsumed = transactionWithMeta?.meta?.computeUnitsConsumed;
   const transaction = transactionWithMeta?.transaction;
   const blockhash = transaction?.message.recentBlockhash;
   const version = transactionWithMeta?.version;
@@ -328,6 +328,15 @@ function StatusCard({
             <td>Fee (SOL)</td>
             <td className="text-lg-end">
               <SolBalance lamports={fee} />
+            </td>
+          </tr>
+        )}
+
+        {computeUnitsConsumed && (
+          <tr>
+            <td>Compute units consumed</td>
+            <td className="text-lg-end">
+              {computeUnitsConsumed.toLocaleString("en-US")}
             </td>
           </tr>
         )}
