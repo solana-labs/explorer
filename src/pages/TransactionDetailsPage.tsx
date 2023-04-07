@@ -195,6 +195,7 @@ function StatusCard({
 
   const transactionWithMeta = details?.data?.transactionWithMeta;
   const fee = transactionWithMeta?.meta?.fee;
+  const computeUnitsConsumed = transactionWithMeta?.meta?.computeUnitsConsumed;
   const transaction = transactionWithMeta?.transaction;
   const blockhash = transaction?.message.recentBlockhash;
   const version = transactionWithMeta?.version;
@@ -328,6 +329,15 @@ function StatusCard({
             <td>Fee (SOL)</td>
             <td className="text-lg-end">
               <SolBalance lamports={fee} />
+            </td>
+          </tr>
+        )}
+
+        {computeUnitsConsumed !== undefined && (
+          <tr>
+            <td>Compute units consumed</td>
+            <td className="text-lg-end">
+              {computeUnitsConsumed.toLocaleString("en-US")}
             </td>
           </tr>
         )}
