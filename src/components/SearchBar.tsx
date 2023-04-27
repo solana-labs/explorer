@@ -15,6 +15,10 @@ import { useTokenRegistry } from "providers/mints/token-registry";
 import { TokenInfoMap } from "@solana/spl-token-registry";
 import { Connection } from "@solana/web3.js";
 import { getDomainInfo, hasDomainSyntax } from "utils/name-service";
+import {
+  getANSDomainOwnerAndAddress,
+  hasANSDomainSyntax,
+} from "utils/ans-domains";
 
 interface SearchOptions {
   label: string;
@@ -73,6 +77,11 @@ export function SearchBar() {
     if (hasDomainSyntax(search)) {
       // if search input is a potential domain we continue the loading state
       domainSearch(options);
+    }
+    // the else statement has been moved to the bottom.
+    // checking for ans domains
+    if (hasANSDomainSyntax(search)) {
+      domainANSSearch(options);
     } else {
       // if search input is not a potential domain we can conclude the search has finished
       setLoadingSearch(false);
@@ -87,6 +96,23 @@ export function SearchBar() {
     const connection = new Connection(url);
     const searchTerm = search;
     const updatedOptions = await buildDomainOptions(
+      connection,
+      search,
+      options
+    );
+    if (searchRef.current === searchTerm) {
+      setSearchOptions(updatedOptions);
+      // after attempting to fetch the domain name we can conclude the loading state
+      setLoadingSearch(false);
+      setLoadingSearchMessage("Loading...");
+    }
+  };
+  // appends ans domain lookup results to the local search state
+  const domainANSSearch = async (options: SearchOptions[]) => {
+    setLoadingSearchMessage("Looking up domain...");
+    const connection = new Connection(url);
+    const searchTerm = search;
+    const updatedOptions = await buildAnsDomainOptions(
       connection,
       search,
       options
@@ -288,6 +314,39 @@ async function buildDomainOptions(
   return updatedOptions;
 }
 
+// ANS Domains Options
+async function buildAnsDomainOptions(
+  connection: Connection,
+  search: string,
+  options: SearchOptions[]
+) {
+  const domainInfo = await getANSDomainOwnerAndAddress(search, connection);
+  const updatedOptions: SearchOptions[] = [...options];
+  if (domainInfo && domainInfo.owner && domainInfo.address) {
+    updatedOptions.push({
+      label: "Domain Owner",
+      options: [
+        {
+          label: domainInfo.owner,
+          value: [search],
+          pathname: "/address/" + domainInfo.owner,
+        },
+      ],
+    });
+    updatedOptions.push({
+      label: "ANS Account",
+      options: [
+        {
+          label: search,
+          value: [search],
+          pathname: "/address/" + domainInfo.address,
+        },
+      ],
+    });
+  }
+  return updatedOptions;
+}
+
 // builds local search options
 function buildOptions(
   rawSearch: string,
@@ -379,7 +438,7 @@ function buildOptions(
         ],
       });
     }
-  } catch (err) {}
+  } catch (err) { }
 
   return options;
 }
