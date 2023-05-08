@@ -234,7 +234,7 @@ function TabLink({ path, slot, title }: { path: string; slot: number; title: str
     const isActive = (selectedLayoutSegment === null && path === '') || selectedLayoutSegment === path;
     return (
         <li className="nav-item">
-            <Link className={`${isActive ? 'active ' : ''}nav-link`} href={tabPath}>
+            <Link className={`${isActive ? 'active ' : ''}nav-link`} href={tabPath} scroll={false}>
                 {title}
             </Link>
         </li>
