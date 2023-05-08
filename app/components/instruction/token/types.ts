@@ -18,6 +18,14 @@ const InitializeMint = type({
     rentSysvar: PublicKeyFromString,
 });
 
+const InitializeMint2 = type({
+    decimals: number(),
+    freezeAuthority: PublicKeyFromString,
+    freezeAuthorityOption: optional(number()),
+    mint: PublicKeyFromString,
+    mintAuthority: PublicKeyFromString,
+});
+
 const InitializeAccount = type({
     account: PublicKeyFromString,
     mint: PublicKeyFromString,
@@ -229,6 +237,7 @@ const CreateNativeMint = type({
 export type TokenInstructionType = Infer<typeof TokenInstructionType>;
 export const TokenInstructionType = enums([
     'initializeMint',
+    'initializeMint2',
     'initializeAccount',
     'initializeAccount2',
     'initializeAccount3',
@@ -281,6 +290,7 @@ export const IX_STRUCTS = {
     initializeAccount3: InitializeAccount3,
     initializeImmutableOwner: InitializeImmutableOwner,
     initializeMint: InitializeMint,
+    initializeMint2: InitializeMint2,
     initializeMintCloseAuthority: InitializeMintCloseAuthority,
     initializeMultisig: InitializeMultisig,
     memoTransferExtension: MemoTransferExtension,
@@ -317,6 +327,7 @@ export const IX_TITLES = {
     initializeAccount3: 'Initialize Account (3)',
     initializeImmutableOwner: 'Initialize Immutable Owner',
     initializeMint: 'Initialize Mint',
+    initializeMint2: 'Initialize Mint (2)',
     initializeMintCloseAuthority: 'Initialize Mint Close Authority',
     initializeMultisig: 'Initialize Multisig',
     memoTransferExtension: 'Memo Transfer Extension',
