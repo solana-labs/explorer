@@ -14,7 +14,6 @@ import { useMemo } from 'react';
 import { InstructionCard } from './InstructionCard';
 
 export default function AnchorDetailsCard(props: {
-    key: string;
     ix: TransactionInstruction;
     index: number;
     result: SignatureResult;

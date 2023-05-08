@@ -176,7 +176,11 @@ function InstructionCard({
 
         switch (ix.program) {
             case 'spl-token':
-                return <TokenDetailsCard {...props} key={key} />;
+                return (
+                    <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
+                        <TokenDetailsCard {...props} key={key} />
+                    </ErrorBoundary>
+                );
             case 'bpf-loader':
                 return <BpfLoaderDetailsCard {...props} key={key} />;
             case 'bpf-upgradeable-loader':
@@ -229,8 +233,8 @@ function InstructionCard({
         return <ComputeBudgetDetailsCard key={key} {...props} />;
     } else if (anchorProgram) {
         return (
-            <ErrorBoundary fallback={<UnknownDetailsCard {...props} />}>
-                <AnchorDetailsCard key={key} anchorProgram={anchorProgram} {...props} />
+            <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
+                <AnchorDetailsCard anchorProgram={anchorProgram} {...props} />
             </ErrorBoundary>
         );
     } else {

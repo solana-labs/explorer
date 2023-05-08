@@ -3,13 +3,11 @@ import { useFetchAccountInfo, useMintAccountInfo, useTokenAccountInfo } from '@p
 import { useTokenRegistry } from '@providers/mints/token-registry';
 import { ParsedInstruction, ParsedTransaction, PublicKey, SignatureResult } from '@solana/web3.js';
 import { normalizeTokenAmount } from '@utils/index';
-import { reportError } from '@utils/sentry';
 import { ParsedInfo } from '@validators/index';
 import React from 'react';
 import { create } from 'superstruct';
 
 import { InstructionCard } from '../InstructionCard';
-import { UnknownDetailsCard } from '../UnknownDetailsCard';
 import { IX_STRUCTS, IX_TITLES, TokenAmountUi, TokenInstructionType } from './types';
 
 type DetailsProps = {
@@ -22,19 +20,12 @@ type DetailsProps = {
 };
 
 export function TokenDetailsCard(props: DetailsProps) {
-    try {
-        const parsed = create(props.ix.parsed, ParsedInfo);
-        const { type: rawType, info } = parsed;
-        const type = create(rawType, TokenInstructionType);
-        const title = `Token Program: ${IX_TITLES[type]}`;
-        const created = create(info, IX_STRUCTS[type] as any);
-        return <TokenInstruction title={title} info={created} {...props} />;
-    } catch (err) {
-        reportError(err, {
-            signature: props.tx.signatures[0],
-        });
-        return <UnknownDetailsCard {...props} />;
-    }
+    const parsed = create(props.ix.parsed, ParsedInfo);
+    const { type: rawType, info } = parsed;
+    const type = create(rawType, TokenInstructionType);
+    const title = `Token Program: ${IX_TITLES[type]}`;
+    const created = create(info, IX_STRUCTS[type] as any);
+    return <TokenInstruction title={title} info={created} {...props} />;
 }
 
 type InfoProps = {
