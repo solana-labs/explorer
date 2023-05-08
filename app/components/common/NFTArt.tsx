@@ -40,26 +40,19 @@ export const CachedImageContent = ({ uri }: { uri?: string }) => {
                     setIsLoading(false);
                 }}
                 src={cachedImage.url}
-                style={{
-                    bottom: 0,
-                    left: 0,
-                    maxHeight: '200px',
-                    position: 'absolute',
-                    right: 0,
-                    top: 0,
-                    width: '100%',
-                }}
+                width="100%"
             />
         );
     } else if (cachedImage?.__type === 'objectUrl') {
         imageElement = (
-            <Image
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
                 alt="nft"
-                fill={true}
-                onLoadingComplete={() => {
+                onLoad={() => {
                     setIsLoading(false);
                 }}
                 src={cachedImage.url}
+                width="100%"
             />
         );
     }
@@ -77,13 +70,13 @@ export const CachedImageContent = ({ uri }: { uri?: string }) => {
                         <>
                             <div
                                 className={`rounded mx-auto ${isLoading ? 'd-none' : 'd-block'}`}
-                                style={{ overflow: 'hidden', paddingBottom: '100%', position: 'relative' }}
+                                style={{ overflow: 'hidden' }}
                             >
                                 {imageElement}
                             </div>
                         </>
                     )}
-                    {uri && <ViewOriginalArtContentLink src={uri} />}
+                    {!isLoading && uri && <ViewOriginalArtContentLink src={uri} />}
                 </div>
             )}
         </>
@@ -184,7 +177,7 @@ const HTMLContent = ({ animationUrl, files }: { animationUrl?: string; files?: (
                                 setShowError(true);
                             }}
                         ></iframe>
-                        {htmlURL && <ViewOriginalArtContentLink src={htmlURL} />}
+                        {!isLoading && htmlURL && <ViewOriginalArtContentLink src={htmlURL} />}
                     </div>
                 </>
             )}
