@@ -18,6 +18,7 @@ import { VoteAccountSection } from '@components/account/VoteAccountSection';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { Identicon } from '@components/common/Identicon';
 import { LoadingCard } from '@components/common/LoadingCard';
+import { PROGRAM_ADDRESS as TOKEN_AUTH_RULES_ADDRESS } from '@metaplex-foundation/mpl-token-auth-rules';
 import {
     Account,
     TokenProgramData,
@@ -31,7 +32,7 @@ import { useAnchorProgram } from '@providers/anchor';
 import { CacheEntry, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { useTokenRegistry } from '@providers/mints/token-registry';
-import { PROGRAM_ID as ACCOUNT_COMPRESSION_ID } from '@solana/spl-account-compression';
+import { PROGRAM_ADDRESS as ACCOUNT_COMPRESSION_ADDRESS } from '@solana/spl-account-compression';
 import { PublicKey } from '@solana/web3.js';
 import { ClusterStatus } from '@utils/cluster';
 import { useClusterPath } from '@utils/url';
@@ -125,6 +126,13 @@ const TABS_LOOKUP: { [id: string]: Tab[] } = {
             path: 'stake-history',
             slug: 'stake-history',
             title: 'Stake History',
+        },
+    ],
+    'token-auth-rules': [
+        {
+            path: 'token-auth-rules',
+            slug: 'token-auth-rules',
+            title: 'Token Ruleset',
         },
     ],
     vote: [
@@ -371,7 +379,8 @@ export type MoreTabs =
     | 'anchor-program'
     | 'anchor-account'
     | 'entries'
-    | 'concurrent-merkle-tree';
+    | 'concurrent-merkle-tree'
+    | 'token-auth-rules';
 
 function MoreSection({ children, tabs }: { children: React.ReactNode; tabs: (JSX.Element | null)[] }) {
     return (
@@ -450,8 +459,11 @@ function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
         });
     }
 
-    if (account.owner.toBase58() === ACCOUNT_COMPRESSION_ID.toBase58()) {
-        tabs.push(TABS_LOOKUP['spl-account-compression'][0]);
+    if (account.owner.toBase58() === ACCOUNT_COMPRESSION_ADDRESS) {
+        tabs.push(...TABS_LOOKUP['spl-account-compression']);
+    }
+    if (account.owner.toBase58() === TOKEN_AUTH_RULES_ADDRESS) {
+        tabs.push(...TABS_LOOKUP['token-auth-rules']);
     }
 
     return tabs.map(tab => {
