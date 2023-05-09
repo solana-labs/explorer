@@ -49,6 +49,11 @@ export enum PROGRAM_NAMES {
     TOKEN_METADATA = 'Token Metadata Program',
     TOKEN_VAULT = 'Token Vault Program',
 
+    // metaplex
+    HYDRA = 'Hydra Program (Metaplex)',
+    GUMDROP = 'Gumdrop Program (Metaplex)',
+    TOKEN_AUTH_RULES = 'Token Auth Rules Program (Metaplex)',
+
     // other
     ACUMEN = 'Acumen Program',
     BREAK_SOLANA = 'Break Solana Program',
@@ -214,7 +219,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: PROGRAM_NAMES.ASSOCIATED_TOKEN,
     },
 
-    // native built-ins
+    // native built-in
     AddressLookupTab1e1111111111111111111111111: {
         deployments: ALL_CLUSTERS,
         name: PROGRAM_NAMES.ADDRESS_LOOKUP_TABLE,
@@ -229,6 +234,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: LIVE_CLUSTERS,
         name: PROGRAM_NAMES.BREAK_SOLANA,
     },
+
     // other
     C64kTdg1Hzv5KoQmZrQRcm2Qz7PkxtFBgw7EpFhvYn8W: {
         deployments: [Cluster.MainnetBeta],
@@ -398,6 +404,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: LIVE_CLUSTERS,
         name: PROGRAM_NAMES.NFT_AUCTION,
     },
+    auth9SigNpDKz4sJJ1DfCTuZrZNSAgh9sFD3rboVmgg: {
+        deployments: [Cluster.MainnetBeta, Cluster.Devnet],
+        name: PROGRAM_NAMES.TOKEN_AUTH_RULES,
+    },
     cjg3oHmg9uuPsP8D6g29NWvhySJkdYdAo9D25PRbKXJ: {
         deployments: [Cluster.Devnet, Cluster.MainnetBeta],
         name: PROGRAM_NAMES.CHAINLINK_ORACLE,
@@ -417,6 +427,14 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     gSbePebfvPy7tRqimPoVecS2UsBvYv46ynrzWocc92s: {
         deployments: [Cluster.Devnet],
         name: PROGRAM_NAMES.PYTH_DEVNET,
+    },
+    gdrpGjVffourzkdDRrQmySw4aTHr8a3xmQzzxSwFD1a: {
+        deployments: [Cluster.MainnetBeta, Cluster.Devnet],
+        name: PROGRAM_NAMES.GUMDROP,
+    },
+    hyDQ4Nz1eYyegS6JfenyKwKzYxRsCWCriYSAjtzP4Vg: {
+        deployments: [Cluster.MainnetBeta, Cluster.Devnet],
+        name: PROGRAM_NAMES.HYDRA,
     },
     metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s: {
         deployments: LIVE_CLUSTERS,
