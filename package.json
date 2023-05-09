@@ -92,6 +92,7 @@
     },
     "pnpm": {
         "overrides": {
+            "cross-fetch": "^3.1.5",
             "node-fetch": "^2.6.9",
             "uuid": "^9.0.0"
         }

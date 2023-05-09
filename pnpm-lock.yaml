@@ -1,6 +1,7 @@
 lockfileVersion: '6.0'
 
 overrides:
+  cross-fetch: ^3.1.5
   node-fetch: ^2.6.9
   uuid: ^9.0.0
 
@@ -1960,7 +1961,7 @@ packages:
     resolution: {integrity: sha512-ekW/oZ+3EVdhvHwP0Baf/0XIEyusTOLY7+AGwWSo7HMrGtq2myluFa0Y3UP5VLIeBWA38B5zVkASdakUc6nk4A==}
     engines: {node: '>=10'}
     dependencies:
-      cross-fetch: 3.0.6
+      cross-fetch: 3.1.5
     transitivePeerDependencies:
       - encoding
     dev: false
@@ -3039,14 +3040,6 @@ packages:
 
   /countup.js@2.6.2:
     resolution: {integrity: sha512-PRvoilkebwr1MKaRAllyJl2cD7mgunGZWXLaSFL+YqHXlJpjLX7SHTWonRfIx2xg1Xf7SPbo92bOOonSIomRYQ==}
-    dev: false
-
-  /cross-fetch@3.0.6:
-    resolution: {integrity: sha512-KBPUbqgFjzWlVcURG+Svp9TlhA5uliYtiNx/0r8nv0pdypeQCRJ9IaSIc3q/x3q8t3F75cHuwxVql1HFGHCNJQ==}
-    dependencies:
-      node-fetch: 2.6.9
-    transitivePeerDependencies:
-      - encoding
     dev: false
 
   /cross-fetch@3.1.5:
