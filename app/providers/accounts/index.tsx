@@ -122,7 +122,7 @@ const StateContext = React.createContext<State | undefined>(undefined);
 const DispatchContext = React.createContext<Dispatch | undefined>(undefined);
 
 class MultipleAccountFetcher {
-    pubkeys: PublicKey[] = [];
+    pubkeys: Set<string> = new Set();
     fetchTimeout?: NodeJS.Timeout;
 
     constructor(
@@ -132,13 +132,13 @@ class MultipleAccountFetcher {
         private dataMode: FetchAccountDataMode
     ) {}
     fetch = (pubkey: PublicKey) => {
-        if (this.pubkeys !== undefined) this.pubkeys.push(pubkey);
+        if (this.pubkeys !== undefined) this.pubkeys.add(pubkey.toBase58());
         if (this.fetchTimeout === undefined) {
             this.fetchTimeout = setTimeout(() => {
                 this.fetchTimeout = undefined;
                 if (this.pubkeys !== undefined) {
-                    const pubkeys = this.pubkeys;
-                    this.pubkeys = [];
+                    const pubkeys = Array.from(this.pubkeys).map(p => new PublicKey(p));
+                    this.pubkeys.clear();
 
                     const { dispatch, cluster, url, dataMode } = this;
                     fetchMultipleAccounts({ cluster, dataMode, dispatch, pubkeys, url });
