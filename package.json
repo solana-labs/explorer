@@ -24,6 +24,7 @@
         "@sentry/nextjs": "^7.51.0",
         "@sentry/react": "^7.51.0",
         "@solana/buffer-layout": "^3.0.0",
+        "@solana/spl-account-compression": "^0.1.8",
         "@solana/spl-token": "^0.1.8",
         "@solana/spl-token-registry": "^0.2.3736",
         "@solana/web3.js": "^1.66.0",

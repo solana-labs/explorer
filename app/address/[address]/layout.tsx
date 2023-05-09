@@ -31,6 +31,7 @@ import { useAnchorProgram } from '@providers/anchor';
 import { CacheEntry, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { useTokenRegistry } from '@providers/mints/token-registry';
+import { PROGRAM_ID as ACCOUNT_COMPRESSION_ID } from '@solana/spl-account-compression';
 import { PublicKey } from '@solana/web3.js';
 import { ClusterStatus } from '@utils/cluster';
 import { useClusterPath } from '@utils/url';
@@ -60,6 +61,13 @@ const TABS_LOOKUP: { [id: string]: Tab[] } = {
             path: 'nfts',
             slug: 'nftoken-collection-nfts',
             title: 'NFTs',
+        },
+    ],
+    'spl-account-compression': [
+        {
+            path: 'concurrent-merkle-tree',
+            slug: 'concurrent-merkle-tree',
+            title: 'Concurrent Merkle Tree',
         },
     ],
     'spl-token:mint': [
@@ -362,7 +370,8 @@ export type MoreTabs =
     | 'security'
     | 'anchor-program'
     | 'anchor-account'
-    | 'entries';
+    | 'entries'
+    | 'concurrent-merkle-tree';
 
 function MoreSection({ children, tabs }: { children: React.ReactNode; tabs: (JSX.Element | null)[] }) {
     return (
@@ -439,6 +448,10 @@ function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
             slug: 'domains',
             title: 'Domains',
         });
+    }
+
+    if (account.owner.toBase58() === ACCOUNT_COMPRESSION_ID.toBase58()) {
+        tabs.push(TABS_LOOKUP['spl-account-compression'][0]);
     }
 
     return tabs.map(tab => {
