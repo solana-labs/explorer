@@ -92,6 +92,7 @@
     },
     "pnpm": {
         "overrides": {
+            "node-fetch": "^2.6.9",
             "uuid": "^9.0.0"
         }
     }

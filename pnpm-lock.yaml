@@ -1,6 +1,7 @@
 lockfileVersion: '6.0'
 
 overrides:
+  node-fetch: ^2.6.9
   uuid: ^9.0.0
 
 dependencies:
@@ -1960,6 +1961,8 @@ packages:
     engines: {node: '>=10'}
     dependencies:
       cross-fetch: 3.0.6
+    transitivePeerDependencies:
+      - encoding
     dev: false
 
   /@solana/spl-token@0.1.8:
@@ -3041,13 +3044,15 @@ packages:
   /cross-fetch@3.0.6:
     resolution: {integrity: sha512-KBPUbqgFjzWlVcURG+Svp9TlhA5uliYtiNx/0r8nv0pdypeQCRJ9IaSIc3q/x3q8t3F75cHuwxVql1HFGHCNJQ==}
     dependencies:
-      node-fetch: 2.6.1
+      node-fetch: 2.6.9
+    transitivePeerDependencies:
+      - encoding
     dev: false
 
   /cross-fetch@3.1.5:
     resolution: {integrity: sha512-lvb1SBsI0Z7GDwmuid+mU3kWVBwTVUbe7S0H52yaaAdQOXq2YktTCZdlAcNKFzE6QtRz0snpw9bNiPeOIkkQvw==}
     dependencies:
-      node-fetch: 2.6.7
+      node-fetch: 2.6.9
     transitivePeerDependencies:
       - encoding
     dev: false
@@ -5397,23 +5402,6 @@ packages:
     dependencies:
       lower-case: 2.0.2
       tslib: 2.5.0
-    dev: false
-
-  /node-fetch@2.6.1:
-    resolution: {integrity: sha512-V4aYg89jEoVRxRb2fJdAg8FHvI7cEyYdVAh94HH0UIK8oJxUfkjlDQN9RbMx+bEjP7+ggMiFRprSti032Oipxw==}
-    engines: {node: 4.x || >=6.0.0}
-    dev: false
-
-  /node-fetch@2.6.7:
-    resolution: {integrity: sha512-ZjMPFEfVx5j+y2yF35Kzx5sF7kDzxuDj6ziH4FFbOp87zKDZNx8yExJIb05OGF4Nlt9IHFIMBkRl41VdvcNdbQ==}
-    engines: {node: 4.x || >=6.0.0}
-    peerDependencies:
-      encoding: ^0.1.0
-    peerDependenciesMeta:
-      encoding:
-        optional: true
-    dependencies:
-      whatwg-url: 5.0.0
     dev: false
 
   /node-fetch@2.6.9:
