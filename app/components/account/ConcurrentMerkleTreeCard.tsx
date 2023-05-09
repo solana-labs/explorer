@@ -6,7 +6,6 @@ import { TableCardBody } from '../common/TableCardBody';
 
 export function ConcurrentMerkleTreeCard({ data }: { data: Buffer }) {
     const cmt = ConcurrentMerkleTreeAccount.fromBuffer(Buffer.from(data));
-    console.log('Account:', cmt);
     const authority = cmt.getAuthority();
     const root = cmt.getCurrentRoot();
     const seq = cmt.getCurrentSeq();
@@ -71,15 +70,21 @@ export function ConcurrentMerkleTreeCard({ data }: { data: Buffer }) {
                             </td>
                         </tr>
                         <tr>
-                            <td>Next Leaf Index</td>
+                            <td>Current Number of Leaves</td>
                             <td className="text-lg-end">
-                                <span className="text-monospace">{rightMostIndex}</span>
+                                <span className="text-monospace">{rightMostIndex - 1}</span>
                             </td>
                         </tr>
                         <tr>
                             <td>Remaining Leaves</td>
                             <td className="text-lg-end">
                                 <span className="text-monospace">{Math.pow(2, treeHeight) - rightMostIndex + 1}</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Max Possible Leaves</td>
+                            <td className="text-lg-end">
+                                <span className="text-monospace">{Math.pow(2, treeHeight)}</span>
                             </td>
                         </tr>
                     </TableCardBody>

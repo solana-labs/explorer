@@ -16,6 +16,5 @@ export async function generateMetadata({ params: { address } }: Props): Promise<
 }
 
 export default function ConcurrentMerkleTreePage(props: Props) {
-    console.log(props);
     return <ConcurrentMerkleTreePageClient {...props} />;
 }
