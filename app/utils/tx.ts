@@ -37,7 +37,7 @@ export enum PROGRAM_NAMES {
 
     // spl
     ASSOCIATED_TOKEN = 'Associated Token Program',
-    ACCOUNT_COMPRESSION = 'Account Compression Program',
+    ACCOUNT_COMPRESSION = 'State Compression Program',
     FEATURE_PROPOSAL = 'Feature Proposal Program',
     LENDING = 'Lending Program',
     MEMO = 'Memo Program',
@@ -448,7 +448,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     },
 };
 
-export type LoaderName = (typeof LOADER_IDS)[keyof typeof LOADER_IDS];
+export type LoaderName = typeof LOADER_IDS[keyof typeof LOADER_IDS];
 export const LOADER_IDS = {
     BPFLoaderUpgradeab1e11111111111111111111111: 'BPF Upgradeable Loader',
     MoveLdr111111111111111111111111111111111111: 'Move Loader',
