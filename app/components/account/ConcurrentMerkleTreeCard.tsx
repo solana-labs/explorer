@@ -2,6 +2,7 @@ import { ConcurrentMerkleTreeAccount } from '@solana/spl-account-compression';
 import { PublicKey } from '@solana/web3.js';
 
 import { Address } from '../common/Address';
+import { Slot } from '../common/Slot';
 import { TableCardBody } from '../common/TableCardBody';
 
 export function ConcurrentMerkleTreeCard({ data }: { data: Buffer }) {
@@ -36,7 +37,7 @@ export function ConcurrentMerkleTreeCard({ data }: { data: Buffer }) {
                         <tr>
                             <td>Creation Slot</td>
                             <td className="text-lg-end">
-                                <span className="text-monospace">{creationSlot.toString()}</span>
+                                <Slot slot={creationSlot.toNumber()} link />
                             </td>
                         </tr>
                         <tr>
