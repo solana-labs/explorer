@@ -144,6 +144,9 @@ dependencies:
   use-async-effect:
     specifier: ^2.2.7
     version: 2.2.7(react@18.2.0)
+  use-tab-visibility:
+    specifier: ^1.0.9
+    version: 1.0.9(react@18.2.0)
 
 devDependencies:
   '@solana/eslint-config-solana':
@@ -6621,6 +6624,14 @@ packages:
       '@types/react': 18.2.0
       react: 18.2.0
       use-isomorphic-layout-effect: 1.1.2(@types/react@18.2.0)(react@18.2.0)
+    dev: false
+
+  /use-tab-visibility@1.0.9(react@18.2.0):
+    resolution: {integrity: sha512-zAbkQl36+fXpTErE8/xhDfPQMA79Bzb45VLhrfiewlL7AhwxEnfFbwI6MUMK9XT2ZCN8kiAQo/cbqpB0hQxYaA==}
+    peerDependencies:
+      react: '>=16'
+    dependencies:
+      react: 18.2.0
     dev: false
 
   /utf-8-validate@5.0.10:

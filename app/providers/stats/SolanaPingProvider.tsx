@@ -5,6 +5,7 @@ import { useStatsProvider } from '@providers/stats/solanaClusterStats';
 import { Cluster, clusterSlug } from '@utils/cluster';
 import { fetch } from 'cross-fetch';
 import React from 'react';
+import useTabVisibility from 'use-tab-visibility';
 
 const FETCH_PING_INTERVAL = 60 * 1000;
 
@@ -83,9 +84,9 @@ export function SolanaPingProvider({ children }: Props) {
     const [rollup, setRollup] = React.useState<PingRollupInfo | undefined>({
         status: PingStatus.Loading,
     });
-
+    const { visible: isTabVisible } = useTabVisibility();
     React.useEffect(() => {
-        if (!active) {
+        if (!active || !isTabVisible) {
             return;
         }
 
@@ -98,48 +99,51 @@ export function SolanaPingProvider({ children }: Props) {
         if (!url) {
             return;
         }
+        let stale = false;
+        const fetchPingMetrics = async () => {
+            try {
+                const response = await fetch(url);
+                if (stale) {
+                    return;
+                }
+                const json: PingMetric[] = await response.json();
+                if (stale) {
+                    return;
+                }
+                const points = json
+                    .map<PingInfo>(({ submitted, confirmed, mean_ms, ts }: PingMetric) => {
+                        return {
+                            confirmed,
+                            loss: (submitted - confirmed) / submitted,
+                            mean: mean_ms,
+                            submitted,
+                            timestamp: new Date(ts),
+                        };
+                    })
+                    .reverse();
 
-        const fetchPingMetrics = () => {
-            fetch(url)
-                .then(res => {
-                    return res.json();
-                })
-                .then((body: PingMetric[]) => {
-                    const points = body
-                        .map<PingInfo>(({ submitted, confirmed, mean_ms, ts }: PingMetric) => {
-                            return {
-                                confirmed,
-                                loss: (submitted - confirmed) / submitted,
-                                mean: mean_ms,
-                                submitted,
-                                timestamp: new Date(ts),
-                            };
-                        })
-                        .reverse();
+                const short = points.slice(-30);
+                const medium = downsample(points, 4).slice(-30);
+                const long = downsample(points, 12);
 
-                    const short = points.slice(-30);
-                    const medium = downsample(points, 4).slice(-30);
-                    const long = downsample(points, 12);
-
-                    setRollup({
-                        long,
-                        medium,
-                        short,
-                        status: PingStatus.Ready,
-                    });
-                })
-                .catch(_error => {
-                    setRollup({
-                        retry: () => {
-                            setRollup({
-                                status: PingStatus.Loading,
-                            });
-
-                            fetchPingMetrics();
-                        },
-                        status: PingStatus.Error,
-                    });
+                setRollup({
+                    long,
+                    medium,
+                    short,
+                    status: PingStatus.Ready,
                 });
+            } catch {
+                setRollup({
+                    retry: () => {
+                        setRollup({
+                            status: PingStatus.Loading,
+                        });
+
+                        fetchPingMetrics();
+                    },
+                    status: PingStatus.Error,
+                });
+            }
         };
 
         const fetchPingInterval = setInterval(() => {
@@ -148,8 +152,9 @@ export function SolanaPingProvider({ children }: Props) {
         fetchPingMetrics();
         return () => {
             clearInterval(fetchPingInterval);
+            stale = true;
         };
-    }, [cluster, active]);
+    }, [active, cluster, isTabVisible]);
 
     return <PingContext.Provider value={rollup}>{children}</PingContext.Provider>;
 }
