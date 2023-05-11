@@ -29,6 +29,7 @@ import bs58 from 'bs58';
 import Link from 'next/link';
 import React, { Suspense, useEffect, useState } from 'react';
 import { RefreshCw, Settings } from 'react-feather';
+import useTabVisibility from 'use-tab-visibility';
 
 const AUTO_REFRESH_INTERVAL = 2000;
 const ZERO_CONFIRMATION_BAILOUT = 5;
@@ -61,10 +62,12 @@ export default function TransactionDetailsPageClient({ params: { signature: raw 
 
     const status = useTransactionStatus(signature);
     const [zeroConfirmationRetries, setZeroConfirmationRetries] = useState(0);
+    const { visible: isTabVisible } = useTabVisibility();
 
     let autoRefresh = AutoRefresh.Inactive;
-
-    if (zeroConfirmationRetries >= ZERO_CONFIRMATION_BAILOUT) {
+    if (!isTabVisible) {
+        autoRefresh = AutoRefresh.Inactive;
+    } else if (zeroConfirmationRetries >= ZERO_CONFIRMATION_BAILOUT) {
         autoRefresh = AutoRefresh.BailedOut;
     } else if (status?.data?.info && status.data.info.confirmations !== 'max') {
         autoRefresh = AutoRefresh.Active;

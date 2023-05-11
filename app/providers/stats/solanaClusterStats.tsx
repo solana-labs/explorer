@@ -5,6 +5,7 @@ import { Connection } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { reportError } from '@utils/sentry';
 import React from 'react';
+import useTabVisibility from 'use-tab-visibility';
 
 import { DashboardInfo, DashboardInfoActionType, dashboardInfoReducer } from './solanaDashboardInfo';
 import { PerformanceInfo, PerformanceInfoActionType, performanceInfoReducer } from './solanaPerformanceInfo';
@@ -80,20 +81,22 @@ export function SolanaClusterStatsProvider({ children }: Props) {
     const [active, setActive] = React.useState(false);
     const [dashboardInfo, dispatchDashboardInfo] = React.useReducer(dashboardInfoReducer, initialDashboardInfo);
     const [performanceInfo, dispatchPerformanceInfo] = React.useReducer(performanceInfoReducer, initialPerformanceInfo);
-
+    const { visible: isTabVisible } = useTabVisibility();
     React.useEffect(() => {
-        if (!active || !url) return;
+        if (!active || !isTabVisible || !url) return;
 
         const connection = getConnection(url);
 
         if (!connection) return;
 
         let lastSlot: number | null = null;
-
+        let stale = false;
         const getPerformanceSamples = async () => {
             try {
                 const samples = await connection.getRecentPerformanceSamples(60 * SAMPLE_HISTORY_HOURS);
-
+                if (stale) {
+                    return;
+                }
                 if (samples.length < 1) {
                     // no samples to work with (node has no history).
                     return; // we will allow for a timeout instead of throwing an error
@@ -129,6 +132,9 @@ export function SolanaClusterStatsProvider({ children }: Props) {
         const getTransactionCount = async () => {
             try {
                 const transactionCount = await connection.getTransactionCount();
+                if (stale) {
+                    return;
+                }
                 dispatchPerformanceInfo({
                     data: transactionCount,
                     type: PerformanceInfoActionType.SetTransactionCount,
@@ -150,6 +156,9 @@ export function SolanaClusterStatsProvider({ children }: Props) {
         const getEpochInfo = async () => {
             try {
                 const epochInfo = await connection.getEpochInfo();
+                if (stale) {
+                    return;
+                }
                 lastSlot = epochInfo.absoluteSlot;
                 dispatchDashboardInfo({
                     data: epochInfo,
@@ -173,6 +182,9 @@ export function SolanaClusterStatsProvider({ children }: Props) {
             if (lastSlot) {
                 try {
                     const blockTime = await connection.getBlockTime(lastSlot);
+                    if (stale) {
+                        return;
+                    }
                     if (blockTime !== null) {
                         dispatchDashboardInfo({
                             data: {
@@ -205,8 +217,9 @@ export function SolanaClusterStatsProvider({ children }: Props) {
             clearInterval(transactionCountInterval);
             clearInterval(epochInfoInterval);
             clearInterval(blockTimeInterval);
+            stale = true;
         };
-    }, [active, cluster, url]);
+    }, [active, cluster, isTabVisible, url]);
 
     // Reset when cluster changes
     React.useEffect(() => {
