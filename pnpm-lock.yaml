@@ -78,9 +78,6 @@ dependencies:
   classnames:
     specifier: ^2.3.1
     version: 2.3.1
-  coingecko-api:
-    specifier: 1.0.10
-    version: 1.0.10
   cross-fetch:
     specifier: ^3.1.5
     version: 3.1.5
@@ -144,6 +141,9 @@ dependencies:
   use-async-effect:
     specifier: ^2.2.7
     version: 2.2.7(react@18.2.0)
+  use-tab-visibility:
+    specifier: ^1.0.9
+    version: 1.0.9(react@18.2.0)
 
 devDependencies:
   '@solana/eslint-config-solana':
@@ -3019,10 +3019,6 @@ packages:
     resolution: {integrity: sha512-QVb0dM5HvG+uaxitm8wONl7jltx8dqhfU33DcqtOZcLSVIKSDDLDi7+0LbAKiyI8hD9u42m2YxXSkMGWThaecQ==}
     engines: {iojs: '>= 1.0.0', node: '>= 0.12.0'}
     dev: true
-
-  /coingecko-api@1.0.10:
-    resolution: {integrity: sha512-7YLLC85+daxAw5QlBWoHVBVpJRwoPr4HtwanCr8V/WRjoyHTa1Lb9DQAvv4MDJZHiz4no6HGnDQnddtjV35oRA==}
-    dev: false
 
   /collect-v8-coverage@1.0.1:
     resolution: {integrity: sha512-iBPtljfCNcTKNAto0KEtDfZ3qzjJvqE3aTGZsbhjSBlorqpXJlaWWtPO35D+ZImoC3KWejX64o+yPGxhWSTzfg==}
@@ -6621,6 +6617,14 @@ packages:
       '@types/react': 18.2.0
       react: 18.2.0
       use-isomorphic-layout-effect: 1.1.2(@types/react@18.2.0)(react@18.2.0)
+    dev: false
+
+  /use-tab-visibility@1.0.9(react@18.2.0):
+    resolution: {integrity: sha512-zAbkQl36+fXpTErE8/xhDfPQMA79Bzb45VLhrfiewlL7AhwxEnfFbwI6MUMK9XT2ZCN8kiAQo/cbqpB0hQxYaA==}
+    peerDependencies:
+      react: '>=16'
+    dependencies:
+      react: 18.2.0
     dev: false
 
   /utf-8-validate@5.0.10:
