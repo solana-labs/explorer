@@ -16,7 +16,6 @@ import { StatsProvider } from '@providers/stats';
 import { SupplyProvider } from '@providers/supply';
 import { TransactionsProvider } from '@providers/transactions';
 import { Rubik } from 'next/font/google';
-import Script from 'next/script';
 import { Metadata } from 'next/types';
 
 export const metadata: Metadata = {
@@ -37,35 +36,15 @@ const rubikFont = Rubik({
     weight: ['300', '400', '700'],
 });
 
-function GoogleAnalytics() {
-    const safeAnalyticsId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID?.replace("'", "\\'");
-    if (!safeAnalyticsId) {
-        return null;
-    }
-    return (
-        <>
-            {/* Global site tag (gtag.js) - Google Analytics  */}
-            <Script
-                async
-                src={`https://www.googletagmanager.com/gtag/js?id=${safeAnalyticsId}`}
-                strategy="afterInteractive"
-            />
-            <Script id="google-analytics-initialization" strategy="afterInteractive">
-                {`
-                    window.dataLayer = window.dataLayer || [];
-                    function gtag(){dataLayer.push(arguments);}
-                    gtag('js', new Date());
-                    gtag('config', '${safeAnalyticsId}');
-                `}
-            </Script>
-        </>
-    );
-}
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+    analytics,
+    children,
+}: {
+    analytics?: React.ReactNode;
+    children: React.ReactNode;
+}) {
     return (
         <html lang="en" className={`${rubikFont.variable}`}>
-            <GoogleAnalytics />
             <body>
                 <ScrollAnchorProvider>
                     <ClusterProvider>
@@ -95,6 +74,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                         </StatsProvider>
                     </ClusterProvider>
                 </ScrollAnchorProvider>
+                {analytics}
             </body>
         </html>
     );
