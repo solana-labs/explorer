@@ -1,12 +1,7 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import * as CoinGecko from 'coingecko-api';
 import React from 'react';
 import useTabVisibility from 'use-tab-visibility';
 
 const PRICE_REFRESH = 10000;
-
-const CoinGeckoClient = new CoinGecko.default();
 
 export enum CoingeckoStatus {
     Success,
@@ -24,21 +19,21 @@ export interface CoinInfo {
 }
 
 export interface CoinInfoResult {
-    data: {
-        market_data: {
-            current_price: {
-                usd: number;
-            };
-            total_volume: {
-                usd: number;
-            };
-            market_cap: {
-                usd: number;
-            };
-            price_change_percentage_24h: number;
-            market_cap_rank: number;
+    last_updated: string;
+    market_cap_rank: number;
+    market_data: {
+        current_price: {
+            usd: number;
         };
-        last_updated: string;
+        market_cap: {
+            usd: number;
+        };
+        price_change_percentage_24h_in_currency: {
+            usd: number;
+        };
+        total_volume: {
+            usd: number;
+        };
     };
 }
 
@@ -64,18 +59,29 @@ export function useCoinGecko(coinId?: string): CoinGeckoResult | undefined {
                     });
                 }
                 try {
-                    const info: CoinInfoResult = await CoinGeckoClient.coins.fetch(coinId);
+                    const response = await fetch(
+                        `https://api.coingecko.com/api/v3/coins/${coinId}?` +
+                            [
+                                'community_data=false',
+                                'developer_data=false',
+                                'localization=false',
+                                'market_data=true',
+                                'sparkline=false',
+                                'tickers=false',
+                            ].join('&')
+                    );
                     if (stale) {
                         return;
                     }
+                    const info: CoinInfoResult = await response.json();
                     setCoinInfo({
                         coinInfo: {
-                            last_updated: new Date(info.data.last_updated),
-                            market_cap: info.data.market_data.market_cap.usd,
-                            market_cap_rank: info.data.market_data.market_cap_rank,
-                            price: info.data.market_data.current_price.usd,
-                            price_change_percentage_24h: info.data.market_data.price_change_percentage_24h,
-                            volume_24: info.data.market_data.total_volume.usd,
+                            last_updated: new Date(info.last_updated),
+                            market_cap: info.market_data.market_cap.usd,
+                            market_cap_rank: info.market_cap_rank,
+                            price: info.market_data.current_price.usd,
+                            price_change_percentage_24h: info.market_data.price_change_percentage_24h_in_currency.usd,
+                            volume_24: info.market_data.total_volume.usd,
                         },
                         status: CoingeckoStatus.Success,
                     });
