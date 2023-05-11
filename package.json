@@ -97,11 +97,5 @@
             "node-fetch": "^2.6.9",
             "uuid": "^9.0.0"
         }
-    },
-    "nextBundleAnalysis": {
-        "budget": null,
-        "budgetPercentIncreaseRed": 10,
-        "minimumChangeThreshold": 0,
-        "showDetails": true
     }
 }
