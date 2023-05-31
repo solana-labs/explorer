@@ -1,4 +1,5 @@
 import { TokenLargestAccountsCard } from '@components/account/TokenLargestAccountsCard';
+import getReadableTitleFromAddress, {AddressPageMetadataProps} from "@utils/get-readable-title-from-address";
 import { Metadata } from 'next/types';
 
 type Props = Readonly<{
@@ -7,10 +8,10 @@ type Props = Readonly<{
     };
 }>;
 
-export async function generateMetadata({ params: { address } }: Props): Promise<Metadata> {
+export async function generateMetadata(props: AddressPageMetadataProps): Promise<Metadata> {
     return {
-        description: `Largest holders of the token with address ${address} on Solana`,
-        title: `Token Distribution | ${address} | Solana`,
+        description: `Largest holders of the token with address ${props.params.address} on Solana`,
+        title: `Token Distribution | ${await getReadableTitleFromAddress(props)} | Solana`,
     };
 }
 

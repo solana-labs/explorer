@@ -1,3 +1,4 @@
+import getReadableTitleFromAddress, {AddressPageMetadataProps} from "@utils/get-readable-title-from-address";
 import { Metadata } from 'next/types';
 
 import AddressLookupTableEntriesPageClient from './page-client';
@@ -8,10 +9,10 @@ type Props = Readonly<{
     };
 }>;
 
-export async function generateMetadata({ params: { address } }: Props): Promise<Metadata> {
+export async function generateMetadata(props: AddressPageMetadataProps): Promise<Metadata> {
     return {
-        description: `Entries of the address lookup table at ${address} on Solana`,
-        title: `Address Lookup Table Entries | ${address} | Solana`,
+        description: `Entries of the address lookup table at ${props.params.address} on Solana`,
+        title: `Address Lookup Table Entries | ${await getReadableTitleFromAddress(props)} | Solana`,
     };
 }
 
