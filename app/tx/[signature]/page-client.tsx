@@ -1,34 +1,33 @@
 'use client';
 
-import { Address } from '@components/common/Address';
-import { BalanceDelta } from '@components/common/BalanceDelta';
-import { ErrorCard } from '@components/common/ErrorCard';
-import { InfoTooltip } from '@components/common/InfoTooltip';
-import { LoadingCard } from '@components/common/LoadingCard';
-import { Signature } from '@components/common/Signature';
-import { Slot } from '@components/common/Slot';
-import { SolBalance } from '@components/common/SolBalance';
-import { TableCardBody } from '@components/common/TableCardBody';
-import { SignatureContext } from '@components/instruction/SignatureContext';
-import { InstructionsSection } from '@components/transaction/InstructionsSection';
-import { ProgramLogSection } from '@components/transaction/ProgramLogSection';
-import { TokenBalancesCard } from '@components/transaction/TokenBalancesCard';
-import { FetchStatus } from '@providers/cache';
-import { useCluster } from '@providers/cluster';
-import { useFetchTransactionStatus, useTransactionDetails, useTransactionStatus } from '@providers/transactions';
-import { useFetchTransactionDetails } from '@providers/transactions/parsed';
-import { SystemInstruction, SystemProgram, TransactionSignature } from '@solana/web3.js';
-import { ClusterStatus } from '@utils/cluster';
-import { displayTimestamp } from '@utils/date';
-import { SignatureProps } from '@utils/index';
-import { getTransactionInstructionError } from '@utils/program-err';
-import { intoTransactionInstruction } from '@utils/tx';
-import { useClusterPath } from '@utils/url';
-import { BigNumber } from 'bignumber.js';
+import {Address} from '@components/common/Address';
+import {BalanceDelta} from '@components/common/BalanceDelta';
+import {ErrorCard} from '@components/common/ErrorCard';
+import {InfoTooltip} from '@components/common/InfoTooltip';
+import {LoadingCard} from '@components/common/LoadingCard';
+import {Signature} from '@components/common/Signature';
+import {Slot} from '@components/common/Slot';
+import {SolBalance} from '@components/common/SolBalance';
+import {TableCardBody} from '@components/common/TableCardBody';
+import {SignatureContext} from '@components/instruction/SignatureContext';
+import {InstructionsSection} from '@components/transaction/InstructionsSection';
+import {ProgramLogSection} from '@components/transaction/ProgramLogSection';
+import {TokenBalancesCard} from '@components/transaction/TokenBalancesCard';
+import {FetchStatus} from '@providers/cache';
+import {useCluster} from '@providers/cluster';
+import {useFetchTransactionStatus, useTransactionDetails, useTransactionStatus} from '@providers/transactions';
+import {useFetchTransactionDetails} from '@providers/transactions/parsed';
+import {SystemInstruction, SystemProgram, TransactionSignature} from '@solana/web3.js';
+import {Cluster, ClusterStatus} from '@utils/cluster';
+import {displayTimestamp} from '@utils/date';
+import {SignatureProps} from '@utils/index';
+import {intoTransactionErrorReason, intoTransactionInstruction} from '@utils/tx';
+import {useClusterPath} from '@utils/url';
+import {BigNumber} from 'bignumber.js';
 import bs58 from 'bs58';
 import Link from 'next/link';
-import React, { Suspense, useEffect, useState } from 'react';
-import { RefreshCw, Settings } from 'react-feather';
+import React, {Suspense, useEffect, useState} from 'react';
+import {RefreshCw, Settings} from 'react-feather';
 import useTabVisibility from 'use-tab-visibility';
 
 const AUTO_REFRESH_INTERVAL = 2000;
@@ -111,7 +110,7 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
     const fetchStatus = useFetchTransactionStatus();
     const status = useTransactionStatus(signature);
     const details = useTransactionDetails(signature);
-    const { clusterInfo, status: clusterStatus } = useCluster();
+    const { cluster, clusterInfo, name: clusterName, status: clusterStatus, url: clusterUrl } = useCluster();
     const inspectPath = useClusterPath({ pathname: `/tx/${signature}/inspect` });
 
     // Fetch transaction on load
@@ -151,25 +150,6 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
 
     const { info } = status.data;
 
-    let statusClass = 'success';
-    let statusText = 'Success';
-    let errorReason = undefined;
-
-    if (info.result.err) {
-        statusClass = 'warning';
-        statusText = 'Error';
-        if (typeof info.result.err === 'string') {
-            errorReason = `Runtime Error: "${info.result.err}"`;
-        } else {
-            const programError = getTransactionInstructionError(info.result.err);
-            if (programError !== undefined) {
-                errorReason = `Program Error: "Instruction #${programError.index + 1} Failed"`;
-            } else {
-                errorReason = `Unknown Error: "${JSON.stringify(info.result.err)}"`;
-            }
-        }
-    }
-
     const transactionWithMeta = details?.data?.transactionWithMeta;
     const fee = transactionWithMeta?.meta?.fee;
     const computeUnitsConsumed = transactionWithMeta?.meta?.computeUnitsConsumed;
@@ -188,6 +168,24 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
             SystemInstruction.decodeInstructionType(ix) === 'AdvanceNonceAccount'
         );
     })();
+
+    let statusClass = 'success';
+    let statusText = 'Success';
+    let errorReason = undefined;
+    let errorLink = undefined;
+
+    if (info.result.err) {
+        statusClass = 'warning';
+        statusText = 'Error';
+
+        const err = intoTransactionErrorReason(info, transaction)
+        errorReason = err.errorReason
+        if (cluster === Cluster.MainnetBeta) {
+            errorLink = err.errorLink
+        } else {
+            errorLink = `${err.errorLink}?cluster=${clusterName.toLowerCase()}${cluster === Cluster.Custom ? `&customUrl=${clusterUrl}` : ''}`
+        }
+    }
 
     return (
         <div className="card">
@@ -229,7 +227,13 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
                         <td>Error</td>
                         <td className="text-lg-end">
                             <h3 className="mb-0">
-                                <span className={`badge bg-${statusClass}-soft`}>{errorReason}</span>
+                                {errorLink ? (
+                                    <Link href={errorLink}>
+                                        <span className={`badge bg-${statusClass}-soft`}>{errorReason}</span>
+                                    </Link>
+                                ) : (
+                                    <span className={`badge bg-${statusClass}-soft`}>{errorReason}</span>
+                                )}
                             </h3>
                         </td>
                     </tr>
