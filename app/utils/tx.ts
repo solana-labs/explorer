@@ -1,13 +1,12 @@
 import { OPEN_BOOK_PROGRAM_ID } from '@components/instruction/serum/types';
-import {TransactionStatusInfo} from "@providers/transactions";
 import { TokenInfoMap } from '@solana/spl-token-registry';
 import {
     BPF_LOADER_DEPRECATED_PROGRAM_ID,
     BPF_LOADER_PROGRAM_ID,
     Ed25519Program,
     ParsedInstruction,
-    ParsedTransaction, ParsedTransactionWithMeta,
-    PartiallyDecodedInstruction, PublicKey,
+    ParsedTransaction,
+    PartiallyDecodedInstruction,
     Secp256k1Program,
     StakeProgram,
     SystemProgram,
@@ -15,12 +14,11 @@ import {
     SYSVAR_RENT_PUBKEY,
     SYSVAR_REWARDS_PUBKEY,
     SYSVAR_STAKE_HISTORY_PUBKEY,
-    Transaction, TransactionError,
+    Transaction,
     TransactionInstruction,
     VOTE_PROGRAM_ID,
 } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
-import {getTransactionInstructionError} from "@utils/program-err";
 import { SerumMarketRegistry } from '@utils/serumMarketRegistry';
 import bs58 from 'bs58';
 
@@ -450,7 +448,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     },
 };
 
-export type LoaderName = typeof LOADER_IDS[keyof typeof LOADER_IDS];
+export type LoaderName = (typeof LOADER_IDS)[keyof typeof LOADER_IDS];
 export const LOADER_IDS = {
     BPFLoaderUpgradeab1e11111111111111111111111: 'BPF Upgradeable Loader',
     MoveLdr111111111111111111111111111111111111: 'Move Loader',
@@ -559,31 +557,4 @@ export function intoParsedTransaction(tx: Transaction): ParsedTransaction {
         },
         signatures: tx.signatures.map(value => bs58.encode(value.signature as any)),
     };
-}
-
-export function intoTransactionErrorReason(info: TransactionStatusInfo, tx?: ParsedTransaction | Transaction): { errorReason: string, errorLink?: string } {
-    if (typeof info.result.err === 'string') {
-        return { errorReason: `Runtime Error: "${info.result.err}"` };
-    }
-
-    const programError = getTransactionInstructionError(info.result.err);
-    if (programError !== undefined) {
-        return { errorReason: `Program Error: "Instruction #${programError.index + 1} Failed"` };
-    }
-
-    try {
-        const accountIndex = (info.result.err as { InsufficientFundsForRent: { account_index: number } }).InsufficientFundsForRent.account_index;
-        if (tx) {
-            let address: PublicKey
-            if ('message' in tx) address = tx.message.accountKeys[accountIndex].pubkey
-            else address = tx.compileMessage().accountKeys[accountIndex]
-
-            return { errorLink: `/address/${address}`, errorReason: `Insufficient Funds For Rent: ${address}` };
-        }
-        return { errorReason: `Insufficient Funds For Rent: Account #${accountIndex + 1}` };
-    } catch (e) {
-        // ignore (return below)
-    }
-
-    return { errorReason: `Unknown Error: "${JSON.stringify(info.result.err)}"` }; // catch-all
 }

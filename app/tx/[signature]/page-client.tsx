@@ -1,33 +1,39 @@
 'use client';
 
-import {Address} from '@components/common/Address';
-import {BalanceDelta} from '@components/common/BalanceDelta';
-import {ErrorCard} from '@components/common/ErrorCard';
-import {InfoTooltip} from '@components/common/InfoTooltip';
-import {LoadingCard} from '@components/common/LoadingCard';
-import {Signature} from '@components/common/Signature';
-import {Slot} from '@components/common/Slot';
-import {SolBalance} from '@components/common/SolBalance';
-import {TableCardBody} from '@components/common/TableCardBody';
-import {SignatureContext} from '@components/instruction/SignatureContext';
-import {InstructionsSection} from '@components/transaction/InstructionsSection';
-import {ProgramLogSection} from '@components/transaction/ProgramLogSection';
-import {TokenBalancesCard} from '@components/transaction/TokenBalancesCard';
-import {FetchStatus} from '@providers/cache';
-import {useCluster} from '@providers/cluster';
-import {useFetchTransactionStatus, useTransactionDetails, useTransactionStatus} from '@providers/transactions';
-import {useFetchTransactionDetails} from '@providers/transactions/parsed';
-import {SystemInstruction, SystemProgram, TransactionSignature} from '@solana/web3.js';
-import {Cluster, ClusterStatus} from '@utils/cluster';
-import {displayTimestamp} from '@utils/date';
-import {SignatureProps} from '@utils/index';
-import {intoTransactionErrorReason, intoTransactionInstruction} from '@utils/tx';
-import {useClusterPath} from '@utils/url';
-import {BigNumber} from 'bignumber.js';
+import { Address } from '@components/common/Address';
+import { BalanceDelta } from '@components/common/BalanceDelta';
+import { ErrorCard } from '@components/common/ErrorCard';
+import { InfoTooltip } from '@components/common/InfoTooltip';
+import { LoadingCard } from '@components/common/LoadingCard';
+import { Signature } from '@components/common/Signature';
+import { Slot } from '@components/common/Slot';
+import { SolBalance } from '@components/common/SolBalance';
+import { TableCardBody } from '@components/common/TableCardBody';
+import { SignatureContext } from '@components/instruction/SignatureContext';
+import { InstructionsSection } from '@components/transaction/InstructionsSection';
+import { ProgramLogSection } from '@components/transaction/ProgramLogSection';
+import { TokenBalancesCard } from '@components/transaction/TokenBalancesCard';
+import { FetchStatus } from '@providers/cache';
+import { useCluster } from '@providers/cluster';
+import {
+    TransactionStatusInfo,
+    useFetchTransactionStatus,
+    useTransactionDetails,
+    useTransactionStatus,
+} from '@providers/transactions';
+import { useFetchTransactionDetails } from '@providers/transactions/parsed';
+import { ParsedTransaction, SystemInstruction, SystemProgram, TransactionSignature } from '@solana/web3.js';
+import { Cluster, ClusterStatus } from '@utils/cluster';
+import { displayTimestamp } from '@utils/date';
+import { SignatureProps } from '@utils/index';
+import { getTransactionInstructionError } from '@utils/program-err';
+import { intoTransactionInstruction } from '@utils/tx';
+import { useClusterPath } from '@utils/url';
+import { BigNumber } from 'bignumber.js';
 import bs58 from 'bs58';
 import Link from 'next/link';
-import React, {Suspense, useEffect, useState} from 'react';
-import {RefreshCw, Settings} from 'react-feather';
+import React, { Suspense, useEffect, useState } from 'react';
+import { RefreshCw, Settings } from 'react-feather';
 import useTabVisibility from 'use-tab-visibility';
 
 const AUTO_REFRESH_INTERVAL = 2000;
@@ -46,6 +52,34 @@ type AutoRefreshProps = {
 type Props = Readonly<{
     params: SignatureProps;
 }>;
+
+function getTransactionErrorReason(
+    info: TransactionStatusInfo,
+    tx: ParsedTransaction | undefined
+): { errorReason: string; errorLink?: string } {
+    if (typeof info.result.err === 'string') {
+        return { errorReason: `Runtime Error: "${info.result.err}"` };
+    }
+
+    const programError = getTransactionInstructionError(info.result.err);
+    if (programError !== undefined) {
+        return { errorReason: `Program Error: "Instruction #${programError.index + 1} Failed"` };
+    }
+
+    try {
+        const accountIndex = (info.result.err as { InsufficientFundsForRent: { account_index: number } })
+            .InsufficientFundsForRent.account_index;
+        if (tx) {
+            const address = tx.message.accountKeys[accountIndex].pubkey;
+            return { errorLink: `/address/${address}`, errorReason: `Insufficient Funds For Rent: ${address}` };
+        }
+        return { errorReason: `Insufficient Funds For Rent: Account #${accountIndex + 1}` };
+    } catch (e) {
+        // ignore (return below)
+    }
+
+    return { errorReason: `Unknown Error: "${JSON.stringify(info.result.err)}"` }; // catch-all
+}
 
 export default function TransactionDetailsPageClient({ params: { signature: raw } }: Props) {
     let signature: TransactionSignature | undefined;
@@ -178,12 +212,14 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
         statusClass = 'warning';
         statusText = 'Error';
 
-        const err = intoTransactionErrorReason(info, transaction)
-        errorReason = err.errorReason
+        const err = getTransactionErrorReason(info, transaction);
+        errorReason = err.errorReason;
         if (cluster === Cluster.MainnetBeta) {
-            errorLink = err.errorLink
+            errorLink = err.errorLink;
         } else {
-            errorLink = `${err.errorLink}?cluster=${clusterName.toLowerCase()}${cluster === Cluster.Custom ? `&customUrl=${clusterUrl}` : ''}`
+            errorLink = `${err.errorLink}?cluster=${clusterName.toLowerCase()}${
+                cluster === Cluster.Custom ? `&customUrl=${clusterUrl}` : ''
+            }`;
         }
     }
 
