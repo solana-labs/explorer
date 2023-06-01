@@ -66,19 +66,16 @@ function getTransactionErrorReason(
         return { errorReason: `Program Error: "Instruction #${programError.index + 1} Failed"` };
     }
 
-    try {
-        const accountIndex = (info.result.err as { InsufficientFundsForRent: { account_index: number } })
-            .InsufficientFundsForRent.account_index;
+    const { InsufficientFundsForRent } = info.result.err as { InsufficientFundsForRent?: { account_index: number } };
+    if (InsufficientFundsForRent !== undefined) {
         if (tx) {
-            const address = tx.message.accountKeys[accountIndex].pubkey;
+            const address = tx.message.accountKeys[InsufficientFundsForRent.account_index].pubkey;
             return { errorLink: `/address/${address}`, errorReason: `Insufficient Funds For Rent: ${address}` };
         }
-        return { errorReason: `Insufficient Funds For Rent: Account #${accountIndex + 1}` };
-    } catch (e) {
-        // ignore (return below)
+        return { errorReason: `Insufficient Funds For Rent: Account #${InsufficientFundsForRent.account_index + 1}` };
     }
 
-    return { errorReason: `Unknown Error: "${JSON.stringify(info.result.err)}"` }; // catch-all
+    return { errorReason: `Unknown Error: "${JSON.stringify(info.result.err)}"` };
 }
 
 export default function TransactionDetailsPageClient({ params: { signature: raw } }: Props) {
