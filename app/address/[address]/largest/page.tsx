@@ -1,5 +1,5 @@
 import { TokenLargestAccountsCard } from '@components/account/TokenLargestAccountsCard';
-import getReadableTitleFromAddress, {AddressPageMetadataProps} from "@utils/get-readable-title-from-address";
+import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/get-readable-title-from-address';
 import { Metadata } from 'next/types';
 
 type Props = Readonly<{

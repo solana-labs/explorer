@@ -1,6 +1,6 @@
 import { AnchorProgramCard } from '@components/account/AnchorProgramCard';
 import { LoadingCard } from '@components/common/LoadingCard';
-import getReadableTitleFromAddress, {AddressPageMetadataProps} from "@utils/get-readable-title-from-address";
+import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/get-readable-title-from-address';
 import { Metadata } from 'next/types';
 import { Suspense } from 'react';
 

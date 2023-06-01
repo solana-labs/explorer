@@ -1,5 +1,5 @@
 import { DomainsCard } from '@components/account/DomainsCard';
-import getReadableTitleFromAddress, {AddressPageMetadataProps} from "@utils/get-readable-title-from-address";
+import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/get-readable-title-from-address';
 import { Metadata } from 'next/types';
 
 type Props = Readonly<{
@@ -14,7 +14,6 @@ export async function generateMetadata(props: AddressPageMetadataProps): Promise
         title: `Domains | ${await getReadableTitleFromAddress(props)} | Solana`,
     };
 }
-
 
 export default function OwnedDomainsPage({ params: { address } }: Props) {
     return <DomainsCard address={address} />;
