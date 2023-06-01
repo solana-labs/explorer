@@ -211,12 +211,14 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
 
         const err = getTransactionErrorReason(info, transaction);
         errorReason = err.errorReason;
-        if (cluster === Cluster.MainnetBeta) {
-            errorLink = err.errorLink;
-        } else {
-            errorLink = `${err.errorLink}?cluster=${clusterName.toLowerCase()}${
-                cluster === Cluster.Custom ? `&customUrl=${clusterUrl}` : ''
-            }`;
+        if (err.errorLink !== undefined) {
+            if (cluster === Cluster.MainnetBeta) {
+                errorLink = err.errorLink;
+            } else {
+                errorLink = `${err.errorLink}?cluster=${clusterName.toLowerCase()}${
+                    cluster === Cluster.Custom ? `&customUrl=${clusterUrl}` : ''
+                }`;
+            }
         }
     }
 
@@ -260,7 +262,7 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
                         <td>Error</td>
                         <td className="text-lg-end">
                             <h3 className="mb-0">
-                                {errorLink ? (
+                                {errorLink !== undefined ? (
                                     <Link href={errorLink}>
                                         <span className={`badge bg-${statusClass}-soft`}>{errorReason}</span>
                                     </Link>
