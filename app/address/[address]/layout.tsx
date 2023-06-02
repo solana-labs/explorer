@@ -3,6 +3,7 @@
 import { AddressLookupTableAccountSection } from '@components/account/address-lookup-table/AddressLookupTableAccountSection';
 import { isAddressLookupTableAccount } from '@components/account/address-lookup-table/types';
 import { ConfigAccountSection } from '@components/account/ConfigAccountSection';
+import { FEATURE_PROGRAM_ID,FeatureAccountSection } from '@components/account/FeatureAccountSection';
 import { MetaplexNFTHeader } from '@components/account/MetaplexNFTHeader';
 import { isNFTokenAccount, parseNFTokenCollectionAccount } from '@components/account/nftoken/isNFTokenAccount';
 import { NFTOKEN_ADDRESS } from '@components/account/nftoken/nftoken';
@@ -336,6 +337,8 @@ function InfoSection({ account }: { account: Account }) {
         return <AddressLookupTableAccountSection account={account} lookupTableAccount={parsedData.parsed.info} />;
     } else if (rawData && isAddressLookupTableAccount(account.owner, rawData)) {
         return <AddressLookupTableAccountSection account={account} data={rawData} />;
+    } else if (account.owner.equals(FEATURE_PROGRAM_ID)) {
+        return <FeatureAccountSection account={account} />;
     } else {
         return <UnknownAccountCard account={account} />;
     }
