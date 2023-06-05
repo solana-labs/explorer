@@ -1,6 +1,5 @@
-import { EpochInfo, PerfSample } from '@solana/web3.js';
-
 import { ClusterStatsStatus } from './solanaClusterStats';
+import { PerformanceSample } from './solanaPerformanceInfo';
 
 export type DashboardInfo = {
     status: ClusterStatsStatus;
@@ -13,7 +12,7 @@ export type DashboardInfo = {
 
 export type BlockTimeInfo = {
     blockTime: number;
-    slot: number;
+    slot: bigint;
 };
 
 export enum DashboardInfoActionType {
@@ -24,9 +23,17 @@ export enum DashboardInfoActionType {
     Reset,
 }
 
+export type EpochInfo = {
+    absoluteSlot: bigint,
+    blockHeight: bigint,
+    epoch: bigint,
+    slotIndex: bigint,
+    slotsInEpoch: bigint,
+};
+
 export type DashboardInfoActionSetPerfSamples = {
     type: DashboardInfoActionType.SetPerfSamples;
-    data: PerfSample[];
+    data: PerformanceSample[];
 };
 
 export type DashboardInfoActionSetEpochInfo = {
@@ -74,10 +81,10 @@ export function dashboardInfoReducer(state: DashboardInfo, action: DashboardInfo
 
             const samples = action.data
                 .filter(sample => {
-                    return sample.numSlots !== 0;
+                    return sample.numSlots !== BigInt(0);
                 })
                 .map(sample => {
-                    return sample.samplePeriodSecs / sample.numSlots;
+                    return sample.samplePeriodSecs / Number(sample.numSlots);
                 })
                 .slice(0, 60);
 
@@ -87,7 +94,7 @@ export function dashboardInfoReducer(state: DashboardInfo, action: DashboardInfo
                     return sum + cur;
                 }, 0) / samplesInHour;
 
-            const status = state.epochInfo.absoluteSlot !== 0 ? ClusterStatsStatus.Ready : ClusterStatsStatus.Loading;
+            const status = state.epochInfo.absoluteSlot !== BigInt(0) ? ClusterStatsStatus.Ready : ClusterStatsStatus.Loading;
 
             return {
                 ...state,
@@ -109,8 +116,8 @@ export function dashboardInfoReducer(state: DashboardInfo, action: DashboardInfo
                 action.data.absoluteSlot >= state.lastBlockTime.slot
             ) {
                 blockTime =
-                    state.lastBlockTime.blockTime +
-                    (action.data.absoluteSlot - state.lastBlockTime.slot) * Math.floor(state.avgSlotTime_1h * 1000);
+                    Number(BigInt(state.lastBlockTime.blockTime) +
+                        (action.data.absoluteSlot - state.lastBlockTime.slot) * BigInt(Math.floor(state.avgSlotTime_1h * 1000)));
             }
 
             return {

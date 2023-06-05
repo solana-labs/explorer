@@ -1,14 +1,14 @@
 'use client';
 
 import { useCluster } from '@providers/cluster';
-import { Connection } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { reportError } from '@utils/sentry';
 import React from 'react';
 import useTabVisibility from 'use-tab-visibility';
+import { createDefaultRpcTransport, createSolanaRpc } from 'web3js-experimental';
 
-import { DashboardInfo, DashboardInfoActionType, dashboardInfoReducer } from './solanaDashboardInfo';
-import { PerformanceInfo, PerformanceInfoActionType, performanceInfoReducer } from './solanaPerformanceInfo';
+import { DashboardInfo, DashboardInfoActionType, dashboardInfoReducer, EpochInfo } from './solanaDashboardInfo';
+import { PerformanceInfo, PerformanceInfoActionType, performanceInfoReducer, PerformanceSample } from './solanaPerformanceInfo';
 
 export const PERF_UPDATE_SEC = 5;
 export const SAMPLE_HISTORY_HOURS = 6;
@@ -33,18 +33,18 @@ const initialPerformanceInfo: PerformanceInfo = {
         short: [],
     },
     status: ClusterStatsStatus.Loading,
-    transactionCount: 0,
+    transactionCount: BigInt(0),
 };
 
 const initialDashboardInfo: DashboardInfo = {
     avgSlotTime_1h: 0,
     avgSlotTime_1min: 0,
     epochInfo: {
-        absoluteSlot: 0,
-        blockHeight: 0,
-        epoch: 0,
-        slotIndex: 0,
-        slotsInEpoch: 0,
+        absoluteSlot: BigInt(0),
+        blockHeight: BigInt(0),
+        epoch: BigInt(0),
+        slotIndex: BigInt(0),
+        slotsInEpoch: BigInt(0),
     },
     status: ClusterStatsStatus.Loading,
 };
@@ -52,11 +52,11 @@ const initialDashboardInfo: DashboardInfo = {
 type SetActive = React.Dispatch<React.SetStateAction<boolean>>;
 const StatsProviderContext = React.createContext<
     | {
-          setActive: SetActive;
-          setTimedOut: () => void;
-          retry: () => void;
-          active: boolean;
-      }
+        setActive: SetActive;
+        setTimedOut: () => void;
+        retry: () => void;
+        active: boolean;
+    }
     | undefined
 >(undefined);
 
@@ -68,14 +68,6 @@ const PerformanceContext = React.createContext<PerformanceState | undefined>(und
 
 type Props = { children: React.ReactNode };
 
-function getConnection(url: string): Connection | undefined {
-    try {
-        return new Connection(url);
-    } catch (error) {
-        /* empty */
-    }
-}
-
 export function SolanaClusterStatsProvider({ children }: Props) {
     const { cluster, url } = useCluster();
     const [active, setActive] = React.useState(false);
@@ -85,19 +77,25 @@ export function SolanaClusterStatsProvider({ children }: Props) {
     React.useEffect(() => {
         if (!active || !isTabVisible || !url) return;
 
-        const connection = getConnection(url);
+        const transport = createDefaultRpcTransport({ url });
+        const rpc = createSolanaRpc({ transport });
 
-        if (!connection) return;
-
-        let lastSlot: number | null = null;
+        let lastSlot: bigint | null = null;
         let stale = false;
         const getPerformanceSamples = async () => {
             try {
-                const samples = await connection.getRecentPerformanceSamples(60 * SAMPLE_HISTORY_HOURS);
+                const samplesResponse = await rpc.getRecentPerformanceSamples(60 * SAMPLE_HISTORY_HOURS).send();
+
+                const samples: PerformanceSample[] = samplesResponse.map(s => ({
+                    numSlots: s.numSlots,
+                    numTransactions: s.numTransactions,
+                    samplePeriodSecs: s.samplePeriodSecs,
+                }));
+
                 if (stale) {
                     return;
                 }
-                if (samples.length < 1) {
+                if (samplesResponse.length < 1) {
                     // no samples to work with (node has no history).
                     return; // we will allow for a timeout instead of throwing an error
                 }
@@ -131,7 +129,7 @@ export function SolanaClusterStatsProvider({ children }: Props) {
 
         const getTransactionCount = async () => {
             try {
-                const transactionCount = await connection.getTransactionCount();
+                const transactionCount = await rpc.getTransactionCount({ commitment: 'confirmed' }).send();
                 if (stale) {
                     return;
                 }
@@ -155,7 +153,16 @@ export function SolanaClusterStatsProvider({ children }: Props) {
 
         const getEpochInfo = async () => {
             try {
-                const epochInfo = await connection.getEpochInfo();
+                const epochInfoResponse = await rpc.getEpochInfo().send();
+
+                const epochInfo: EpochInfo = {
+                    absoluteSlot: epochInfoResponse.absoluteSlot,
+                    blockHeight: epochInfoResponse.blockHeight,
+                    epoch: epochInfoResponse.epoch,
+                    slotIndex: epochInfoResponse.slotIndex,
+                    slotsInEpoch: epochInfoResponse.slotsInEpoch,
+                }
+
                 if (stale) {
                     return;
                 }
@@ -181,19 +188,18 @@ export function SolanaClusterStatsProvider({ children }: Props) {
         const getBlockTime = async () => {
             if (lastSlot) {
                 try {
-                    const blockTime = await connection.getBlockTime(lastSlot);
+                    const blockTime = await rpc.getBlockTime(lastSlot).send();
+
                     if (stale) {
                         return;
                     }
-                    if (blockTime !== null) {
-                        dispatchDashboardInfo({
-                            data: {
-                                blockTime: blockTime * 1000,
-                                slot: lastSlot,
-                            },
-                            type: DashboardInfoActionType.SetLastBlockTime,
-                        });
-                    }
+                    dispatchDashboardInfo({
+                        data: {
+                            blockTime: blockTime * 1000,
+                            slot: lastSlot,
+                        },
+                        type: DashboardInfoActionType.SetLastBlockTime,
+                    });
                 } catch (error) {
                     // let this fail gracefully
                 }

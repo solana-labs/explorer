@@ -1,5 +1,3 @@
-import { PerfSample } from '@solana/web3.js';
-
 import { ClusterStatsStatus } from './solanaClusterStats';
 
 export type PerformanceInfo = {
@@ -11,7 +9,13 @@ export type PerformanceInfo = {
         medium: (number | null)[];
         long: (number | null)[];
     };
-    transactionCount: number;
+    transactionCount: bigint;
+};
+
+export type PerformanceSample = {
+    numTransactions: bigint;
+    numSlots: bigint;
+    samplePeriodSecs: number;
 };
 
 export enum PerformanceInfoActionType {
@@ -23,12 +27,12 @@ export enum PerformanceInfoActionType {
 
 export type PerformanceInfoActionSetTransactionCount = {
     type: PerformanceInfoActionType.SetTransactionCount;
-    data: number;
+    data: bigint;
 };
 
 export type PerformanceInfoActionSetPerfSamples = {
     type: PerformanceInfoActionType.SetPerfSamples;
-    data: PerfSample[];
+    data: PerformanceSample[];
 };
 
 export type PerformanceInfoActionSetError = {
@@ -56,10 +60,10 @@ export function performanceInfoReducer(state: PerformanceInfo, action: Performan
 
             const short = action.data
                 .filter(sample => {
-                    return sample.numTransactions !== 0;
+                    return sample.numTransactions !== BigInt(0);
                 })
                 .map(sample => {
-                    return sample.numTransactions / sample.samplePeriodSecs;
+                    return Number(sample.numTransactions / BigInt(sample.samplePeriodSecs));
                 });
 
             const avgTps = short[0];
@@ -78,7 +82,7 @@ export function performanceInfoReducer(state: PerformanceInfo, action: Performan
                 Math.max(...perfHistory.long)
             );
 
-            const status = state.transactionCount !== 0 ? ClusterStatsStatus.Ready : ClusterStatsStatus.Loading;
+            const status = state.transactionCount !== BigInt(0) ? ClusterStatsStatus.Ready : ClusterStatsStatus.Loading;
 
             return {
                 ...state,

@@ -16,6 +16,7 @@ type Lamports = bigint;
 
 type Supply = Readonly<{
     circulating: Lamports,
+    nonCirculating: Lamports,
     total: Lamports,
 }>;
 
@@ -54,6 +55,7 @@ async function fetch(dispatch: Dispatch, cluster: Cluster, url: string) {
         const supplyResponse = await rpc.getSupply({ commitment: 'finalized', excludeNonCirculatingAccountsList: true }).send();
         const supply: Supply = {
             circulating: supplyResponse.value.circulating,
+            nonCirculating: supplyResponse.value.nonCirculating,
             total: supplyResponse.value.total,
         };
 

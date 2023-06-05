@@ -19,6 +19,7 @@ import {
 import { Status, useFetchSupply, useSupply } from '@providers/supply';
 import { ClusterStatus } from '@utils/cluster';
 import { abbreviatedNumber, lamportsToSol, slotsToHumanString } from '@utils/index';
+import { percentage } from '@utils/math';
 import React from 'react';
 
 export default function Page() {
@@ -80,12 +81,12 @@ function StakingComponent() {
         return <ErrorCard text={supply} retry={fetchData} />;
     }
 
-    // Multiply by 10000 while in BigInt form, so we get 2dp with no loss of accuracy, then round to 1
-    const circulatingPercentage = (Number(supply.circulating * BigInt(10000) / supply.total) / 100).toFixed(1);
+    // Calculate to 2dp for accuracy, then display as 1
+    const circulatingPercentage = percentage(supply.circulating, supply.total, 2).toFixed(1);
 
     let delinquentStakePercentage;
     if (delinquentStake && activeStake) {
-        delinquentStakePercentage = (Number(delinquentStake * BigInt(10000) / activeStake) / 100).toFixed(1);
+        delinquentStakePercentage = percentage(delinquentStake, activeStake, 2).toFixed(1);
     }
 
     return (
@@ -150,8 +151,8 @@ function StatsCardBody() {
     const hourlySlotTime = Math.round(1000 * avgSlotTime_1h);
     const averageSlotTime = Math.round(1000 * avgSlotTime_1min);
     const { slotIndex, slotsInEpoch } = epochInfo;
-    const epochProgress = ((100 * slotIndex) / slotsInEpoch).toFixed(1) + '%';
-    const epochTimeRemaining = slotsToHumanString(slotsInEpoch - slotIndex, hourlySlotTime);
+    const epochProgress = percentage(slotIndex, slotsInEpoch, 2).toFixed(1) + '%';
+    const epochTimeRemaining = slotsToHumanString(Number(slotsInEpoch - slotIndex), hourlySlotTime);
     const { blockHeight, absoluteSlot } = epochInfo;
 
     return (
@@ -159,14 +160,14 @@ function StatsCardBody() {
             <tr>
                 <td className="w-100">Slot</td>
                 <td className="text-lg-end font-monospace">
-                    <Slot slot={absoluteSlot} link />
+                    <Slot slot={Number(absoluteSlot)} link />
                 </td>
             </tr>
             {blockHeight !== undefined && (
                 <tr>
                     <td className="w-100">Block height</td>
                     <td className="text-lg-end font-monospace">
-                        <Slot slot={blockHeight} />
+                        <Slot slot={Number(blockHeight)} />
                     </td>
                 </tr>
             )}
