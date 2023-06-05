@@ -59,13 +59,13 @@ function StakingComponent() {
 
     const delinquentStake = React.useMemo(() => {
         if (voteAccounts) {
-            return voteAccounts.delinquent.reduce((prev, current) => prev + current.activatedStake, 0);
+            return voteAccounts.delinquent.reduce((prev, current) => prev + current.activatedStake, BigInt(0));
         }
     }, [voteAccounts]);
 
     const activeStake = React.useMemo(() => {
         if (voteAccounts && delinquentStake) {
-            return voteAccounts.current.reduce((prev, current) => prev + current.activatedStake, 0) + delinquentStake;
+            return voteAccounts.current.reduce((prev, current) => prev + current.activatedStake, BigInt(0)) + delinquentStake;
         }
     }, [voteAccounts, delinquentStake]);
 
@@ -80,11 +80,12 @@ function StakingComponent() {
         return <ErrorCard text={supply} retry={fetchData} />;
     }
 
-    const circulatingPercentage = ((supply.circulating / supply.total) * 100).toFixed(1);
+    // Multiply by 10000 while in BigInt form, so we get 2dp with no loss of accuracy, then round to 1
+    const circulatingPercentage = (Number(supply.circulating * BigInt(10000) / supply.total) / 100).toFixed(1);
 
     let delinquentStakePercentage;
     if (delinquentStake && activeStake) {
-        delinquentStakePercentage = ((delinquentStake / activeStake) * 100).toFixed(1);
+        delinquentStakePercentage = (Number(delinquentStake * BigInt(10000) / activeStake) / 100).toFixed(1);
     }
 
     return (
@@ -107,11 +108,11 @@ function StakingComponent() {
                 <div className="card">
                     <div className="card-body">
                         <h4>Active Stake</h4>
-                        {activeStake && (
+                        {activeStake ? (
                             <h1>
                                 <em>{displayLamports(activeStake)}</em> / <small>{displayLamports(supply.total)}</small>
                             </h1>
-                        )}
+                        ) : null}
                         {delinquentStakePercentage && (
                             <h5>
                                 Delinquent stake: <em>{delinquentStakePercentage}%</em>
@@ -124,7 +125,7 @@ function StakingComponent() {
     );
 }
 
-function displayLamports(value: number) {
+function displayLamports(value: number | bigint) {
     return abbreviatedNumber(lamportsToSol(value));
 }
 

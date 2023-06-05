@@ -4,10 +4,16 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 overrides:
   cross-fetch: ^3.1.5
   node-fetch: ^2.6.9
   uuid: ^9.0.0
+
+packageExtensionsChecksum: 7806f6f9382d8ed8e85237fc76baca0f
 
 dependencies:
   '@blockworks-foundation/mango-client':
@@ -148,6 +154,9 @@ dependencies:
   use-tab-visibility:
     specifier: ^1.0.9
     version: 1.0.9(react@18.2.0)
+  web3js-experimental:
+    specifier: npm:@solana/web3.js@2.0.0-experimental.b79b56f
+    version: /@solana/web3.js@2.0.0-experimental.b79b56f
 
 devDependencies:
   '@solana/eslint-config-solana':
@@ -568,8 +577,10 @@ packages:
       bn.js: 5.2.1
       borsh: 0.7.0
       ethers: 5.7.2
+      web3js-1: /@solana/web3.js@1.66.0
     transitivePeerDependencies:
       - bufferutil
+      - encoding
       - utf-8-validate
     dev: false
 
@@ -1430,8 +1441,12 @@ packages:
       buffer: 6.0.3
       crypto-hash: 1.3.0
       form-data: 4.0.0
+      web3js-1: /@solana/web3.js@1.66.0
     transitivePeerDependencies:
+      - bufferutil
       - debug
+      - encoding
+      - utf-8-validate
     dev: false
 
   /@next/env@13.4.0:
@@ -1980,6 +1995,12 @@ packages:
       typescript: 5.0.4
     dev: true
 
+  /@solana/keys@2.0.0-experimental.b79b56f:
+    resolution: {integrity: sha512-CQO4bbMkKX4DF6lMyw/8D6gSVD3Md60vKuK6cfxcE2h2vl0Je/MvHHjpTa6CAibRiAfrVAPeqqVcZviQUng58g==}
+    dependencies:
+      bs58: 5.0.0
+    dev: false
+
   /@solana/prettier-config-solana@0.0.2(prettier@2.8.8):
     resolution: {integrity: sha512-F/e2UIJwb30Y8QjR9nr/OrJiCc8yjMkiP9Ctk4VYg+8jODNP31dx6s9mn4sbMFVYA0Km5EPZLN2xsZacBy0y/A==}
     peerDependencies:
@@ -1987,6 +2008,17 @@ packages:
     dependencies:
       prettier: 2.8.8
     dev: true
+
+  /@solana/rpc-core@2.0.0-experimental.b79b56f:
+    resolution: {integrity: sha512-nZ/PFIpbmq3Y/+/QR3kMI99WCkMEiPdiZusnE+pb3BLgDcZ5SZpPf/yGytv6/MqvqwgT8oxwS/G6Z3XogeUzng==}
+    dependencies:
+      '@solana/keys': 2.0.0-experimental.b79b56f
+      bs58: 5.0.0
+    dev: false
+
+  /@solana/rpc-transport@2.0.0-experimental.b79b56f:
+    resolution: {integrity: sha512-CadExK4nr2COekDkHpeByOosY0hfJSUOb1gogX6N/4dHbShOEnRLVXUXQeSw6ochMtLkfxamuZU1I3p1rS/ObQ==}
+    dev: false
 
   /@solana/spl-account-compression@0.1.8(@solana/web3.js@1.66.0):
     resolution: {integrity: sha512-vsvsx358pVFPtyNd8zIZy0lezR0NuvOykQ29Zq+8oto+kHfTXMGXXQ1tKHUYke6XkINIWLFVg/jDi+1D9RYaqQ==}
@@ -2001,6 +2033,7 @@ packages:
       borsh: 0.7.0
       js-sha3: 0.8.0
       typescript-collections: 1.3.3
+      web3js-1: /@solana/web3.js@1.66.0
     transitivePeerDependencies:
       - bufferutil
       - encoding
@@ -2056,6 +2089,15 @@ packages:
       - bufferutil
       - encoding
       - utf-8-validate
+    dev: false
+
+  /@solana/web3.js@2.0.0-experimental.b79b56f:
+    resolution: {integrity: sha512-f6wbWSSGGsBlwQ23jmBAG4ZOEzXcbXKpIceC+y2iTYnCKf+dLGco27RPPx6AjRNe8cgB5dxeY+rHiEWRWJPoxA==}
+    dependencies:
+      '@solana/keys': 2.0.0-experimental.b79b56f
+      '@solana/rpc-core': 2.0.0-experimental.b79b56f
+      '@solana/rpc-transport': 2.0.0-experimental.b79b56f
+      fast-stable-stringify: 1.0.0
     dev: false
 
   /@swc/helpers@0.5.1:
