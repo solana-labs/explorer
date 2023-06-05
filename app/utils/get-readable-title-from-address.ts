@@ -14,17 +14,26 @@ export type AddressPageMetadataProps = Readonly<{
 export default async function getReadableTitleFromAddress(props: AddressPageMetadataProps): Promise<string> {
     const {
         params: { address },
-        searchParams: { cluster },
+        searchParams: { cluster: clusterParam },
     } = props;
 
-    // Get cluster from URL querystring (e.g. `?cluster=devnet`). If nothing is found, default to mainnet-beta.
-    let parsedCluster = Cluster.MainnetBeta;
-    if (cluster === 'devnet') parsedCluster = Cluster.Devnet;
-    else if (cluster === 'testnet') parsedCluster = Cluster.Testnet;
-    else if (cluster === 'custom') parsedCluster = Cluster.Custom;
+    let cluster: Cluster;
+    switch (clusterParam) {
+        case 'custom':
+            cluster = Cluster.Custom;
+            break;
+        case 'devnet':
+            cluster = Cluster.Devnet;
+            break;
+        case 'testnet':
+            cluster = Cluster.Testnet;
+            break;
+        default:
+            cluster = Cluster.MainnetBeta;
+    }
 
     try {
-        const tokenList = await getTokenList(parsedCluster, Strategy.Solana);
+        const tokenList = await getTokenList(cluster, Strategy.Solana);
         if (typeof tokenList.get(address)?.name === 'undefined') {
             return address;
         }
