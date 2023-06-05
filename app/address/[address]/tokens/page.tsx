@@ -1,5 +1,6 @@
 import { OwnedTokensCard } from '@components/account/OwnedTokensCard';
 import { TokenHistoryCard } from '@components/account/TokenHistoryCard';
+import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/get-readable-title-from-address';
 import { Metadata } from 'next/types';
 
 type Props = Readonly<{
@@ -8,10 +9,10 @@ type Props = Readonly<{
     };
 }>;
 
-export async function generateMetadata({ params: { address } }: Props): Promise<Metadata> {
+export async function generateMetadata(props: AddressPageMetadataProps): Promise<Metadata> {
     return {
-        description: `All tokens owned by the address ${address} on Solana`,
-        title: `Tokens | ${address} | Solana`,
+        description: `All tokens owned by the address ${props.params.address} on Solana`,
+        title: `Tokens | ${await getReadableTitleFromAddress(props)} | Solana`,
     };
 }
 

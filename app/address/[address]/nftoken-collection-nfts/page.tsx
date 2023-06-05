@@ -1,4 +1,5 @@
 import { NFTokenCollectionNFTGrid } from '@components/account/nftoken/NFTokenCollectionNFTGrid';
+import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/get-readable-title-from-address';
 import { Metadata } from 'next/types';
 
 type Props = Readonly<{
@@ -7,10 +8,10 @@ type Props = Readonly<{
     };
 }>;
 
-export async function generateMetadata({ params: { address } }: Props): Promise<Metadata> {
+export async function generateMetadata(props: AddressPageMetadataProps): Promise<Metadata> {
     return {
-        description: `NFToken NFTs belonging to the collection ${address} on Solana`,
-        title: `NFToken Collection NFTs | ${address} | Solana`,
+        description: `NFToken NFTs belonging to the collection ${props.params.address} on Solana`,
+        title: `NFToken Collection NFTs | ${await getReadableTitleFromAddress(props)} | Solana`,
     };
 }
 
