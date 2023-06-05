@@ -448,7 +448,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     },
 };
 
-export type LoaderName = (typeof LOADER_IDS)[keyof typeof LOADER_IDS];
+export type LoaderName = typeof LOADER_IDS[keyof typeof LOADER_IDS];
 export const LOADER_IDS = {
     BPFLoaderUpgradeab1e11111111111111111111111: 'BPF Upgradeable Loader',
     MoveLdr111111111111111111111111111111111111: 'Move Loader',
