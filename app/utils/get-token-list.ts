@@ -7,6 +7,6 @@ export default async function getTokenList(cluster: Cluster, strategy: Strategy)
         return tokenList.reduce((map: TokenInfoMap, item: TokenInfo) => {
             map.set(item.address, item);
             return map;
-        }, new Map())
+        }, new Map());
     });
 }
