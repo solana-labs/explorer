@@ -26,7 +26,7 @@ export default async function getReadableTitleFromAddress(props: AddressPageMeta
     try {
         const tokenList = await getTokenList(parsedCluster, Strategy.Solana);
         if (typeof tokenList.get(address)?.name === 'undefined') {
-            console.log(tokenList.get(address))
+            console.log(tokenList.get(address));
             return address;
         }
 

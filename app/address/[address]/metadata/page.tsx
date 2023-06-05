@@ -1,4 +1,4 @@
-import getReadableTitleFromAddress, {AddressPageMetadataProps} from "@utils/get-readable-title-from-address";
+import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/get-readable-title-from-address';
 import { Metadata } from 'next/types';
 
 import MetaplexNFTMetadataPageClient from './page-client';

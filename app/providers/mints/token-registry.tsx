@@ -14,7 +14,7 @@ export function TokenRegistryProvider({ children }: ProviderProps) {
     const { cluster } = useCluster();
 
     React.useEffect(() => {
-        getTokenList(cluster, Strategy.Solana).then((tokens: TokenInfoMap) => setTokenRegistry(tokens))
+        getTokenList(cluster, Strategy.Solana).then((tokens: TokenInfoMap) => setTokenRegistry(tokens));
     }, [cluster]);
 
     return <TokenRegistryContext.Provider value={tokenRegistry}>{children}</TokenRegistryContext.Provider>;
