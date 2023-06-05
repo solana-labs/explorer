@@ -1,4 +1,4 @@
-import { Strategy, TokenInfo } from '@solana/spl-token-registry';
+import { Strategy } from '@solana/spl-token-registry';
 import { Cluster } from '@utils/cluster';
 import getTokenList from '@utils/get-token-list';
 
@@ -34,14 +34,12 @@ export default async function getReadableTitleFromAddress(props: AddressPageMeta
 
     try {
         const tokenList = await getTokenList(cluster, Strategy.Solana);
-        if (typeof tokenList.get(address)?.name === 'undefined') {
+        const tokenName = tokenList.get(address)?.name;
+        if (tokenName == null) {
             return address;
         }
-
-        const tokenName = (tokenList.get(address) as TokenInfo).name;
-        const tokenAddressBlob = address.slice(0, 2) + '\u2026' + address.slice(-2);
-
-        return `Token | ${tokenName} (${tokenAddressBlob})`;
+        const tokenDisplayAddress = address.slice(0, 2) + '\u2026' + address.slice(-2);
+        return `Token | ${tokenName} (${tokenDisplayAddress})`;
     } catch {
         return address;
     }
