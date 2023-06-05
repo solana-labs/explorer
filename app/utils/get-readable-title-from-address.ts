@@ -30,7 +30,7 @@ export default async function getReadableTitleFromAddress(props: AddressPageMeta
         }
 
         const tokenName = (tokenList.get(address) as TokenInfo).name;
-        const tokenAddressBlob = address.slice(0, 2) + '...' + address.slice(-2);
+        const tokenAddressBlob = address.slice(0, 2) + '\u2026' + address.slice(-2);
 
         return `Token | ${tokenName} (${tokenAddressBlob})`;
     } catch {
