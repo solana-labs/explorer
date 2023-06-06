@@ -5,16 +5,9 @@ import { ClusterStatusBanner } from '@components/ClusterStatusButton';
 import { MessageBanner } from '@components/MessageBanner';
 import { Navbar } from '@components/Navbar';
 import { SearchBar } from '@components/SearchBar';
-import { AccountsProvider } from '@providers/accounts';
-import { BlockProvider } from '@providers/block';
 import { ClusterProvider } from '@providers/cluster';
-import { EpochProvider } from '@providers/epoch';
 import { MintsProvider } from '@providers/mints';
-import { RichListProvider } from '@providers/richList';
 import { ScrollAnchorProvider } from '@providers/scroll-anchor';
-import { StatsProvider } from '@providers/stats';
-import { SupplyProvider } from '@providers/supply';
-import { TransactionsProvider } from '@providers/transactions';
 import { Rubik } from 'next/font/google';
 import { Metadata } from 'next/types';
 
@@ -48,30 +41,16 @@ export default function RootLayout({
             <body>
                 <ScrollAnchorProvider>
                     <ClusterProvider>
-                        <StatsProvider>
-                            <SupplyProvider>
-                                <RichListProvider>
-                                    <AccountsProvider>
-                                        <BlockProvider>
-                                            <EpochProvider>
-                                                <MintsProvider>
-                                                    <TransactionsProvider>
-                                                        <ClusterModal />
-                                                        <div className="main-content pb-4">
-                                                            <Navbar />
-                                                            <MessageBanner />
-                                                            <ClusterStatusBanner />
-                                                            <SearchBar />
-                                                            {children}
-                                                        </div>
-                                                    </TransactionsProvider>
-                                                </MintsProvider>
-                                            </EpochProvider>
-                                        </BlockProvider>
-                                    </AccountsProvider>
-                                </RichListProvider>
-                            </SupplyProvider>
-                        </StatsProvider>
+                        <MintsProvider>
+                            <ClusterModal />
+                            <div className="main-content pb-4">
+                                <Navbar />
+                                <MessageBanner />
+                                <ClusterStatusBanner />
+                                <SearchBar />
+                                {children}
+                            </div>
+                        </MintsProvider>
                     </ClusterProvider>
                 </ScrollAnchorProvider>
                 {analytics}

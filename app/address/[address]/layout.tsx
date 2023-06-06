@@ -21,6 +21,7 @@ import { Identicon } from '@components/common/Identicon';
 import { LoadingCard } from '@components/common/LoadingCard';
 import {
     Account,
+    AccountsProvider,
     TokenProgramData,
     useAccountInfo,
     useFetchAccountInfo,
@@ -39,7 +40,7 @@ import { FEATURE_PROGRAM_ID } from '@utils/parseFeatureAccount';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 import { redirect, useSelectedLayoutSegment } from 'next/navigation';
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 
 const IDENTICON_WIDTH = 64;
 
@@ -145,8 +146,9 @@ const TABS_LOOKUP: { [id: string]: Tab[] } = {
 
 const TOKEN_TABS_HIDDEN = ['spl-token:mint', 'config', 'vote', 'sysvar', 'config'];
 
-type Props = { children: React.ReactNode; params: { address: string } };
-export default function AddressLayout({ children, params: { address } }: Props) {
+type Props = PropsWithChildren<{ params: { address: string } }>;
+
+function AddressLayoutInner({ children, params: { address } }: Props) {
     const fetchAccount = useFetchAccountInfo();
     const { status } = useCluster();
     const info = useAccountInfo(address);
@@ -180,6 +182,14 @@ export default function AddressLayout({ children, params: { address } }: Props) 
                 </DetailsSections>
             )}
         </div>
+    );
+}
+
+export default function AddressLayout({ children, params }: Props) {
+    return (
+        <AccountsProvider>
+            <AddressLayoutInner params={params}>{children}</AddressLayoutInner>
+        </AccountsProvider>
     );
 }
 
