@@ -13,7 +13,6 @@ interface ClusterInfo {
     firstAvailableBlock: number;
     epochSchedule: EpochSchedule;
     epochInfo: EpochInfo;
-    genesisHash: string;
 }
 
 type Dispatch = (action: Action) => void;
@@ -117,11 +116,10 @@ async function updateCluster(dispatch: Dispatch, cluster: Cluster, customUrl: st
         new URL(customUrl);
 
         const connection = new Connection(clusterUrl(cluster, customUrl));
-        const [firstAvailableBlock, epochSchedule, epochInfo, genesisHash] = await Promise.all([
+        const [firstAvailableBlock, epochSchedule, epochInfo] = await Promise.all([
             connection.getFirstAvailableBlock(),
             connection.getEpochSchedule(),
             connection.getEpochInfo(),
-            connection.getGenesisHash(),
         ]);
 
         dispatch({
@@ -130,7 +128,6 @@ async function updateCluster(dispatch: Dispatch, cluster: Cluster, customUrl: st
                 epochInfo,
                 epochSchedule,
                 firstAvailableBlock,
-                genesisHash,
             },
             customUrl,
             status: ClusterStatus.Connected,
