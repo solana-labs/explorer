@@ -15,10 +15,15 @@ import { ProgramLogSection } from '@components/transaction/ProgramLogSection';
 import { TokenBalancesCard } from '@components/transaction/TokenBalancesCard';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
-import { useFetchTransactionStatus, useTransactionDetails, useTransactionStatus } from '@providers/transactions';
+import {
+    TransactionStatusInfo,
+    useFetchTransactionStatus,
+    useTransactionDetails,
+    useTransactionStatus,
+} from '@providers/transactions';
 import { useFetchTransactionDetails } from '@providers/transactions/parsed';
-import { SystemInstruction, SystemProgram, TransactionSignature } from '@solana/web3.js';
-import { ClusterStatus } from '@utils/cluster';
+import { ParsedTransaction, SystemInstruction, SystemProgram, TransactionSignature } from '@solana/web3.js';
+import { Cluster, ClusterStatus } from '@utils/cluster';
 import { displayTimestamp } from '@utils/date';
 import { SignatureProps } from '@utils/index';
 import { getTransactionInstructionError } from '@utils/program-err';
@@ -47,6 +52,31 @@ type AutoRefreshProps = {
 type Props = Readonly<{
     params: SignatureProps;
 }>;
+
+function getTransactionErrorReason(
+    info: TransactionStatusInfo,
+    tx: ParsedTransaction | undefined
+): { errorReason: string; errorLink?: string } {
+    if (typeof info.result.err === 'string') {
+        return { errorReason: `Runtime Error: "${info.result.err}"` };
+    }
+
+    const programError = getTransactionInstructionError(info.result.err);
+    if (programError !== undefined) {
+        return { errorReason: `Program Error: "Instruction #${programError.index + 1} Failed"` };
+    }
+
+    const { InsufficientFundsForRent } = info.result.err as { InsufficientFundsForRent?: { account_index: number } };
+    if (InsufficientFundsForRent !== undefined) {
+        if (tx) {
+            const address = tx.message.accountKeys[InsufficientFundsForRent.account_index].pubkey;
+            return { errorLink: `/address/${address}`, errorReason: `Insufficient Funds For Rent: ${address}` };
+        }
+        return { errorReason: `Insufficient Funds For Rent: Account #${InsufficientFundsForRent.account_index + 1}` };
+    }
+
+    return { errorReason: `Unknown Error: "${JSON.stringify(info.result.err)}"` };
+}
 
 export default function TransactionDetailsPageClient({ params: { signature: raw } }: Props) {
     let signature: TransactionSignature | undefined;
@@ -111,7 +141,7 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
     const fetchStatus = useFetchTransactionStatus();
     const status = useTransactionStatus(signature);
     const details = useTransactionDetails(signature);
-    const { clusterInfo, status: clusterStatus } = useCluster();
+    const { cluster, clusterInfo, name: clusterName, status: clusterStatus, url: clusterUrl } = useCluster();
     const inspectPath = useClusterPath({ pathname: `/tx/${signature}/inspect` });
 
     // Fetch transaction on load
@@ -151,25 +181,6 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
 
     const { info } = status.data;
 
-    let statusClass = 'success';
-    let statusText = 'Success';
-    let errorReason = undefined;
-
-    if (info.result.err) {
-        statusClass = 'warning';
-        statusText = 'Error';
-        if (typeof info.result.err === 'string') {
-            errorReason = `Runtime Error: "${info.result.err}"`;
-        } else {
-            const programError = getTransactionInstructionError(info.result.err);
-            if (programError !== undefined) {
-                errorReason = `Program Error: "Instruction #${programError.index + 1} Failed"`;
-            } else {
-                errorReason = `Unknown Error: "${JSON.stringify(info.result.err)}"`;
-            }
-        }
-    }
-
     const transactionWithMeta = details?.data?.transactionWithMeta;
     const fee = transactionWithMeta?.meta?.fee;
     const computeUnitsConsumed = transactionWithMeta?.meta?.computeUnitsConsumed;
@@ -188,6 +199,28 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
             SystemInstruction.decodeInstructionType(ix) === 'AdvanceNonceAccount'
         );
     })();
+
+    let statusClass = 'success';
+    let statusText = 'Success';
+    let errorReason = undefined;
+    let errorLink = undefined;
+
+    if (info.result.err) {
+        statusClass = 'warning';
+        statusText = 'Error';
+
+        const err = getTransactionErrorReason(info, transaction);
+        errorReason = err.errorReason;
+        if (err.errorLink !== undefined) {
+            if (cluster === Cluster.MainnetBeta) {
+                errorLink = err.errorLink;
+            } else {
+                errorLink = `${err.errorLink}?cluster=${clusterName.toLowerCase()}${
+                    cluster === Cluster.Custom ? `&customUrl=${clusterUrl}` : ''
+                }`;
+            }
+        }
+    }
 
     return (
         <div className="card">
@@ -229,7 +262,13 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
                         <td>Error</td>
                         <td className="text-lg-end">
                             <h3 className="mb-0">
-                                <span className={`badge bg-${statusClass}-soft`}>{errorReason}</span>
+                                {errorLink !== undefined ? (
+                                    <Link href={errorLink}>
+                                        <span className={`badge bg-${statusClass}-soft`}>{errorReason}</span>
+                                    </Link>
+                                ) : (
+                                    <span className={`badge bg-${statusClass}-soft`}>{errorReason}</span>
+                                )}
                             </h3>
                         </td>
                     </tr>

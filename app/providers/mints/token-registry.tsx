@@ -1,8 +1,8 @@
 'use client';
 
 import { useCluster } from '@providers/cluster';
-import { Strategy, TokenInfo, TokenInfoMap, TokenListContainer, TokenListProvider } from '@solana/spl-token-registry';
-import { Cluster, clusterSlug } from '@utils/cluster';
+import { Strategy, TokenInfoMap } from '@solana/spl-token-registry';
+import getTokenList from '@utils/get-token-list';
 import React from 'react';
 
 const TokenRegistryContext = React.createContext<TokenInfoMap>(new Map());
@@ -14,17 +14,7 @@ export function TokenRegistryProvider({ children }: ProviderProps) {
     const { cluster } = useCluster();
 
     React.useEffect(() => {
-        new TokenListProvider().resolve(Strategy.Solana).then((tokens: TokenListContainer) => {
-            const tokenList =
-                cluster === Cluster.Custom ? [] : tokens.filterByClusterSlug(clusterSlug(cluster)).getList();
-
-            setTokenRegistry(
-                tokenList.reduce((map: TokenInfoMap, item: TokenInfo) => {
-                    map.set(item.address, item);
-                    return map;
-                }, new Map())
-            );
-        });
+        getTokenList(cluster, Strategy.Solana).then((tokens: TokenInfoMap) => setTokenRegistry(tokens));
     }, [cluster]);
 
     return <TokenRegistryContext.Provider value={tokenRegistry}>{children}</TokenRegistryContext.Provider>;

@@ -18,8 +18,6 @@ import {
 } from '@providers/stats/solanaClusterStats';
 import { Status, useFetchSupply, useSupply } from '@providers/supply';
 import { ClusterStatus } from '@utils/cluster';
-import { CoingeckoStatus, useCoinGecko } from '@utils/coingecko';
-import { displayTimestampWithoutDate } from '@utils/date';
 import { abbreviatedNumber, lamportsToSol, slotsToHumanString } from '@utils/index';
 import React from 'react';
 
@@ -46,7 +44,6 @@ function StakingComponent() {
     const { status } = useCluster();
     const supply = useSupply();
     const fetchSupply = useFetchSupply();
-    const coinInfo = useCoinGecko('solana');
     const { fetchVoteAccounts, voteAccounts } = useVoteAccounts();
 
     function fetchData() {
@@ -77,8 +74,8 @@ function StakingComponent() {
         return null;
     }
 
-    if (supply === Status.Idle || supply === Status.Connecting || !coinInfo) {
-        return <LoadingCard message="Loading supply and price data" />;
+    if (supply === Status.Idle || supply === Status.Connecting) {
+        return <LoadingCard message="Loading supply data" />;
     } else if (typeof supply === 'string') {
         return <ErrorCard text={supply} retry={fetchData} />;
     }
@@ -90,14 +87,9 @@ function StakingComponent() {
         delinquentStakePercentage = ((delinquentStake / activeStake) * 100).toFixed(1);
     }
 
-    let solanaInfo;
-    if (coinInfo.status === CoingeckoStatus.Success) {
-        solanaInfo = coinInfo.coinInfo;
-    }
-
     return (
         <div className="row staking-card">
-            <div className="col-12 col-lg-4 col-xl">
+            <div className="col-6 col-xl">
                 <div className="card">
                     <div className="card-body">
                         <h4>Circulating Supply</h4>
@@ -111,7 +103,7 @@ function StakingComponent() {
                     </div>
                 </div>
             </div>
-            <div className="col-12 col-lg-4 col-xl">
+            <div className="col-6 col-xl">
                 <div className="card">
                     <div className="card-body">
                         <h4>Active Stake</h4>
@@ -124,54 +116,6 @@ function StakingComponent() {
                             <h5>
                                 Delinquent stake: <em>{delinquentStakePercentage}%</em>
                             </h5>
-                        )}
-                    </div>
-                </div>
-            </div>
-            <div className="col-12 col-lg-4 col-xl">
-                <div className="card">
-                    <div className="card-body">
-                        {solanaInfo && (
-                            <>
-                                <h4>
-                                    Price{' '}
-                                    <span className="ms-2 badge bg-primary rank">
-                                        Rank #{solanaInfo.market_cap_rank}
-                                    </span>
-                                </h4>
-                                <h1>
-                                    <em>${solanaInfo.price.toFixed(2)}</em>{' '}
-                                    {solanaInfo.price_change_percentage_24h > 0 && (
-                                        <small className="change-positive">
-                                            &uarr; {solanaInfo.price_change_percentage_24h.toFixed(2)}%
-                                        </small>
-                                    )}
-                                    {solanaInfo.price_change_percentage_24h < 0 && (
-                                        <small className="change-negative">
-                                            &darr; {solanaInfo.price_change_percentage_24h.toFixed(2)}%
-                                        </small>
-                                    )}
-                                    {solanaInfo.price_change_percentage_24h === 0 && <small>0%</small>}
-                                </h1>
-                                <h5>
-                                    24h Vol: <em>${abbreviatedNumber(solanaInfo.volume_24)}</em> MCap:{' '}
-                                    <em>${abbreviatedNumber(solanaInfo.market_cap)}</em>
-                                </h5>
-                            </>
-                        )}
-                        {coinInfo.status === CoingeckoStatus.FetchFailed && (
-                            <>
-                                <h4>Price</h4>
-                                <h1>
-                                    <em>$--.--</em>
-                                </h1>
-                                <h5>Error fetching the latest price information</h5>
-                            </>
-                        )}
-                        {solanaInfo && (
-                            <p className="updated-time text-muted">
-                                Updated at {displayTimestampWithoutDate(solanaInfo.last_updated.getTime())}
-                            </p>
                         )}
                     </div>
                 </div>

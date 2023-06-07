@@ -3,6 +3,7 @@
 import { AddressLookupTableAccountSection } from '@components/account/address-lookup-table/AddressLookupTableAccountSection';
 import { isAddressLookupTableAccount } from '@components/account/address-lookup-table/types';
 import { ConfigAccountSection } from '@components/account/ConfigAccountSection';
+import { FeatureAccountSection } from '@components/account/FeatureAccountSection';
 import { MetaplexNFTHeader } from '@components/account/MetaplexNFTHeader';
 import { isNFTokenAccount, parseNFTokenCollectionAccount } from '@components/account/nftoken/isNFTokenAccount';
 import { NFTOKEN_ADDRESS } from '@components/account/nftoken/nftoken';
@@ -34,6 +35,7 @@ import { useTokenRegistry } from '@providers/mints/token-registry';
 import { PROGRAM_ID as ACCOUNT_COMPRESSION_ID } from '@solana/spl-account-compression';
 import { PublicKey } from '@solana/web3.js';
 import { ClusterStatus } from '@utils/cluster';
+import { FEATURE_PROGRAM_ID } from '@utils/parseFeatureAccount';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 import { redirect, useSelectedLayoutSegment } from 'next/navigation';
@@ -336,6 +338,8 @@ function InfoSection({ account }: { account: Account }) {
         return <AddressLookupTableAccountSection account={account} lookupTableAccount={parsedData.parsed.info} />;
     } else if (rawData && isAddressLookupTableAccount(account.owner, rawData)) {
         return <AddressLookupTableAccountSection account={account} data={rawData} />;
+    } else if (account.owner.toBase58() === FEATURE_PROGRAM_ID) {
+        return <FeatureAccountSection account={account} />;
     } else {
         return <UnknownAccountCard account={account} />;
     }

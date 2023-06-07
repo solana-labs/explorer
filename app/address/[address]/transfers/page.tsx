@@ -1,4 +1,5 @@
 import { TokenTransfersCard } from '@components/account/history/TokenTransfersCard';
+import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/get-readable-title-from-address';
 import { Metadata } from 'next/types';
 
 type Props = Readonly<{
@@ -7,10 +8,10 @@ type Props = Readonly<{
     };
 }>;
 
-export async function generateMetadata({ params: { address } }: Props): Promise<Metadata> {
+export async function generateMetadata(props: AddressPageMetadataProps): Promise<Metadata> {
     return {
-        description: `History of all token transfers involving the address ${address} on Solana`,
-        title: `Transfers | ${address} | Solana`,
+        description: `History of all token transfers involving the address ${props.params.address} on Solana`,
+        title: `Transfers | ${await getReadableTitleFromAddress(props)} | Solana`,
     };
 }
 
