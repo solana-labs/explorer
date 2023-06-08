@@ -46,6 +46,9 @@ export function useCoinGecko(coinId?: string): CoinGeckoResult | undefined {
     const [coinInfo, setCoinInfo] = React.useState<CoinGeckoResult>();
     const { visible: isTabVisible } = useTabVisibility();
     React.useEffect(() => {
+        if (coinId === 'solana') {
+            return;
+        }
         if (!isTabVisible) {
             return;
         }
