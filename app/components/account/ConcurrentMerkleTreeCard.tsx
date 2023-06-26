@@ -73,13 +73,13 @@ export function ConcurrentMerkleTreeCard({ data }: { data: Buffer }) {
                         <tr>
                             <td>Current Number of Leaves</td>
                             <td className="text-lg-end">
-                                <span className="text-monospace">{rightMostIndex - 1}</span>
+                                <span className="text-monospace">{rightMostIndex}</span>
                             </td>
                         </tr>
                         <tr>
                             <td>Remaining Leaves</td>
                             <td className="text-lg-end">
-                                <span className="text-monospace">{Math.pow(2, treeHeight) - rightMostIndex + 1}</span>
+                                <span className="text-monospace">{Math.pow(2, treeHeight) - rightMostIndex}</span>
                             </td>
                         </tr>
                         <tr>
