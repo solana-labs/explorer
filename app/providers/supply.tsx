@@ -1,16 +1,24 @@
 'use client';
 
 import { useCluster } from '@providers/cluster';
-import { Connection, Supply } from '@solana/web3.js';
 import { Cluster, ClusterStatus } from '@utils/cluster';
 import { reportError } from '@utils/sentry';
 import React from 'react';
+import { createDefaultRpcTransport, createSolanaRpc } from 'web3js-experimental';
 
 export enum Status {
     Idle,
     Disconnected,
     Connecting,
 }
+
+type Lamports = bigint;
+
+type Supply = Readonly<{
+    circulating: Lamports,
+    nonCirculating: Lamports,
+    total: Lamports,
+}>;
 
 type State = Supply | Status | string;
 
@@ -41,8 +49,15 @@ async function fetch(dispatch: Dispatch, cluster: Cluster, url: string) {
     dispatch(Status.Connecting);
 
     try {
-        const connection = new Connection(url, 'finalized');
-        const supply = (await connection.getSupply({ excludeNonCirculatingAccountsList: true })).value;
+        const transport = createDefaultRpcTransport({ url });
+        const rpc = createSolanaRpc({ transport });
+
+        const supplyResponse = await rpc.getSupply({ commitment: 'finalized', excludeNonCirculatingAccountsList: true }).send();
+        const supply: Supply = {
+            circulating: supplyResponse.value.circulating,
+            nonCirculating: supplyResponse.value.nonCirculating,
+            total: supplyResponse.value.total,
+        };
 
         // Update state if still connecting
         dispatch(state => {

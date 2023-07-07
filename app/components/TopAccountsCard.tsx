@@ -11,6 +11,8 @@ import React, { createRef, useMemo } from 'react';
 import { ChevronDown } from 'react-feather';
 import useAsyncEffect from 'use-async-effect';
 
+import { percentage } from '../utils/math';
+
 type Filter = 'circulating' | 'nonCirculating' | 'all' | null;
 
 export function TopAccountsCard() {
@@ -33,7 +35,7 @@ export function TopAccountsCard() {
         return <ErrorCard text={richList} retry={fetchRichList} />;
     }
 
-    let supplyCount: number;
+    let supplyCount: bigint;
     let accounts, header;
 
     if (richList !== Status.Idle) {
@@ -105,7 +107,7 @@ export function TopAccountsCard() {
     );
 }
 
-const renderAccountRow = (account: AccountBalancePair, index: number, supply: number) => {
+const renderAccountRow = (account: AccountBalancePair, index: number, supply: bigint) => {
     return (
         <tr key={index}>
             <td>
@@ -117,7 +119,7 @@ const renderAccountRow = (account: AccountBalancePair, index: number, supply: nu
             <td className="text-end">
                 <SolBalance lamports={account.lamports} maximumFractionDigits={0} />
             </td>
-            <td className="text-end">{`${((100 * account.lamports) / supply).toFixed(3)}%`}</td>
+            <td className="text-end">{percentage(BigInt(100 * account.lamports), supply, 4).toFixed(3) + '%'}</td>
         </tr>
     );
 };

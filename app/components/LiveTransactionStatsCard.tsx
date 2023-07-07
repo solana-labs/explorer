@@ -224,7 +224,8 @@ function AnimatedTransactionCount({ info }: { info: PerformanceInfo }) {
     const countUpRef = React.useRef({ lastUpdate: 0, period: 0, start: 0 });
     const countUp = countUpRef.current;
 
-    const { transactionCount: txCount, avgTps } = info;
+    const { transactionCount, avgTps } = info;
+    const txCount = Number(transactionCount);
 
     // Track last tx count to reset count up options
     if (txCount !== txCountRef.current) {
@@ -442,14 +443,13 @@ function PingBarChart({
             <div class="value">${val.mean} ms</div>
             <div class="label">
               <p class="mb-0">${val.confirmed} of ${val.submitted} confirmed</p>
-            ${
-                val.loss
+            ${val.loss
                     ? `<p class="mb-0">${val.loss.toLocaleString(undefined, {
-                          minimumFractionDigits: 2,
-                          style: 'percent',
-                      })} loss</p>`
+                        minimumFractionDigits: 2,
+                        style: 'percent',
+                    })} loss</p>`
                     : ''
-            }
+                }
             ${SERIES_INFO[series].label(seriesLength - i)}min ago
             </div>
           `;

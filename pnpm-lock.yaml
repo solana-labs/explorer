@@ -15,7 +15,7 @@ dependencies:
     version: 3.6.7
   '@bonfida/spl-name-service':
     specifier: 0.1.30
-    version: 0.1.30(@solana/buffer-layout@3.0.0)(@solana/spl-token@0.1.8)(@solana/web3.js@1.66.0)(bn.js@5.2.1)(borsh@0.7.0)
+    version: 0.1.30(@solana/buffer-layout@3.0.0)(@solana/spl-token@0.1.8)(@solana/web3.js@2.0.0-experimental.b79b56f)(bn.js@5.2.1)(borsh@0.7.0)
   '@cloudflare/stream-react':
     specifier: ^1.2.0
     version: 1.2.0(react@18.2.0)
@@ -27,7 +27,7 @@ dependencies:
     version: 1.1.0
   '@metaplex/js':
     specifier: ^4.12.0
-    version: 4.12.0(@metaplex-foundation/mpl-auction@0.0.2)(@metaplex-foundation/mpl-core@0.0.2)(@metaplex-foundation/mpl-metaplex@0.0.5)(@metaplex-foundation/mpl-token-metadata@1.1.0)(@metaplex-foundation/mpl-token-vault@0.0.2)(@solana/spl-token@0.1.8)(@solana/web3.js@1.66.0)
+    version: 4.12.0(@metaplex-foundation/mpl-auction@0.0.2)(@metaplex-foundation/mpl-core@0.0.2)(@metaplex-foundation/mpl-metaplex@0.0.5)(@metaplex-foundation/mpl-token-metadata@1.1.0)(@metaplex-foundation/mpl-token-vault@0.0.2)(@solana/spl-token@0.1.8)(@solana/web3.js@2.0.0-experimental.b79b56f)
   '@project-serum/anchor':
     specifier: ^0.23.0
     version: 0.23.0
@@ -51,7 +51,7 @@ dependencies:
     version: 3.0.0
   '@solana/spl-account-compression':
     specifier: ^0.1.8
-    version: 0.1.8(@solana/web3.js@1.66.0)
+    version: 0.1.8(@solana/web3.js@2.0.0-experimental.b79b56f)
   '@solana/spl-token':
     specifier: ^0.1.8
     version: 0.1.8
@@ -148,6 +148,9 @@ dependencies:
   use-tab-visibility:
     specifier: ^1.0.9
     version: 1.0.9(react@18.2.0)
+  web3js-experimental:
+    specifier: npm:@solana/web3.js@2.0.0-experimental.b79b56f
+    version: /@solana/web3.js@2.0.0-experimental.b79b56f
 
 devDependencies:
   '@solana/eslint-config-solana':
@@ -553,7 +556,7 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@bonfida/spl-name-service@0.1.30(@solana/buffer-layout@3.0.0)(@solana/spl-token@0.1.8)(@solana/web3.js@1.66.0)(bn.js@5.2.1)(borsh@0.7.0):
+  /@bonfida/spl-name-service@0.1.30(@solana/buffer-layout@3.0.0)(@solana/spl-token@0.1.8)(@solana/web3.js@2.0.0-experimental.b79b56f)(bn.js@5.2.1)(borsh@0.7.0):
     resolution: {integrity: sha512-0aSpymeNDq7rDSDEJgB6/qKyy3yUkHLQk7Jxwtmibfva3s1johEfFdl2kUDDPWi/ubgbxYjPxJRGrlGQNEmmQw==}
     peerDependencies:
       '@solana/buffer-layout': ^4.0.0
@@ -564,7 +567,7 @@ packages:
     dependencies:
       '@solana/buffer-layout': 3.0.0
       '@solana/spl-token': 0.1.8
-      '@solana/web3.js': 1.66.0
+      '@solana/web3.js': 2.0.0-experimental.b79b56f
       bn.js: 5.2.1
       borsh: 0.7.0
       ethers: 5.7.2
@@ -1403,7 +1406,7 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@metaplex/js@4.12.0(@metaplex-foundation/mpl-auction@0.0.2)(@metaplex-foundation/mpl-core@0.0.2)(@metaplex-foundation/mpl-metaplex@0.0.5)(@metaplex-foundation/mpl-token-metadata@1.1.0)(@metaplex-foundation/mpl-token-vault@0.0.2)(@solana/spl-token@0.1.8)(@solana/web3.js@1.66.0):
+  /@metaplex/js@4.12.0(@metaplex-foundation/mpl-auction@0.0.2)(@metaplex-foundation/mpl-core@0.0.2)(@metaplex-foundation/mpl-metaplex@0.0.5)(@metaplex-foundation/mpl-token-metadata@1.1.0)(@metaplex-foundation/mpl-token-vault@0.0.2)(@solana/spl-token@0.1.8)(@solana/web3.js@2.0.0-experimental.b79b56f):
     resolution: {integrity: sha512-rIUTMXo5gIXFIZt08AEHyqH4oVoLL2dMYiNePQluw9pydesRym4jDayJ5POxEmKmyc6KGqVKw/YWUIivmUY5zg==}
     deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     peerDependencies:
@@ -1421,7 +1424,7 @@ packages:
       '@metaplex-foundation/mpl-token-metadata': 1.1.0
       '@metaplex-foundation/mpl-token-vault': 0.0.2
       '@solana/spl-token': 0.1.8
-      '@solana/web3.js': 1.66.0
+      '@solana/web3.js': 2.0.0-experimental.b79b56f
       '@types/bs58': 4.0.1
       axios: 0.25.0
       bn.js: 5.2.1
@@ -1980,6 +1983,12 @@ packages:
       typescript: 5.0.4
     dev: true
 
+  /@solana/keys@2.0.0-experimental.b79b56f:
+    resolution: {integrity: sha512-CQO4bbMkKX4DF6lMyw/8D6gSVD3Md60vKuK6cfxcE2h2vl0Je/MvHHjpTa6CAibRiAfrVAPeqqVcZviQUng58g==}
+    dependencies:
+      bs58: 5.0.0
+    dev: false
+
   /@solana/prettier-config-solana@0.0.2(prettier@2.8.8):
     resolution: {integrity: sha512-F/e2UIJwb30Y8QjR9nr/OrJiCc8yjMkiP9Ctk4VYg+8jODNP31dx6s9mn4sbMFVYA0Km5EPZLN2xsZacBy0y/A==}
     peerDependencies:
@@ -1988,7 +1997,18 @@ packages:
       prettier: 2.8.8
     dev: true
 
-  /@solana/spl-account-compression@0.1.8(@solana/web3.js@1.66.0):
+  /@solana/rpc-core@2.0.0-experimental.b79b56f:
+    resolution: {integrity: sha512-nZ/PFIpbmq3Y/+/QR3kMI99WCkMEiPdiZusnE+pb3BLgDcZ5SZpPf/yGytv6/MqvqwgT8oxwS/G6Z3XogeUzng==}
+    dependencies:
+      '@solana/keys': 2.0.0-experimental.b79b56f
+      bs58: 5.0.0
+    dev: false
+
+  /@solana/rpc-transport@2.0.0-experimental.b79b56f:
+    resolution: {integrity: sha512-CadExK4nr2COekDkHpeByOosY0hfJSUOb1gogX6N/4dHbShOEnRLVXUXQeSw6ochMtLkfxamuZU1I3p1rS/ObQ==}
+    dev: false
+
+  /@solana/spl-account-compression@0.1.8(@solana/web3.js@2.0.0-experimental.b79b56f):
     resolution: {integrity: sha512-vsvsx358pVFPtyNd8zIZy0lezR0NuvOykQ29Zq+8oto+kHfTXMGXXQ1tKHUYke6XkINIWLFVg/jDi+1D9RYaqQ==}
     engines: {node: '>=16'}
     peerDependencies:
@@ -1996,7 +2016,7 @@ packages:
     dependencies:
       '@metaplex-foundation/beet': 0.7.1
       '@metaplex-foundation/beet-solana': 0.4.0
-      '@solana/web3.js': 1.66.0
+      '@solana/web3.js': 2.0.0-experimental.b79b56f
       bn.js: 5.2.1
       borsh: 0.7.0
       js-sha3: 0.8.0
@@ -2056,6 +2076,15 @@ packages:
       - bufferutil
       - encoding
       - utf-8-validate
+    dev: false
+
+  /@solana/web3.js@2.0.0-experimental.b79b56f:
+    resolution: {integrity: sha512-f6wbWSSGGsBlwQ23jmBAG4ZOEzXcbXKpIceC+y2iTYnCKf+dLGco27RPPx6AjRNe8cgB5dxeY+rHiEWRWJPoxA==}
+    dependencies:
+      '@solana/keys': 2.0.0-experimental.b79b56f
+      '@solana/rpc-core': 2.0.0-experimental.b79b56f
+      '@solana/rpc-transport': 2.0.0-experimental.b79b56f
+      fast-stable-stringify: 1.0.0
     dev: false
 
   /@swc/helpers@0.5.1:
