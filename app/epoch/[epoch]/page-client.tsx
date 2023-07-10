@@ -12,6 +12,8 @@ import { ClusterStatus } from '@utils/cluster';
 import { displayTimestampUtc } from '@utils/date';
 import React from 'react';
 
+import { getFirstSlotInEpoch, getLastSlotInEpoch } from '@/app/utils/epoch-schedule';
+
 type Props = {
     params: {
         epoch: string;
@@ -71,8 +73,8 @@ function EpochOverviewCard({ epoch }: OverviewProps) {
         return <LoadingCard message="Loading epoch" />;
     }
 
-    const firstSlot = epochSchedule.getFirstSlotInEpoch(epoch);
-    const lastSlot = epochSchedule.getLastSlotInEpoch(epoch);
+    const firstSlot = getFirstSlotInEpoch(epochSchedule, BigInt(epoch));
+    const lastSlot = getLastSlotInEpoch(epochSchedule, BigInt(epoch));
 
     return (
         <>
@@ -108,13 +110,13 @@ function EpochOverviewCard({ epoch }: OverviewProps) {
                     <tr>
                         <td className="w-100">First Slot</td>
                         <td className="text-lg-end font-monospace">
-                            <Slot slot={firstSlot} />
+                            <Slot slot={Number(firstSlot)} />
                         </td>
                     </tr>
                     <tr>
                         <td className="w-100">Last Slot</td>
                         <td className="text-lg-end font-monospace">
-                            <Slot slot={lastSlot} />
+                            <Slot slot={Number(lastSlot)} />
                         </td>
                     </tr>
                     {epochState.data.firstTimestamp && (
