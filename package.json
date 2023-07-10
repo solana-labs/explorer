@@ -57,7 +57,7 @@
         "typescript": "5.0.4",
         "use-async-effect": "^2.2.7",
         "use-tab-visibility": "^1.0.9",
-        "web3js-experimental": "npm:@solana/web3.js@2.0.0-experimental.b79b56f"
+        "web3js-experimental": "npm:@solana/web3.js@2.0.0-experimental.9232d2b"
     },
     "devDependencies": {
         "@solana/eslint-config-solana": "^1.0.1",
