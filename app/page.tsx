@@ -10,13 +10,14 @@ import { LiveTransactionStatsCard } from '@components/LiveTransactionStatsCard';
 import { StatsNotReady } from '@components/StatsNotReady';
 import { useVoteAccounts } from '@providers/accounts/vote-accounts';
 import { useCluster } from '@providers/cluster';
+import { StatsProvider } from '@providers/stats';
 import {
     ClusterStatsStatus,
     useDashboardInfo,
     usePerformanceInfo,
     useStatsProvider,
 } from '@providers/stats/solanaClusterStats';
-import { Status, useFetchSupply, useSupply } from '@providers/supply';
+import { Status, SupplyProvider, useFetchSupply, useSupply } from '@providers/supply';
 import { ClusterStatus } from '@utils/cluster';
 import { abbreviatedNumber, lamportsToSol, slotsToHumanString } from '@utils/index';
 import { percentage } from '@utils/math';
@@ -24,20 +25,24 @@ import React from 'react';
 
 export default function Page() {
     return (
-        <div className="container mt-4">
-            <StakingComponent />
-            <div className="card">
-                <div className="card-header">
-                    <div className="row align-items-center">
-                        <div className="col">
-                            <h4 className="card-header-title">Live Cluster Stats</h4>
+        <StatsProvider>
+            <SupplyProvider>
+                <div className="container mt-4">
+                    <StakingComponent />
+                    <div className="card">
+                        <div className="card-header">
+                            <div className="row align-items-center">
+                                <div className="col">
+                                    <h4 className="card-header-title">Live Cluster Stats</h4>
+                                </div>
+                            </div>
                         </div>
+                        <StatsCardBody />
                     </div>
+                    <LiveTransactionStatsCard />
                 </div>
-                <StatsCardBody />
-            </div>
-            <LiveTransactionStatsCard />
-        </div>
+            </SupplyProvider>
+        </StatsProvider>
     );
 }
 

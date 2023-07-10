@@ -6,22 +6,18 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Slot } from '@components/common/Slot';
 import { TableCardBody } from '@components/common/TableCardBody';
-import { FetchStatus, useBlock, useFetchBlock } from '@providers/block';
+import { BlockProvider, FetchStatus, useBlock, useFetchBlock } from '@providers/block';
 import { useCluster } from '@providers/cluster';
 import { ClusterStatus } from '@utils/cluster';
 import { displayTimestamp, displayTimestampUtc } from '@utils/date';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 import { notFound, useSelectedLayoutSegment } from 'next/navigation';
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 
-export default function BlockLayout({
-    children,
-    params: { slot },
-}: {
-    children: React.ReactNode;
-    params: { slot: string };
-}) {
+type Props = PropsWithChildren<{ params: { slot: string } }>;
+
+function BlockLayoutInner({ children, params: { slot } }: Props) {
     const slotNumber = Number(slot);
     if (isNaN(slotNumber) || slotNumber >= Number.MAX_SAFE_INTEGER || slotNumber % 1 !== 0) {
         notFound();
@@ -176,6 +172,14 @@ export default function BlockLayout({
             {content}
         </div>
     );
+}
+
+export default function BlockLayout({ children, params }: Props) {
+    return (
+        <BlockProvider>
+            <BlockLayoutInner params={params}>{children}</BlockLayoutInner>
+        </BlockProvider>
+    )
 }
 
 const TABS: Tab[] = [
