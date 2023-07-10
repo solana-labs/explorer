@@ -1,16 +1,25 @@
 'use client';
 
-import { Connection, EpochInfo, EpochSchedule } from '@solana/web3.js';
+import { Connection, EpochSchedule } from '@solana/web3.js';
 import { Cluster, clusterName, ClusterStatus, clusterUrl, DEFAULT_CLUSTER } from '@utils/cluster';
 import { localStorageIsAvailable } from '@utils/index';
 import { reportError } from '@utils/sentry';
 import { ReadonlyURLSearchParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { createContext, useContext, useEffect, useReducer, useState } from 'react';
+import { createDefaultRpcTransport, createSolanaRpc } from 'web3js-experimental';
 
 type Action = State;
 
+interface EpochInfo {
+    absoluteSlot: bigint;
+    blockHeight: bigint;
+    epoch: bigint;
+    slotIndex: bigint;
+    slotsInEpoch: bigint;
+}
+
 interface ClusterInfo {
-    firstAvailableBlock: number;
+    firstAvailableBlock: bigint;
     epochSchedule: EpochSchedule;
     epochInfo: EpochInfo;
 }
@@ -115,11 +124,15 @@ async function updateCluster(dispatch: Dispatch, cluster: Cluster, customUrl: st
         // validate url
         new URL(customUrl);
 
+        const transportUrl = clusterUrl(cluster, customUrl);
+        const transport = createDefaultRpcTransport({ url: transportUrl })
+        const rpc = createSolanaRpc({ transport })
+
         const connection = new Connection(clusterUrl(cluster, customUrl));
         const [firstAvailableBlock, epochSchedule, epochInfo] = await Promise.all([
-            connection.getFirstAvailableBlock(),
+            rpc.getFirstAvailableBlock().send(),
             connection.getEpochSchedule(),
-            connection.getEpochInfo(),
+            rpc.getEpochInfo().send(),
         ]);
 
         dispatch({
@@ -127,7 +140,7 @@ async function updateCluster(dispatch: Dispatch, cluster: Cluster, customUrl: st
             clusterInfo: {
                 epochInfo,
                 epochSchedule,
-                firstAvailableBlock,
+                firstAvailableBlock: firstAvailableBlock as bigint, // todo why am I getting unknown here?
             },
             customUrl,
             status: ClusterStatus.Connected,

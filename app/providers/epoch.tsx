@@ -63,7 +63,7 @@ export async function fetchEpoch(
     url: string,
     cluster: Cluster,
     epochSchedule: EpochSchedule,
-    currentEpoch: number,
+    currentEpoch: bigint,
     epoch: number
 ) {
     dispatch({
@@ -133,7 +133,7 @@ export function useFetchEpoch() {
 
     const { cluster, url } = useCluster();
     return React.useCallback(
-        (key: number, currentEpoch: number, epochSchedule: EpochSchedule) =>
+        (key: number, currentEpoch: bigint, epochSchedule: EpochSchedule) =>
             fetchEpoch(dispatch, url, cluster, epochSchedule, currentEpoch, key),
         [dispatch, cluster, url]
     );

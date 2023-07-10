@@ -1,5 +1,3 @@
-import { clusterApiUrl } from '@solana/web3.js';
-
 export enum ClusterStatus {
     Connected,
     Connecting,
@@ -41,26 +39,18 @@ export function clusterName(cluster: Cluster): string {
     }
 }
 
-export const MAINNET_BETA_URL = clusterApiUrl('mainnet-beta');
-export const TESTNET_URL = clusterApiUrl('testnet');
-export const DEVNET_URL = clusterApiUrl('devnet');
+export const MAINNET_BETA_URL = 'https://explorer-api.mainnet-beta.solana.com';
+export const TESTNET_URL = 'https://explorer-api.testnet.solana.com';
+export const DEVNET_URL = 'https://explorer-api.devnet.solana.com';
 
 export function clusterUrl(cluster: Cluster, customUrl: string): string {
-    const modifyUrl = (url: string): string => {
-        if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-            return url;
-        } else {
-            return url.replace('api', 'explorer-api');
-        }
-    };
-
     switch (cluster) {
         case Cluster.Devnet:
-            return process.env.NEXT_PUBLIC_DEVNET_RPC_URL ?? modifyUrl(DEVNET_URL);
+            return process.env.NEXT_PUBLIC_DEVNET_RPC_URL ?? DEVNET_URL;
         case Cluster.MainnetBeta:
-            return process.env.NEXT_PUBLIC_MAINNET_RPC_URL ?? modifyUrl(MAINNET_BETA_URL);
+            return process.env.NEXT_PUBLIC_MAINNET_RPC_URL ?? MAINNET_BETA_URL;
         case Cluster.Testnet:
-            return process.env.NEXT_PUBLIC_TESTNET_RPC_URL ?? modifyUrl(TESTNET_URL);
+            return process.env.NEXT_PUBLIC_TESTNET_RPC_URL ?? TESTNET_URL;
         case Cluster.Custom:
             return customUrl;
     }
