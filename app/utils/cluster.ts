@@ -39,7 +39,7 @@ export function clusterName(cluster: Cluster): string {
     }
 }
 
-export const MAINNET_BETA_URL = 'https://explorer-api.mainnet-beta.solana.com';
+export const MAINNET_BETA_URL = 'https://api.mainnet-beta.solana.com';
 export const TESTNET_URL = 'https://explorer-api.testnet.solana.com';
 export const DEVNET_URL = 'https://explorer-api.devnet.solana.com';
 

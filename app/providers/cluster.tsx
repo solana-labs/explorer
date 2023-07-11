@@ -1,7 +1,7 @@
 'use client';
 
 import { Cluster, clusterName, ClusterStatus, clusterUrl, DEFAULT_CLUSTER } from '@utils/cluster';
-import { localStorageIsAvailable } from '@utils/index';
+import { localStorageIsAvailable } from '@utils/local-storage';
 import { reportError } from '@utils/sentry';
 import { ReadonlyURLSearchParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { createContext, useContext, useEffect, useReducer, useState } from 'react';
