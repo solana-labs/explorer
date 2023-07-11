@@ -16,10 +16,6 @@ export type SignatureProps = {
     signature: TransactionSignature;
 };
 
-export function assertUnreachable(_x: never): never {
-    throw new Error('Unreachable!');
-}
-
 export function normalizeTokenAmount(raw: string | number, decimals: number): number {
     let rawTokens: number;
     if (typeof raw === 'string') rawTokens = parseInt(raw);
