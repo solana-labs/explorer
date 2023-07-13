@@ -1,7 +1,7 @@
 'use client';
 
 import { useCluster } from '@providers/cluster';
-import { useTokenRegistry } from '@providers/mints/token-registry';
+import { useTokenRegistry } from '@providers/token-registry';
 import { TokenInfoMap } from '@solana/spl-token-registry';
 import { Connection } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';

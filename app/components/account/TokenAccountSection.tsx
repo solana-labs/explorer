@@ -5,7 +5,7 @@ import { TableCardBody } from '@components/common/TableCardBody';
 import { Account, NFTData, TokenProgramData, useFetchAccountInfo } from '@providers/accounts';
 import isMetaplexNFT from '@providers/accounts/utils/isMetaplexNFT';
 import { useCluster } from '@providers/cluster';
-import { useTokenRegistry } from '@providers/mints/token-registry';
+import { useTokenRegistry } from '@providers/token-registry';
 import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { CoingeckoStatus, useCoinGecko } from '@utils/coingecko';

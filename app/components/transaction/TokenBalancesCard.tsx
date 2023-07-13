@@ -1,6 +1,6 @@
 import { Address } from '@components/common/Address';
 import { BalanceDelta } from '@components/common/BalanceDelta';
-import { useTokenRegistry } from '@providers/mints/token-registry';
+import { useTokenRegistry } from '@providers/token-registry';
 import { useTransactionDetails } from '@providers/transactions';
 import { ParsedMessageAccount, PublicKey, TokenAmount, TokenBalance } from '@solana/web3.js';
 import { SignatureProps } from '@utils/index';

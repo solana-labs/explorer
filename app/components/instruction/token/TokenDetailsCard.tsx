@@ -1,6 +1,6 @@
 import { Address } from '@components/common/Address';
 import { useFetchAccountInfo, useMintAccountInfo, useTokenAccountInfo } from '@providers/accounts';
-import { useTokenRegistry } from '@providers/mints/token-registry';
+import { useTokenRegistry } from '@providers/token-registry';
 import { ParsedInstruction, ParsedTransaction, PublicKey, SignatureResult } from '@solana/web3.js';
 import { normalizeTokenAmount } from '@utils/index';
 import { ParsedInfo } from '@validators/index';

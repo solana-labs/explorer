@@ -16,7 +16,7 @@ import { useAccountHistories, useFetchAccountHistory } from '@providers/accounts
 import { TOKEN_PROGRAM_ID, TokenInfoWithPubkey, useAccountOwnedTokens } from '@providers/accounts/tokens';
 import { CacheEntry, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
-import { useTokenRegistry } from '@providers/mints/token-registry';
+import { useTokenRegistry } from '@providers/token-registry';
 import { Details, useFetchTransactionDetails, useTransactionDetailsCache } from '@providers/transactions/parsed';
 import { TokenInfoMap } from '@solana/spl-token-registry';
 import { ConfirmedSignatureInfo, ParsedInstruction, PartiallyDecodedInstruction, PublicKey } from '@solana/web3.js';

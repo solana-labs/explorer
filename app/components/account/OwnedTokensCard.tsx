@@ -6,7 +6,7 @@ import { Identicon } from '@components/common/Identicon';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { TokenInfoWithPubkey, useAccountOwnedTokens, useFetchAccountOwnedTokens } from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
-import { useTokenRegistry } from '@providers/mints/token-registry';
+import { useTokenRegistry } from '@providers/token-registry';
 import { PublicKey } from '@solana/web3.js';
 import { BigNumber } from 'bignumber.js';
 import Image from 'next/image';
