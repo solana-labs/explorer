@@ -110,13 +110,13 @@ function EpochOverviewCard({ epoch }: OverviewProps) {
                     <tr>
                         <td className="w-100">First Slot</td>
                         <td className="text-lg-end font-monospace">
-                            <Slot slot={Number(firstSlot)} />
+                            <Slot slot={firstSlot} />
                         </td>
                     </tr>
                     <tr>
                         <td className="w-100">Last Slot</td>
                         <td className="text-lg-end font-monospace">
-                            <Slot slot={Number(lastSlot)} />
+                            <Slot slot={lastSlot} />
                         </td>
                     </tr>
                     {epochState.data.firstTimestamp && (

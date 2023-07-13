@@ -165,14 +165,14 @@ function StatsCardBody() {
             <tr>
                 <td className="w-100">Slot</td>
                 <td className="text-lg-end font-monospace">
-                    <Slot slot={Number(absoluteSlot)} link />
+                    <Slot slot={absoluteSlot} link />
                 </td>
             </tr>
             {blockHeight !== undefined && (
                 <tr>
                     <td className="w-100">Block height</td>
                     <td className="text-lg-end font-monospace">
-                        <Slot slot={Number(blockHeight)} />
+                        <Slot slot={blockHeight} />
                     </td>
                 </tr>
             )}
