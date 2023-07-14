@@ -40,17 +40,25 @@ export function clusterName(cluster: Cluster): string {
 }
 
 export const MAINNET_BETA_URL = 'https://api.mainnet-beta.solana.com';
-export const TESTNET_URL = 'https://explorer-api.testnet.solana.com';
-export const DEVNET_URL = 'https://explorer-api.devnet.solana.com';
+export const TESTNET_URL = 'https://api.testnet.solana.com';
+export const DEVNET_URL = 'https://api.devnet.solana.com';
 
 export function clusterUrl(cluster: Cluster, customUrl: string): string {
+    const modifyUrl = (url: string): string => {
+        if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+            return url;
+        } else {
+            return url.replace('api', 'explorer-api');
+        }
+    };
+
     switch (cluster) {
         case Cluster.Devnet:
-            return process.env.NEXT_PUBLIC_DEVNET_RPC_URL ?? DEVNET_URL;
+            return process.env.NEXT_PUBLIC_DEVNET_RPC_URL ?? modifyUrl(DEVNET_URL);
         case Cluster.MainnetBeta:
-            return process.env.NEXT_PUBLIC_MAINNET_RPC_URL ?? MAINNET_BETA_URL;
+            return process.env.NEXT_PUBLIC_MAINNET_RPC_URL ?? modifyUrl(MAINNET_BETA_URL);
         case Cluster.Testnet:
-            return process.env.NEXT_PUBLIC_TESTNET_RPC_URL ?? TESTNET_URL;
+            return process.env.NEXT_PUBLIC_TESTNET_RPC_URL ?? modifyUrl(TESTNET_URL);
         case Cluster.Custom:
             return customUrl;
     }
