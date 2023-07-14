@@ -5,7 +5,7 @@ import React from 'react';
 import { Copyable } from './Copyable';
 
 type Props = {
-    slot: number;
+    slot: number | bigint;
     link?: boolean;
 };
 export function Slot({ slot, link }: Props) {

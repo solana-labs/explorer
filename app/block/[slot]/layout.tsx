@@ -15,6 +15,8 @@ import Link from 'next/link';
 import { notFound, useSelectedLayoutSegment } from 'next/navigation';
 import React, { PropsWithChildren } from 'react';
 
+import { getEpochForSlot } from '@/app/utils/epoch-schedule';
+
 type Props = PropsWithChildren<{ params: { slot: string } }>;
 
 function BlockLayoutInner({ children, params: { slot } }: Props) {
@@ -43,7 +45,7 @@ function BlockLayoutInner({ children, params: { slot } }: Props) {
         const { block, blockLeader, childSlot, childLeader, parentLeader } = confirmedBlock.data;
         const showSuccessfulCount = block.transactions.every(tx => tx.meta !== null);
         const successfulTxs = block.transactions.filter(tx => tx.meta?.err === null);
-        const epoch = clusterInfo?.epochSchedule.getEpoch(slotNumber);
+        const epoch = clusterInfo ? getEpochForSlot(clusterInfo.epochSchedule, BigInt(slotNumber)) : undefined;
 
         content = (
             <>

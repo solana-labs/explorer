@@ -1,4 +1,4 @@
-import { localStorageIsAvailable } from '@utils/index';
+import { localStorageIsAvailable } from '@utils/local-storage';
 import { ChangeEvent } from 'react';
 
 export default function ClusterModalDeveloperSettings() {

@@ -1,16 +1,26 @@
 'use client';
 
-import { Connection, EpochInfo, EpochSchedule } from '@solana/web3.js';
 import { Cluster, clusterName, ClusterStatus, clusterUrl, DEFAULT_CLUSTER } from '@utils/cluster';
-import { localStorageIsAvailable } from '@utils/index';
+import { localStorageIsAvailable } from '@utils/local-storage';
 import { reportError } from '@utils/sentry';
 import { ReadonlyURLSearchParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { createContext, useContext, useEffect, useReducer, useState } from 'react';
+import { createDefaultRpcTransport, createSolanaRpc } from 'web3js-experimental';
+
+import { EpochSchedule } from '../utils/epoch-schedule';
 
 type Action = State;
 
+interface EpochInfo {
+    absoluteSlot: bigint;
+    blockHeight: bigint;
+    epoch: bigint;
+    slotIndex: bigint;
+    slotsInEpoch: bigint;
+}
+
 interface ClusterInfo {
-    firstAvailableBlock: number;
+    firstAvailableBlock: bigint;
     epochSchedule: EpochSchedule;
     epochInfo: EpochInfo;
 }
@@ -115,19 +125,24 @@ async function updateCluster(dispatch: Dispatch, cluster: Cluster, customUrl: st
         // validate url
         new URL(customUrl);
 
-        const connection = new Connection(clusterUrl(cluster, customUrl));
+        const transportUrl = clusterUrl(cluster, customUrl);
+        const transport = createDefaultRpcTransport({ url: transportUrl })
+        const rpc = createSolanaRpc({ transport })
+
         const [firstAvailableBlock, epochSchedule, epochInfo] = await Promise.all([
-            connection.getFirstAvailableBlock(),
-            connection.getEpochSchedule(),
-            connection.getEpochInfo(),
+            rpc.getFirstAvailableBlock().send(),
+            rpc.getEpochSchedule().send(),
+            rpc.getEpochInfo().send(),
         ]);
 
         dispatch({
             cluster,
             clusterInfo: {
                 epochInfo,
-                epochSchedule,
-                firstAvailableBlock,
+                // These are incorrectly typed as unknown
+                // See https://github.com/solana-labs/solana-web3.js/issues/1389
+                epochSchedule: epochSchedule as EpochSchedule,
+                firstAvailableBlock: firstAvailableBlock as bigint,
             },
             customUrl,
             status: ClusterStatus.Connected,
