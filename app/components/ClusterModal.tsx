@@ -3,7 +3,6 @@
 import { useCluster, useClusterModal, useUpdateCustomUrl } from '@providers/cluster';
 import { useDebounceCallback } from '@react-hook/debounce';
 import { Cluster, clusterName, CLUSTERS, clusterSlug, ClusterStatus } from '@utils/cluster';
-import { assertUnreachable } from '@utils/index';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -80,6 +79,10 @@ function CustomClusterInput({ activeSuffix, active }: InputProps) {
             )}
         </>
     );
+}
+
+function assertUnreachable(_x: never): never {
+    throw new Error('Unreachable!');
 }
 
 function ClusterToggle() {
