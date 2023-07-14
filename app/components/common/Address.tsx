@@ -2,7 +2,7 @@
 
 import { Connection, programs } from '@metaplex/js';
 import { useCluster } from '@providers/cluster';
-import { useTokenRegistry } from '@providers/mints/token-registry';
+import { useTokenRegistry } from '@providers/token-registry';
 import { PublicKey } from '@solana/web3.js';
 import { displayAddress } from '@utils/tx';
 import { useClusterPath } from '@utils/url';
