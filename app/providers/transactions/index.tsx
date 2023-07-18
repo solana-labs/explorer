@@ -123,14 +123,6 @@ export async function fetchTransactionStatus(
     });
 }
 
-export function useTransactions() {
-    const context = React.useContext(StateContext);
-    if (!context) {
-        throw new Error(`useTransactions must be used within a TransactionsProvider`);
-    }
-    return context;
-}
-
 export function useTransactionStatus(
     signature: TransactionSignature | undefined
 ): Cache.CacheEntry<TransactionStatus> | undefined {
