@@ -4,7 +4,6 @@ import { useCluster } from '@providers/cluster';
 import { useTokenRegistry } from '@providers/token-registry';
 import { TokenInfoMap } from '@solana/spl-token-registry';
 import { Cluster } from '@utils/cluster';
-import { LOADER_IDS, LoaderName, PROGRAM_INFO_BY_ID, SPECIAL_IDS, SYSVAR_IDS } from '@utils/tx';
 import bs58 from 'bs58';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useId } from 'react';
@@ -12,6 +11,7 @@ import { Search } from 'react-feather';
 import Select, { ActionMeta, InputActionMeta, ValueType } from 'react-select';
 
 import { FetchedDomainInfo } from '../api/domain-info/[domain]/route';
+import { LOADER_IDS, LoaderName, PROGRAM_INFO_BY_ID, SPECIAL_IDS, SYSVAR_IDS } from '../utils/programs';
 
 interface SearchOptions {
     label: string;
