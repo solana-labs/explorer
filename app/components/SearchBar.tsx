@@ -1,8 +1,6 @@
 'use client';
 
 import { useCluster } from '@providers/cluster';
-import { useTokenRegistry } from '@providers/token-registry';
-import { TokenInfoMap } from '@solana/spl-token-registry';
 import { Cluster } from '@utils/cluster';
 import bs58 from 'bs58';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -12,6 +10,7 @@ import Select, { ActionMeta, InputActionMeta, ValueType } from 'react-select';
 
 import { FetchedDomainInfo } from '../api/domain-info/[domain]/route';
 import { LOADER_IDS, LoaderName, PROGRAM_INFO_BY_ID, SPECIAL_IDS, SYSVAR_IDS } from '../utils/programs';
+import { searchTokens } from '../utils/token-search';
 
 interface SearchOptions {
     label: string;
@@ -34,7 +33,6 @@ export function SearchBar() {
     const [loadingSearchMessage, setLoadingSearchMessage] = React.useState<string>('loading...');
     const selectRef = React.useRef<Select<any> | null>(null);
     const router = useRouter();
-    const { tokenRegistry } = useTokenRegistry();
     const { cluster, clusterInfo } = useCluster();
     const searchParams = useSearchParams();
     const onChange = ({ pathname }: ValueType<any, false>, meta: ActionMeta<any>) => {
@@ -57,9 +55,16 @@ export function SearchBar() {
         setLoadingSearch(true);
 
         // builds and sets local search output
-        const options = buildOptions(search, cluster, tokenRegistry, clusterInfo?.epochInfo.epoch);
-
+        const options = buildOptions(search, cluster, clusterInfo?.epochInfo.epoch);
         setSearchOptions(options);
+
+        if (search.length > 0) {
+            buildTokenOptions(search, cluster).then(tokenOptions => {
+                if (tokenOptions) {
+                    setSearchOptions(options => [...options, tokenOptions])
+                }
+            })
+        }
 
         // checking for non local search output
         if (hasDomainSyntax(search) && cluster === Cluster.MainnetBeta) {
@@ -194,24 +199,13 @@ function buildSpecialOptions(search: string) {
     }
 }
 
-function buildTokenOptions(search: string, cluster: Cluster, tokenRegistry: TokenInfoMap) {
-    const matchedTokens = Array.from(tokenRegistry.entries()).filter(([address, details]) => {
-        const searchLower = search.toLowerCase();
-        return (
-            details.name.toLowerCase().includes(searchLower) ||
-            details.symbol.toLowerCase().includes(searchLower) ||
-            address.includes(search)
-        );
-    });
+async function buildTokenOptions(search: string, cluster: Cluster): Promise<SearchOptions | undefined> {
+    const matchedTokens = await searchTokens(search, cluster);
 
     if (matchedTokens.length > 0) {
         return {
             label: 'Tokens',
-            options: matchedTokens.slice(0, 10).map(([id, details]) => ({
-                label: details.name,
-                pathname: '/address/' + id,
-                value: [details.name, details.symbol, id],
-            })),
+            options: matchedTokens
         };
     }
 }
@@ -246,7 +240,7 @@ async function buildDomainOptions(search: string, options: SearchOptions[]) {
 }
 
 // builds local search options
-function buildOptions(rawSearch: string, cluster: Cluster, tokenRegistry: TokenInfoMap, currentEpoch?: bigint) {
+function buildOptions(rawSearch: string, cluster: Cluster, currentEpoch?: bigint) {
     const search = rawSearch.trim();
     if (search.length === 0) return [];
 
@@ -270,11 +264,6 @@ function buildOptions(rawSearch: string, cluster: Cluster, tokenRegistry: TokenI
     const specialOptions = buildSpecialOptions(search);
     if (specialOptions) {
         options.push(specialOptions);
-    }
-
-    const tokenOptions = buildTokenOptions(search, cluster, tokenRegistry);
-    if (tokenOptions) {
-        options.push(tokenOptions);
     }
 
     if (!isNaN(Number(search))) {
