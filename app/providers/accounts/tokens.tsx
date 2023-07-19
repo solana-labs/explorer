@@ -1,5 +1,6 @@
 'use client';
 
+import { getTokenInfos } from '@/app/utils/token-info';
 import * as Cache from '@providers/cache';
 import { ActionType, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
@@ -13,6 +14,8 @@ import { create } from 'superstruct';
 export type TokenInfoWithPubkey = {
     info: TokenAccountInfo;
     pubkey: PublicKey;
+    logoURI?: string;
+    symbol?: string;
 };
 
 interface AccountTokens {
@@ -58,12 +61,31 @@ async function fetchAccountTokens(dispatch: Dispatch, pubkey: PublicKey, cluster
         const { value } = await new Connection(url, 'processed').getParsedTokenAccountsByOwner(pubkey, {
             programId: TOKEN_PROGRAM_ID,
         });
+
+        const tokens: TokenInfoWithPubkey[] = value.slice(0, 101).map(accountInfo => {
+            const parsedInfo = accountInfo.account.data.parsed.info;
+            const info = create(parsedInfo, TokenAccountInfo);
+            return { info, pubkey: accountInfo.pubkey };
+        });
+
+        // Fetch symbols and logos for tokens
+        const tokenMintInfos = await getTokenInfos(tokens.map(t => t.info.mint), cluster, url);
+        if (tokenMintInfos) {
+            const mappedTokenInfos = Object.fromEntries(tokenMintInfos.map(t => [t.address, {
+                logoURI: t.logoURI,
+                symbol: t.symbol
+            }]))
+            tokens.forEach(t => {
+                const tokenInfo = mappedTokenInfos[t.info.mint.toString()]
+                if (tokenInfo) {
+                    t.logoURI = tokenInfo.logoURI ?? undefined;
+                    t.symbol = tokenInfo.symbol;
+                }
+            })
+        }
+
         data = {
-            tokens: value.slice(0, 101).map(accountInfo => {
-                const parsedInfo = accountInfo.account.data.parsed.info;
-                const info = create(parsedInfo, TokenAccountInfo);
-                return { info, pubkey: accountInfo.pubkey };
-            }),
+            tokens
         };
         status = FetchStatus.Fetched;
     } catch (error) {

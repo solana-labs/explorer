@@ -32,3 +32,14 @@ export async function getTokenInfo(
     const token = await client.fetchMint(new PublicKey(address));
     return token;
 }
+
+export async function getTokenInfos(
+    addresses: PublicKey[],
+    cluster: Cluster,
+    connectionString: string
+): Promise<Token[] | undefined> {
+    const client = makeUtlClient(cluster, connectionString);
+    if (!client) return Promise.resolve(undefined);
+    const tokens = await client.fetchMints(addresses);
+    return tokens;
+}
