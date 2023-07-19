@@ -32,15 +32,18 @@ import isMetaplexNFT from '@providers/accounts/utils/isMetaplexNFT';
 import { useAnchorProgram } from '@providers/anchor';
 import { CacheEntry, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
-import { useTokenRegistry } from '@providers/token-registry';
 import { PROGRAM_ID as ACCOUNT_COMPRESSION_ID } from '@solana/spl-account-compression';
 import { PublicKey } from '@solana/web3.js';
+import { Token } from '@solflare-wallet/utl-sdk';
 import { ClusterStatus } from '@utils/cluster';
 import { FEATURE_PROGRAM_ID } from '@utils/parseFeatureAccount';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 import { redirect, useSelectedLayoutSegment } from 'next/navigation';
-import React, { PropsWithChildren } from 'react';
+import React, { PropsWithChildren, useEffect, useState } from 'react';
+import { assertIsBase58EncodedAddress } from 'web3js-experimental';
+
+import { getTokenInfo } from '@/app/utils/token-info';
 
 const IDENTICON_WIDTH = 64;
 
@@ -189,11 +192,24 @@ export default function AddressLayout({ children, params }: Props) {
 }
 
 function AccountHeader({ address, account }: { address: string; account?: Account }) {
-    const { tokenRegistry } = useTokenRegistry();
-    const tokenDetails = tokenRegistry.get(address);
+    const [tokenDetails, setTokenDetails] = useState<Token | undefined>(undefined);
     const mintInfo = useMintAccountInfo(address);
+    const { cluster, url } = useCluster()
+
     const parsedData = account?.data.parsed;
     const isToken = parsedData?.program === 'spl-token' && parsedData?.parsed.type === 'mint';
+
+    useEffect(() => {
+        if (!isToken) return;
+
+        assertIsBase58EncodedAddress(address);
+        let isSubscribed = true;
+        getTokenInfo(address, cluster, url).then(token => {
+            if (isSubscribed) setTokenDetails(token)
+        })
+
+        return () => { isSubscribed = false };
+    }, [cluster, url, isToken]);
 
     if (isMetaplexNFT(parsedData, mintInfo) && parsedData.nftData) {
         return <MetaplexNFTHeader nftData={parsedData.nftData} address={address} />;
