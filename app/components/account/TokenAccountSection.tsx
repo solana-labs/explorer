@@ -5,20 +5,21 @@ import { TableCardBody } from '@components/common/TableCardBody';
 import { Account, NFTData, TokenProgramData, useFetchAccountInfo } from '@providers/accounts';
 import isMetaplexNFT from '@providers/accounts/utils/isMetaplexNFT';
 import { useCluster } from '@providers/cluster';
-import { useTokenRegistry } from '@providers/token-registry';
 import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { CoingeckoStatus, useCoinGecko } from '@utils/coingecko';
 import { displayTimestampWithoutDate } from '@utils/date';
 import { abbreviatedNumber, normalizeTokenAmount } from '@utils/index';
 import { reportError } from '@utils/sentry';
-import { addressLabel } from '@utils/tx';
+import { addressLabel_ } from '@utils/tx';
 import { MintAccountInfo, MultisigAccountInfo, TokenAccount, TokenAccountInfo } from '@validators/accounts/token';
 import { BigNumber } from 'bignumber.js';
+import { useEffect, useState } from 'react';
 import { ExternalLink, RefreshCw } from 'react-feather';
 import { create } from 'superstruct';
+import useSWR from 'swr';
 
-import { FullLegacyTokenInfo } from '@/app/utils/token-info';
+import { FullLegacyTokenInfo, getTokenInfo } from '@/app/utils/token-info';
 
 import { UnknownAccountCard } from './UnknownAccountCard';
 
@@ -343,22 +344,25 @@ function NonFungibleTokenMintAccountCard({
 
 function TokenAccountCard({ account, info }: { account: Account; info: TokenAccountInfo }) {
     const refresh = useFetchAccountInfo();
-    const { cluster } = useCluster();
-    const { tokenRegistry } = useTokenRegistry();
-    const label = addressLabel(account.pubkey.toBase58(), cluster, tokenRegistry);
+    const { cluster, url } = useCluster();
+    const label = addressLabel_(account.pubkey.toBase58(), cluster);
+    const swrKey = ['get-token-info', info.mint.toString()];
+    const { data: tokenInfo } = useSWR(swrKey, () => getTokenInfo(info.mint, cluster, url))
+    const [symbol, setSymbol] = useState<string | undefined>(undefined);
 
-    let unit, balance;
-    if (info.isNative) {
-        unit = 'SOL';
-        balance = (
-            <>
-                ◎<span className="font-monospace">{new BigNumber(info.tokenAmount.uiAmountString).toFormat(9)}</span>
-            </>
-        );
-    } else {
-        balance = <>{info.tokenAmount.uiAmountString}</>;
-        unit = tokenRegistry.get(info.mint.toBase58())?.symbol || 'tokens';
-    }
+    const balance = info.isNative ? (
+        <>
+            ◎<span className="font-monospace">{new BigNumber(info.tokenAmount.uiAmountString).toFormat(9)}</span>
+        </>
+    ) : <>{info.tokenAmount.uiAmountString}</>;
+
+    useEffect(() => {
+        if (info.isNative) {
+            setSymbol('SOL');
+        } else {
+            setSymbol(tokenInfo?.symbol)
+        }
+    }, [tokenInfo])
 
     return (
         <div className="card">
@@ -396,7 +400,7 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
                     </td>
                 </tr>
                 <tr>
-                    <td>Token balance ({unit})</td>
+                    <td>Token balance {typeof symbol === 'string' && `(${symbol})`}</td>
                     <td className="text-lg-end">{balance}</td>
                 </tr>
                 {info.state === 'uninitialized' && (

@@ -47,6 +47,16 @@ export function addressLabel(address: string, cluster: Cluster, tokenRegistry?: 
     );
 }
 
+export function addressLabel_(address: string, cluster: Cluster, tokenName?: string): string | undefined {
+    return (
+        programLabel(address, cluster) ||
+        SYSVAR_IDS[address] ||
+        SPECIAL_IDS[address] ||
+        tokenName ||
+        SerumMarketRegistry.get(address, cluster)
+    );
+}
+
 export function displayAddress(address: string, cluster: Cluster, tokenRegistry: TokenInfoMap): string {
     return addressLabel(address, cluster, tokenRegistry) || address;
 }
