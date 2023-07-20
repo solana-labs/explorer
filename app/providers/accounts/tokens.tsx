@@ -1,6 +1,5 @@
 'use client';
 
-import { getTokenInfos } from '@/app/utils/token-info';
 import * as Cache from '@providers/cache';
 import { ActionType, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
@@ -10,6 +9,8 @@ import { reportError } from '@utils/sentry';
 import { TokenAccountInfo } from '@validators/accounts/token';
 import React from 'react';
 import { create } from 'superstruct';
+
+import { getTokenInfos } from '@/app/utils/token-info';
 
 export type TokenInfoWithPubkey = {
     info: TokenAccountInfo;

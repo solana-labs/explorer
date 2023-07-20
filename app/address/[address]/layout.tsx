@@ -34,16 +34,14 @@ import { CacheEntry, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { PROGRAM_ID as ACCOUNT_COMPRESSION_ID } from '@solana/spl-account-compression';
 import { PublicKey } from '@solana/web3.js';
-import { Token } from '@solflare-wallet/utl-sdk';
 import { ClusterStatus } from '@utils/cluster';
 import { FEATURE_PROGRAM_ID } from '@utils/parseFeatureAccount';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 import { redirect, useSelectedLayoutSegment } from 'next/navigation';
-import React, { PropsWithChildren, useEffect, useState } from 'react';
-import { assertIsBase58EncodedAddress } from 'web3js-experimental';
+import React, { PropsWithChildren, useState } from 'react';
 
-import { getTokenInfo } from '@/app/utils/token-info';
+import { FullLegacyTokenInfo, getFullLegacyTokenInfoUsingCdn } from '@/app/utils/token-info';
 
 const IDENTICON_WIDTH = 64;
 
@@ -148,8 +146,10 @@ type Props = PropsWithChildren<{ params: { address: string } }>;
 
 function AddressLayoutInner({ children, params: { address } }: Props) {
     const fetchAccount = useFetchAccountInfo();
-    const { status } = useCluster();
+    const { status, cluster, url } = useCluster();
     const info = useAccountInfo(address);
+    const [fullLegacyTokenInfo, setFullLegacyTokenInfo] = useState<FullLegacyTokenInfo | undefined>(undefined);
+
     let pubkey: PublicKey | undefined;
 
     try {
@@ -165,17 +165,34 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
         }
     }, [address, status]); // eslint-disable-line react-hooks/exhaustive-deps
 
+    const infoStatus = info?.status;
+    const infoProgram = info?.data?.data.parsed?.program;
+
+    React.useEffect(() => {
+        let isSubscribed = true;
+
+        if (infoStatus === FetchStatus.Fetched && infoProgram === "spl-token" && pubkey) {
+            getFullLegacyTokenInfoUsingCdn(pubkey, cluster, url).then(tokenInfo => {
+                if (isSubscribed) {
+                    setFullLegacyTokenInfo(tokenInfo)
+                }
+            })
+        }
+
+        return () => { isSubscribed = false; }
+    }, [infoStatus, infoProgram, pubkey?.toString(), cluster, url])
+
     return (
         <div className="container mt-n3">
             <div className="header">
                 <div className="header-body">
-                    <AccountHeader address={address} account={info?.data} />
+                    <AccountHeader address={address} account={info?.data} tokenInfo={fullLegacyTokenInfo} />
                 </div>
             </div>
             {!pubkey ? (
                 <ErrorCard text={`Address "${address}" is not valid`} />
             ) : (
-                <DetailsSections info={info} pubkey={pubkey}>
+                <DetailsSections info={info} pubkey={pubkey} tokenInfo={fullLegacyTokenInfo}>
                     {children}
                 </DetailsSections>
             )}
@@ -191,25 +208,11 @@ export default function AddressLayout({ children, params }: Props) {
     );
 }
 
-function AccountHeader({ address, account }: { address: string; account?: Account }) {
-    const [tokenDetails, setTokenDetails] = useState<Token | undefined>(undefined);
+function AccountHeader({ address, account, tokenInfo }: { address: string; account?: Account, tokenInfo?: FullLegacyTokenInfo }) {
     const mintInfo = useMintAccountInfo(address);
-    const { cluster, url } = useCluster()
 
     const parsedData = account?.data.parsed;
     const isToken = parsedData?.program === 'spl-token' && parsedData?.parsed.type === 'mint';
-
-    useEffect(() => {
-        if (!isToken) return;
-
-        assertIsBase58EncodedAddress(address);
-        let isSubscribed = true;
-        getTokenInfo(address, cluster, url).then(token => {
-            if (isSubscribed) setTokenDetails(token)
-        })
-
-        return () => { isSubscribed = false };
-    }, [cluster, url, isToken]);
 
     if (isMetaplexNFT(parsedData, mintInfo) && parsedData.nftData) {
         return <MetaplexNFTHeader nftData={parsedData.nftData} address={address} />;
@@ -225,16 +228,16 @@ function AccountHeader({ address, account }: { address: string; account?: Accoun
         let unverified = false;
 
         // Fall back to legacy token list when there is stub metadata (blank uri), updatable by default by the mint authority
-        if (!parsedData?.nftData?.metadata.data.uri && tokenDetails) {
-            token = tokenDetails;
+        if (!parsedData?.nftData?.metadata.data.uri && tokenInfo) {
+            token = tokenInfo;
         } else if (parsedData?.nftData) {
             token = {
                 logoURI: parsedData?.nftData?.json?.image,
                 name: parsedData?.nftData?.json?.name ?? parsedData?.nftData.metadata.data.name,
             };
             unverified = true;
-        } else if (tokenDetails) {
-            token = tokenDetails;
+        } else if (tokenInfo) {
+            token = tokenInfo;
         }
 
         return (
@@ -287,11 +290,13 @@ function DetailsSections({
     pubkey,
     tab,
     info,
+    tokenInfo,
 }: {
     children: React.ReactNode;
     pubkey: PublicKey;
     tab?: string;
     info?: CacheEntry<Account>;
+    tokenInfo?: FullLegacyTokenInfo;
 }) {
     const fetchAccount = useFetchAccountInfo();
     const address = pubkey.toBase58();
@@ -312,13 +317,13 @@ function DetailsSections({
     return (
         <>
             {FLAGGED_ACCOUNTS_WARNING[address] ?? null}
-            <InfoSection account={account} />
+            <InfoSection account={account} tokenInfo={tokenInfo} />
             <MoreSection tabs={tabComponents.map(({ component }) => component)}>{children}</MoreSection>
         </>
     );
 }
 
-function InfoSection({ account }: { account: Account }) {
+function InfoSection({ account, tokenInfo }: { account: Account, tokenInfo?: FullLegacyTokenInfo }) {
     const parsedData = account.data.parsed;
     const rawData = account.data.raw;
 
@@ -342,7 +347,7 @@ function InfoSection({ account }: { account: Account }) {
     } else if (account.owner.toBase58() === NFTOKEN_ADDRESS) {
         return <NFTokenAccountSection account={account} />;
     } else if (parsedData && parsedData.program === 'spl-token') {
-        return <TokenAccountSection account={account} tokenAccount={parsedData.parsed} />;
+        return <TokenAccountSection account={account} tokenAccount={parsedData.parsed} tokenInfo={tokenInfo} />;
     } else if (parsedData && parsedData.program === 'nonce') {
         return <NonceAccountSection account={account} nonceAccount={parsedData.parsed} />;
     } else if (parsedData && parsedData.program === 'vote') {
