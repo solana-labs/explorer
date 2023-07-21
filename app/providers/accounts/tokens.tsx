@@ -17,6 +17,7 @@ export type TokenInfoWithPubkey = {
     pubkey: PublicKey;
     logoURI?: string;
     symbol?: string;
+    name?: string;
 };
 
 interface AccountTokens {
@@ -74,6 +75,7 @@ async function fetchAccountTokens(dispatch: Dispatch, pubkey: PublicKey, cluster
         if (tokenMintInfos) {
             const mappedTokenInfos = Object.fromEntries(tokenMintInfos.map(t => [t.address, {
                 logoURI: t.logoURI,
+                name: t.name,
                 symbol: t.symbol
             }]))
             tokens.forEach(t => {
@@ -81,6 +83,7 @@ async function fetchAccountTokens(dispatch: Dispatch, pubkey: PublicKey, cluster
                 if (tokenInfo) {
                     t.logoURI = tokenInfo.logoURI ?? undefined;
                     t.symbol = tokenInfo.symbol;
+                    t.name = tokenInfo.name;
                 }
             })
         }
