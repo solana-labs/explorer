@@ -9,7 +9,6 @@ import { useAccountHistory } from '@providers/accounts';
 import { useFetchAccountHistory } from '@providers/accounts/history';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
-import { useTokenRegistry } from '@providers/token-registry';
 import { ParsedInstruction, ParsedTransactionWithMeta, PartiallyDecodedInstruction, PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { normalizeTokenAmount } from '@utils/index';
@@ -18,6 +17,9 @@ import { reportError } from '@utils/sentry';
 import React, { useMemo } from 'react';
 import Moment from 'react-moment';
 import { create } from 'superstruct';
+import useSWR from 'swr';
+
+import { getTokenInfo } from '@/app/utils/token-info';
 
 import { getTransactionRows, HistoryCardFooter, HistoryCardHeader } from '../HistoryCardComponents';
 import { extractMintDetails, MintDetails } from './common';
@@ -29,16 +31,14 @@ type IndexedTransfer = {
 };
 
 export function TokenTransfersCard({ address }: { address: string }) {
-    const { cluster } = useCluster();
+    const { cluster, url } = useCluster();
     const pubkey = useMemo(() => new PublicKey(address), [address]);
     const history = useAccountHistory(address);
     const fetchAccountHistory = useFetchAccountHistory();
     const refresh = () => fetchAccountHistory(pubkey, true, true);
     const loadMore = () => fetchAccountHistory(pubkey, true);
-
-    const { tokenRegistry } = useTokenRegistry();
-
-    const mintDetails = React.useMemo(() => tokenRegistry.get(address), [address, tokenRegistry]);
+    const swrKey = ['get-token-info', address];
+    const { data: tokenInfo, isLoading: tokenInfoLoading } = useSWR(swrKey, () => getTokenInfo(pubkey, cluster, url))
 
     const transactionRows = React.useMemo(() => {
         if (history?.data?.fetched) {
@@ -109,8 +109,14 @@ export function TokenTransfersCard({ address }: { address: string }) {
                 let units = 'Tokens';
                 let amountString = '';
 
-                if (mintDetails?.symbol) {
-                    units = mintDetails.symbol;
+                // Loading token info, just don't show units
+                if (tokenInfoLoading) {
+                    units = '';
+                }
+
+                // Loaded symbol, use it
+                if (tokenInfo?.symbol) {
+                    units = tokenInfo.symbol;
                 }
 
                 if ('tokenAmount' in transfer) {
@@ -118,8 +124,8 @@ export function TokenTransfersCard({ address }: { address: string }) {
                 } else {
                     let decimals = 0;
 
-                    if (mintDetails?.decimals) {
-                        decimals = mintDetails.decimals;
+                    if (tokenInfo?.decimals) {
+                        decimals = tokenInfo.decimals;
                     } else if (mintMap.has(transfer.source.toBase58())) {
                         decimals = mintMap.get(transfer.source.toBase58())?.decimals || 0;
                     } else if (mintMap.has(transfer.destination.toBase58())) {
@@ -166,7 +172,7 @@ export function TokenTransfersCard({ address }: { address: string }) {
             detailsList,
             hasTimestamps,
         };
-    }, [history, transactionRows, mintDetails, pubkey, address, cluster]);
+    }, [history, transactionRows, tokenInfo, pubkey, address, cluster]);
 
     if (!history) {
         return null;
