@@ -2,13 +2,14 @@
 
 import { Connection, programs } from '@metaplex/js';
 import { useCluster } from '@providers/cluster';
-import { useTokenRegistry } from '@providers/token-registry';
 import { PublicKey } from '@solana/web3.js';
-import { displayAddress } from '@utils/tx';
+import { displayAddress_, TokenLabelInfo } from '@utils/tx';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 import React from 'react';
 import { useEffect, useState } from 'react';
+
+import { getTokenInfo } from '@/app/utils/token-info';
 
 import { Copyable } from './Copyable';
 
@@ -22,6 +23,8 @@ type Props = {
     truncateChars?: number;
     useMetadata?: boolean;
     overrideText?: string;
+    tokenLabelInfo?: TokenLabelInfo;
+    fetchTokenLabelInfo?: boolean;
 };
 
 export function Address({
@@ -34,19 +37,30 @@ export function Address({
     truncateChars,
     useMetadata,
     overrideText,
+    tokenLabelInfo,
+    fetchTokenLabelInfo,
 }: Props) {
     const address = pubkey.toBase58();
-    const { tokenRegistry } = useTokenRegistry();
     const { cluster } = useCluster();
     const addressPath = useClusterPath({ pathname: `/address/${address}` });
-    if (truncateUnknown && address === displayAddress(address, cluster, tokenRegistry)) {
+
+    const display = displayAddress_(address, cluster, tokenLabelInfo);
+    if (truncateUnknown && address === display) {
         truncate = true;
     }
 
-    let addressLabel = raw ? address : displayAddress(address, cluster, tokenRegistry);
+    let addressLabel = raw ? address : display;
 
     const metaplexData = useTokenMetadata(useMetadata, address);
-    if (metaplexData && metaplexData.data) addressLabel = metaplexData.data.data.name;
+    if (metaplexData && metaplexData.data) {
+        addressLabel = metaplexData.data.data.name;
+    }
+
+    const tokenInfo = useTokenInfo(fetchTokenLabelInfo, address);
+    if (tokenInfo) {
+        addressLabel = displayAddress_(address, cluster, tokenInfo);
+    }
+
     if (truncateChars && addressLabel === address) {
         addressLabel = addressLabel.slice(0, truncateChars) + '…';
     }
@@ -78,7 +92,7 @@ export function Address({
         </>
     );
 }
-export const useTokenMetadata = (useMetadata: boolean | undefined, pubkey: string) => {
+const useTokenMetadata = (useMetadata: boolean | undefined, pubkey: string) => {
     const [data, setData] = useState<programs.metadata.MetadataData>();
     const { url } = useCluster();
 
@@ -102,4 +116,24 @@ export const useTokenMetadata = (useMetadata: boolean | undefined, pubkey: strin
         }
     }, [useMetadata, pubkey, url, data, setData]);
     return { data };
+};
+
+const useTokenInfo = (fetchTokenLabelInfo: boolean | undefined, pubkey: string) => {
+    const [info, setInfo] = useState<TokenLabelInfo>();
+    const { cluster, url } = useCluster();
+
+    useEffect(() => {
+        if (!fetchTokenLabelInfo) return;
+        if (!info) {
+            getTokenInfo(new PublicKey(pubkey), cluster, url)
+                .then(token => {
+                    setInfo(token);
+                })
+                .catch(() => {
+                    setInfo(undefined);
+                });
+        }
+    }, [fetchTokenLabelInfo, pubkey, cluster, url, info, setInfo]);
+
+    return info;
 };

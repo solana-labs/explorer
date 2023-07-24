@@ -455,7 +455,7 @@ const TokenTransactionRow = React.memo(function TokenTransactionRow({
                         </td>
 
                         <td className="forced-truncate">
-                            <Address pubkey={mint} link truncateUnknown />
+                            <Address pubkey={mint} link truncateUnknown fetchTokenLabelInfo />
                         </td>
 
                         <td>

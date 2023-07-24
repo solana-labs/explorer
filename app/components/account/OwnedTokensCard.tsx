@@ -111,7 +111,7 @@ function HoldingsDetailTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                     <Address pubkey={tokenAccount.pubkey} link truncate />
                 </td>
                 <td>
-                    <Address pubkey={tokenAccount.info.mint} link truncate />
+                    <Address pubkey={tokenAccount.info.mint} link truncate tokenLabelInfo={tokenAccount} />
                 </td>
                 <td>
                     {tokenAccount.info.tokenAmount.uiAmountString} {tokenAccount.symbol}
@@ -141,10 +141,11 @@ function HoldingsSummaryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
     type MappedToken = {
         amount: string,
         logoURI?: string,
-        symbol?: string
+        symbol?: string,
+        name?: string
     }
     const mappedTokens = new Map<string, MappedToken>();
-    for (const { info: token, logoURI, symbol } of tokens) {
+    for (const { info: token, logoURI, symbol, name } of tokens) {
         const mintAddress = token.mint.toBase58();
         const totalByMint = mappedTokens.get(mintAddress)?.amount;
 
@@ -156,7 +157,8 @@ function HoldingsSummaryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
         mappedTokens.set(mintAddress, {
             amount,
             logoURI,
-            symbol,
+            name,
+            symbol
         });
     }
 
@@ -186,7 +188,7 @@ function HoldingsSummaryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                     </td>
                 )}
                 <td>
-                    <Address pubkey={new PublicKey(mintAddress)} link useMetadata />
+                    <Address pubkey={new PublicKey(mintAddress)} link tokenLabelInfo={token} useMetadata />
                 </td>
                 <td>
                     {token.amount} {token.symbol}

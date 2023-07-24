@@ -390,7 +390,7 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
                 <tr>
                     <td>Mint</td>
                     <td className="text-lg-end">
-                        <Address pubkey={info.mint} alignRight link />
+                        <Address pubkey={info.mint} alignRight link tokenLabelInfo={tokenInfo} />
                     </td>
                 </tr>
                 <tr>

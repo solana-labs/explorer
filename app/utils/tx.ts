@@ -12,7 +12,7 @@ import bs58 from 'bs58';
 
 import { LOADER_IDS, PROGRAM_INFO_BY_ID, SPECIAL_IDS, SYSVAR_IDS } from './programs';
 
-type TokenLabelInfo = {
+export type TokenLabelInfo = {
     name?: string,
     symbol?: string,
 };
@@ -74,7 +74,7 @@ export function displayAddress(address: string, cluster: Cluster, tokenRegistry:
     return addressLabel(address, cluster, tokenRegistry) || address;
 }
 
-export function displayAddress_(address: string, cluster: Cluster, tokenInfo: TokenLabelInfo): string {
+export function displayAddress_(address: string, cluster: Cluster, tokenInfo?: TokenLabelInfo): string {
     return addressLabel_(address, cluster, tokenInfo) || address;
 }
 
