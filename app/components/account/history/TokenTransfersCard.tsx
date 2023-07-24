@@ -19,7 +19,7 @@ import Moment from 'react-moment';
 import { create } from 'superstruct';
 import useSWR from 'swr';
 
-import { getTokenInfo } from '@/app/utils/token-info';
+import { getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 
 import { getTransactionRows, HistoryCardFooter, HistoryCardHeader } from '../HistoryCardComponents';
 import { extractMintDetails, MintDetails } from './common';
@@ -37,7 +37,7 @@ export function TokenTransfersCard({ address }: { address: string }) {
     const fetchAccountHistory = useFetchAccountHistory();
     const refresh = () => fetchAccountHistory(pubkey, true, true);
     const loadMore = () => fetchAccountHistory(pubkey, true);
-    const swrKey = ['get-token-info', address];
+    const swrKey = getTokenInfoSwrKey(address);
     const { data: tokenInfo, isLoading: tokenInfoLoading } = useSWR(swrKey, () => getTokenInfo(pubkey, cluster, url))
 
     const transactionRows = React.useMemo(() => {

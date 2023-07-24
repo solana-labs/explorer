@@ -19,7 +19,7 @@ import { ExternalLink, RefreshCw } from 'react-feather';
 import { create } from 'superstruct';
 import useSWR from 'swr';
 
-import { FullLegacyTokenInfo, getTokenInfo } from '@/app/utils/token-info';
+import { FullLegacyTokenInfo, getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 
 import { UnknownAccountCard } from './UnknownAccountCard';
 
@@ -346,7 +346,7 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
     const refresh = useFetchAccountInfo();
     const { cluster, url } = useCluster();
     const label = addressLabel_(account.pubkey.toBase58(), cluster);
-    const swrKey = ['get-token-info', info.mint.toString()];
+    const swrKey = getTokenInfoSwrKey(info.mint.toString());
     const { data: tokenInfo } = useSWR(swrKey, () => getTokenInfo(info.mint, cluster, url))
     const [symbol, setSymbol] = useState<string | undefined>(undefined);
 

@@ -58,6 +58,10 @@ function makeUtlClient(
     return new Client(config);
 }
 
+export function getTokenInfoSwrKey(address: string) {
+    return ['get-token-info', address];
+}
+
 export async function getTokenInfo(
     address: PublicKey,
     cluster: Cluster,
