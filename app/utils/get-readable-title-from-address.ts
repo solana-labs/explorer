@@ -1,6 +1,7 @@
-import { Strategy } from '@solana/spl-token-registry';
-import { Cluster } from '@utils/cluster';
-import getTokenList from '@utils/get-token-list';
+import { PublicKey } from '@solana/web3.js';
+import { Cluster, clusterUrl } from '@utils/cluster';
+
+import { getTokenInfo } from './token-info';
 
 export type AddressPageMetadataProps = Readonly<{
     params: {
@@ -8,13 +9,14 @@ export type AddressPageMetadataProps = Readonly<{
     };
     searchParams: {
         cluster: string;
+        customUrl?: string;
     };
 }>;
 
 export default async function getReadableTitleFromAddress(props: AddressPageMetadataProps): Promise<string> {
     const {
         params: { address },
-        searchParams: { cluster: clusterParam },
+        searchParams: { cluster: clusterParam, customUrl },
     } = props;
 
     let cluster: Cluster;
@@ -33,8 +35,9 @@ export default async function getReadableTitleFromAddress(props: AddressPageMeta
     }
 
     try {
-        const tokenList = await getTokenList(cluster, Strategy.Solana);
-        const tokenName = tokenList.get(address)?.name;
+        const url = clusterUrl(cluster, customUrl ? decodeURI(customUrl) : '');
+        const tokenInfo = await getTokenInfo(new PublicKey(address), cluster, url);
+        const tokenName = tokenInfo?.name;
         if (tokenName == null) {
             return address;
         }
