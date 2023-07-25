@@ -22,7 +22,7 @@ import { Cluster } from '@utils/cluster';
 import { INNER_INSTRUCTIONS_START_SLOT } from '@utils/index';
 import { getTokenProgramInstructionName } from '@utils/instruction';
 import { reportError } from '@utils/sentry';
-import { displayAddress_, intoTransactionInstruction } from '@utils/tx';
+import { displayAddress, intoTransactionInstruction } from '@utils/tx';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import React, { useCallback } from 'react';
@@ -516,7 +516,7 @@ function InstructionDetails({ instructionType, tx }: { instructionType: Instruct
 }
 
 function formatTokenName(pubkey: string, cluster: Cluster, tokenInfo: TokenInfoWithPubkey): string {
-    let display = displayAddress_(pubkey, cluster, tokenInfo);
+    let display = displayAddress(pubkey, cluster, tokenInfo);
 
     if (display === pubkey) {
         display = display.slice(0, TRUNCATE_TOKEN_LENGTH) + '\u2026';

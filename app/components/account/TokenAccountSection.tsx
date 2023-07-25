@@ -11,7 +11,7 @@ import { CoingeckoStatus, useCoinGecko } from '@utils/coingecko';
 import { displayTimestampWithoutDate } from '@utils/date';
 import { abbreviatedNumber, normalizeTokenAmount } from '@utils/index';
 import { reportError } from '@utils/sentry';
-import { addressLabel_ } from '@utils/tx';
+import { addressLabel } from '@utils/tx';
 import { MintAccountInfo, MultisigAccountInfo, TokenAccount, TokenAccountInfo } from '@validators/accounts/token';
 import { BigNumber } from 'bignumber.js';
 import { useEffect, useState } from 'react';
@@ -345,7 +345,7 @@ function NonFungibleTokenMintAccountCard({
 function TokenAccountCard({ account, info }: { account: Account; info: TokenAccountInfo }) {
     const refresh = useFetchAccountInfo();
     const { cluster, url } = useCluster();
-    const label = addressLabel_(account.pubkey.toBase58(), cluster);
+    const label = addressLabel(account.pubkey.toBase58(), cluster);
     const swrKey = getTokenInfoSwrKey(info.mint.toString());
     const { data: tokenInfo } = useSWR(swrKey, () => getTokenInfo(info.mint, cluster, url))
     const [symbol, setSymbol] = useState<string | undefined>(undefined);

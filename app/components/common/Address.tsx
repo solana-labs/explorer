@@ -3,7 +3,7 @@
 import { Connection, programs } from '@metaplex/js';
 import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
-import { displayAddress_, TokenLabelInfo } from '@utils/tx';
+import { displayAddress, TokenLabelInfo } from '@utils/tx';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 import React from 'react';
@@ -44,7 +44,7 @@ export function Address({
     const { cluster } = useCluster();
     const addressPath = useClusterPath({ pathname: `/address/${address}` });
 
-    const display = displayAddress_(address, cluster, tokenLabelInfo);
+    const display = displayAddress(address, cluster, tokenLabelInfo);
     if (truncateUnknown && address === display) {
         truncate = true;
     }
@@ -58,7 +58,7 @@ export function Address({
 
     const tokenInfo = useTokenInfo(fetchTokenLabelInfo, address);
     if (tokenInfo) {
-        addressLabel = displayAddress_(address, cluster, tokenInfo);
+        addressLabel = displayAddress(address, cluster, tokenInfo);
     }
 
     if (truncateChars && addressLabel === address) {

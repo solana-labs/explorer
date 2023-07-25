@@ -1,4 +1,3 @@
-import { TokenInfoMap } from '@solana/spl-token-registry';
 import {
     ParsedInstruction,
     ParsedTransaction,
@@ -32,16 +31,6 @@ function programLabel(address: string, cluster: Cluster): string | undefined {
     return LOADER_IDS[address] as string;
 }
 
-function tokenLabel(address: string, tokenRegistry?: TokenInfoMap): string | undefined {
-    if (!tokenRegistry) return;
-    const tokenInfo = tokenRegistry.get(address);
-    if (!tokenInfo) return;
-    if (tokenInfo.name === tokenInfo.symbol) {
-        return tokenInfo.name;
-    }
-    return `${tokenInfo.symbol} - ${tokenInfo.name}`;
-}
-
 function tokenLabel_(tokenInfo?: TokenLabelInfo): string | undefined {
     if (!tokenInfo || !tokenInfo.name || !tokenInfo.symbol) return;
     if (tokenInfo.name === tokenInfo.symbol) {
@@ -50,17 +39,7 @@ function tokenLabel_(tokenInfo?: TokenLabelInfo): string | undefined {
     return `${tokenInfo.symbol} - ${tokenInfo.name}`;
 }
 
-export function addressLabel(address: string, cluster: Cluster, tokenRegistry?: TokenInfoMap): string | undefined {
-    return (
-        programLabel(address, cluster) ||
-        SYSVAR_IDS[address] ||
-        SPECIAL_IDS[address] ||
-        tokenLabel(address, tokenRegistry) ||
-        SerumMarketRegistry.get(address, cluster)
-    );
-}
-
-export function addressLabel_(address: string, cluster: Cluster, tokenInfo?: TokenLabelInfo): string | undefined {
+export function addressLabel(address: string, cluster: Cluster, tokenInfo?: TokenLabelInfo): string | undefined {
     return (
         programLabel(address, cluster) ||
         SYSVAR_IDS[address] ||
@@ -70,12 +49,8 @@ export function addressLabel_(address: string, cluster: Cluster, tokenInfo?: Tok
     );
 }
 
-export function displayAddress(address: string, cluster: Cluster, tokenRegistry: TokenInfoMap): string {
-    return addressLabel(address, cluster, tokenRegistry) || address;
-}
-
-export function displayAddress_(address: string, cluster: Cluster, tokenInfo?: TokenLabelInfo): string {
-    return addressLabel_(address, cluster, tokenInfo) || address;
+export function displayAddress(address: string, cluster: Cluster, tokenInfo?: TokenLabelInfo): string {
+    return addressLabel(address, cluster, tokenInfo) || address;
 }
 
 export function intoTransactionInstruction(

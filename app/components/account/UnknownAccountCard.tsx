@@ -3,13 +3,13 @@ import { SolBalance } from '@components/common/SolBalance';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { Account } from '@providers/accounts';
 import { useCluster } from '@providers/cluster';
-import { addressLabel_ } from '@utils/tx';
+import { addressLabel } from '@utils/tx';
 import React from 'react';
 
 export function UnknownAccountCard({ account }: { account: Account }) {
     const { cluster } = useCluster();
 
-    const label = addressLabel_(account.pubkey.toBase58(), cluster);
+    const label = addressLabel(account.pubkey.toBase58(), cluster);
     return (
         <div className="card">
             <div className="card-header align-items-center">
