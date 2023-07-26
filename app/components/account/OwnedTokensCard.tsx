@@ -8,7 +8,6 @@ import { TokenInfoWithPubkey, useAccountOwnedTokens, useFetchAccountOwnedTokens 
 import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
 import { BigNumber } from 'bignumber.js';
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import React, { useCallback, useMemo } from 'react';
@@ -91,7 +90,7 @@ function HoldingsDetailTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                 {showLogos && (
                     <td className="w-1 p-0 text-center">
                         {tokenAccount.logoURI ? (
-                            <Image
+                            <img
                                 alt="token icon"
                                 className="token-icon rounded-circle border border-4 border-gray-dark"
                                 height={16}
@@ -170,8 +169,7 @@ function HoldingsSummaryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                 {showLogos && (
                     <td className="w-1 p-0 text-center">
                         {token.logoURI ? (
-                            <Image
-                                loader={({ src }) => src}
+                            <img
                                 alt="token icon"
                                 className="token-icon rounded-circle border border-4 border-gray-dark"
                                 height={16}

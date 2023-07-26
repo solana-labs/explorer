@@ -58,8 +58,8 @@ function makeUtlClient(
     return new Client(config);
 }
 
-export function getTokenInfoSwrKey(address: string) {
-    return ['get-token-info', address];
+export function getTokenInfoSwrKey(address: string, cluster: Cluster, connectionString: string) {
+    return ['get-token-info', address, cluster, connectionString];
 }
 
 export async function getTokenInfo(
@@ -68,7 +68,7 @@ export async function getTokenInfo(
     connectionString: string
 ): Promise<Token | undefined> {
     const client = makeUtlClient(cluster, connectionString);
-    if (!client) return Promise.resolve(undefined);
+    if (!client) return undefined;
     const token = await client.fetchMint(address);
     return token;
 }
@@ -120,7 +120,7 @@ export async function getTokenInfos(
     connectionString: string
 ): Promise<Token[] | undefined> {
     const client = makeUtlClient(cluster, connectionString);
-    if (!client) return Promise.resolve(undefined);
+    if (!client) return undefined;
     const tokens = await client.fetchMints(addresses);
     return tokens;
 }

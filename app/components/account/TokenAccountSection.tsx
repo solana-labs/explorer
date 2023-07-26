@@ -14,7 +14,7 @@ import { reportError } from '@utils/sentry';
 import { addressLabel } from '@utils/tx';
 import { MintAccountInfo, MultisigAccountInfo, TokenAccount, TokenAccountInfo } from '@validators/accounts/token';
 import { BigNumber } from 'bignumber.js';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ExternalLink, RefreshCw } from 'react-feather';
 import { create } from 'superstruct';
 import useSWR from 'swr';
@@ -342,17 +342,21 @@ function NonFungibleTokenMintAccountCard({
     );
 }
 
+async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', string, Cluster, string]) {
+    return await getTokenInfo(new PublicKey(address), cluster, url);
+}
+
 function TokenAccountCard({ account, info }: { account: Account; info: TokenAccountInfo }) {
     const refresh = useFetchAccountInfo();
     const { cluster, url } = useCluster();
     const label = addressLabel(account.pubkey.toBase58(), cluster);
-    const swrKey = getTokenInfoSwrKey(info.mint.toString());
-    const { data: tokenInfo } = useSWR(swrKey, () => getTokenInfo(info.mint, cluster, url))
+    const swrKey = useMemo(() => getTokenInfoSwrKey(info.mint.toString(), cluster, url), [cluster, url]);
+    const { data: tokenInfo } = useSWR(swrKey, fetchTokenInfo);
     const [symbol, setSymbol] = useState<string | undefined>(undefined);
 
     const balance = info.isNative ? (
         <>
-            ◎<span className="font-monospace">{new BigNumber(info.tokenAmount.uiAmountString).toFormat(9)}</span>
+            {'\u25ce'}<span className="font-monospace">{new BigNumber(info.tokenAmount.uiAmountString).toFormat(9)}</span>
         </>
     ) : <>{info.tokenAmount.uiAmountString}</>;
 

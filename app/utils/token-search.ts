@@ -38,7 +38,7 @@ export async function searchTokens(
     cluster: Cluster
 ): Promise<SearchElement[]> {
     if (process.env.NEXT_PUBLIC_DISABLE_TOKEN_SEARCH || !search) {
-        return Promise.resolve([]);
+        return [];
     }
 
     // See https://github.com/solflare-wallet/utl-sdk/blob/master/src/types.ts#L5
@@ -46,9 +46,9 @@ export async function searchTokens(
     if (cluster === Cluster.MainnetBeta) chainId = 101;
     else if (cluster === Cluster.Testnet) chainId = 102;
     else if (cluster === Cluster.Devnet) chainId = 103;
-    else { return Promise.resolve([]); }
+    else { return []; }
 
-    const apiResponse = await fetch(`https://token-list-api.solana.cloud/v1/search?query=${search}&chainId=${chainId}&start=0&limit=20`);
+    const apiResponse = await fetch(`https://token-list-api.solana.cloud/v1/search?query=${encodeURIComponent(search)}&chainId=${chainId}&start=0&limit=20`);
     if (apiResponse.status >= 400) {
         try {
             const errorJsonBody = await apiResponse.json();

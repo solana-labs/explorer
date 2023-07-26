@@ -12,8 +12,8 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        hostname: '**',
-        pathname: '**',
+        hostname: 'raw.githubusercontent.com',
+        pathname: '/solana-labs/token-list/main/assets/**',
         port: '',
         protocol: 'https',
       },

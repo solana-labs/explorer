@@ -40,6 +40,7 @@ import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 import { redirect, useSelectedLayoutSegment } from 'next/navigation';
 import React, { PropsWithChildren, useState } from 'react';
+import useAsyncEffect from 'use-async-effect';
 
 import { FullLegacyTokenInfo, getFullLegacyTokenInfoUsingCdn } from '@/app/utils/token-info';
 
@@ -168,19 +169,14 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
     const infoStatus = info?.status;
     const infoProgram = info?.data?.data.parsed?.program;
 
-    React.useEffect(() => {
-        let isSubscribed = true;
-
+    useAsyncEffect(async isMounted => {
         if (infoStatus === FetchStatus.Fetched && infoProgram === "spl-token" && pubkey) {
-            getFullLegacyTokenInfoUsingCdn(pubkey, cluster, url).then(tokenInfo => {
-                if (isSubscribed) {
-                    setFullLegacyTokenInfo(tokenInfo)
-                }
-            })
+            const tokenInfo = await getFullLegacyTokenInfoUsingCdn(pubkey, cluster, url);
+            if (isMounted()) {
+                setFullLegacyTokenInfo(tokenInfo)
+            }
         }
-
-        return () => { isSubscribed = false; }
-    }, [infoStatus, infoProgram, pubkey?.toString(), cluster, url])
+    }, [infoStatus, infoProgram, pubkey?.toString(), cluster, url]);
 
     return (
         <div className="container mt-n3">

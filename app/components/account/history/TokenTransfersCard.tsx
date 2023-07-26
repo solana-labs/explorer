@@ -30,6 +30,10 @@ type IndexedTransfer = {
     transfer: Transfer | TransferChecked;
 };
 
+async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', string, Cluster, string]) {
+    return await getTokenInfo(new PublicKey(address), cluster, url)
+}
+
 export function TokenTransfersCard({ address }: { address: string }) {
     const { cluster, url } = useCluster();
     const pubkey = useMemo(() => new PublicKey(address), [address]);
@@ -37,8 +41,8 @@ export function TokenTransfersCard({ address }: { address: string }) {
     const fetchAccountHistory = useFetchAccountHistory();
     const refresh = () => fetchAccountHistory(pubkey, true, true);
     const loadMore = () => fetchAccountHistory(pubkey, true);
-    const swrKey = getTokenInfoSwrKey(address);
-    const { data: tokenInfo, isLoading: tokenInfoLoading } = useSWR(swrKey, () => getTokenInfo(pubkey, cluster, url))
+    const swrKey = useMemo(() => getTokenInfoSwrKey(address, cluster, url), [address, cluster, url]);
+    const { data: tokenInfo, isLoading: tokenInfoLoading } = useSWR(swrKey, fetchTokenInfo);
 
     const transactionRows = React.useMemo(() => {
         if (history?.data?.fetched) {

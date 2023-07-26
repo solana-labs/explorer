@@ -7,7 +7,8 @@ import { displayAddress, TokenLabelInfo } from '@utils/tx';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 import React from 'react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import useAsyncEffect from 'use-async-effect';
 
 import { getTokenInfo } from '@/app/utils/token-info';
 
@@ -96,23 +97,21 @@ const useTokenMetadata = (useMetadata: boolean | undefined, pubkey: string) => {
     const [data, setData] = useState<programs.metadata.MetadataData>();
     const { url } = useCluster();
 
-    useEffect(() => {
+    useAsyncEffect(async isMounted => {
         if (!useMetadata) return;
         if (pubkey && !data) {
-            programs.metadata.Metadata.getPDA(pubkey)
-                .then(pda => {
-                    const connection = new Connection(url);
-                    programs.metadata.Metadata.load(connection, pda)
-                        .then(metadata => {
-                            setData(metadata.data);
-                        })
-                        .catch(() => {
-                            setData(undefined);
-                        });
-                })
-                .catch(() => {
+            try {
+                const pda = await programs.metadata.Metadata.getPDA(pubkey);
+                const connection = new Connection(url);
+                const metadata = await programs.metadata.Metadata.load(connection, pda);
+                if (isMounted()) {
+                    setData(metadata.data);
+                }
+            } catch {
+                if (isMounted()) {
                     setData(undefined);
-                });
+                }
+            }
         }
     }, [useMetadata, pubkey, url, data, setData]);
     return { data };
@@ -122,16 +121,19 @@ const useTokenInfo = (fetchTokenLabelInfo: boolean | undefined, pubkey: string) 
     const [info, setInfo] = useState<TokenLabelInfo>();
     const { cluster, url } = useCluster();
 
-    useEffect(() => {
+    useAsyncEffect(async isMounted => {
         if (!fetchTokenLabelInfo) return;
         if (!info) {
-            getTokenInfo(new PublicKey(pubkey), cluster, url)
-                .then(token => {
+            try {
+                const token = await getTokenInfo(new PublicKey(pubkey), cluster, url);
+                if (isMounted()) {
                     setInfo(token);
-                })
-                .catch(() => {
+                }
+            } catch {
+                if (isMounted()) {
                     setInfo(undefined);
-                });
+                }
+            }
         }
     }, [fetchTokenLabelInfo, pubkey, cluster, url, info, setInfo]);
 

@@ -8,6 +8,7 @@ import { create } from 'superstruct';
 import useSWR from 'swr';
 
 import { useCluster } from '@/app/providers/cluster';
+import { Cluster } from '@/app/utils/cluster';
 import { getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 
 import { InstructionCard } from '../InstructionCard';
@@ -40,6 +41,10 @@ type InfoProps = {
     innerCards?: JSX.Element[];
     childIndex?: number;
 };
+
+async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', string, Cluster, string]) {
+    return await getTokenInfo(new PublicKey(address), cluster, url);
+}
 
 function TokenInstruction(props: InfoProps) {
     const { mintAddress: infoMintAddress, tokenAddress } = React.useMemo(() => {
@@ -81,8 +86,8 @@ function TokenInstruction(props: InfoProps) {
 
     const { cluster, url } = useCluster();
     const { data: tokenDetails } = useSWR(
-        mintAddress ? getTokenInfoSwrKey(mintAddress) : null,
-        () => getTokenInfo(new PublicKey(mintAddress!), cluster, url)
+        mintAddress ? getTokenInfoSwrKey(mintAddress, cluster, url) : null,
+        fetchTokenInfo
     );
 
     const attributes: JSX.Element[] = [];

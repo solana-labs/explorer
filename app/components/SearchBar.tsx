@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useId } from 'react';
 import { Search } from 'react-feather';
 import Select, { ActionMeta, InputActionMeta, ValueType } from 'react-select';
+import useAsyncEffect from 'use-async-effect';
 
 import { FetchedDomainInfo } from '../api/domain-info/[domain]/route';
 import { LOADER_IDS, LoaderName, PROGRAM_INFO_BY_ID, SPECIAL_IDS, SYSVAR_IDS } from '../utils/programs';
@@ -49,7 +50,7 @@ export function SearchBar() {
         }
     };
 
-    React.useEffect(() => {
+    useAsyncEffect(async isMounted => {
         searchRef.current = search;
         setLoadingSearchMessage('Loading...');
         setLoadingSearch(true);
@@ -59,20 +60,19 @@ export function SearchBar() {
         setSearchOptions(options);
 
         if (search.length > 0) {
-            buildTokenOptions(search, cluster).then(tokenOptions => {
-                if (tokenOptions) {
-                    setSearchOptions(options => [...options, tokenOptions])
-                }
-            })
+            const tokenOptions = await buildTokenOptions(search, cluster);
+            if (isMounted() && tokenOptions) {
+                setSearchOptions(options => [...options, tokenOptions])
+            }
+            setLoadingSearch(false);
+        } else {
+            setLoadingSearch(false)
         }
 
         // checking for non local search output
         if (hasDomainSyntax(search) && cluster === Cluster.MainnetBeta) {
             // if search input is a potential domain we continue the loading state
             domainSearch(options);
-        } else {
-            // if search input is not a potential domain we can conclude the search has finished
-            setLoadingSearch(false);
         }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
