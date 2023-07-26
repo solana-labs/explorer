@@ -6,8 +6,8 @@ import bs58 from 'bs58';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useId } from 'react';
 import { Search } from 'react-feather';
-import Select, { ActionMeta, InputActionMeta, ValueType } from 'react-select';
-import useAsyncEffect from 'use-async-effect';
+import { ActionMeta, InputActionMeta, ValueType } from 'react-select';
+import AsyncSelect from 'react-select/async';
 
 import { FetchedDomainInfo } from '../api/domain-info/[domain]/route';
 import { LOADER_IDS, LoaderName, PROGRAM_INFO_BY_ID, SPECIAL_IDS, SYSVAR_IDS } from '../utils/programs';
@@ -28,11 +28,7 @@ const hasDomainSyntax = (value: string) => {
 
 export function SearchBar() {
     const [search, setSearch] = React.useState('');
-    const searchRef = React.useRef('');
-    const [searchOptions, setSearchOptions] = React.useState<SearchOptions[]>([]);
-    const [loadingSearch, setLoadingSearch] = React.useState<boolean>(false);
-    const [loadingSearchMessage, setLoadingSearchMessage] = React.useState<string>('loading...');
-    const selectRef = React.useRef<Select<any> | null>(null);
+    const selectRef = React.useRef<AsyncSelect<any> | null>(null);
     const router = useRouter();
     const { cluster, clusterInfo } = useCluster();
     const searchParams = useSearchParams();
@@ -50,59 +46,30 @@ export function SearchBar() {
         }
     };
 
-    useAsyncEffect(async isMounted => {
-        searchRef.current = search;
-        setLoadingSearchMessage('Loading...');
-        setLoadingSearch(true);
+    async function performSearch(search: string): Promise<SearchOptions[]> {
+        const localOptions = buildOptions(search, cluster, clusterInfo?.epochInfo.epoch);
+        const tokenOptions = await buildTokenOptions(search, cluster);
+        const tokenOptionsAppendable = tokenOptions ? [tokenOptions] : [];
+        const domainOptions = hasDomainSyntax(search) && cluster === Cluster.MainnetBeta ?
+            await buildDomainOptions(search) ?? [] : [];
 
-        // builds and sets local search output
-        const options = buildOptions(search, cluster, clusterInfo?.epochInfo.epoch);
-        setSearchOptions(options);
-
-        if (search.length > 0) {
-            const tokenOptions = await buildTokenOptions(search, cluster);
-            if (isMounted() && tokenOptions) {
-                setSearchOptions(options => [...options, tokenOptions])
-            }
-            setLoadingSearch(false);
-        } else {
-            setLoadingSearch(false)
-        }
-
-        // checking for non local search output
-        if (hasDomainSyntax(search) && cluster === Cluster.MainnetBeta) {
-            // if search input is a potential domain we continue the loading state
-            domainSearch(options);
-        }
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [search]);
-
-    // appends domain lookup results to the local search state
-    const domainSearch = async (options: SearchOptions[]) => {
-        setLoadingSearchMessage('Looking up domain...');
-        const searchTerm = search;
-        const updatedOptions = await buildDomainOptions(search, options);
-        if (searchRef.current === searchTerm) {
-            setSearchOptions(updatedOptions);
-            // after attempting to fetch the domain name we can conclude the loading state
-            setLoadingSearch(false);
-            setLoadingSearchMessage('Loading...');
-        }
-    };
+        return [...localOptions, ...tokenOptionsAppendable, ...domainOptions];
+    }
 
     const resetValue = '' as any;
     return (
         <div className="container my-4">
             <div className="row align-items-center">
                 <div className="col">
-                    <Select
+                    <AsyncSelect
+                        cacheOptions
+                        defaultOptions
+                        loadOptions={performSearch}
                         autoFocus
                         inputId={useId()}
                         ref={ref => (selectRef.current = ref)}
-                        options={searchOptions}
                         noOptionsMessage={() => 'No Results'}
-                        loadingMessage={() => loadingSearchMessage}
+                        loadingMessage={() => 'loading...'}
                         placeholder="Search for blocks, accounts, transactions, programs, and tokens"
                         value={resetValue}
                         inputValue={search}
@@ -117,7 +84,8 @@ export function SearchBar() {
                         onInputChange={onInputChange}
                         components={{ DropdownIndicator }}
                         classNamePrefix="search-bar"
-                        isLoading={loadingSearch}
+                        /* workaround for https://github.com/JedWatson/react-select/issues/5714 */
+                        onFocus={() => { selectRef.current?.handleInputChange(search, { action: 'set-value' }) }}
                     />
                 </div>
             </div>
@@ -210,33 +178,34 @@ async function buildTokenOptions(search: string, cluster: Cluster): Promise<Sear
     }
 }
 
-async function buildDomainOptions(search: string, options: SearchOptions[]) {
+async function buildDomainOptions(search: string) {
     const domainInfoResponse = await fetch(`/api/domain-info/${search}`);
     const domainInfo = await domainInfoResponse.json() as FetchedDomainInfo;
-    const updatedOptions: SearchOptions[] = [...options];
+
     if (domainInfo && domainInfo.owner && domainInfo.address) {
-        updatedOptions.push({
-            label: 'Domain Owner',
-            options: [
-                {
-                    label: domainInfo.owner,
-                    pathname: '/address/' + domainInfo.owner,
-                    value: [search],
-                },
-            ],
-        });
-        updatedOptions.push({
-            label: 'Name Service Account',
-            options: [
-                {
-                    label: search,
-                    pathname: '/address/' + domainInfo.address,
-                    value: [search],
-                },
-            ],
-        });
+
+        return [
+            {
+                label: 'Domain Owner',
+                options: [
+                    {
+                        label: domainInfo.owner,
+                        pathname: '/address/' + domainInfo.owner,
+                        value: [search],
+                    },
+                ],
+            },
+            {
+                label: 'Name Service Account',
+                options: [
+                    {
+                        label: search,
+                        pathname: '/address/' + domainInfo.address,
+                        value: [search],
+                    },
+                ],
+            }];
     }
-    return updatedOptions;
 }
 
 // builds local search options
