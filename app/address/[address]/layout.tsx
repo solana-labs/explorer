@@ -34,13 +34,13 @@ import { CacheEntry, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { PROGRAM_ID as ACCOUNT_COMPRESSION_ID } from '@solana/spl-account-compression';
 import { PublicKey } from '@solana/web3.js';
-import { ClusterStatus } from '@utils/cluster';
+import { Cluster, ClusterStatus } from '@utils/cluster';
 import { FEATURE_PROGRAM_ID } from '@utils/parseFeatureAccount';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 import { redirect, useSelectedLayoutSegment } from 'next/navigation';
-import React, { PropsWithChildren, useState } from 'react';
-import useAsyncEffect from 'use-async-effect';
+import React, { PropsWithChildren } from 'react';
+import useSWRImmutable from 'swr/immutable';
 
 import { FullLegacyTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
 
@@ -145,11 +145,14 @@ const TOKEN_TABS_HIDDEN = ['spl-token:mint', 'config', 'vote', 'sysvar', 'config
 
 type Props = PropsWithChildren<{ params: { address: string } }>;
 
+async function fetchFullTokenInfo([_, pubkey, cluster, url]: ['get-full-token-info', string, Cluster, string]) {
+    return await getFullTokenInfo(new PublicKey(pubkey), cluster, url);
+}
+
 function AddressLayoutInner({ children, params: { address } }: Props) {
     const fetchAccount = useFetchAccountInfo();
     const { status, cluster, url } = useCluster();
     const info = useAccountInfo(address);
-    const [fullTokenInfo, setFullTokenInfo] = useState<FullLegacyTokenInfo | undefined>(undefined);
 
     let pubkey: PublicKey | undefined;
 
@@ -159,6 +162,14 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
         /* empty */
     }
 
+    const infoStatus = info?.status;
+    const infoProgram = info?.data?.data.parsed?.program;
+
+    const { data: fullTokenInfo, isLoading: isFullTokenInfoLoading } = useSWRImmutable(
+        infoStatus === FetchStatus.Fetched && infoProgram === "spl-token" && pubkey ? ['get-full-token-info', address, cluster, url] : null,
+        fetchFullTokenInfo
+    );
+
     // Fetch account on load
     React.useEffect(() => {
         if (!info && status === ClusterStatus.Connected && pubkey) {
@@ -166,29 +177,17 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
         }
     }, [address, status]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const infoStatus = info?.status;
-    const infoProgram = info?.data?.data.parsed?.program;
-
-    useAsyncEffect(async isMounted => {
-        if (infoStatus === FetchStatus.Fetched && infoProgram === "spl-token" && pubkey) {
-            const tokenInfo = await getFullTokenInfo(pubkey, cluster, url);
-            if (isMounted()) {
-                setFullTokenInfo(tokenInfo)
-            }
-        }
-    }, [infoStatus, infoProgram, pubkey?.toString(), cluster, url]);
-
     return (
         <div className="container mt-n3">
             <div className="header">
                 <div className="header-body">
-                    <AccountHeader address={address} account={info?.data} tokenInfo={fullTokenInfo} />
+                    <AccountHeader address={address} account={info?.data} tokenInfo={fullTokenInfo} isTokenInfoLoading={isFullTokenInfoLoading} />
                 </div>
             </div>
             {!pubkey ? (
                 <ErrorCard text={`Address "${address}" is not valid`} />
             ) : (
-                <DetailsSections info={info} pubkey={pubkey} tokenInfo={fullTokenInfo}>
+                <DetailsSections info={info} pubkey={pubkey} tokenInfo={fullTokenInfo} isTokenInfoLoading={isFullTokenInfoLoading}>
                     {children}
                 </DetailsSections>
             )}
@@ -204,7 +203,7 @@ export default function AddressLayout({ children, params }: Props) {
     );
 }
 
-function AccountHeader({ address, account, tokenInfo }: { address: string; account?: Account, tokenInfo?: FullLegacyTokenInfo }) {
+function AccountHeader({ address, account, tokenInfo, isTokenInfoLoading }: { address: string; account?: Account, tokenInfo?: FullLegacyTokenInfo, isTokenInfoLoading: boolean }) {
     const mintInfo = useMintAccountInfo(address);
 
     const parsedData = account?.data.parsed;
@@ -219,7 +218,7 @@ function AccountHeader({ address, account, tokenInfo }: { address: string; accou
         return <NFTokenAccountHeader account={account} />;
     }
 
-    if (isToken) {
+    if (isToken && !isTokenInfoLoading) {
         let token;
         let unverified = false;
 
@@ -287,17 +286,19 @@ function DetailsSections({
     tab,
     info,
     tokenInfo,
+    isTokenInfoLoading
 }: {
     children: React.ReactNode;
     pubkey: PublicKey;
     tab?: string;
     info?: CacheEntry<Account>;
     tokenInfo?: FullLegacyTokenInfo;
+    isTokenInfoLoading: boolean;
 }) {
     const fetchAccount = useFetchAccountInfo();
     const address = pubkey.toBase58();
 
-    if (!info || info.status === FetchStatus.Fetching) {
+    if (!info || info.status === FetchStatus.Fetching || isTokenInfoLoading) {
         return <LoadingCard />;
     } else if (info.status === FetchStatus.FetchFailed || info.data?.lamports === undefined) {
         return <ErrorCard retry={() => fetchAccount(pubkey, 'parsed')} text="Fetch Failed" />;
