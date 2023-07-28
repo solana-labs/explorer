@@ -42,7 +42,7 @@ import { redirect, useSelectedLayoutSegment } from 'next/navigation';
 import React, { PropsWithChildren, useState } from 'react';
 import useAsyncEffect from 'use-async-effect';
 
-import { FullLegacyTokenInfo, getFullLegacyTokenInfoUsingCdn } from '@/app/utils/token-info';
+import { FullLegacyTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
 
 const IDENTICON_WIDTH = 64;
 
@@ -149,7 +149,7 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
     const fetchAccount = useFetchAccountInfo();
     const { status, cluster, url } = useCluster();
     const info = useAccountInfo(address);
-    const [fullLegacyTokenInfo, setFullLegacyTokenInfo] = useState<FullLegacyTokenInfo | undefined>(undefined);
+    const [fullTokenInfo, setFullTokenInfo] = useState<FullLegacyTokenInfo | undefined>(undefined);
 
     let pubkey: PublicKey | undefined;
 
@@ -171,9 +171,9 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
 
     useAsyncEffect(async isMounted => {
         if (infoStatus === FetchStatus.Fetched && infoProgram === "spl-token" && pubkey) {
-            const tokenInfo = await getFullLegacyTokenInfoUsingCdn(pubkey, cluster, url);
+            const tokenInfo = await getFullTokenInfo(pubkey, cluster, url);
             if (isMounted()) {
-                setFullLegacyTokenInfo(tokenInfo)
+                setFullTokenInfo(tokenInfo)
             }
         }
     }, [infoStatus, infoProgram, pubkey?.toString(), cluster, url]);
@@ -182,13 +182,13 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
         <div className="container mt-n3">
             <div className="header">
                 <div className="header-body">
-                    <AccountHeader address={address} account={info?.data} tokenInfo={fullLegacyTokenInfo} />
+                    <AccountHeader address={address} account={info?.data} tokenInfo={fullTokenInfo} />
                 </div>
             </div>
             {!pubkey ? (
                 <ErrorCard text={`Address "${address}" is not valid`} />
             ) : (
-                <DetailsSections info={info} pubkey={pubkey} tokenInfo={fullLegacyTokenInfo}>
+                <DetailsSections info={info} pubkey={pubkey} tokenInfo={fullTokenInfo}>
                     {children}
                 </DetailsSections>
             )}

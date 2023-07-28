@@ -73,22 +73,10 @@ export async function getTokenInfo(
     return token;
 }
 
-/**
- * Get the full token info from a CDN with the legacy token list
- * The UTL SDK only returns the most common fields, we sometimes need eg extensions
- * @param address Public key of the token
- * @param cluster Cluster to fetch the token info for
- */
-export async function getFullLegacyTokenInfoUsingCdn(
+async function getFullLegacyTokenInfoUsingCdn(
     address: PublicKey,
-    cluster: Cluster,
-    connectionString: string
+    chainId: ChainId
 ): Promise<FullLegacyTokenInfo | undefined> {
-    const chainId = getChainId(cluster);
-    if (!chainId) return undefined;
-
-    // We use the solana-labs token-list from CDN
-    // We can't use the solflare one because it only includes the coinGeckoId extension
     const tokenListResponse = await fetch('https://cdn.jsdelivr.net/gh/solana-labs/token-list@latest/src/tokens/solana.tokenlist.json');
     if (tokenListResponse.status >= 400) {
         reportError(new Error('Error fetching token list from CDN'));
@@ -96,21 +84,46 @@ export async function getFullLegacyTokenInfoUsingCdn(
     }
     const { tokens } = await tokenListResponse.json() as FullLegacyTokenInfoList;
     const tokenInfo = tokens.find(t => t.address === address.toString() && t.chainId === chainId)
-    if (tokenInfo) return tokenInfo;
+    return tokenInfo;
+}
 
-    // If it wasn't in the CDN, fetch it from the SDK
-    // This won't have all the fields, but return what we can
-    const sdkTokenInfo = await getTokenInfo(address, cluster, connectionString);
-    if (!sdkTokenInfo) return undefined;
+/**
+ * Get the full token info from a CDN with the legacy token list
+ * The UTL SDK only returns the most common fields, we sometimes need eg extensions
+ * @param address Public key of the token
+ * @param cluster Cluster to fetch the token info for
+ */
+export async function getFullTokenInfo(
+    address: PublicKey,
+    cluster: Cluster,
+    connectionString: string
+): Promise<FullLegacyTokenInfo | undefined> {
+    const chainId = getChainId(cluster);
+    if (!chainId) return undefined;
+
+    const [legacyCdnTokenInfo, sdkTokenInfo] = await Promise.all([
+        getFullLegacyTokenInfoUsingCdn(address, chainId),
+        getTokenInfo(address, cluster, connectionString)
+    ]);
+
+    if (!sdkTokenInfo) {
+        return legacyCdnTokenInfo;
+    }
+
+    // Merge the fields, prioritising the sdk ones which are more up to date
+    let tags: string[] = [];
+    if (sdkTokenInfo.tags) tags = Array.from(sdkTokenInfo.tags);
+    else if (legacyCdnTokenInfo?.tags) tags = legacyCdnTokenInfo.tags;
 
     return {
         address: sdkTokenInfo.address,
         chainId,
         decimals: sdkTokenInfo.decimals ?? 0,
+        extensions: legacyCdnTokenInfo?.extensions,
         logoURI: sdkTokenInfo.logoURI ?? undefined,
         name: sdkTokenInfo.name,
         symbol: sdkTokenInfo.symbol,
-        tags: sdkTokenInfo.tags ? Array.from(sdkTokenInfo.tags) : [],
+        tags
     }
 }
 
