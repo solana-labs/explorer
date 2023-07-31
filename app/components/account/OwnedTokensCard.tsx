@@ -6,10 +6,8 @@ import { Identicon } from '@components/common/Identicon';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { TokenInfoWithPubkey, useAccountOwnedTokens, useFetchAccountOwnedTokens } from '@providers/accounts/tokens';
 import { FetchStatus } from '@providers/cache';
-import { useTokenRegistry } from '@providers/token-registry';
 import { PublicKey } from '@solana/web3.js';
 import { BigNumber } from 'bignumber.js';
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import React, { useCallback, useMemo } from 'react';
@@ -84,22 +82,19 @@ export function OwnedTokensCard({ address }: { address: string }) {
 
 function HoldingsDetailTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
     const detailsList: React.ReactNode[] = [];
-    const { tokenRegistry } = useTokenRegistry();
-    const showLogos = tokens.some(t => tokenRegistry.get(t.info.mint.toBase58())?.logoURI !== undefined);
+    const showLogos = tokens.some(t => t.logoURI !== undefined);
     tokens.forEach(tokenAccount => {
         const address = tokenAccount.pubkey.toBase58();
-        const mintAddress = tokenAccount.info.mint.toBase58();
-        const tokenDetails = tokenRegistry.get(mintAddress);
         detailsList.push(
             <tr key={address}>
                 {showLogos && (
                     <td className="w-1 p-0 text-center">
-                        {tokenDetails?.logoURI ? (
-                            <Image
+                        {tokenAccount.logoURI ? (
+                            <img
                                 alt="token icon"
                                 className="token-icon rounded-circle border border-4 border-gray-dark"
                                 height={16}
-                                src={tokenDetails.logoURI}
+                                src={tokenAccount.logoURI}
                                 width={16}
                             />
                         ) : (
@@ -115,10 +110,10 @@ function HoldingsDetailTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                     <Address pubkey={tokenAccount.pubkey} link truncate />
                 </td>
                 <td>
-                    <Address pubkey={tokenAccount.info.mint} link truncate />
+                    <Address pubkey={tokenAccount.info.mint} link truncate tokenLabelInfo={tokenAccount} />
                 </td>
                 <td>
-                    {tokenAccount.info.tokenAmount.uiAmountString} {tokenDetails && tokenDetails.symbol}
+                    {tokenAccount.info.tokenAmount.uiAmountString} {tokenAccount.symbol}
                 </td>
             </tr>
         );
@@ -142,34 +137,43 @@ function HoldingsDetailTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
 }
 
 function HoldingsSummaryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
-    const { tokenRegistry } = useTokenRegistry();
-    const mappedTokens = new Map<string, string>();
-    for (const { info: token } of tokens) {
+    type MappedToken = {
+        amount: string,
+        logoURI?: string,
+        symbol?: string,
+        name?: string
+    }
+    const mappedTokens = new Map<string, MappedToken>();
+    for (const { info: token, logoURI, symbol, name } of tokens) {
         const mintAddress = token.mint.toBase58();
-        const totalByMint = mappedTokens.get(mintAddress);
+        const totalByMint = mappedTokens.get(mintAddress)?.amount;
 
         let amount = token.tokenAmount.uiAmountString;
         if (totalByMint !== undefined) {
             amount = new BigNumber(totalByMint).plus(token.tokenAmount.uiAmountString).toString();
         }
 
-        mappedTokens.set(mintAddress, amount);
+        mappedTokens.set(mintAddress, {
+            amount,
+            logoURI,
+            name,
+            symbol
+        });
     }
 
     const detailsList: React.ReactNode[] = [];
-    const showLogos = tokens.some(t => tokenRegistry.get(t.info.mint.toBase58())?.logoURI !== undefined);
-    mappedTokens.forEach((totalByMint, mintAddress) => {
-        const tokenDetails = tokenRegistry.get(mintAddress);
+    const showLogos = tokens.some(t => t.logoURI !== undefined);
+    mappedTokens.forEach((token, mintAddress) => {
         detailsList.push(
             <tr key={mintAddress}>
                 {showLogos && (
                     <td className="w-1 p-0 text-center">
-                        {tokenDetails?.logoURI ? (
-                            <Image
+                        {token.logoURI ? (
+                            <img
                                 alt="token icon"
                                 className="token-icon rounded-circle border border-4 border-gray-dark"
                                 height={16}
-                                src={tokenDetails.logoURI}
+                                src={token.logoURI}
                                 width={16}
                             />
                         ) : (
@@ -182,10 +186,10 @@ function HoldingsSummaryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
                     </td>
                 )}
                 <td>
-                    <Address pubkey={new PublicKey(mintAddress)} link useMetadata />
+                    <Address pubkey={new PublicKey(mintAddress)} link tokenLabelInfo={token} useMetadata />
                 </td>
                 <td>
-                    {totalByMint} {tokenDetails && tokenDetails.symbol}
+                    {token.amount} {token.symbol}
                 </td>
             </tr>
         );

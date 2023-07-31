@@ -1,11 +1,15 @@
 import { Address } from '@components/common/Address';
 import { useFetchAccountInfo, useMintAccountInfo, useTokenAccountInfo } from '@providers/accounts';
-import { useTokenRegistry } from '@providers/token-registry';
 import { ParsedInstruction, ParsedTransaction, PublicKey, SignatureResult } from '@solana/web3.js';
 import { normalizeTokenAmount } from '@utils/index';
 import { ParsedInfo } from '@validators/index';
 import React from 'react';
 import { create } from 'superstruct';
+import useSWR from 'swr';
+
+import { useCluster } from '@/app/providers/cluster';
+import { Cluster } from '@/app/utils/cluster';
+import { getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 
 import { InstructionCard } from '../InstructionCard';
 import { IX_STRUCTS, IX_TITLES, TokenAmountUi, TokenInstructionType } from './types';
@@ -38,6 +42,10 @@ type InfoProps = {
     childIndex?: number;
 };
 
+async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', string, Cluster, string]) {
+    return await getTokenInfo(new PublicKey(address), cluster, url);
+}
+
 function TokenInstruction(props: InfoProps) {
     const { mintAddress: infoMintAddress, tokenAddress } = React.useMemo(() => {
         let mintAddress: string | undefined;
@@ -62,7 +70,6 @@ function TokenInstruction(props: InfoProps) {
     const tokenInfo = useTokenAccountInfo(tokenAddress);
     const mintAddress = infoMintAddress || tokenInfo?.mint.toBase58();
     const mintInfo = useMintAccountInfo(mintAddress);
-    const { tokenRegistry } = useTokenRegistry();
     const fetchAccountInfo = useFetchAccountInfo();
 
     React.useEffect(() => {
@@ -77,6 +84,12 @@ function TokenInstruction(props: InfoProps) {
         }
     }, [fetchAccountInfo, mintAddress]); // eslint-disable-line react-hooks/exhaustive-deps
 
+    const { cluster, url } = useCluster();
+    const { data: tokenDetails } = useSWR(
+        mintAddress ? getTokenInfoSwrKey(mintAddress, cluster, url) : null,
+        fetchTokenInfo
+    );
+
     const attributes: JSX.Element[] = [];
     let decimals = mintInfo?.decimals;
     let tokenSymbol = '';
@@ -86,8 +99,6 @@ function TokenInstruction(props: InfoProps) {
     }
 
     if (mintAddress) {
-        const tokenDetails = tokenRegistry.get(mintAddress);
-
         if (tokenDetails) {
             tokenSymbol = tokenDetails.symbol;
         }
@@ -96,7 +107,7 @@ function TokenInstruction(props: InfoProps) {
             <tr key={mintAddress}>
                 <td>Token</td>
                 <td className="text-lg-end">
-                    <Address pubkey={new PublicKey(mintAddress)} alignRight link />
+                    <Address pubkey={new PublicKey(mintAddress)} alignRight link fetchTokenLabelInfo />
                 </td>
             </tr>
         );

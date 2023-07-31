@@ -1,13 +1,16 @@
 import { Address } from '@components/common/Address';
 import { BalanceDelta } from '@components/common/BalanceDelta';
-import { useTokenRegistry } from '@providers/token-registry';
 import { useTransactionDetails } from '@providers/transactions';
 import { ParsedMessageAccount, PublicKey, TokenAmount, TokenBalance } from '@solana/web3.js';
 import { SignatureProps } from '@utils/index';
 import { BigNumber } from 'bignumber.js';
-import React from 'react';
+import React, { useState } from 'react';
+import useAsyncEffect from 'use-async-effect';
 
-export type TokenBalanceRow = {
+import { useCluster } from '@/app/providers/cluster';
+import { getTokenInfos } from '@/app/utils/token-info';
+
+type TokenBalanceRow = {
     account: PublicKey;
     mint: string;
     balance: TokenAmount;
@@ -17,7 +20,6 @@ export type TokenBalanceRow = {
 
 export function TokenBalancesCard({ signature }: SignatureProps) {
     const details = useTransactionDetails(signature);
-    const { tokenRegistry } = useTokenRegistry();
 
     if (!details) {
         return null;
@@ -38,9 +40,32 @@ export function TokenBalancesCard({ signature }: SignatureProps) {
         return null;
     }
 
+    return <TokenBalancesCardInner rows={rows} />
+}
+
+type TokenBalancesCardInnerProps = {
+    rows: TokenBalanceRow[]
+}
+
+
+function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
+    const { cluster, url } = useCluster();
+    const [tokenInfosLoading, setTokenInfosLoading] = useState(true);
+    const [tokenSymbols, setTokenSymbols] = useState<Map<string, string>>(new Map());
+
+    useAsyncEffect(async isMounted => {
+        const mints = rows.map(r => new PublicKey(r.mint));
+        getTokenInfos(mints, cluster, url).then(tokens => {
+            if (isMounted()) {
+                setTokenSymbols(new Map(tokens?.map(t => [t.address, t.symbol])));
+                setTokenInfosLoading(false);
+            }
+        });
+    }, [])
+
     const accountRows = rows.map(({ account, delta, balance, mint }) => {
         const key = account.toBase58() + mint;
-        const units = tokenRegistry.get(mint)?.symbol || 'tokens';
+        const units = tokenInfosLoading ? '' : tokenSymbols.get(mint) || 'tokens';
 
         return (
             <tr key={key}>
@@ -48,7 +73,7 @@ export function TokenBalancesCard({ signature }: SignatureProps) {
                     <Address pubkey={account} link />
                 </td>
                 <td>
-                    <Address pubkey={new PublicKey(mint)} link />
+                    <Address pubkey={new PublicKey(mint)} link fetchTokenLabelInfo />
                 </td>
                 <td>
                     <BalanceDelta delta={delta} />
@@ -82,7 +107,7 @@ export function TokenBalancesCard({ signature }: SignatureProps) {
     );
 }
 
-export function generateTokenBalanceRows(
+function generateTokenBalanceRows(
     preTokenBalances: TokenBalance[],
     postTokenBalances: TokenBalance[],
     accounts: ParsedMessageAccount[]

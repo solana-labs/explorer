@@ -1,17 +1,17 @@
 'use client';
 
 import { useCluster } from '@providers/cluster';
-import { useTokenRegistry } from '@providers/token-registry';
-import { TokenInfoMap } from '@solana/spl-token-registry';
 import { Cluster } from '@utils/cluster';
 import bs58 from 'bs58';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useId } from 'react';
 import { Search } from 'react-feather';
-import Select, { ActionMeta, InputActionMeta, ValueType } from 'react-select';
+import { ActionMeta, InputActionMeta, ValueType } from 'react-select';
+import AsyncSelect from 'react-select/async';
 
 import { FetchedDomainInfo } from '../api/domain-info/[domain]/route';
 import { LOADER_IDS, LoaderName, PROGRAM_INFO_BY_ID, SPECIAL_IDS, SYSVAR_IDS } from '../utils/programs';
+import { searchTokens } from '../utils/token-search';
 
 interface SearchOptions {
     label: string;
@@ -28,13 +28,8 @@ const hasDomainSyntax = (value: string) => {
 
 export function SearchBar() {
     const [search, setSearch] = React.useState('');
-    const searchRef = React.useRef('');
-    const [searchOptions, setSearchOptions] = React.useState<SearchOptions[]>([]);
-    const [loadingSearch, setLoadingSearch] = React.useState<boolean>(false);
-    const [loadingSearchMessage, setLoadingSearchMessage] = React.useState<string>('loading...');
-    const selectRef = React.useRef<Select<any> | null>(null);
+    const selectRef = React.useRef<AsyncSelect<any> | null>(null);
     const router = useRouter();
-    const { tokenRegistry } = useTokenRegistry();
     const { cluster, clusterInfo } = useCluster();
     const searchParams = useSearchParams();
     const onChange = ({ pathname }: ValueType<any, false>, meta: ActionMeta<any>) => {
@@ -51,53 +46,30 @@ export function SearchBar() {
         }
     };
 
-    React.useEffect(() => {
-        searchRef.current = search;
-        setLoadingSearchMessage('Loading...');
-        setLoadingSearch(true);
+    async function performSearch(search: string): Promise<SearchOptions[]> {
+        const localOptions = buildOptions(search, cluster, clusterInfo?.epochInfo.epoch);
+        const tokenOptions = await buildTokenOptions(search, cluster);
+        const tokenOptionsAppendable = tokenOptions ? [tokenOptions] : [];
+        const domainOptions = hasDomainSyntax(search) && cluster === Cluster.MainnetBeta ?
+            await buildDomainOptions(search) ?? [] : [];
 
-        // builds and sets local search output
-        const options = buildOptions(search, cluster, tokenRegistry, clusterInfo?.epochInfo.epoch);
-
-        setSearchOptions(options);
-
-        // checking for non local search output
-        if (hasDomainSyntax(search) && cluster === Cluster.MainnetBeta) {
-            // if search input is a potential domain we continue the loading state
-            domainSearch(options);
-        } else {
-            // if search input is not a potential domain we can conclude the search has finished
-            setLoadingSearch(false);
-        }
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [search]);
-
-    // appends domain lookup results to the local search state
-    const domainSearch = async (options: SearchOptions[]) => {
-        setLoadingSearchMessage('Looking up domain...');
-        const searchTerm = search;
-        const updatedOptions = await buildDomainOptions(search, options);
-        if (searchRef.current === searchTerm) {
-            setSearchOptions(updatedOptions);
-            // after attempting to fetch the domain name we can conclude the loading state
-            setLoadingSearch(false);
-            setLoadingSearchMessage('Loading...');
-        }
-    };
+        return [...localOptions, ...tokenOptionsAppendable, ...domainOptions];
+    }
 
     const resetValue = '' as any;
     return (
         <div className="container my-4">
             <div className="row align-items-center">
                 <div className="col">
-                    <Select
+                    <AsyncSelect
+                        cacheOptions
+                        defaultOptions
+                        loadOptions={performSearch}
                         autoFocus
                         inputId={useId()}
                         ref={ref => (selectRef.current = ref)}
-                        options={searchOptions}
                         noOptionsMessage={() => 'No Results'}
-                        loadingMessage={() => loadingSearchMessage}
+                        loadingMessage={() => 'loading...'}
                         placeholder="Search for blocks, accounts, transactions, programs, and tokens"
                         value={resetValue}
                         inputValue={search}
@@ -112,7 +84,8 @@ export function SearchBar() {
                         onInputChange={onInputChange}
                         components={{ DropdownIndicator }}
                         classNamePrefix="search-bar"
-                        isLoading={loadingSearch}
+                        /* workaround for https://github.com/JedWatson/react-select/issues/5714 */
+                        onFocus={() => { selectRef.current?.handleInputChange(search, { action: 'set-value' }) }}
                     />
                 </div>
             </div>
@@ -194,59 +167,49 @@ function buildSpecialOptions(search: string) {
     }
 }
 
-function buildTokenOptions(search: string, cluster: Cluster, tokenRegistry: TokenInfoMap) {
-    const matchedTokens = Array.from(tokenRegistry.entries()).filter(([address, details]) => {
-        const searchLower = search.toLowerCase();
-        return (
-            details.name.toLowerCase().includes(searchLower) ||
-            details.symbol.toLowerCase().includes(searchLower) ||
-            address.includes(search)
-        );
-    });
+async function buildTokenOptions(search: string, cluster: Cluster): Promise<SearchOptions | undefined> {
+    const matchedTokens = await searchTokens(search, cluster);
 
     if (matchedTokens.length > 0) {
         return {
             label: 'Tokens',
-            options: matchedTokens.slice(0, 10).map(([id, details]) => ({
-                label: details.name,
-                pathname: '/address/' + id,
-                value: [details.name, details.symbol, id],
-            })),
+            options: matchedTokens
         };
     }
 }
 
-async function buildDomainOptions(search: string, options: SearchOptions[]) {
+async function buildDomainOptions(search: string) {
     const domainInfoResponse = await fetch(`/api/domain-info/${search}`);
     const domainInfo = await domainInfoResponse.json() as FetchedDomainInfo;
-    const updatedOptions: SearchOptions[] = [...options];
+
     if (domainInfo && domainInfo.owner && domainInfo.address) {
-        updatedOptions.push({
-            label: 'Domain Owner',
-            options: [
-                {
-                    label: domainInfo.owner,
-                    pathname: '/address/' + domainInfo.owner,
-                    value: [search],
-                },
-            ],
-        });
-        updatedOptions.push({
-            label: 'Name Service Account',
-            options: [
-                {
-                    label: search,
-                    pathname: '/address/' + domainInfo.address,
-                    value: [search],
-                },
-            ],
-        });
+
+        return [
+            {
+                label: 'Domain Owner',
+                options: [
+                    {
+                        label: domainInfo.owner,
+                        pathname: '/address/' + domainInfo.owner,
+                        value: [search],
+                    },
+                ],
+            },
+            {
+                label: 'Name Service Account',
+                options: [
+                    {
+                        label: search,
+                        pathname: '/address/' + domainInfo.address,
+                        value: [search],
+                    },
+                ],
+            }];
     }
-    return updatedOptions;
 }
 
 // builds local search options
-function buildOptions(rawSearch: string, cluster: Cluster, tokenRegistry: TokenInfoMap, currentEpoch?: bigint) {
+function buildOptions(rawSearch: string, cluster: Cluster, currentEpoch?: bigint) {
     const search = rawSearch.trim();
     if (search.length === 0) return [];
 
@@ -270,11 +233,6 @@ function buildOptions(rawSearch: string, cluster: Cluster, tokenRegistry: TokenI
     const specialOptions = buildSpecialOptions(search);
     if (specialOptions) {
         options.push(specialOptions);
-    }
-
-    const tokenOptions = buildTokenOptions(search, cluster, tokenRegistry);
-    if (tokenOptions) {
-        options.push(tokenOptions);
     }
 
     if (!isNaN(Number(search))) {

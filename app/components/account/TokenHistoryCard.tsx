@@ -16,9 +16,7 @@ import { useAccountHistories, useFetchAccountHistory } from '@providers/accounts
 import { TOKEN_PROGRAM_ID, TokenInfoWithPubkey, useAccountOwnedTokens } from '@providers/accounts/tokens';
 import { CacheEntry, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
-import { useTokenRegistry } from '@providers/token-registry';
 import { Details, useFetchTransactionDetails, useTransactionDetailsCache } from '@providers/transactions/parsed';
-import { TokenInfoMap } from '@solana/spl-token-registry';
 import { ConfirmedSignatureInfo, ParsedInstruction, PartiallyDecodedInstruction, PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { INNER_INSTRUCTIONS_START_SLOT } from '@utils/index';
@@ -257,7 +255,6 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
 
 const FilterDropdown = ({ filter, toggle, show, tokens }: FilterProps) => {
     const { cluster } = useCluster();
-    const { tokenRegistry } = useTokenRegistry();
     const currentSearchParams = useSearchParams();
     const currentPathname = usePathname();
     const buildLocation = useCallback(
@@ -281,7 +278,7 @@ const FilterDropdown = ({ filter, toggle, show, tokens }: FilterProps) => {
         const address = token.info.mint.toBase58();
         if (!nameLookup.has(address)) {
             filterOptions.push(address);
-            nameLookup.set(address, formatTokenName(address, cluster, tokenRegistry));
+            nameLookup.set(address, formatTokenName(address, cluster, token));
         }
     });
 
@@ -303,7 +300,7 @@ const FilterDropdown = ({ filter, toggle, show, tokens }: FilterProps) => {
                         >
                             {filterOption === ALL_TOKENS
                                 ? 'All Tokens'
-                                : formatTokenName(filterOption, cluster, tokenRegistry)}
+                                : nameLookup.get(filterOption) || filterOption}
                         </Link>
                     );
                 })}
@@ -458,7 +455,7 @@ const TokenTransactionRow = React.memo(function TokenTransactionRow({
                         </td>
 
                         <td className="forced-truncate">
-                            <Address pubkey={mint} link truncateUnknown />
+                            <Address pubkey={mint} link truncateUnknown fetchTokenLabelInfo />
                         </td>
 
                         <td>
@@ -518,8 +515,8 @@ function InstructionDetails({ instructionType, tx }: { instructionType: Instruct
     );
 }
 
-function formatTokenName(pubkey: string, cluster: Cluster, tokenRegistry: TokenInfoMap): string {
-    let display = displayAddress(pubkey, cluster, tokenRegistry);
+function formatTokenName(pubkey: string, cluster: Cluster, tokenInfo: TokenInfoWithPubkey): string {
+    let display = displayAddress(pubkey, cluster, tokenInfo);
 
     if (display === pubkey) {
         display = display.slice(0, TRUNCATE_TOKEN_LENGTH) + '\u2026';

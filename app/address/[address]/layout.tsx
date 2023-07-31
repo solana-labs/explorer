@@ -32,15 +32,17 @@ import isMetaplexNFT from '@providers/accounts/utils/isMetaplexNFT';
 import { useAnchorProgram } from '@providers/anchor';
 import { CacheEntry, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
-import { useTokenRegistry } from '@providers/token-registry';
 import { PROGRAM_ID as ACCOUNT_COMPRESSION_ID } from '@solana/spl-account-compression';
 import { PublicKey } from '@solana/web3.js';
-import { ClusterStatus } from '@utils/cluster';
+import { Cluster, ClusterStatus } from '@utils/cluster';
 import { FEATURE_PROGRAM_ID } from '@utils/parseFeatureAccount';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 import { redirect, useSelectedLayoutSegment } from 'next/navigation';
 import React, { PropsWithChildren } from 'react';
+import useSWRImmutable from 'swr/immutable';
+
+import { FullLegacyTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
 
 const IDENTICON_WIDTH = 64;
 
@@ -143,10 +145,15 @@ const TOKEN_TABS_HIDDEN = ['spl-token:mint', 'config', 'vote', 'sysvar', 'config
 
 type Props = PropsWithChildren<{ params: { address: string } }>;
 
+async function fetchFullTokenInfo([_, pubkey, cluster, url]: ['get-full-token-info', string, Cluster, string]) {
+    return await getFullTokenInfo(new PublicKey(pubkey), cluster, url);
+}
+
 function AddressLayoutInner({ children, params: { address } }: Props) {
     const fetchAccount = useFetchAccountInfo();
-    const { status } = useCluster();
+    const { status, cluster, url } = useCluster();
     const info = useAccountInfo(address);
+
     let pubkey: PublicKey | undefined;
 
     try {
@@ -154,6 +161,14 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
     } catch (err) {
         /* empty */
     }
+
+    const infoStatus = info?.status;
+    const infoProgram = info?.data?.data.parsed?.program;
+
+    const { data: fullTokenInfo, isLoading: isFullTokenInfoLoading } = useSWRImmutable(
+        infoStatus === FetchStatus.Fetched && infoProgram === "spl-token" && pubkey ? ['get-full-token-info', address, cluster, url] : null,
+        fetchFullTokenInfo
+    );
 
     // Fetch account on load
     React.useEffect(() => {
@@ -166,13 +181,13 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
         <div className="container mt-n3">
             <div className="header">
                 <div className="header-body">
-                    <AccountHeader address={address} account={info?.data} />
+                    <AccountHeader address={address} account={info?.data} tokenInfo={fullTokenInfo} isTokenInfoLoading={isFullTokenInfoLoading} />
                 </div>
             </div>
             {!pubkey ? (
                 <ErrorCard text={`Address "${address}" is not valid`} />
             ) : (
-                <DetailsSections info={info} pubkey={pubkey}>
+                <DetailsSections info={info} pubkey={pubkey} tokenInfo={fullTokenInfo} isTokenInfoLoading={isFullTokenInfoLoading}>
                     {children}
                 </DetailsSections>
             )}
@@ -188,10 +203,9 @@ export default function AddressLayout({ children, params }: Props) {
     );
 }
 
-function AccountHeader({ address, account }: { address: string; account?: Account }) {
-    const { tokenRegistry } = useTokenRegistry();
-    const tokenDetails = tokenRegistry.get(address);
+function AccountHeader({ address, account, tokenInfo, isTokenInfoLoading }: { address: string; account?: Account, tokenInfo?: FullLegacyTokenInfo, isTokenInfoLoading: boolean }) {
     const mintInfo = useMintAccountInfo(address);
+
     const parsedData = account?.data.parsed;
     const isToken = parsedData?.program === 'spl-token' && parsedData?.parsed.type === 'mint';
 
@@ -204,21 +218,21 @@ function AccountHeader({ address, account }: { address: string; account?: Accoun
         return <NFTokenAccountHeader account={account} />;
     }
 
-    if (isToken) {
+    if (isToken && !isTokenInfoLoading) {
         let token;
         let unverified = false;
 
         // Fall back to legacy token list when there is stub metadata (blank uri), updatable by default by the mint authority
-        if (!parsedData?.nftData?.metadata.data.uri && tokenDetails) {
-            token = tokenDetails;
+        if (!parsedData?.nftData?.metadata.data.uri && tokenInfo) {
+            token = tokenInfo;
         } else if (parsedData?.nftData) {
             token = {
                 logoURI: parsedData?.nftData?.json?.image,
                 name: parsedData?.nftData?.json?.name ?? parsedData?.nftData.metadata.data.name,
             };
             unverified = true;
-        } else if (tokenDetails) {
-            token = tokenDetails;
+        } else if (tokenInfo) {
+            token = tokenInfo;
         }
 
         return (
@@ -271,16 +285,20 @@ function DetailsSections({
     pubkey,
     tab,
     info,
+    tokenInfo,
+    isTokenInfoLoading
 }: {
     children: React.ReactNode;
     pubkey: PublicKey;
     tab?: string;
     info?: CacheEntry<Account>;
+    tokenInfo?: FullLegacyTokenInfo;
+    isTokenInfoLoading: boolean;
 }) {
     const fetchAccount = useFetchAccountInfo();
     const address = pubkey.toBase58();
 
-    if (!info || info.status === FetchStatus.Fetching) {
+    if (!info || info.status === FetchStatus.Fetching || isTokenInfoLoading) {
         return <LoadingCard />;
     } else if (info.status === FetchStatus.FetchFailed || info.data?.lamports === undefined) {
         return <ErrorCard retry={() => fetchAccount(pubkey, 'parsed')} text="Fetch Failed" />;
@@ -296,13 +314,13 @@ function DetailsSections({
     return (
         <>
             {FLAGGED_ACCOUNTS_WARNING[address] ?? null}
-            <InfoSection account={account} />
+            <InfoSection account={account} tokenInfo={tokenInfo} />
             <MoreSection tabs={tabComponents.map(({ component }) => component)}>{children}</MoreSection>
         </>
     );
 }
 
-function InfoSection({ account }: { account: Account }) {
+function InfoSection({ account, tokenInfo }: { account: Account, tokenInfo?: FullLegacyTokenInfo }) {
     const parsedData = account.data.parsed;
     const rawData = account.data.raw;
 
@@ -326,7 +344,7 @@ function InfoSection({ account }: { account: Account }) {
     } else if (account.owner.toBase58() === NFTOKEN_ADDRESS) {
         return <NFTokenAccountSection account={account} />;
     } else if (parsedData && parsedData.program === 'spl-token') {
-        return <TokenAccountSection account={account} tokenAccount={parsedData.parsed} />;
+        return <TokenAccountSection account={account} tokenAccount={parsedData.parsed} tokenInfo={tokenInfo} />;
     } else if (parsedData && parsedData.program === 'nonce') {
         return <NonceAccountSection account={account} nonceAccount={parsedData.parsed} />;
     } else if (parsedData && parsedData.program === 'vote') {

@@ -10,8 +10,6 @@ import { ScrollAnchorProvider } from '@providers/scroll-anchor';
 import { Rubik } from 'next/font/google';
 import { Metadata } from 'next/types';
 
-import { TokenRegistryProvider } from './providers/token-registry';
-
 export const metadata: Metadata = {
     description: 'Inspect transactions, accounts, blocks, and more on the Solana blockchain',
     manifest: '/manifest.json',
@@ -42,16 +40,14 @@ export default function RootLayout({
             <body>
                 <ScrollAnchorProvider>
                     <ClusterProvider>
-                        <TokenRegistryProvider>
-                            <ClusterModal />
-                            <div className="main-content pb-4">
-                                <Navbar />
-                                <MessageBanner />
-                                <ClusterStatusBanner />
-                                <SearchBar />
-                                {children}
-                            </div>
-                        </TokenRegistryProvider>
+                        <ClusterModal />
+                        <div className="main-content pb-4">
+                            <Navbar />
+                            <MessageBanner />
+                            <ClusterStatusBanner />
+                            <SearchBar />
+                            {children}
+                        </div>
                     </ClusterProvider>
                 </ScrollAnchorProvider>
                 {analytics}

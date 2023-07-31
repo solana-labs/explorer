@@ -1,4 +1,3 @@
-import { TokenInfoMap } from '@solana/spl-token-registry';
 import {
     ParsedInstruction,
     ParsedTransaction,
@@ -12,13 +11,18 @@ import bs58 from 'bs58';
 
 import { LOADER_IDS, PROGRAM_INFO_BY_ID, SPECIAL_IDS, SYSVAR_IDS } from './programs';
 
+export type TokenLabelInfo = {
+    name?: string,
+    symbol?: string,
+};
+
 export function getProgramName(address: string, cluster: Cluster): string {
     const label = programLabel(address, cluster);
     if (label) return label;
     return `Unknown Program (${address})`;
 }
 
-export function programLabel(address: string, cluster: Cluster): string | undefined {
+function programLabel(address: string, cluster: Cluster): string | undefined {
     const programInfo = PROGRAM_INFO_BY_ID[address];
     if (programInfo && programInfo.deployments.includes(cluster)) {
         return programInfo.name;
@@ -27,28 +31,26 @@ export function programLabel(address: string, cluster: Cluster): string | undefi
     return LOADER_IDS[address] as string;
 }
 
-export function tokenLabel(address: string, tokenRegistry?: TokenInfoMap): string | undefined {
-    if (!tokenRegistry) return;
-    const tokenInfo = tokenRegistry.get(address);
-    if (!tokenInfo) return;
+function tokenLabel_(tokenInfo?: TokenLabelInfo): string | undefined {
+    if (!tokenInfo || !tokenInfo.name || !tokenInfo.symbol) return;
     if (tokenInfo.name === tokenInfo.symbol) {
         return tokenInfo.name;
     }
     return `${tokenInfo.symbol} - ${tokenInfo.name}`;
 }
 
-export function addressLabel(address: string, cluster: Cluster, tokenRegistry?: TokenInfoMap): string | undefined {
+export function addressLabel(address: string, cluster: Cluster, tokenInfo?: TokenLabelInfo): string | undefined {
     return (
         programLabel(address, cluster) ||
         SYSVAR_IDS[address] ||
         SPECIAL_IDS[address] ||
-        tokenLabel(address, tokenRegistry) ||
+        tokenLabel_(tokenInfo) ||
         SerumMarketRegistry.get(address, cluster)
     );
 }
 
-export function displayAddress(address: string, cluster: Cluster, tokenRegistry: TokenInfoMap): string {
-    return addressLabel(address, cluster, tokenRegistry) || address;
+export function displayAddress(address: string, cluster: Cluster, tokenInfo?: TokenLabelInfo): string {
+    return addressLabel(address, cluster, tokenInfo) || address;
 }
 
 export function intoTransactionInstruction(

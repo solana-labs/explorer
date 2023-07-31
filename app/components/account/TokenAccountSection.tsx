@@ -5,7 +5,6 @@ import { TableCardBody } from '@components/common/TableCardBody';
 import { Account, NFTData, TokenProgramData, useFetchAccountInfo } from '@providers/accounts';
 import isMetaplexNFT from '@providers/accounts/utils/isMetaplexNFT';
 import { useCluster } from '@providers/cluster';
-import { useTokenRegistry } from '@providers/token-registry';
 import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { CoingeckoStatus, useCoinGecko } from '@utils/coingecko';
@@ -15,8 +14,12 @@ import { reportError } from '@utils/sentry';
 import { addressLabel } from '@utils/tx';
 import { MintAccountInfo, MultisigAccountInfo, TokenAccount, TokenAccountInfo } from '@validators/accounts/token';
 import { BigNumber } from 'bignumber.js';
+import { useEffect, useMemo, useState } from 'react';
 import { ExternalLink, RefreshCw } from 'react-feather';
 import { create } from 'superstruct';
+import useSWR from 'swr';
+
+import { FullLegacyTokenInfo, getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 
 import { UnknownAccountCard } from './UnknownAccountCard';
 
@@ -33,25 +36,25 @@ const getEthAddress = (link?: string) => {
     return address;
 };
 
-export function TokenAccountSection({ account, tokenAccount }: { account: Account; tokenAccount: TokenAccount }) {
+export function TokenAccountSection({ account, tokenAccount, tokenInfo }: { account: Account; tokenAccount: TokenAccount, tokenInfo?: FullLegacyTokenInfo }) {
     const { cluster } = useCluster();
 
     try {
         switch (tokenAccount.type) {
             case 'mint': {
-                const info = create(tokenAccount.info, MintAccountInfo);
+                const mintInfo = create(tokenAccount.info, MintAccountInfo);
 
-                if (isMetaplexNFT(account.data.parsed, info)) {
+                if (isMetaplexNFT(account.data.parsed, mintInfo)) {
                     return (
                         <NonFungibleTokenMintAccountCard
                             account={account}
                             nftData={(account.data.parsed as TokenProgramData).nftData!}
-                            mintInfo={info}
+                            mintInfo={mintInfo}
                         />
                     );
                 }
 
-                return <FungibleTokenMintAccountCard account={account} info={info} />;
+                return <FungibleTokenMintAccountCard account={account} mintInfo={mintInfo} tokenInfo={tokenInfo} />;
             }
             case 'account': {
                 const info = create(tokenAccount.info, TokenAccountInfo);
@@ -72,12 +75,9 @@ export function TokenAccountSection({ account, tokenAccount }: { account: Accoun
     return <UnknownAccountCard account={account} />;
 }
 
-function FungibleTokenMintAccountCard({ account, info }: { account: Account; info: MintAccountInfo }) {
-    const { tokenRegistry } = useTokenRegistry();
-    const mintAddress = account.pubkey.toBase58();
+function FungibleTokenMintAccountCard({ account, mintInfo, tokenInfo }: { account: Account; mintInfo: MintAccountInfo, tokenInfo?: FullLegacyTokenInfo }) {
     const fetchInfo = useFetchAccountInfo();
     const refresh = () => fetchInfo(account.pubkey, 'parsed');
-    const tokenInfo = tokenRegistry.get(mintAddress);
 
     const bridgeContractAddress = getEthAddress(tokenInfo?.extensions?.bridgeContract);
     const assetContractAddress = getEthAddress(tokenInfo?.extensions?.assetContract);
@@ -167,9 +167,9 @@ function FungibleTokenMintAccountCard({ account, info }: { account: Account; inf
                         </td>
                     </tr>
                     <tr>
-                        <td>{info.mintAuthority === null ? 'Fixed Supply' : 'Current Supply'}</td>
+                        <td>{mintInfo.mintAuthority === null ? 'Fixed Supply' : 'Current Supply'}</td>
                         <td className="text-lg-end">
-                            {normalizeTokenAmount(info.supply, info.decimals).toLocaleString('en-US', {
+                            {normalizeTokenAmount(mintInfo.supply, mintInfo.decimals).toLocaleString('en-US', {
                                 maximumFractionDigits: 20,
                             })}
                         </td>
@@ -185,27 +185,27 @@ function FungibleTokenMintAccountCard({ account, info }: { account: Account; inf
                             </td>
                         </tr>
                     )}
-                    {info.mintAuthority && (
+                    {mintInfo.mintAuthority && (
                         <tr>
                             <td>Mint Authority</td>
                             <td className="text-lg-end">
-                                <Address pubkey={info.mintAuthority} alignRight link />
+                                <Address pubkey={mintInfo.mintAuthority} alignRight link />
                             </td>
                         </tr>
                     )}
-                    {info.freezeAuthority && (
+                    {mintInfo.freezeAuthority && (
                         <tr>
                             <td>Freeze Authority</td>
                             <td className="text-lg-end">
-                                <Address pubkey={info.freezeAuthority} alignRight link />
+                                <Address pubkey={mintInfo.freezeAuthority} alignRight link />
                             </td>
                         </tr>
                     )}
                     <tr>
                         <td>Decimals</td>
-                        <td className="text-lg-end">{info.decimals}</td>
+                        <td className="text-lg-end">{mintInfo.decimals}</td>
                     </tr>
-                    {!info.isInitialized && (
+                    {!mintInfo.isInitialized && (
                         <tr>
                             <td>Status</td>
                             <td className="text-lg-end">Uninitialized</td>
@@ -342,24 +342,31 @@ function NonFungibleTokenMintAccountCard({
     );
 }
 
+async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', string, Cluster, string]) {
+    return await getTokenInfo(new PublicKey(address), cluster, url);
+}
+
 function TokenAccountCard({ account, info }: { account: Account; info: TokenAccountInfo }) {
     const refresh = useFetchAccountInfo();
-    const { cluster } = useCluster();
-    const { tokenRegistry } = useTokenRegistry();
-    const label = addressLabel(account.pubkey.toBase58(), cluster, tokenRegistry);
+    const { cluster, url } = useCluster();
+    const label = addressLabel(account.pubkey.toBase58(), cluster);
+    const swrKey = useMemo(() => getTokenInfoSwrKey(info.mint.toString(), cluster, url), [cluster, url]);
+    const { data: tokenInfo } = useSWR(swrKey, fetchTokenInfo);
+    const [symbol, setSymbol] = useState<string | undefined>(undefined);
 
-    let unit, balance;
-    if (info.isNative) {
-        unit = 'SOL';
-        balance = (
-            <>
-                ◎<span className="font-monospace">{new BigNumber(info.tokenAmount.uiAmountString).toFormat(9)}</span>
-            </>
-        );
-    } else {
-        balance = <>{info.tokenAmount.uiAmountString}</>;
-        unit = tokenRegistry.get(info.mint.toBase58())?.symbol || 'tokens';
-    }
+    const balance = info.isNative ? (
+        <>
+            {'\u25ce'}<span className="font-monospace">{new BigNumber(info.tokenAmount.uiAmountString).toFormat(9)}</span>
+        </>
+    ) : <>{info.tokenAmount.uiAmountString}</>;
+
+    useEffect(() => {
+        if (info.isNative) {
+            setSymbol('SOL');
+        } else {
+            setSymbol(tokenInfo?.symbol)
+        }
+    }, [tokenInfo])
 
     return (
         <div className="card">
@@ -387,7 +394,7 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
                 <tr>
                     <td>Mint</td>
                     <td className="text-lg-end">
-                        <Address pubkey={info.mint} alignRight link />
+                        <Address pubkey={info.mint} alignRight link tokenLabelInfo={tokenInfo} />
                     </td>
                 </tr>
                 <tr>
@@ -397,7 +404,7 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
                     </td>
                 </tr>
                 <tr>
-                    <td>Token balance ({unit})</td>
+                    <td>Token balance {typeof symbol === 'string' && `(${symbol})`}</td>
                     <td className="text-lg-end">{balance}</td>
                 </tr>
                 {info.state === 'uninitialized' && (

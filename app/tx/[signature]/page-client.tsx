@@ -215,9 +215,8 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
             if (cluster === Cluster.MainnetBeta) {
                 errorLink = err.errorLink;
             } else {
-                errorLink = `${err.errorLink}?cluster=${clusterName.toLowerCase()}${
-                    cluster === Cluster.Custom ? `&customUrl=${clusterUrl}` : ''
-                }`;
+                errorLink = `${err.errorLink}?cluster=${clusterName.toLowerCase()}${cluster === Cluster.Custom ? `&customUrl=${clusterUrl}` : ''
+                    }`;
             }
         }
     }
@@ -409,7 +408,7 @@ function AccountsCard({ signature }: SignatureProps) {
             <tr key={key}>
                 <td>{index + 1}</td>
                 <td>
-                    <Address pubkey={pubkey} link />
+                    <Address pubkey={pubkey} link fetchTokenLabelInfo />
                 </td>
                 <td>
                     <BalanceDelta delta={delta} isSol />

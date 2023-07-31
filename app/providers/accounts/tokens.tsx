@@ -10,9 +10,14 @@ import { TokenAccountInfo } from '@validators/accounts/token';
 import React from 'react';
 import { create } from 'superstruct';
 
+import { getTokenInfos } from '@/app/utils/token-info';
+
 export type TokenInfoWithPubkey = {
     info: TokenAccountInfo;
     pubkey: PublicKey;
+    logoURI?: string;
+    symbol?: string;
+    name?: string;
 };
 
 interface AccountTokens {
@@ -58,12 +63,33 @@ async function fetchAccountTokens(dispatch: Dispatch, pubkey: PublicKey, cluster
         const { value } = await new Connection(url, 'processed').getParsedTokenAccountsByOwner(pubkey, {
             programId: TOKEN_PROGRAM_ID,
         });
+
+        const tokens: TokenInfoWithPubkey[] = value.slice(0, 101).map(accountInfo => {
+            const parsedInfo = accountInfo.account.data.parsed.info;
+            const info = create(parsedInfo, TokenAccountInfo);
+            return { info, pubkey: accountInfo.pubkey };
+        });
+
+        // Fetch symbols and logos for tokens
+        const tokenMintInfos = await getTokenInfos(tokens.map(t => t.info.mint), cluster, url);
+        if (tokenMintInfos) {
+            const mappedTokenInfos = Object.fromEntries(tokenMintInfos.map(t => [t.address, {
+                logoURI: t.logoURI,
+                name: t.name,
+                symbol: t.symbol
+            }]))
+            tokens.forEach(t => {
+                const tokenInfo = mappedTokenInfos[t.info.mint.toString()]
+                if (tokenInfo) {
+                    t.logoURI = tokenInfo.logoURI ?? undefined;
+                    t.symbol = tokenInfo.symbol;
+                    t.name = tokenInfo.name;
+                }
+            })
+        }
+
         data = {
-            tokens: value.slice(0, 101).map(accountInfo => {
-                const parsedInfo = accountInfo.account.data.parsed.info;
-                const info = create(parsedInfo, TokenAccountInfo);
-                return { info, pubkey: accountInfo.pubkey };
-            }),
+            tokens
         };
         status = FetchStatus.Fetched;
     } catch (error) {
