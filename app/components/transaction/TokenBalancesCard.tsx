@@ -43,12 +43,12 @@ export function TokenBalancesCard({ signature }: SignatureProps) {
     return <TokenBalancesCardInner rows={rows} />
 }
 
-type TokenBalancesCardInnerProps = {
+export type TokenBalancesCardInnerProps = {
     rows: TokenBalanceRow[]
 }
 
 
-function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
+export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
     const { cluster, url } = useCluster();
     const [tokenInfosLoading, setTokenInfosLoading] = useState(true);
     const [tokenSymbols, setTokenSymbols] = useState<Map<string, string>>(new Map());
@@ -107,7 +107,7 @@ function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
     );
 }
 
-function generateTokenBalanceRows(
+export function generateTokenBalanceRows(
     preTokenBalances: TokenBalance[],
     postTokenBalances: TokenBalance[],
     accounts: ParsedMessageAccount[]
