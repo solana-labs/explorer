@@ -4,7 +4,6 @@ import ErrorLogo from '@img/logos-solana/dark-solana-logo.svg';
 import { MetadataJson, MetaDataJsonCategory, MetadataJsonFile } from '@metaplex/js';
 import { PublicKey } from '@solana/web3.js';
 import { getLast } from '@utils/index';
-import { useCachedImage } from '@utils/useCachedImage';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -27,59 +26,20 @@ const ViewOriginalArtContentLink = ({ src }: { src: string }) => {
     );
 };
 
-export const CachedImageContent = ({ uri }: { uri?: string }) => {
+export const NFTImageContent = ({ uri }: { uri?: string }) => {
     const [isLoading, setIsLoading] = useState(true);
-    const { data: cachedImage, error } = useCachedImage(uri || '');
-    let imageElement;
-    if (cachedImage?.__type === 'fallbackUrl') {
-        imageElement = (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-                alt="nft"
-                onLoad={() => {
-                    setIsLoading(false);
-                }}
-                src={cachedImage.url}
-                width="100%"
-            />
-        );
-    } else if (cachedImage?.__type === 'objectUrl') {
-        imageElement = (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-                alt="nft"
-                onLoad={() => {
-                    setIsLoading(false);
-                }}
-                src={cachedImage.url}
-                width="100%"
-            />
-        );
-    }
+
     return (
-        <>
-            {error ? (
-                <div className={'art-error-image-placeholder'}>
-                    <ErrorPlaceHolder />
-                    <h6 className={'header-pretitle mt-2'}>Error Loading Image</h6>
-                </div>
-            ) : (
-                <div style={{ maxHeight: 200, width: 150 }}>
-                    {isLoading && <LoadingArtPlaceholder />}
-                    {imageElement && (
-                        <>
-                            <div
-                                className={`rounded mx-auto ${isLoading ? 'd-none' : 'd-block'}`}
-                                style={{ overflow: 'hidden' }}
-                            >
-                                {imageElement}
-                            </div>
-                        </>
-                    )}
-                    {!isLoading && uri && <ViewOriginalArtContentLink src={uri} />}
-                </div>
-            )}
-        </>
+        <div style={{ maxHeight: 200, width: 150 }}>
+            {isLoading && <LoadingArtPlaceholder />}
+            <div
+                className={`rounded mx-auto ${isLoading ? 'd-none' : 'd-block'}`}
+                style={{ overflow: 'hidden' }}
+            >
+                <img alt="nft" src={uri} width="100%" onLoad={() => setIsLoading(false)} />
+            </div>
+            {!isLoading && uri && <ViewOriginalArtContentLink src={uri} />}
+        </div>
     );
 };
 
@@ -220,7 +180,7 @@ export const ArtContent = ({
         ) : category === 'html' || animationUrlExt === 'html' ? (
             <HTMLContent animationUrl={animationURL} files={files} />
         ) : (
-            <CachedImageContent uri={uri} />
+            <NFTImageContent uri={uri} />
         );
 
     return (
