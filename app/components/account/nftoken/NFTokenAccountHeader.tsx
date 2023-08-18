@@ -1,6 +1,6 @@
 import { InfoTooltip } from '@components/common/InfoTooltip';
 import { LoadingArtPlaceholder } from '@components/common/LoadingArtPlaceholder';
-import { CachedImageContent } from '@components/common/NFTArt';
+import { NFTImageContent } from '@components/common/NFTArt';
 import { Account } from '@providers/accounts';
 import React, { Suspense } from 'react';
 
@@ -42,7 +42,7 @@ export function NFTokenNFTHeader({ nft }: { nft: NftokenTypes.NftAccount }) {
     return (
         <div className="row">
             <div className="col-auto ms-2 d-flex align-items-center">
-                <CachedImageContent uri={metadata?.image.trim()} />
+                <NFTImageContent uri={metadata?.image.trim()} />
             </div>
 
             <div className="col mb-3 ms-0.5 mt-3">
@@ -55,9 +55,8 @@ export function NFTokenNFTHeader({ nft }: { nft: NftokenTypes.NftAccount }) {
 
                 <div>
                     <div className={'d-inline-flex align-items-center mt-2'}>
-                        <span className="badge badge-pill bg-dark">{`${
-                            nft.authority_can_update ? 'Mutable' : 'Immutable'
-                        }`}</span>
+                        <span className="badge badge-pill bg-dark">{`${nft.authority_can_update ? 'Mutable' : 'Immutable'
+                            }`}</span>
 
                         <InfoTooltip
                             bottom
@@ -80,7 +79,7 @@ export function NFTokenCollectionHeader({ collection }: { collection: NftokenTyp
     return (
         <div className="row">
             <div className="col-auto ms-2 d-flex align-items-center">
-                <CachedImageContent uri={metadata?.image} />
+                <NFTImageContent uri={metadata?.image} />
             </div>
 
             <div className="col mb-3 ms-0.5 mt-3">
@@ -93,9 +92,8 @@ export function NFTokenCollectionHeader({ collection }: { collection: NftokenTyp
 
                 <div>
                     <div className={'d-inline-flex align-items-center mt-2'}>
-                        <span className="badge badge-pill bg-dark">{`${
-                            collection.authority_can_update ? 'Mutable' : 'Immutable'
-                        }`}</span>
+                        <span className="badge badge-pill bg-dark">{`${collection.authority_can_update ? 'Mutable' : 'Immutable'
+                            }`}</span>
 
                         <InfoTooltip
                             bottom

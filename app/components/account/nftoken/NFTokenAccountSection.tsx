@@ -2,7 +2,6 @@ import { Address } from '@components/common/Address';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { Account, useFetchAccountInfo } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
-import { useCachedImage } from '@utils/useCachedImage';
 import { Suspense, useState } from 'react';
 import { RefreshCw } from 'react-feather';
 
@@ -85,39 +84,32 @@ const NFTCard = ({ nft }: { nft: NftokenTypes.NftAccount }) => {
 
 export const NftokenImage = ({ url, size }: { url: string | undefined; size: number }) => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const { data: cachedImage, error } = useCachedImage(url || '');
 
     return (
         <>
-            {error ? (
-                <div style={{ backgroundColor: 'lightgrey', height: size, width: size }} />
-            ) : (
-                <>
-                    {isLoading && (
-                        <div
-                            style={{
-                                backgroundColor: 'lightgrey',
-                                height: size,
-                                width: size,
-                            }}
-                        />
-                    )}
-                    <div className={`rounded mx-auto ${isLoading ? 'd-none' : 'd-block'}`}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                            alt="nft"
-                            height={size}
-                            onLoad={() => {
-                                setIsLoading(false);
-                            }}
-                            src={cachedImage?.url ?? ''}
-                            width={size}
-                        />
-                    </div>
-                </>
+            {isLoading && (
+                <div
+                    style={{
+                        backgroundColor: 'lightgrey',
+                        height: size,
+                        width: size,
+                    }}
+                />
             )}
+            <div className={`rounded mx-auto ${isLoading ? 'd-none' : 'd-block'}`}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                    alt="nft"
+                    height={size}
+                    onLoad={() => {
+                        setIsLoading(false);
+                    }}
+                    src={url}
+                    width={size}
+                />
+            </div>
         </>
-    );
+    )
 };
 
 const CollectionCard = ({ collection }: { collection: NftokenTypes.CollectionAccount }) => {
