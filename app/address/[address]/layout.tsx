@@ -42,7 +42,7 @@ import { redirect, useSelectedLayoutSegment } from 'next/navigation';
 import React, { PropsWithChildren } from 'react';
 import useSWRImmutable from 'swr/immutable';
 
-import { FullLegacyTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
+import { FullTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
 
 const IDENTICON_WIDTH = 64;
 
@@ -203,7 +203,7 @@ export default function AddressLayout({ children, params }: Props) {
     );
 }
 
-function AccountHeader({ address, account, tokenInfo, isTokenInfoLoading }: { address: string; account?: Account, tokenInfo?: FullLegacyTokenInfo, isTokenInfoLoading: boolean }) {
+function AccountHeader({ address, account, tokenInfo, isTokenInfoLoading }: { address: string; account?: Account, tokenInfo?: FullTokenInfo, isTokenInfoLoading: boolean }) {
     const mintInfo = useMintAccountInfo(address);
 
     const parsedData = account?.data.parsed;
@@ -230,7 +230,9 @@ function AccountHeader({ address, account, tokenInfo, isTokenInfoLoading }: { ad
                 logoURI: parsedData?.nftData?.json?.image,
                 name: parsedData?.nftData?.json?.name ?? parsedData?.nftData.metadata.data.name,
             };
-            unverified = true;
+            if (!tokenInfo?.verified) {
+                unverified = true;
+            }
         } else if (tokenInfo) {
             token = tokenInfo;
         }
@@ -292,7 +294,7 @@ function DetailsSections({
     pubkey: PublicKey;
     tab?: string;
     info?: CacheEntry<Account>;
-    tokenInfo?: FullLegacyTokenInfo;
+    tokenInfo?: FullTokenInfo;
     isTokenInfoLoading: boolean;
 }) {
     const fetchAccount = useFetchAccountInfo();
@@ -320,7 +322,7 @@ function DetailsSections({
     );
 }
 
-function InfoSection({ account, tokenInfo }: { account: Account, tokenInfo?: FullLegacyTokenInfo }) {
+function InfoSection({ account, tokenInfo }: { account: Account, tokenInfo?: FullTokenInfo }) {
     const parsedData = account.data.parsed;
     const rawData = account.data.raw;
 
