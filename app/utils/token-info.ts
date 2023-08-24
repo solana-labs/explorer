@@ -31,6 +31,9 @@ export type FullLegacyTokenInfo = {
     readonly tags?: string[],
     readonly extensions?: TokenExtensions,
 }
+export type FullTokenInfo = FullLegacyTokenInfo & {
+    readonly verified: boolean;
+};
 
 type FullLegacyTokenInfoList = {
     tokens: FullLegacyTokenInfo[]
@@ -97,7 +100,7 @@ export async function getFullTokenInfo(
     address: PublicKey,
     cluster: Cluster,
     connectionString: string
-): Promise<FullLegacyTokenInfo | undefined> {
+): Promise<FullTokenInfo | undefined> {
     const chainId = getChainId(cluster);
     if (!chainId) return undefined;
 
@@ -107,7 +110,12 @@ export async function getFullTokenInfo(
     ]);
 
     if (!sdkTokenInfo) {
-        return legacyCdnTokenInfo;
+        return legacyCdnTokenInfo
+            ? {
+                  ...legacyCdnTokenInfo,
+                  verified: true,
+              }
+            : undefined;
     }
 
     // Merge the fields, prioritising the sdk ones which are more up to date
@@ -123,8 +131,9 @@ export async function getFullTokenInfo(
         logoURI: sdkTokenInfo.logoURI ?? undefined,
         name: sdkTokenInfo.name,
         symbol: sdkTokenInfo.symbol,
-        tags
-    }
+        tags,
+        verified: !!(legacyCdnTokenInfo || sdkTokenInfo.verified),
+    };
 }
 
 export async function getTokenInfos(
