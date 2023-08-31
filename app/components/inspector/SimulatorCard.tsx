@@ -1,13 +1,14 @@
 import { ProgramLogsCardBody } from '@components/ProgramLogsCardBody';
 import { useCluster } from '@providers/cluster';
-import { AccountInfo, Connection, ParsedAccountData, ParsedMessageAccount, SimulatedTransactionAccountInfo, TokenBalance, VersionedMessage, VersionedTransaction } from '@solana/web3.js';
-import { InstructionLogs, parseProgramLogs } from '@utils/program-logs';
 import { AccountLayout, MintLayout, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { AccountInfo, Connection, ParsedAccountData, ParsedMessageAccount, SimulatedTransactionAccountInfo, TokenBalance, VersionedMessage, VersionedTransaction } from '@solana/web3.js';
 import { PublicKey } from '@solana/web3.js';
+import { InstructionLogs, parseProgramLogs } from '@utils/program-logs';
 import React from 'react';
-import { TokenBalancesCardInner, TokenBalancesCardInnerProps, generateTokenBalanceRows } from '../transaction/TokenBalancesCard';
 
-export function SimulatorCard({ message }: { message: VersionedMessage }) {
+import { generateTokenBalanceRows,TokenBalancesCardInner, TokenBalancesCardInnerProps } from '../transaction/TokenBalancesCard';
+
+export function SimulatorCard({ message, showTokenBalanceChanges }: { message: VersionedMessage; showTokenBalanceChanges: boolean }) {
     const { cluster, url } = useCluster();
     const { simulate, simulating, simulationLogs: logs, simulationError, simulationTokenBalanceRows } = useSimulator(message);
     if (simulating) {
@@ -62,7 +63,7 @@ export function SimulatorCard({ message }: { message: VersionedMessage }) {
                 </div>
                 <ProgramLogsCardBody message={message} logs={logs} cluster={cluster} url={url} />
             </div>
-            {simulationTokenBalanceRows && simulationTokenBalanceRows.rows.length && (
+            {showTokenBalanceChanges && simulationTokenBalanceRows && !simulationError && simulationTokenBalanceRows.rows.length && (
                 <div className="card">
                     <TokenBalancesCardInner rows={simulationTokenBalanceRows.rows} />
                 </div>
@@ -99,13 +100,13 @@ function useSimulator(message: VersionedMessage) {
                 // Simulate without signers to skip signer verification. Request
                 // all account data after the simulation.
                 const resp = await connection.simulateTransaction(new VersionedTransaction(message), {
-                    replaceRecentBlockhash: true,
                     accounts: {
-                        encoding: 'base64',
                         addresses: accountKeys.map(function (key) {
                             return key.toBase58();
                         }),
+                        encoding: 'base64',
                     },
+                    replaceRecentBlockhash: true,
                 });
 
                 const mintToDecimals: { [mintPk: string]: number} =  getMintDecimals(
@@ -125,7 +126,8 @@ function useSimulator(message: VersionedMessage) {
                     const accountOwnerPost = resp.value.accounts?.at(index)?.owner;
 
                     if (
-                        parsedAccountPre?.owner.toBase58() == TOKEN_PROGRAM_ID.toBase58() &&
+                        (parsedAccountPre?.owner.toBase58() == TOKEN_PROGRAM_ID.toBase58() ||
+                        parsedAccountPre?.owner.toBase58() == "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb") &&
                         (parsedAccountPre?.data as ParsedAccountData).parsed.type === 'account'
                     ) {
                         const mint = (parsedAccountPre?.data as ParsedAccountData).parsed.info.mint;
@@ -141,8 +143,9 @@ function useSimulator(message: VersionedMessage) {
                     }
 
                     if (
-                        accountOwnerPost === TOKEN_PROGRAM_ID.toBase58() &&
-                        Buffer.from(accountDataPost!, 'base64').length === 165
+                        (accountOwnerPost === TOKEN_PROGRAM_ID.toBase58() ||
+                        accountOwnerPost === "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb") &&
+                        Buffer.from(accountDataPost!, 'base64').length >= 165
                     ) {
                         const accountParsedPost = AccountLayout.decode(Buffer.from(accountDataPost!, 'base64'));
                         const mint = new PublicKey(accountParsedPost.mint);

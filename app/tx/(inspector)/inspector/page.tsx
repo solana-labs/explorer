@@ -7,5 +7,5 @@ type Props = Readonly<{
 }>;
 
 export default function Page({ params: { signature } }: Props) {
-    return <TransactionInspectorPage signature={signature} />;
+    return <TransactionInspectorPage signature={signature} showTokenBalanceChanges={true} />;
 }
