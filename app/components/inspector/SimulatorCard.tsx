@@ -1,7 +1,7 @@
 import { ProgramLogsCardBody } from '@components/ProgramLogsCardBody';
 import { useCluster } from '@providers/cluster';
 import { AccountLayout, MintLayout, TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { AccountInfo, Connection, ParsedAccountData, ParsedMessageAccount, SimulatedTransactionAccountInfo, TokenBalance, VersionedMessage, VersionedTransaction } from '@solana/web3.js';
+import { AccountInfo, AddressLookupTableAccount, Connection, MessageAddressTableLookup, ParsedAccountData, ParsedMessageAccount, SimulatedTransactionAccountInfo, TokenBalance, VersionedMessage, VersionedTransaction } from '@solana/web3.js';
 import { PublicKey } from '@solana/web3.js';
 import { InstructionLogs, parseProgramLogs } from '@utils/program-logs';
 import React from 'react';
@@ -93,8 +93,24 @@ function useSimulator(message: VersionedMessage) {
         const connection = new Connection(url, 'confirmed');
         (async () => {
             try {
+                const addressTableLookups: MessageAddressTableLookup[] = message.addressTableLookups;
+                const addressTableLookupKeys: PublicKey[] = addressTableLookups.map((addressTableLookup: MessageAddressTableLookup) => {
+                    return addressTableLookup.accountKey;
+                });
+                const addressTableLookupsFetched: (AccountInfo<Buffer> | null)[] = await connection.getMultipleAccountsInfo(addressTableLookupKeys);
+                const nonNullAddressTableLookups: AccountInfo<Buffer>[] = addressTableLookupsFetched.filter((o): o is AccountInfo<Buffer> => !!o);
+
+                const addressLookupTablesParsed: AddressLookupTableAccount[] = nonNullAddressTableLookups.map((addressTableLookup: AccountInfo<Buffer>, index) => {
+                    return new AddressLookupTableAccount({
+                        key: addressTableLookupKeys[index],
+                        state: AddressLookupTableAccount.deserialize(addressTableLookup.data)
+                    });
+                })
+
                 // Fetch all the accounts before simulating
-                const accountKeys = message.getAccountKeys().staticAccountKeys;
+                const accountKeys = message.getAccountKeys({
+                    addressLookupTableAccounts: addressLookupTablesParsed,
+                }).staticAccountKeys;
                 const parsedAccountsPre = await connection.getMultipleParsedAccounts(accountKeys);
 
                 // Simulate without signers to skip signer verification. Request
@@ -196,6 +212,10 @@ function useSimulator(message: VersionedMessage) {
                 } else {
                     // Prettify logs
                     setLogs(parseProgramLogs(resp.value.logs, resp.value.err, cluster));
+                }
+                // If the response has an error, the logs will say what it it, so no need to parse here.
+                if (resp.value.err) {
+                    setError('TransactionError');
                 }
             } catch (err) {
                 console.error(err);
