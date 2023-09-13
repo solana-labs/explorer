@@ -64,9 +64,7 @@ export function SimulatorCard({ message, showTokenBalanceChanges }: { message: V
                 <ProgramLogsCardBody message={message} logs={logs} cluster={cluster} url={url} />
             </div>
             {showTokenBalanceChanges && simulationTokenBalanceRows && !simulationError && simulationTokenBalanceRows.rows.length && (
-                <div className="card">
-                    <TokenBalancesCardInner rows={simulationTokenBalanceRows.rows} />
-                </div>
+                <TokenBalancesCardInner rows={simulationTokenBalanceRows.rows} />
             )}
         </>
     );
