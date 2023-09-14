@@ -15,5 +15,5 @@ export async function generateMetadata({ params: { signature } }: Props): Promis
 }
 
 export default function TransactionInspectionPage({ params: { signature } }: Props) {
-    return <TransactionInspectorPage signature={signature} />;
+    return <TransactionInspectorPage signature={signature} showTokenBalanceChanges={false} />;
 }

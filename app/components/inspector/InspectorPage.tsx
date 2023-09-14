@@ -128,7 +128,7 @@ function decodeUrlParams(params: URLSearchParams): [TransactionData | string, UR
     }
 }
 
-export function TransactionInspectorPage({ signature }: { signature?: string }) {
+export function TransactionInspectorPage({ signature, showTokenBalanceChanges }: { signature?: string; showTokenBalanceChanges: boolean }) {
     const [transaction, setTransaction] = React.useState<TransactionData>();
     const currentSearchParams = useSearchParams();
     const currentPathname = usePathname();
@@ -196,9 +196,9 @@ export function TransactionInspectorPage({ signature }: { signature?: string }) 
                 </div>
             </div>
             {signature ? (
-                <PermalinkView signature={signature} reset={reset} />
+                <PermalinkView signature={signature} reset={reset} showTokenBalanceChanges={showTokenBalanceChanges} />
             ) : transaction ? (
-                <LoadedView transaction={transaction} onClear={reset} />
+                <LoadedView transaction={transaction} onClear={reset} showTokenBalanceChanges={showTokenBalanceChanges} />
             ) : (
                 <RawInput value={paramString} setTransactionData={setTransaction} />
             )}
@@ -206,7 +206,7 @@ export function TransactionInspectorPage({ signature }: { signature?: string }) 
     );
 }
 
-function PermalinkView({ signature }: { signature: string; reset: () => void }) {
+function PermalinkView({ signature, showTokenBalanceChanges }: { signature: string; reset: () => void; showTokenBalanceChanges: boolean }) {
     const details = useRawTransactionDetails(signature);
     const fetchTransaction = useFetchRawTransaction();
     const refreshTransaction = () => fetchTransaction(signature);
@@ -233,10 +233,10 @@ function PermalinkView({ signature }: { signature: string; reset: () => void }) 
     const { message, signatures } = transaction;
     const tx = { message, rawMessage: message.serialize(), signatures };
 
-    return <LoadedView transaction={tx} onClear={reset} />;
+    return <LoadedView transaction={tx} onClear={reset} showTokenBalanceChanges={showTokenBalanceChanges} />;
 }
 
-function LoadedView({ transaction, onClear }: { transaction: TransactionData; onClear: () => void }) {
+function LoadedView({ transaction, onClear, showTokenBalanceChanges }: { transaction: TransactionData; onClear: () => void; showTokenBalanceChanges: boolean }) {
     const { message, rawMessage, signatures } = transaction;
 
     const fetchAccountInfo = useFetchAccountInfo();
@@ -249,7 +249,7 @@ function LoadedView({ transaction, onClear }: { transaction: TransactionData; on
     return (
         <>
             <OverviewCard message={message} raw={rawMessage} onClear={onClear} />
-            <SimulatorCard message={message} />
+            <SimulatorCard message={message} showTokenBalanceChanges={showTokenBalanceChanges} />
             {signatures && <TransactionSignatures message={message} signatures={signatures} rawMessage={rawMessage} />}
             <AccountsCard message={message} />
             <AddressTableLookupsCard message={message} />
