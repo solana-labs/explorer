@@ -132,7 +132,7 @@ export async function getFullTokenInfo(
         name: sdkTokenInfo.name,
         symbol: sdkTokenInfo.symbol,
         tags,
-        verified: !!(legacyCdnTokenInfo || sdkTokenInfo.verified),
+        verified: sdkTokenInfo.verified ?? false,
     };
 }
 
