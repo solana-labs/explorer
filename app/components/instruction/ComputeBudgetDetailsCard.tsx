@@ -3,7 +3,6 @@ import { SolBalance } from '@components/common/SolBalance';
 import { useCluster } from '@providers/cluster';
 import { ComputeBudgetInstruction, SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import { microLamportsToLamportsString } from '@utils/index';
-import { reportError } from '@utils/sentry';
 import React from 'react';
 
 import { InstructionCard } from './InstructionCard';
@@ -144,7 +143,7 @@ export function ComputeBudgetDetailsCard({
             }
         }
     } catch (error) {
-        reportError(error, {
+        console.error(error, {
             signature: signature,
             url: url,
         });

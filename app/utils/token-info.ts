@@ -1,43 +1,43 @@
-import { Connection, PublicKey } from "@solana/web3.js";
-import { ChainId, Client, Token, UtlConfig } from "@solflare-wallet/utl-sdk";
+import { Connection, PublicKey } from '@solana/web3.js';
+import { ChainId, Client, Token, UtlConfig } from '@solflare-wallet/utl-sdk';
 
-import { Cluster } from "./cluster";
+import { Cluster } from './cluster';
 
 type TokenExtensions = {
-    readonly website?: string,
-    readonly bridgeContract?: string,
-    readonly assetContract?: string,
-    readonly address?: string,
-    readonly explorer?: string,
-    readonly twitter?: string,
-    readonly github?: string,
-    readonly medium?: string,
-    readonly tgann?: string,
-    readonly tggroup?: string,
-    readonly discord?: string,
-    readonly serumV3Usdt?: string,
-    readonly serumV3Usdc?: string,
-    readonly coingeckoId?: string,
-    readonly imageUrl?: string,
-    readonly description?: string,
-}
+    readonly website?: string;
+    readonly bridgeContract?: string;
+    readonly assetContract?: string;
+    readonly address?: string;
+    readonly explorer?: string;
+    readonly twitter?: string;
+    readonly github?: string;
+    readonly medium?: string;
+    readonly tgann?: string;
+    readonly tggroup?: string;
+    readonly discord?: string;
+    readonly serumV3Usdt?: string;
+    readonly serumV3Usdc?: string;
+    readonly coingeckoId?: string;
+    readonly imageUrl?: string;
+    readonly description?: string;
+};
 export type FullLegacyTokenInfo = {
-    readonly chainId: number,
-    readonly address: string,
-    readonly name: string,
-    readonly decimals: number,
-    readonly symbol: string,
-    readonly logoURI?: string,
-    readonly tags?: string[],
-    readonly extensions?: TokenExtensions,
-}
+    readonly chainId: number;
+    readonly address: string;
+    readonly name: string;
+    readonly decimals: number;
+    readonly symbol: string;
+    readonly logoURI?: string;
+    readonly tags?: string[];
+    readonly extensions?: TokenExtensions;
+};
 export type FullTokenInfo = FullLegacyTokenInfo & {
     readonly verified: boolean;
 };
 
 type FullLegacyTokenInfoList = {
-    tokens: FullLegacyTokenInfo[]
-}
+    tokens: FullLegacyTokenInfo[];
+};
 
 function getChainId(cluster: Cluster): ChainId | undefined {
     if (cluster === Cluster.MainnetBeta) return ChainId.MAINNET;
@@ -46,17 +46,14 @@ function getChainId(cluster: Cluster): ChainId | undefined {
     else return undefined;
 }
 
-function makeUtlClient(
-    cluster: Cluster,
-    connectionString: string
-): Client | undefined {
+function makeUtlClient(cluster: Cluster, connectionString: string): Client | undefined {
     const chainId = getChainId(cluster);
     if (!chainId) return undefined;
 
     const config: UtlConfig = new UtlConfig({
         chainId,
         connection: new Connection(connectionString),
-    })
+    });
 
     return new Client(config);
 }
@@ -80,13 +77,15 @@ async function getFullLegacyTokenInfoUsingCdn(
     address: PublicKey,
     chainId: ChainId
 ): Promise<FullLegacyTokenInfo | undefined> {
-    const tokenListResponse = await fetch('https://cdn.jsdelivr.net/gh/solana-labs/token-list@latest/src/tokens/solana.tokenlist.json');
+    const tokenListResponse = await fetch(
+        'https://cdn.jsdelivr.net/gh/solana-labs/token-list@latest/src/tokens/solana.tokenlist.json'
+    );
     if (tokenListResponse.status >= 400) {
-        reportError(new Error('Error fetching token list from CDN'));
+        console.error(new Error('Error fetching token list from CDN'));
         return undefined;
     }
-    const { tokens } = await tokenListResponse.json() as FullLegacyTokenInfoList;
-    const tokenInfo = tokens.find(t => t.address === address.toString() && t.chainId === chainId)
+    const { tokens } = (await tokenListResponse.json()) as FullLegacyTokenInfoList;
+    const tokenInfo = tokens.find(t => t.address === address.toString() && t.chainId === chainId);
     return tokenInfo;
 }
 
@@ -106,7 +105,7 @@ export async function getFullTokenInfo(
 
     const [legacyCdnTokenInfo, sdkTokenInfo] = await Promise.all([
         getFullLegacyTokenInfoUsingCdn(address, chainId),
-        getTokenInfo(address, cluster, connectionString)
+        getTokenInfo(address, cluster, connectionString),
     ]);
 
     if (!sdkTokenInfo) {

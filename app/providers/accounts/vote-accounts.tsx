@@ -1,6 +1,5 @@
 import { useCluster } from '@providers/cluster';
 import { Cluster } from '@utils/cluster';
-import { reportError } from '@utils/sentry';
 import React from 'react';
 import { createDefaultRpcTransport, createSolanaRpc } from 'web3js-experimental';
 
@@ -31,7 +30,7 @@ async function fetchVoteAccounts(
         setVoteAccounts(voteAccounts);
     } catch (error) {
         if (cluster !== Cluster.Custom) {
-            reportError(error, { url });
+            console.error(error, { url });
         }
     }
 }
