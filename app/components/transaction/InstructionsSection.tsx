@@ -27,7 +27,6 @@ import { useAnchorProgram } from '@providers/anchor';
 import { useCluster } from '@providers/cluster';
 import { useTransactionDetails, useTransactionStatus } from '@providers/transactions';
 import { useFetchTransactionDetails } from '@providers/transactions/parsed';
-import { ErrorBoundary } from '@sentry/nextjs';
 import {
     ComputeBudgetProgram,
     ParsedInnerInstruction,
@@ -41,6 +40,7 @@ import { Cluster } from '@utils/cluster';
 import { INNER_INSTRUCTIONS_START_SLOT, SignatureProps } from '@utils/index';
 import { intoTransactionInstruction } from '@utils/tx';
 import React from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
 import { isMangoInstruction } from '../instruction/mango/types';

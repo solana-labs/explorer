@@ -21,7 +21,6 @@ import { ConfirmedSignatureInfo, ParsedInstruction, PartiallyDecodedInstruction,
 import { Cluster } from '@utils/cluster';
 import { INNER_INSTRUCTIONS_START_SLOT } from '@utils/index';
 import { getTokenProgramInstructionName } from '@utils/instruction';
-import { reportError } from '@utils/sentry';
 import { displayAddress, intoTransactionInstruction } from '@utils/tx';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
@@ -401,28 +400,28 @@ const TokenTransactionRow = React.memo(function TokenTransactionRow({
                     try {
                         name = parseSerumInstructionTitle(transactionInstruction);
                     } catch (error) {
-                        reportError(error, { signature: tx.signature });
+                        console.error(error, { signature: tx.signature });
                         return undefined;
                     }
                 } else if (transactionInstruction && isTokenSwapInstruction(transactionInstruction)) {
                     try {
                         name = parseTokenSwapInstructionTitle(transactionInstruction);
                     } catch (error) {
-                        reportError(error, { signature: tx.signature });
+                        console.error(error, { signature: tx.signature });
                         return undefined;
                     }
                 } else if (transactionInstruction && isTokenLendingInstruction(transactionInstruction)) {
                     try {
                         name = parseTokenLendingInstructionTitle(transactionInstruction);
                     } catch (error) {
-                        reportError(error, { signature: tx.signature });
+                        console.error(error, { signature: tx.signature });
                         return undefined;
                     }
                 } else if (transactionInstruction && isMangoInstruction(transactionInstruction)) {
                     try {
                         name = parseMangoInstructionTitle(transactionInstruction);
                     } catch (error) {
-                        reportError(error, { signature: tx.signature });
+                        console.error(error, { signature: tx.signature });
                         return undefined;
                     }
                 } else {

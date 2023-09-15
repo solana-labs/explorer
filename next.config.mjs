@@ -1,5 +1,3 @@
-import { withSentryConfig } from "@sentry/nextjs";
-
 const ADDRESS_ALIASES = ["account", "accounts", "addresses"];
 const TX_ALIASES = ["txs", "txn", "txns", "transaction", "transactions"];
 const SUPPLY_ALIASES = ['accounts', 'accounts/top'];
@@ -57,30 +55,4 @@ const nextConfig = {
 };
 
 
-export default withSentryConfig(nextConfig,
-  // Sentry Webpack options
-  {
-    // For all available options, see:
-    // https://github.com/getsentry/sentry-webpack-plugin#options
-    org: "solana",
-    project: "explorer",
-    silent: true, // Suppresses source map uploading logs during build
-
-  },
-  // Sentry config options
-  {
-    // For all available options, see:
-    // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
-
-    // Automatically tree-shake Sentry logger statements to reduce bundle size
-    disableLogger: true,
-
-    // Hides source maps from generated client bundles
-    hideSourceMaps: true,
-
-    // Transpiles SDK to be compatible with IE11 (increases bundle size)
-    transpileClientSDK: true,
-
-    // Upload a larger set of source maps for prettier stack traces (increases build time)
-    widenClientFileUpload: true,
-  });
+export default nextConfig;

@@ -4,7 +4,6 @@ import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
 import { displayTimestamp } from '@utils/date';
 import { camelToTitleCase } from '@utils/index';
-import { reportError } from '@utils/sentry';
 import { ParsedInfo } from '@validators/index';
 import React from 'react';
 import { create, Struct } from 'superstruct';
@@ -41,7 +40,7 @@ export function VoteDetailsCard(props: InstructionDetailsProps) {
                 return renderDetails<VoteSwitchInfo>(props, parsed, VoteSwitchInfo);
         }
     } catch (error) {
-        reportError(error, {
+        console.error(error, {
             url,
         });
     }

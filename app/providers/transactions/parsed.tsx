@@ -5,7 +5,6 @@ import { ActionType, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { Connection, ParsedTransactionWithMeta, TransactionSignature } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
-import { reportError } from '@utils/sentry';
 import React from 'react';
 
 export interface Details {
@@ -52,7 +51,7 @@ async function fetchDetails(dispatch: Dispatch, signature: TransactionSignature,
         fetchStatus = FetchStatus.Fetched;
     } catch (error) {
         if (cluster !== Cluster.Custom) {
-            reportError(error, { url });
+            console.error(error, { url });
         }
         fetchStatus = FetchStatus.FetchFailed;
     }
