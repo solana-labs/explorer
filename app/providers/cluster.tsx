@@ -126,8 +126,8 @@ async function updateCluster(dispatch: Dispatch, cluster: Cluster, customUrl: st
         new URL(customUrl);
 
         const transportUrl = clusterUrl(cluster, customUrl);
-        const transport = createDefaultRpcTransport({ url: transportUrl })
-        const rpc = createSolanaRpc({ transport })
+        const transport = createDefaultRpcTransport({ url: transportUrl });
+        const rpc = createSolanaRpc({ transport });
 
         const [firstAvailableBlock, epochSchedule, epochInfo] = await Promise.all([
             rpc.getFirstAvailableBlock().send(),
