@@ -14,9 +14,9 @@ export enum Status {
 type Lamports = bigint;
 
 type Supply = Readonly<{
-    circulating: Lamports,
-    nonCirculating: Lamports,
-    total: Lamports,
+    circulating: Lamports;
+    nonCirculating: Lamports;
+    total: Lamports;
 }>;
 
 type State = Supply | Status | string;
@@ -51,7 +51,9 @@ async function fetch(dispatch: Dispatch, cluster: Cluster, url: string) {
         const transport = createDefaultRpcTransport({ url });
         const rpc = createSolanaRpc({ transport });
 
-        const supplyResponse = await rpc.getSupply({ commitment: 'finalized', excludeNonCirculatingAccountsList: true }).send();
+        const supplyResponse = await rpc
+            .getSupply({ commitment: 'finalized', excludeNonCirculatingAccountsList: true })
+            .send();
         const supply: Supply = {
             circulating: supplyResponse.value.circulating,
             nonCirculating: supplyResponse.value.nonCirculating,
