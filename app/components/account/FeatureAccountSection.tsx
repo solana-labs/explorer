@@ -1,9 +1,9 @@
 import { Address } from '@components/common/Address';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { Account } from '@providers/accounts';
-import { ErrorBoundary } from '@sentry/nextjs';
 import { PublicKey } from '@solana/web3.js';
 import { parseFeatureAccount } from '@utils/parseFeatureAccount';
+import { ErrorBoundary } from 'react-error-boundary';
 
 import { UnknownAccountCard } from './UnknownAccountCard';
 

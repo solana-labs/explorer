@@ -2,7 +2,6 @@
 
 import * as Cache from '@providers/cache';
 import { useCluster } from '@providers/cluster';
-import * as Sentry from '@sentry/nextjs';
 import { Connection, PublicKey, VersionedBlockResponse } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import React from 'react';
@@ -107,7 +106,7 @@ export async function fetchBlock(dispatch: Dispatch, url: string, cluster: Clust
     } catch (err) {
         status = FetchStatus.FetchFailed;
         if (cluster !== Cluster.Custom) {
-            Sentry.captureException(err, { tags: { url } });
+            console.error(err, { tags: { url } });
         }
     }
 

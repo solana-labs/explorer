@@ -34,8 +34,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Sentry Auth Token
-.sentryclirc
-
 # Speedy Web Compiler
 .swc/

@@ -10,7 +10,6 @@ import { Cluster } from '@utils/cluster';
 import { CoingeckoStatus, useCoinGecko } from '@utils/coingecko';
 import { displayTimestampWithoutDate } from '@utils/date';
 import { abbreviatedNumber, normalizeTokenAmount } from '@utils/index';
-import { reportError } from '@utils/sentry';
 import { addressLabel } from '@utils/tx';
 import { MintAccountInfo, MultisigAccountInfo, TokenAccount, TokenAccountInfo } from '@validators/accounts/token';
 import { BigNumber } from 'bignumber.js';
@@ -67,7 +66,7 @@ export function TokenAccountSection({ account, tokenAccount, tokenInfo }: { acco
         }
     } catch (err) {
         if (cluster !== Cluster.Custom) {
-            reportError(err, {
+            console.error(err, {
                 address: account.pubkey.toBase58(),
             });
         }

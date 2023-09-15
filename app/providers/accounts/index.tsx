@@ -16,7 +16,6 @@ import {
 } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { pubkeyToString } from '@utils/index';
-import { reportError } from '@utils/sentry';
 import { ParsedAddressLookupTableAccount } from '@validators/accounts/address-lookup-table';
 import { ConfigAccount } from '@validators/accounts/config';
 import { NonceAccount } from '@validators/accounts/nonce';
@@ -250,7 +249,7 @@ async function fetchMultipleAccounts({
                         try {
                             parsedData = await handleParsedAccountData(connection, pubkey, accountData);
                         } catch (error) {
-                            reportError(error, { address: pubkey.toBase58(), url });
+                            console.error(error, { address: pubkey.toBase58(), url });
                         }
                     }
 
@@ -285,7 +284,7 @@ async function fetchMultipleAccounts({
             }
         } catch (error) {
             if (cluster !== Cluster.Custom) {
-                reportError(error, { url });
+                console.error(error, { url });
             }
 
             for (const pubkey of batch) {
@@ -491,7 +490,7 @@ export function useMintAccountInfo(address: string | undefined): MintAccountInfo
 
             return create(parsedData.parsed.info, MintAccountInfo);
         } catch (err) {
-            reportError(err, { address });
+            console.error(err, { address });
         }
     }, [address, accountInfo]);
 }
@@ -511,7 +510,7 @@ export function useTokenAccountInfo(address: string | undefined): TokenAccountIn
 
             return create(parsedData.parsed.info, TokenAccountInfo);
         } catch (err) {
-            reportError(err, { address });
+            console.error(err, { address });
         }
     }, [address, accountInfo]);
 }
