@@ -443,13 +443,14 @@ function PingBarChart({
             <div class="value">${val.mean} ms</div>
             <div class="label">
               <p class="mb-0">${val.confirmed} of ${val.submitted} confirmed</p>
-            ${val.loss
+            ${
+                val.loss
                     ? `<p class="mb-0">${val.loss.toLocaleString(undefined, {
-                        minimumFractionDigits: 2,
-                        style: 'percent',
-                    })} loss</p>`
+                          minimumFractionDigits: 2,
+                          style: 'percent',
+                      })} loss</p>`
                     : ''
-                }
+            }
             ${SERIES_INFO[series].label(seriesLength - i)}min ago
             </div>
           `;

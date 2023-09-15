@@ -1,10 +1,6 @@
 'use client';
 
-import {
-    getFilteredProgramAccounts,
-    NAME_PROGRAM_ID,
-    performReverseLookup,
-} from '@bonfida/spl-name-service';
+import { getFilteredProgramAccounts, NAME_PROGRAM_ID, performReverseLookup } from '@bonfida/spl-name-service';
 import { useCluster } from '@providers/cluster';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';

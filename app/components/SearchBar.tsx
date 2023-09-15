@@ -50,8 +50,8 @@ export function SearchBar() {
         const localOptions = buildOptions(search, cluster, clusterInfo?.epochInfo.epoch);
         const tokenOptions = await buildTokenOptions(search, cluster);
         const tokenOptionsAppendable = tokenOptions ? [tokenOptions] : [];
-        const domainOptions = hasDomainSyntax(search) && cluster === Cluster.MainnetBeta ?
-            await buildDomainOptions(search) ?? [] : [];
+        const domainOptions =
+            hasDomainSyntax(search) && cluster === Cluster.MainnetBeta ? (await buildDomainOptions(search)) ?? [] : [];
 
         return [...localOptions, ...tokenOptionsAppendable, ...domainOptions];
     }
@@ -85,7 +85,9 @@ export function SearchBar() {
                         components={{ DropdownIndicator }}
                         classNamePrefix="search-bar"
                         /* workaround for https://github.com/JedWatson/react-select/issues/5714 */
-                        onFocus={() => { selectRef.current?.handleInputChange(search, { action: 'set-value' }) }}
+                        onFocus={() => {
+                            selectRef.current?.handleInputChange(search, { action: 'set-value' });
+                        }}
                     />
                 </div>
             </div>
@@ -173,17 +175,16 @@ async function buildTokenOptions(search: string, cluster: Cluster): Promise<Sear
     if (matchedTokens.length > 0) {
         return {
             label: 'Tokens',
-            options: matchedTokens
+            options: matchedTokens,
         };
     }
 }
 
 async function buildDomainOptions(search: string) {
     const domainInfoResponse = await fetch(`/api/domain-info/${search}`);
-    const domainInfo = await domainInfoResponse.json() as FetchedDomainInfo;
+    const domainInfo = (await domainInfoResponse.json()) as FetchedDomainInfo;
 
     if (domainInfo && domainInfo.owner && domainInfo.address) {
-
         return [
             {
                 label: 'Domain Owner',
@@ -204,7 +205,8 @@ async function buildDomainOptions(search: string) {
                         value: [search],
                     },
                 ],
-            }];
+            },
+        ];
     }
 }
 
@@ -248,7 +250,7 @@ function buildOptions(rawSearch: string, cluster: Cluster, currentEpoch?: bigint
         });
 
         // Parse as BigInt but not if it starts eg 0x or 0b
-        if (currentEpoch !== undefined && !(/^0\w/.test(search)) && BigInt(search) <= currentEpoch + 1n) {
+        if (currentEpoch !== undefined && !/^0\w/.test(search) && BigInt(search) <= currentEpoch + 1n) {
             options.push({
                 label: 'Epoch',
                 options: [

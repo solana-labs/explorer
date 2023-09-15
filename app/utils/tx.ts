@@ -12,8 +12,8 @@ import bs58 from 'bs58';
 import { LOADER_IDS, PROGRAM_INFO_BY_ID, SPECIAL_IDS, SYSVAR_IDS } from './programs';
 
 export type TokenLabelInfo = {
-    name?: string,
-    symbol?: string,
+    name?: string;
+    symbol?: string;
 };
 
 export function getProgramName(address: string, cluster: Cluster): string {
