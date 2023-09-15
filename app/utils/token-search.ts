@@ -9,7 +9,6 @@
 import { Base58EncodedAddress } from 'web3js-experimental';
 
 import { Cluster } from './cluster';
-import { reportError } from './sentry';
 
 type TokenSearchApiResponseToken = {
     address: Base58EncodedAddress;
@@ -55,14 +54,14 @@ export async function searchTokens(search: string, cluster: Cluster): Promise<Se
     if (apiResponse.status >= 400) {
         try {
             const errorJsonBody = await apiResponse.json();
-            reportError(new Error('Error calling token search API'), {
+            console.error(new Error('Error calling token search API'), {
                 chainId: chainId.toString(),
                 errorJsonBody,
                 search,
             });
         } catch {
             // no JSON body for error
-            reportError(new Error('Error calling token search API'), { chainId: chainId.toString(), search });
+            console.error(new Error('Error calling token search API'), { chainId: chainId.toString(), search });
         }
     }
 

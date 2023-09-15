@@ -12,7 +12,6 @@ import {
     ParsedTransactionWithMeta,
     PartiallyDecodedInstruction,
 } from '@solana/web3.js';
-import { reportError } from '@utils/sentry';
 import { intoTransactionInstruction } from '@utils/tx';
 import { ParsedInfo } from '@validators/index';
 import { create } from 'superstruct';
@@ -65,7 +64,7 @@ export function getTokenProgramInstructionName(ix: ParsedInstruction, signatureI
         const type = create(rawType, TokenInstructionType);
         return IX_TITLES[type];
     } catch (err) {
-        reportError(err, { signature: signatureInfo.signature });
+        console.error(err, { signature: signatureInfo.signature });
         return 'Unknown';
     }
 }
@@ -100,7 +99,7 @@ export function getTokenInstructionName(
                 return parseTokenLendingInstructionTitle(transactionInstruction);
             }
         } catch (error) {
-            reportError(error, { signature: signatureInfo.signature });
+            console.error(error, { signature: signatureInfo.signature });
             return undefined;
         }
     }

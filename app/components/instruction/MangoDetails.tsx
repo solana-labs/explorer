@@ -1,6 +1,5 @@
 import { useCluster } from '@providers/cluster';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
-import { reportError } from '@utils/sentry';
 
 import { InstructionCard } from './InstructionCard';
 import { AddOracleDetailsCard } from './mango/AddOracleDetailsCard';
@@ -93,7 +92,7 @@ export function MangoDetailsCard(props: {
                 return <AddSpotMarketDetailsCard info={decodeAddSpotMarket(ix)} {...props} />;
         }
     } catch (error) {
-        reportError(error, {
+        console.error(error, {
             signature: signature,
             url: url,
         });
