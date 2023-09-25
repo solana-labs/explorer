@@ -10,7 +10,7 @@ import React from 'react';
 import { useState } from 'react';
 import useAsyncEffect from 'use-async-effect';
 
-import { getTokenInfo } from '@/app/utils/token-info';
+import { getTokenInfoWithoutOnChainFallback } from '@/app/utils/token-info';
 
 import { Copyable } from './Copyable';
 
@@ -125,7 +125,7 @@ const useTokenInfo = (fetchTokenLabelInfo: boolean | undefined, pubkey: string) 
         if (!fetchTokenLabelInfo) return;
         if (!info) {
             try {
-                const token = await getTokenInfo(new PublicKey(pubkey), cluster, url);
+                const token = await getTokenInfoWithoutOnChainFallback(new PublicKey(pubkey), cluster);
                 if (isMounted()) {
                     setInfo(token);
                 }
