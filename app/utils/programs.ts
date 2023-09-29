@@ -18,8 +18,8 @@ export enum PROGRAM_NAMES {
     ACCOUNT_COMPRESSION = 'State Compression Program',
     FEATURE_PROPOSAL = 'Feature Proposal Program',
     LENDING = 'Lending Program',
+    MEMO_1 = 'Memo Program v1',
     MEMO = 'Memo Program',
-    MEMO_2 = 'Memo Program v2',
     NAME = 'Name Service Program',
     STAKE_POOL = 'Stake Pool Program',
     SWAP = 'Swap Program',
@@ -277,11 +277,11 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     },
     Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo: {
         deployments: ALL_CLUSTERS,
-        name: PROGRAM_NAMES.MEMO,
+        name: PROGRAM_NAMES.MEMO_1,
     },
     MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr: {
         deployments: ALL_CLUSTERS,
-        name: PROGRAM_NAMES.MEMO_2,
+        name: PROGRAM_NAMES.MEMO,
     },
     Port7uDYB3wk6GJAw4KT1WpTeMtSu9bTcChBHkX2LfR: {
         deployments: [Cluster.MainnetBeta],
