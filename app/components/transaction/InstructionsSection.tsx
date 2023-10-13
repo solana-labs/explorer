@@ -54,6 +54,97 @@ export type InstructionDetailsProps = {
     childIndex?: number;
 };
 
+interface InnerInstruction {
+    index: number;
+    stackHeight: number;
+    instruction: ParsedInstruction | PartiallyDecodedInstruction;
+    innerInstructions: InnerInstruction[];
+}
+
+function makeInnerInstructionsTree(
+    innerInstructions: (ParsedInstruction | PartiallyDecodedInstruction)[],
+    index = 0,
+    stackHeight = 2
+): InnerInstruction[] {
+    const innerInstructionsTree: InnerInstruction[] = [];
+    const remainingInnerInstructions = innerInstructions.slice();
+    let currentInstruction = remainingInnerInstructions.shift();
+    if (!currentInstruction) return innerInstructionsTree;
+
+    let innerInstructionsForInnerInstruction: (ParsedInstruction | PartiallyDecodedInstruction)[] = [];
+    for (const instruction of remainingInnerInstructions) {
+        const ixStackHeight = instruction.stackHeight;
+        if (ixStackHeight > stackHeight) {
+            innerInstructionsForInnerInstruction.push(instruction);
+        } else {
+            innerInstructionsTree.push({
+                index,
+                innerInstructions: makeInnerInstructionsTree(
+                    innerInstructionsForInnerInstruction,
+                    index + 1,
+                    stackHeight + 1
+                ),
+                instruction: currentInstruction,
+                stackHeight: ixStackHeight,
+            });
+
+            index += 1 + innerInstructionsForInnerInstruction.length;
+            currentInstruction = instruction;
+            innerInstructionsForInnerInstruction = [];
+        }
+    }
+    innerInstructionsTree.push({
+        index,
+        innerInstructions: makeInnerInstructionsTree(innerInstructionsForInnerInstruction, index + 1, stackHeight + 1),
+        instruction: currentInstruction,
+        stackHeight: currentInstruction.stackHeight,
+    });
+    return innerInstructionsTree;
+}
+
+function instructionCardForInnerInstruction({
+    index,
+    innerInstruction,
+    signature,
+    tx,
+    result,
+    url,
+}: {
+    index: number;
+    innerInstruction: InnerInstruction;
+    signature: string;
+    tx: ParsedTransaction;
+    result: SignatureResult;
+    url: string;
+}) {
+    const innerCards =
+        innerInstruction.innerInstructions.length > 0
+            ? innerInstruction.innerInstructions.map(inner =>
+                  instructionCardForInnerInstruction({
+                      index,
+                      innerInstruction: inner,
+                      result,
+                      signature,
+                      tx,
+                      url,
+                  })
+              )
+            : undefined;
+    return (
+        <InstructionCard
+            key={`${index}-${innerInstruction.index}`}
+            index={index}
+            ix={innerInstruction.instruction}
+            result={result}
+            signature={signature}
+            tx={tx}
+            innerCards={innerCards}
+            childIndex={innerInstruction.index}
+            url={url}
+        />
+    );
+}
+
 export function InstructionsSection({ signature }: SignatureProps) {
     const status = useTransactionStatus(signature);
     const details = useTransactionDetails(signature);
@@ -106,22 +197,21 @@ export function InstructionsSection({ signature }: SignatureProps) {
                 {transaction.message.instructions.map((instruction, index) => {
                     const innerCards: JSX.Element[] = [];
 
-                    if (index in innerInstructions) {
-                        innerInstructions[index].forEach((ix, childIndex) => {
-                            const res = (
-                                <InstructionCard
-                                    key={`${index}-${childIndex}`}
-                                    index={index}
-                                    ix={ix}
-                                    result={result}
-                                    signature={signature}
-                                    tx={transaction}
-                                    childIndex={childIndex}
-                                    url={url}
-                                />
+                    const currentInstructionInnerInstructions = innerInstructions[index];
+                    if (currentInstructionInnerInstructions) {
+                        const innerInstructions = makeInnerInstructionsTree(currentInstructionInnerInstructions);
+                        for (const innerInstruction of innerInstructions) {
+                            innerCards.push(
+                                instructionCardForInnerInstruction({
+                                    index,
+                                    innerInstruction,
+                                    result,
+                                    signature,
+                                    tx: transaction,
+                                    url,
+                                })
                             );
-                            innerCards.push(res);
-                        });
+                        }
                     }
 
                     return (
