@@ -147,8 +147,8 @@ dependencies:
     specifier: ^1.0.9
     version: 1.0.9(react@18.2.0)
   web3js-experimental:
-    specifier: npm:@solana/web3.js@2.0.0-experimental.9232d2b
-    version: /@solana/web3.js@2.0.0-experimental.9232d2b
+    specifier: npm:@solana/web3.js@2.0.0-experimental.7adc22b
+    version: /@solana/web3.js@2.0.0-experimental.7adc22b(fastestsmallesttextencoderdecoder@1.0.22)(node-fetch@2.6.9)(ws@8.14.2)
 
 devDependencies:
   '@solana/eslint-config-solana':
@@ -3043,6 +3043,20 @@ packages:
       tslib: 2.5.0
     dev: false
 
+  /@solana/addresses@2.0.0-experimental.7adc22b(fastestsmallesttextencoderdecoder@1.0.22):
+    resolution: {integrity: sha512-g63A8sUUvBaZszkQdpQSmp9boupfH1k33VXakH4QaV5d8JNY/cMsrqoOS2vcaGra4iNZ0aC4VNzlsEDRFLAfEQ==}
+    dependencies:
+      '@solana/assertions': 2.0.0-experimental.7adc22b
+      '@solana/codecs-core': 2.0.0-experimental.7adc22b
+      '@solana/codecs-strings': 2.0.0-experimental.7adc22b(fastestsmallesttextencoderdecoder@1.0.22)
+    transitivePeerDependencies:
+      - fastestsmallesttextencoderdecoder
+    dev: false
+
+  /@solana/assertions@2.0.0-experimental.7adc22b:
+    resolution: {integrity: sha512-5oW04MYAyIMCC242YVaKVagcoOUVgybj7eyIB9P1ochCkrqEUc/RCX9jsSXEJI4TfB5qLSYLKrUR0ixVsAL8aA==}
+    dev: false
+
   /@solana/buffer-layout-utils@0.2.0:
     resolution: {integrity: sha512-szG4sxgJGktbuZYDg2FfNmkMi0DYQoVjN2h7ta1W1hPrwzarcFLBq9UpX1UjNXsNpT9dn+chgprtWGioUAr4/g==}
     engines: {node: '>= 10'}
@@ -3071,6 +3085,33 @@ packages:
       buffer: 6.0.3
     dev: false
 
+  /@solana/codecs-core@2.0.0-experimental.7adc22b:
+    resolution: {integrity: sha512-pswclTWoESUv4N1yv6zMMTAt8ocA8Er9sBaioEjfeMTIJNtW13Bt56CRFsBsjCQ/EJSGG7y1qtGKNYgZc8dhdA==}
+    dev: false
+
+  /@solana/codecs-data-structures@2.0.0-experimental.7adc22b:
+    resolution: {integrity: sha512-b9Rk6c1UELLK2gJBSJcY3ulyBUaEsrnDx4FnWy/MeeIjKxArC36XDwm0wyJ27ewevvt+UjCsib7Vn1AmBP51Mw==}
+    dependencies:
+      '@solana/codecs-core': 2.0.0-experimental.7adc22b
+      '@solana/codecs-numbers': 2.0.0-experimental.7adc22b
+    dev: false
+
+  /@solana/codecs-numbers@2.0.0-experimental.7adc22b:
+    resolution: {integrity: sha512-5iiX5UksPBiCFmkFLkeTcQTz/HTzHVBjvoor/mBK9waAAMkanKHRY9rSmkaipEipYLBJ9BtiOkC9XQVyqOlv1w==}
+    dependencies:
+      '@solana/codecs-core': 2.0.0-experimental.7adc22b
+    dev: false
+
+  /@solana/codecs-strings@2.0.0-experimental.7adc22b(fastestsmallesttextencoderdecoder@1.0.22):
+    resolution: {integrity: sha512-kfn/oKYsaxDNN4bYe3hBkO0Bhri20ApQJOVQ+rHCnrje6uRioJhbNR5PlsLPetowwJxA6buA3uRHlZpQ7giFJw==}
+    peerDependencies:
+      fastestsmallesttextencoderdecoder: ^1.0.22
+    dependencies:
+      '@solana/codecs-core': 2.0.0-experimental.7adc22b
+      '@solana/codecs-numbers': 2.0.0-experimental.7adc22b
+      fastestsmallesttextencoderdecoder: 1.0.22
+    dev: false
+
   /@solana/eslint-config-solana@1.0.1(@typescript-eslint/eslint-plugin@5.59.2)(@typescript-eslint/parser@5.59.2)(eslint-plugin-jest@27.2.1)(eslint-plugin-react-hooks@4.6.0)(eslint-plugin-simple-import-sort@10.0.0)(eslint-plugin-sort-keys-fix@1.1.2)(eslint@8.39.0)(typescript@5.0.4):
     resolution: {integrity: sha512-nH5gSHbxfycgEonMAt7onsrI0Y7PWh3b+KJSLoWbNnqmpQZGnh+O5MrgK45/7H4/qV6mZ4RNMwFagUt2mhZEsg==}
     peerDependencies:
@@ -3093,14 +3134,18 @@ packages:
       typescript: 5.0.4
     dev: true
 
-  /@solana/instructions@2.0.0-experimental.9232d2b:
-    resolution: {integrity: sha512-KY9MLK+WX/VpeCvbUBo+czQmfTDmIBbgqrrGEiPQDinTUspC+vxQc/dhyXr6c4HvE75CDfcNNW6aMvrQPMXqKg==}
+  /@solana/functional@2.0.0-experimental.7adc22b:
+    resolution: {integrity: sha512-876pYWab7LM+u2hahnS9qhzrsYkI+3TGpeOL7dW+iBZ/hhw0uVqXYXuLSeq6Yfdh6HQH3MEMv4xjB+th/n2fLQ==}
     dev: false
 
-  /@solana/keys@2.0.0-experimental.9232d2b:
-    resolution: {integrity: sha512-q8x4yQY4lb3HBY7kfD/wXMi1sBukIy7CElUYDjQrk41WBfEFtC3RramYLIueGV8LFIOd0COjyR7zOShKV05m4A==}
+  /@solana/instructions@2.0.0-experimental.7adc22b:
+    resolution: {integrity: sha512-gYDYZKK2+/OAJfBge4HP5YiQHvnA5AQEMgoTewWXu4cmMAd78e/3+WhdFaVVJjCJhTzMrRVg4wHqnHl6AQX7Qw==}
+    dev: false
+
+  /@solana/keys@2.0.0-experimental.7adc22b:
+    resolution: {integrity: sha512-7sV3uCVE9SL1VCMkzwWSM/NbUkzhwz8mXJM6bBn20gN8ytrHV4JI/VVAG+MvQ8IS9FRGDq05n4qAhPSXpghW2g==}
     dependencies:
-      '@metaplex-foundation/umi-serializers': 0.8.9
+      '@solana/assertions': 2.0.0-experimental.7adc22b
     dev: false
 
   /@solana/prettier-config-solana@0.0.2(prettier@2.8.8):
@@ -3111,15 +3156,20 @@ packages:
       prettier: 2.8.8
     dev: true
 
-  /@solana/rpc-core@2.0.0-experimental.9232d2b:
-    resolution: {integrity: sha512-qmTQgQpVgx6oiYDxZGQi5hVpvrgyr6/KoeLoKJqS2ahPGTioDntKZyhe5y8Z7Wm66McefjI2loOSS7ii//7X7Q==}
+  /@solana/rpc-core@2.0.0-experimental.7adc22b:
+    resolution: {integrity: sha512-Uvg4g3M6I0SX/hNywaSOXzr6yKqObJSJKqvONON+auaHfC2pF/QaNB9Y4IaDtFuUeP69HjGMUa+7T3AfgTILSA==}
     dependencies:
-      '@metaplex-foundation/umi-serializers-encodings': 0.8.9
-      '@solana/keys': 2.0.0-experimental.9232d2b
+      '@metaplex-foundation/umi-serializers': 0.8.9
     dev: false
 
-  /@solana/rpc-transport@2.0.0-experimental.9232d2b:
-    resolution: {integrity: sha512-gTcHCJJ6wZeL2akMU5HUhGydsoFYRojW0X++JtAcW9d/+68NOrWMytvVnHMMICDrdQ7+QSi8sZc3xx1/L+/zMQ==}
+  /@solana/rpc-transport@2.0.0-experimental.7adc22b(node-fetch@2.6.9)(ws@8.14.2):
+    resolution: {integrity: sha512-kZu0dlaM4ag8xANxfDuIQFKgXy1MXcHTJyL6j2Kh0vNRlV3sYlZm11B7YdLjealD7Ox29A56pl+OM55A+BJ4KA==}
+    peerDependencies:
+      node-fetch: ^2.6.9
+      ws: ^8.14.0
+    dependencies:
+      node-fetch: 2.6.9
+      ws: 8.14.2
     dev: false
 
   /@solana/spl-account-compression@0.1.8(@solana/web3.js@1.66.0):
@@ -3205,6 +3255,19 @@ packages:
       - utf-8-validate
     dev: false
 
+  /@solana/transactions@2.0.0-experimental.7adc22b(fastestsmallesttextencoderdecoder@1.0.22):
+    resolution: {integrity: sha512-WGTpZ4n9JBA9KyWvzfgrNLBMosLarDYig2iYYXGeAvn/2z36StoMTFebfEyx5CxVM2T6TaNxTlJybotnwMp6Ug==}
+    dependencies:
+      '@metaplex-foundation/umi-serializers': 0.8.9
+      '@solana/addresses': 2.0.0-experimental.7adc22b(fastestsmallesttextencoderdecoder@1.0.22)
+      '@solana/codecs-core': 2.0.0-experimental.7adc22b
+      '@solana/codecs-data-structures': 2.0.0-experimental.7adc22b
+      '@solana/codecs-numbers': 2.0.0-experimental.7adc22b
+      '@solana/keys': 2.0.0-experimental.7adc22b
+    transitivePeerDependencies:
+      - fastestsmallesttextencoderdecoder
+    dev: false
+
   /@solana/wallet-adapter-base@0.9.22(@solana/web3.js@1.66.0):
     resolution: {integrity: sha512-xbLEZPGSJFvgTeldG9D55evhl7QK/3e/F7vhvcA97mEt1eieTgeKMnGlmmjs3yivI3/gtZNZeSk1XZLnhKcQvw==}
     engines: {node: '>=16'}
@@ -3276,14 +3339,22 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@solana/web3.js@2.0.0-experimental.9232d2b:
-    resolution: {integrity: sha512-3xSYrz4XqUTmPogKmiZAODEtopE8+ngdNe5UBwiyk7CbQERHhi/mXzFDRUiQR1yM+LpwoiqHdm13nJDy8DkMjw==}
+  /@solana/web3.js@2.0.0-experimental.7adc22b(fastestsmallesttextencoderdecoder@1.0.22)(node-fetch@2.6.9)(ws@8.14.2):
+    resolution: {integrity: sha512-zLpftXBr+dGoKZvUaiGLbGPZWO2eY2EKAmw0UAXvC1bsGv7RRl4w9uYz3aQAmHT5zioTeMY+96iHdV1jP9TZFg==}
     dependencies:
-      '@solana/instructions': 2.0.0-experimental.9232d2b
-      '@solana/keys': 2.0.0-experimental.9232d2b
-      '@solana/rpc-core': 2.0.0-experimental.9232d2b
-      '@solana/rpc-transport': 2.0.0-experimental.9232d2b
+      '@metaplex-foundation/umi-serializers': 0.8.9
+      '@solana/addresses': 2.0.0-experimental.7adc22b(fastestsmallesttextencoderdecoder@1.0.22)
+      '@solana/functional': 2.0.0-experimental.7adc22b
+      '@solana/instructions': 2.0.0-experimental.7adc22b
+      '@solana/keys': 2.0.0-experimental.7adc22b
+      '@solana/rpc-core': 2.0.0-experimental.7adc22b
+      '@solana/rpc-transport': 2.0.0-experimental.7adc22b(node-fetch@2.6.9)(ws@8.14.2)
+      '@solana/transactions': 2.0.0-experimental.7adc22b(fastestsmallesttextencoderdecoder@1.0.22)
       fast-stable-stringify: 1.0.0
+    transitivePeerDependencies:
+      - fastestsmallesttextencoderdecoder
+      - node-fetch
+      - ws
     dev: false
 
   /@solflare-wallet/utl-sdk@1.4.0(@solana/web3.js@1.66.0):
@@ -5513,6 +5584,10 @@ packages:
     hasBin: true
     dependencies:
       strnum: 1.0.5
+    dev: false
+
+  /fastestsmallesttextencoderdecoder@1.0.22:
+    resolution: {integrity: sha512-Pb8d48e+oIuY4MaM64Cd7OW1gt4nxCHs7/ddPPZ/Ic3sg8yVGM7O9wDvZ7us6ScaUupzM+pfBolwtYhN1IxBIw==}
     dev: false
 
   /fastq@1.15.0:
@@ -8756,6 +8831,19 @@ packages:
     dependencies:
       bufferutil: 4.0.7
       utf-8-validate: 5.0.10
+
+  /ws@8.14.2:
+    resolution: {integrity: sha512-wEBG1ftX4jcglPxgFCMJmZ2PLtSbJ2Peg6TmpJFTbe9GZYOQCDPdMYu/Tm0/bGZkw8paZnJY45J4K2PZrLYq8g==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+    dev: false
 
   /xml-name-validator@4.0.0:
     resolution: {integrity: sha512-ICP2e+jsHvAj2E2lIHxa5tjXRlKDJo4IdvPvCXbXQGdzSfmSpNVyIKMvoZHjDY9DP0zV17iI85o90vRFXNccRw==}
