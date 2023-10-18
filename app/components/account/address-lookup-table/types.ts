@@ -1,10 +1,11 @@
-import { PublicKey } from '@solana/web3.js';
+import { Base58EncodedAddress } from 'web3js-experimental';
 
-const PROGRAM_ID = 'AddressLookupTab1e1111111111111111111111111';
+const LOOKUP_TABLE_ACCOUNT_TYPE = 1;
+const PROGRAM_ID =
+    'AddressLookupTab1e1111111111111111111111111' as Base58EncodedAddress<'AddressLookupTab1e1111111111111111111111111'>;
 
-export function isAddressLookupTableAccount(accountOwner: PublicKey, accountData: Uint8Array): boolean {
-    if (accountOwner.toBase58() !== PROGRAM_ID) return false;
+export function isAddressLookupTableAccount(accountOwner: Base58EncodedAddress, accountData: Uint8Array): boolean {
+    if (accountOwner !== PROGRAM_ID) return false;
     if (!accountData || accountData.length === 0) return false;
-    const LOOKUP_TABLE_ACCOUNT_TYPE = 1;
     return accountData[0] === LOOKUP_TABLE_ACCOUNT_TYPE;
 }
