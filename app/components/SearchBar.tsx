@@ -48,7 +48,12 @@ export function SearchBar() {
 
     async function performSearch(search: string): Promise<SearchOptions[]> {
         const localOptions = buildOptions(search, cluster, clusterInfo?.epochInfo.epoch);
-        const tokenOptions = await buildTokenOptions(search, cluster);
+        let tokenOptions;
+        try {
+            tokenOptions = await buildTokenOptions(search, cluster);
+        } catch (e) {
+            console.error(`Failed to build token options for search: ${e instanceof Error ? e.message : e}`);
+        }
         const tokenOptionsAppendable = tokenOptions ? [tokenOptions] : [];
         const domainOptions =
             hasDomainSyntax(search) && cluster === Cluster.MainnetBeta ? (await buildDomainOptions(search)) ?? [] : [];
