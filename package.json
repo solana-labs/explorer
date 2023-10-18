@@ -93,6 +93,7 @@
     },
     "pnpm": {
         "overrides": {
+            "avsc": "git://github.com/Irys-xyz/avsc#a730cc8018b79e114b6a3381bbb57760a24c6cef",
             "cross-fetch": "^3.1.5",
             "node-fetch": "^2.6.9",
             "uuid": "^9.0.0"

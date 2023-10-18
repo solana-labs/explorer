@@ -5,6 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
+  avsc: git://github.com/Irys-xyz/avsc#a730cc8018b79e114b6a3381bbb57760a24c6cef
   cross-fetch: ^3.1.5
   node-fetch: ^2.6.9
   uuid: ^9.0.0
@@ -2182,40 +2183,40 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@metaplex-foundation/umi-options@0.8.2:
-    resolution: {integrity: sha512-xFoViuyVHZ1xtZjd7r6AieecfoRbx9bEwlUByqqWs8tmeA1MZb8bg/neO3vUN4aB3DbWxUbJZTEHZrq8fUP1AA==}
+  /@metaplex-foundation/umi-options@0.8.9:
+    resolution: {integrity: sha512-jSQ61sZMPSAk/TXn8v8fPqtz3x8d0/blVZXLLbpVbo2/T5XobiI6/MfmlUosAjAUaQl6bHRF8aIIqZEFkJiy4A==}
     dev: false
 
-  /@metaplex-foundation/umi-public-keys@0.8.2:
-    resolution: {integrity: sha512-66ZXWJAFtdfc228q61fPtdi5o3ILqinhdf84rT2lYy21SzoLNcveqm4sbp5pDJ482hBU6xAs8W6xeGpzTTBRDw==}
+  /@metaplex-foundation/umi-public-keys@0.8.9:
+    resolution: {integrity: sha512-CxMzN7dgVGOq9OcNCJe2casKUpJ3RmTVoOvDFyeoTQuK+vkZ1YSSahbqC1iGuHEtKTLSjtWjKvUU6O7zWFTw3Q==}
     dependencies:
-      '@metaplex-foundation/umi-serializers-encodings': 0.8.2
+      '@metaplex-foundation/umi-serializers-encodings': 0.8.9
     dev: false
 
-  /@metaplex-foundation/umi-serializers-core@0.8.2:
-    resolution: {integrity: sha512-grncCh1iyMmoWuFowulLMaoQOdetnVVa+m7CXXxEQ340ygnH3ls8WWBHHnP338309DCsRN2J+pPbqwkOHF/3yA==}
+  /@metaplex-foundation/umi-serializers-core@0.8.9:
+    resolution: {integrity: sha512-WT82tkiYJ0Qmscp7uTj1Hz6aWQPETwaKLAENAUN5DeWghkuBKtuxyBKVvEOuoXerJSdhiAk0e8DWA4cxcTTQ/w==}
     dev: false
 
-  /@metaplex-foundation/umi-serializers-encodings@0.8.2:
-    resolution: {integrity: sha512-Em9oxKSHlY30upbQ40V5zV82+gIfKqYpcGkoHAM5ensDx6G0JKLthooazLdSp1hHOP5QfwOpL+Srj76MXyoq4Q==}
+  /@metaplex-foundation/umi-serializers-encodings@0.8.9:
+    resolution: {integrity: sha512-N3VWLDTJ0bzzMKcJDL08U3FaqRmwlN79FyE4BHj6bbAaJ9LEHjDQ9RJijZyWqTm0jE7I750fU7Ow5EZL38Xi6Q==}
     dependencies:
-      '@metaplex-foundation/umi-serializers-core': 0.8.2
+      '@metaplex-foundation/umi-serializers-core': 0.8.9
     dev: false
 
-  /@metaplex-foundation/umi-serializers-numbers@0.8.2:
-    resolution: {integrity: sha512-STQEKGjkFXmG5okZHw9z3mXpHGf6SAcH5xr0K49mb5NIOY9icW9YZEVaccIhUpwYykMXgUI3IEetR2Rmrvhs0Q==}
+  /@metaplex-foundation/umi-serializers-numbers@0.8.9:
+    resolution: {integrity: sha512-NtBf1fnVNQJHFQjLFzRu2i9GGnigb9hOm/Gfrk628d0q0tRJB7BOM3bs5C61VAs7kJs4yd+pDNVAERJkknQ7Lg==}
     dependencies:
-      '@metaplex-foundation/umi-serializers-core': 0.8.2
+      '@metaplex-foundation/umi-serializers-core': 0.8.9
     dev: false
 
-  /@metaplex-foundation/umi-serializers@0.8.2:
-    resolution: {integrity: sha512-N+BCKGb2RnLWvNHY+U3B9dfZUATDLWHp9/5ufJLqGDY1uFS84aTmSPGb3/lOisdtHG6//t6IBY9cprnEOP0l8g==}
+  /@metaplex-foundation/umi-serializers@0.8.9:
+    resolution: {integrity: sha512-Sve8Etm3zqvLSUfza+MYRkjTnCpiaAFT7VWdqeHzA3n58P0AfT3p74RrZwVt/UFkxI+ln8BslwBDJmwzcPkuHw==}
     dependencies:
-      '@metaplex-foundation/umi-options': 0.8.2
-      '@metaplex-foundation/umi-public-keys': 0.8.2
-      '@metaplex-foundation/umi-serializers-core': 0.8.2
-      '@metaplex-foundation/umi-serializers-encodings': 0.8.2
-      '@metaplex-foundation/umi-serializers-numbers': 0.8.2
+      '@metaplex-foundation/umi-options': 0.8.9
+      '@metaplex-foundation/umi-public-keys': 0.8.9
+      '@metaplex-foundation/umi-serializers-core': 0.8.9
+      '@metaplex-foundation/umi-serializers-encodings': 0.8.9
+      '@metaplex-foundation/umi-serializers-numbers': 0.8.9
     dev: false
 
   /@metaplex/js@4.12.0(@metaplex-foundation/mpl-auction@0.0.2)(@metaplex-foundation/mpl-core@0.0.2)(@metaplex-foundation/mpl-metaplex@0.0.5)(@metaplex-foundation/mpl-token-metadata@1.1.0)(@metaplex-foundation/mpl-token-vault@0.0.2)(@solana/spl-token@0.1.8)(@solana/web3.js@1.66.0):
@@ -3099,7 +3100,7 @@ packages:
   /@solana/keys@2.0.0-experimental.9232d2b:
     resolution: {integrity: sha512-q8x4yQY4lb3HBY7kfD/wXMi1sBukIy7CElUYDjQrk41WBfEFtC3RramYLIueGV8LFIOd0COjyR7zOShKV05m4A==}
     dependencies:
-      '@metaplex-foundation/umi-serializers': 0.8.2
+      '@metaplex-foundation/umi-serializers': 0.8.9
     dev: false
 
   /@solana/prettier-config-solana@0.0.2(prettier@2.8.8):
@@ -3113,7 +3114,7 @@ packages:
   /@solana/rpc-core@2.0.0-experimental.9232d2b:
     resolution: {integrity: sha512-qmTQgQpVgx6oiYDxZGQi5hVpvrgyr6/KoeLoKJqS2ahPGTioDntKZyhe5y8Z7Wm66McefjI2loOSS7ii//7X7Q==}
     dependencies:
-      '@metaplex-foundation/umi-serializers-encodings': 0.8.2
+      '@metaplex-foundation/umi-serializers-encodings': 0.8.9
       '@solana/keys': 2.0.0-experimental.9232d2b
     dev: false
 
@@ -3872,7 +3873,7 @@ packages:
       algosdk: 1.24.1
       arweave: 1.14.0
       arweave-stream-tx: 1.2.2(arweave@1.14.0)
-      avsc: github.com/Bundlr-Network/avsc/a730cc8018b79e114b6a3381bbb57760a24c6cef
+      avsc: github.com/Irys-xyz/avsc/a730cc8018b79e114b6a3381bbb57760a24c6cef
       axios: 0.21.4(debug@4.3.4)
       base64url: 3.0.1
       bs58: 4.0.1
@@ -8804,8 +8805,8 @@ packages:
     resolution: {integrity: sha512-m46AKbrzKVzOzs/DZgVnG5H55N1sv1M8qZU3A8RIKbs3mrACDNeIOeilDymVb2HdmP8uwshOCF4uJ8uM9rCqJw==}
     dev: false
 
-  github.com/Bundlr-Network/avsc/a730cc8018b79e114b6a3381bbb57760a24c6cef:
-    resolution: {tarball: https://codeload.github.com/Bundlr-Network/avsc/tar.gz/a730cc8018b79e114b6a3381bbb57760a24c6cef}
+  github.com/Irys-xyz/avsc/a730cc8018b79e114b6a3381bbb57760a24c6cef:
+    resolution: {tarball: https://codeload.github.com/Irys-xyz/avsc/tar.gz/a730cc8018b79e114b6a3381bbb57760a24c6cef}
     name: avsc
     version: 5.4.7
     engines: {node: '>=0.11'}
