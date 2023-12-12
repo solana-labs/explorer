@@ -14,7 +14,7 @@ import {
 import { isTokenSwapInstruction, parseTokenSwapInstructionTitle } from '@components/instruction/token-swap/types';
 import { isTokenProgramData } from '@providers/accounts';
 import { useAccountHistories, useFetchAccountHistory } from '@providers/accounts/history';
-import { TOKEN_PROGRAM_ID, TokenInfoWithPubkey, useAccountOwnedTokens } from '@providers/accounts/tokens';
+import { isTokenProgramId, TokenInfoWithPubkey, useAccountOwnedTokens } from '@providers/accounts/tokens';
 import { CacheEntry, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { Details, useFetchTransactionDetails, useTransactionDetailsCache } from '@providers/transactions/parsed';
@@ -426,7 +426,7 @@ const TokenTransactionRow = React.memo(function TokenTransactionRow({
                         return undefined;
                     }
                 } else {
-                    if (ix.accounts.findIndex(account => account.equals(TOKEN_PROGRAM_ID)) >= 0) {
+                    if (ix.accounts.findIndex(account => isTokenProgramId(account)) >= 0) {
                         name = 'Unknown (Inner)';
                     } else {
                         return undefined;

@@ -5,7 +5,7 @@ import {
     parseTokenLendingInstructionTitle,
 } from '@components/instruction/token-lending/types';
 import { isTokenSwapInstruction, parseTokenSwapInstructionTitle } from '@components/instruction/token-swap/types';
-import { TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
+import { isTokenProgramId } from '@providers/accounts/tokens';
 import {
     ConfirmedSignatureInfo,
     ParsedInstruction,
@@ -105,7 +105,7 @@ export function getTokenInstructionName(
         }
     }
 
-    if (ix.accounts.findIndex(account => account.equals(TOKEN_PROGRAM_ID)) >= 0) {
+    if (ix.accounts.findIndex(account => isTokenProgramId(account)) >= 0) {
         name = 'Unknown (Inner)';
     } else {
         return undefined;
