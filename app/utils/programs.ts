@@ -24,6 +24,7 @@ export enum PROGRAM_NAMES {
     STAKE_POOL = 'Stake Pool Program',
     SWAP = 'Swap Program',
     TOKEN = 'Token Program',
+    TOKEN_2022 = 'Token-2022 Program',
     TOKEN_METADATA = 'Token Metadata Program',
     TOKEN_VAULT = 'Token Vault Program',
 
@@ -343,6 +344,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: ALL_CLUSTERS,
         name: PROGRAM_NAMES.TOKEN,
     },
+    TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb: {
+        deployments: ALL_CLUSTERS,
+        name: PROGRAM_NAMES.TOKEN_2022,
+    },
     Vote111111111111111111111111111111111111111: {
         deployments: ALL_CLUSTERS,
         name: PROGRAM_NAMES.VOTE,
@@ -434,3 +439,21 @@ export const SYSVAR_IDS: { [key: string]: string } = {
     SysvarS1otHistory11111111111111111111111111: 'Sysvar: Slot History',
     SysvarStakeHistory1111111111111111111111111: 'Sysvar: Stake History',
 };
+
+export const TOKEN_IDS: { [key: string]: string } = {
+  TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA: 'Token Program',
+  TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb: 'Token-2022 Program',
+} as const;
+
+export type TokenProgram = 'spl-token' | 'spl-token-2022';
+export function assertIsTokenProgram(program: string): asserts program is TokenProgram {
+    if (program !== 'spl-token' && program !== 'spl-token-2022') throw new Error("Expected token program name of `spl-token` or `spl-token-2022`");
+}
+export function isTokenProgram(program: string): program is TokenProgram {
+    try {
+        assertIsTokenProgram(program);
+        return true;
+    } catch(e) {
+        return false;
+    }
+}

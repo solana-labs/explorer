@@ -12,6 +12,7 @@ import {
     ParsedTransactionWithMeta,
     PartiallyDecodedInstruction,
 } from '@solana/web3.js';
+import { isTokenProgram } from '@utils/programs';
 import { intoTransactionInstruction } from '@utils/tx';
 import { ParsedInfo } from '@validators/index';
 import { create } from 'superstruct';
@@ -82,7 +83,7 @@ export function getTokenInstructionName(
     }
 
     if ('parsed' in ix) {
-        if (ix.program === 'spl-token') {
+        if (isTokenProgram(ix.program)) {
             return getTokenProgramInstructionName(ix, signatureInfo);
         } else {
             return undefined;

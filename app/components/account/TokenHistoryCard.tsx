@@ -12,6 +12,7 @@ import {
     parseTokenLendingInstructionTitle,
 } from '@components/instruction/token-lending/types';
 import { isTokenSwapInstruction, parseTokenSwapInstructionTitle } from '@components/instruction/token-swap/types';
+import { isTokenProgramData } from '@providers/accounts';
 import { useAccountHistories, useFetchAccountHistory } from '@providers/accounts/history';
 import { TOKEN_PROGRAM_ID, TokenInfoWithPubkey, useAccountOwnedTokens } from '@providers/accounts/tokens';
 import { CacheEntry, FetchStatus } from '@providers/cache';
@@ -391,7 +392,7 @@ const TokenTransactionRow = React.memo(function TokenTransactionRow({
                 }
 
                 if ('parsed' in ix) {
-                    if (ix.program === 'spl-token') {
+                    if (isTokenProgramData(ix)) {
                         name = getTokenProgramInstructionName(ix, tx);
                     } else {
                         return undefined;
@@ -476,7 +477,7 @@ function InstructionDetails({ instructionType, tx }: { instructionType: Instruct
 
     const instructionTypes = instructionType.innerInstructions
         .map(ix => {
-            if ('parsed' in ix && ix.program === 'spl-token') {
+            if ('parsed' in ix && isTokenProgramData(ix)) {
                 return getTokenProgramInstructionName(ix, tx);
             }
             return undefined;

@@ -5,7 +5,7 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Signature } from '@components/common/Signature';
 import { TokenInstructionType, Transfer, TransferChecked } from '@components/instruction/token/types';
-import { useAccountHistory } from '@providers/accounts';
+import { isTokenProgramData, useAccountHistory } from '@providers/accounts';
 import { useFetchAccountHistory } from '@providers/accounts/history';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
@@ -218,7 +218,7 @@ function getTransfer(
     cluster: Cluster,
     signature: string
 ): Transfer | TransferChecked | undefined {
-    if ('parsed' in instruction && instruction.program === 'spl-token') {
+    if ('parsed' in instruction && isTokenProgramData(instruction)) {
         try {
             const { type: rawType } = instruction.parsed;
             const type = create(rawType, TokenInstructionType);
