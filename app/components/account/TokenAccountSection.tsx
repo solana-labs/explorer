@@ -3,6 +3,7 @@ import { Copyable } from '@components/common/Copyable';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { Account, NFTData, TokenProgramData, useFetchAccountInfo } from '@providers/accounts';
+import { TOKEN_2022_PROGRAM_ID } from '@providers/accounts/tokens';
 import isMetaplexNFT from '@providers/accounts/utils/isMetaplexNFT';
 import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
@@ -151,7 +152,7 @@ function FungibleTokenMintAccountCard({ account, mintInfo, tokenInfo }: { accoun
             <div className="card">
                 <div className="card-header">
                     <h3 className="card-header-title mb-0 d-flex align-items-center">
-                        {tokenInfo ? 'Overview' : 'Token Mint'}
+                        {tokenInfo ? 'Overview' : account.owner.toBase58() === TOKEN_2022_PROGRAM_ID.toBase58() ? 'Token-2022 Mint' : 'Token Mint'}
                     </h3>
                     <button className="btn btn-white btn-sm" onClick={refresh}>
                         <RefreshCw className="align-text-top me-2" size={13} />
@@ -370,7 +371,7 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
     return (
         <div className="card">
             <div className="card-header">
-                <h3 className="card-header-title mb-0 d-flex align-items-center">Token Account</h3>
+                <h3 className="card-header-title mb-0 d-flex align-items-center">Token{ account.owner.toBase58() === TOKEN_2022_PROGRAM_ID.toBase58() && "-2022" } Account</h3>
                 <button className="btn btn-white btn-sm" onClick={() => refresh(account.pubkey, 'parsed')}>
                     <RefreshCw className="align-text-top me-2" size={13} />
                     Refresh
