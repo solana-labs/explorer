@@ -426,24 +426,24 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
                     </tr>
                 )}
                 {info.delegate && (
-                    <tr>
-                        <td>Delegate</td>
-                        <td className="text-lg-end">
-                            <Address pubkey={info.delegate} alignRight link />
-                        </td>
-                    </tr>
-                )}
-                {info.delegatedAmount && (
-                    <tr>
-                        <td>Delegated amount {typeof symbol === 'string' && `(${symbol})`}</td>
-                        <td className="text-lg-end">
-                            {info.isNative ? (
-                                <>
-                                    {'\u25ce'}<span className="font-monospace">{new BigNumber(info.delegatedAmount.uiAmountString).toFormat(9)}</span>
-                                </>
-                            ) : <>{info.delegatedAmount.uiAmountString}</>}
-                        </td>
-                    </tr>
+                    <>
+                        <tr>
+                            <td>Delegate</td>
+                            <td className="text-lg-end">
+                                <Address pubkey={info.delegate} alignRight link />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Delegated amount {typeof symbol === 'string' && `(${symbol})`}</td>
+                            <td className="text-lg-end">
+                                {info.isNative ? (
+                                    <>
+                                        {'\u25ce'}<span className="font-monospace">{new BigNumber(info.delegatedAmount ? info.delegatedAmount.uiAmountString : "0").toFormat(9)}</span>
+                                    </>
+                                ) : <>{info.delegatedAmount ? info.delegatedAmount.uiAmountString : "0"}</>}
+                            </td>
+                        </tr>
+                    </>
                 )}
             </TableCardBody>
         </div>
