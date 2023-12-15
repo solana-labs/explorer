@@ -46,6 +46,10 @@ export function TokensProvider({ children }: ProviderProps) {
 }
 
 export const TOKEN_PROGRAM_ID = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
+export const TOKEN_2022_PROGRAM_ID = new PublicKey('TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb');
+export function isTokenProgramId(programId: PublicKey) {
+    return programId.equals(TOKEN_PROGRAM_ID) || programId.equals(TOKEN_2022_PROGRAM_ID);
+}
 
 async function fetchAccountTokens(dispatch: Dispatch, pubkey: PublicKey, cluster: Cluster, url: string) {
     const key = pubkey.toBase58();
@@ -59,11 +63,14 @@ async function fetchAccountTokens(dispatch: Dispatch, pubkey: PublicKey, cluster
     let status;
     let data;
     try {
-        const { value } = await new Connection(url, 'processed').getParsedTokenAccountsByOwner(pubkey, {
+        const { value: tokenAccounts } = await new Connection(url, 'processed').getParsedTokenAccountsByOwner(pubkey, {
             programId: TOKEN_PROGRAM_ID,
         });
+        const { value: token2022Accounts } = await new Connection(url, 'processed').getParsedTokenAccountsByOwner(pubkey, {
+            programId: TOKEN_2022_PROGRAM_ID,
+        });
 
-        const tokens: TokenInfoWithPubkey[] = value.slice(0, 101).map(accountInfo => {
+        const tokens: TokenInfoWithPubkey[] = tokenAccounts.concat(token2022Accounts).slice(0, 101).map(accountInfo => {
             const parsedInfo = accountInfo.account.data.parsed.info;
             const info = create(parsedInfo, TokenAccountInfo);
             return { info, pubkey: accountInfo.pubkey };

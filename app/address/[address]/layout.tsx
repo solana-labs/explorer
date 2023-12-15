@@ -22,6 +22,7 @@ import { LoadingCard } from '@components/common/LoadingCard';
 import {
     Account,
     AccountsProvider,
+    isTokenProgramData,
     TokenProgramData,
     useAccountInfo,
     useFetchAccountInfo,
@@ -74,6 +75,30 @@ const TABS_LOOKUP: { [id: string]: Tab[] } = {
             path: 'concurrent-merkle-tree',
             slug: 'concurrent-merkle-tree',
             title: 'Concurrent Merkle Tree',
+        },
+    ],
+    'spl-token-2022:mint': [
+        {
+            path: 'transfers',
+            slug: 'transfers',
+            title: 'Transfers',
+        },
+        {
+            path: 'instructions',
+            slug: 'instructions',
+            title: 'Instructions',
+        },
+    ],
+    'spl-token-2022:mint:metaplexNFT': [
+        {
+            path: 'metadata',
+            slug: 'metadata',
+            title: 'Metadata',
+        },
+        {
+            path: 'attributes',
+            slug: 'attributes',
+            title: 'Attributes',
         },
     ],
     'spl-token:mint': [
@@ -142,7 +167,7 @@ const TABS_LOOKUP: { [id: string]: Tab[] } = {
     ],
 };
 
-const TOKEN_TABS_HIDDEN = ['spl-token:mint', 'config', 'vote', 'sysvar', 'config'];
+const TOKEN_TABS_HIDDEN = ['spl-token:mint', 'spl-token-2022:mint', 'config', 'vote', 'sysvar', 'config'];
 
 type Props = PropsWithChildren<{ params: { address: string } }>;
 
@@ -164,10 +189,10 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
     }
 
     const infoStatus = info?.status;
-    const infoProgram = info?.data?.data.parsed?.program;
+    const infoParsed = info?.data?.data.parsed;
 
     const { data: fullTokenInfo, isLoading: isFullTokenInfoLoading } = useSWRImmutable(
-        infoStatus === FetchStatus.Fetched && infoProgram === "spl-token" && pubkey ? ['get-full-token-info', address, cluster, url] : null,
+        infoStatus === FetchStatus.Fetched && infoParsed && isTokenProgramData(infoParsed) && pubkey ? ['get-full-token-info', address, cluster, url] : null,
         fetchFullTokenInfo
     );
 
@@ -208,7 +233,7 @@ function AccountHeader({ address, account, tokenInfo, isTokenInfoLoading }: { ad
     const mintInfo = useMintAccountInfo(address);
 
     const parsedData = account?.data.parsed;
-    const isToken = parsedData?.program === 'spl-token' && parsedData?.parsed.type === 'mint';
+    const isToken = parsedData && isTokenProgramData(parsedData) && parsedData?.parsed.type === 'mint';
 
     if (isMetaplexNFT(parsedData, mintInfo) && parsedData.nftData) {
         return <MetaplexNFTHeader nftData={parsedData.nftData} address={address} />;
@@ -346,7 +371,7 @@ function InfoSection({ account, tokenInfo }: { account: Account, tokenInfo?: Ful
         );
     } else if (account.owner.toBase58() === NFTOKEN_ADDRESS) {
         return <NFTokenAccountSection account={account} />;
-    } else if (parsedData && parsedData.program === 'spl-token') {
+    } else if (parsedData && isTokenProgramData(parsedData)) {
         return <TokenAccountSection account={account} tokenAccount={parsedData.parsed} tokenInfo={tokenInfo} />;
     } else if (parsedData && parsedData.program === 'nonce') {
         return <NonceAccountSection account={account} nonceAccount={parsedData.parsed} />;
@@ -447,7 +472,7 @@ function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
     }
 
     // Add the key for Metaplex NFTs
-    if (parsedData && programTypeKey === 'spl-token:mint' && (parsedData as TokenProgramData).nftData) {
+    if (parsedData && (programTypeKey === 'spl-token:mint' || programTypeKey == 'spl-token-2022:mint') && (parsedData as TokenProgramData).nftData) {
         tabs.push(...TABS_LOOKUP[`${programTypeKey}:metaplexNFT`]);
     }
 

@@ -9,6 +9,7 @@ import useSWR from 'swr';
 
 import { useCluster } from '@/app/providers/cluster';
 import { Cluster } from '@/app/utils/cluster';
+import { TOKEN_IDS } from '@/app/utils/programs';
 import { getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 
 import { InstructionCard } from '../InstructionCard';
@@ -27,7 +28,7 @@ export function TokenDetailsCard(props: DetailsProps) {
     const parsed = create(props.ix.parsed, ParsedInfo);
     const { type: rawType, info } = parsed;
     const type = create(rawType, TokenInstructionType);
-    const title = `Token Program: ${IX_TITLES[type]}`;
+    const title = `${TOKEN_IDS[props.ix.programId.toString()]}: ${IX_TITLES[type]}`;
     const created = create(info, IX_STRUCTS[type] as any);
     return <TokenInstruction title={title} info={created} {...props} />;
 }
