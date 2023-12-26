@@ -1,5 +1,5 @@
 import { NodeWallet } from '@metaplex/js';
-import { Idl, Program, Provider } from '@project-serum/anchor';
+import { Idl, Program, Provider } from '@coral-xyz/anchor';
 import { Connection, Keypair } from '@solana/web3.js';
 
 const cachedAnchorProgramPromises: Record<

@@ -1,6 +1,6 @@
 import { Address } from '@components/common/Address';
-import { BorshInstructionCoder, Idl, Program } from '@project-serum/anchor';
-import { IdlField, IdlInstruction, IdlType, IdlTypeDef } from '@project-serum/anchor/dist/cjs/idl';
+import { BorshInstructionCoder, Idl, Program } from '@coral-xyz/anchor';
+import { IdlField, IdlInstruction, IdlType, IdlTypeDef } from '@coral-xyz/anchor/dist/cjs/idl';
 import { useAnchorProgram } from '@providers/anchor';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
