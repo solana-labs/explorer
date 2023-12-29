@@ -1,6 +1,6 @@
 import { ErrorCard } from '@components/common/ErrorCard';
-import { BorshAccountsCoder } from '@coral-xyz/anchor';
-import { IdlTypeDef } from '@coral-xyz/anchor/dist/cjs/idl';
+import { BorshAccountsCoder } from '@project-serum/anchor';
+import { IdlTypeDef } from '@project-serum/anchor/dist/cjs/idl';
 import { Account } from '@providers/accounts';
 import { useAnchorProgram } from '@providers/anchor';
 import { useCluster } from '@providers/cluster';

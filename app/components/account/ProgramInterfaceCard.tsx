@@ -1,10 +1,17 @@
 import { ErrorCard } from '@components/common/ErrorCard';
-import { BorshAccountsCoder, Idl } from '@coral-xyz/anchor';
+import { BorshAccountsCoder, Idl } from '@project-serum/anchor';
 import { Account } from '@providers/accounts';
 import { useAnchorProgram } from '@providers/anchor';
 import { useCluster } from '@providers/cluster';
 import { getAnchorProgramName, mapAccountToRows } from '@utils/anchor';
 import React, { useMemo } from 'react';
+
+function WritableBadge() {
+    return <span className={`badge bg-info-soft me-1`}>Writable</span>;
+}
+function SignerBadge() {
+    return <span className={`badge bg-warning-soft me-1`}>Signer</span>;
+}
 
 export function ProgramInterfaceCard({ programId }: { programId: string }) {
     // const { lamports } = account;
@@ -75,8 +82,6 @@ export function ProgramInterfaceCard({ programId }: { programId: string }) {
                                 <thead>
                                     <tr>
                                         <th className="w-1">Account Name</th>
-                                        <th className="w-1">Signer</th>
-                                        <th className="w-1">Writable</th>
                                         <th className="w-1">Value</th>
                                     </tr>
                                 </thead>
@@ -84,9 +89,10 @@ export function ProgramInterfaceCard({ programId }: { programId: string }) {
                                     {ix.accounts.map((account, key) => {
                                         return (
                                             <tr key={key}>
-                                                <td>{account.name}</td>
-                                                <td>{account.isSigner ? true : false}</td>
-                                                <td>{account.isMut ? true : false}</td>
+                                                <td>
+                                                    {account.name} {(account as any).isSigner ? <SignerBadge /> : null}
+                                                    {(account as any).isMut ? <WritableBadge /> : null}
+                                                </td>
                                                 <td>Input Value</td>
                                             </tr>
                                         );
