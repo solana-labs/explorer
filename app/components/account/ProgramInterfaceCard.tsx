@@ -93,7 +93,19 @@ export function ProgramInterfaceCard({ programId }: { programId: string }) {
                                                     {account.name} {(account as any).isSigner ? <SignerBadge /> : null}
                                                     {(account as any).isMut ? <WritableBadge /> : null}
                                                 </td>
-                                                <td>Input Value</td>
+                                                <td>
+                                                    <div>
+                                                        <input
+                                                            type="input"
+                                                            className="form-input"
+                                                            id={`card-input-${ix.name}-${account.name}-${key}`}
+                                                        />
+                                                        <label
+                                                            className="form-check-label"
+                                                            htmlFor={`card-input-${ix.name}-${account.name}-${key}`}
+                                                        ></label>
+                                                    </div>
+                                                </td>
                                             </tr>
                                         );
                                     })}
@@ -116,7 +128,19 @@ export function ProgramInterfaceCard({ programId }: { programId: string }) {
                                             <tr key={key}>
                                                 <td>{arg.name}</td>
                                                 <td>{arg.type.toString()}</td>
-                                                <td>Input Value</td>
+                                                <td>
+                                                    <div>
+                                                        <input
+                                                            type="input"
+                                                            className="form-input"
+                                                            id={`card-input-${ix.name}-${arg.name}-${key}`}
+                                                        />
+                                                        <label
+                                                            className="form-check-label"
+                                                            htmlFor={`card-input-${ix.name}-${arg.name}-${key}`}
+                                                        ></label>
+                                                    </div>
+                                                </td>
                                             </tr>
                                         );
                                     })}
