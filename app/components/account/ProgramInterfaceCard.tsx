@@ -48,7 +48,7 @@ function MsaInstructionCard({
         return async () => {
             // console.log(inputAccountValues);
             const accounts: Record<string, PublicKey> = {};
-            ix.accounts.forEach((account, key) => {
+            preflightIx.accounts.forEach((account, key) => {
                 accounts[account.name] = new PublicKey(inputAccountValues[key]);
             });
 
