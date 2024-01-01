@@ -24,6 +24,9 @@
         "@solana/buffer-layout": "^3.0.0",
         "@solana/spl-account-compression": "^0.1.8",
         "@solana/spl-token": "^0.1.8",
+        "@solana/wallet-adapter-react": "^0.15.35",
+        "@solana/wallet-adapter-react-ui": "^0.9.34",
+        "@solana/wallet-adapter-wallets": "^0.19.24",
         "@solana/web3.js": "^1.66.0",
         "@solflare-wallet/utl-sdk": "^1.4.0",
         "@types/bn.js": "5.1.0",
@@ -96,7 +99,8 @@
             "avsc": "git://github.com/Irys-xyz/avsc#a730cc8018b79e114b6a3381bbb57760a24c6cef",
             "cross-fetch": "^3.1.5",
             "node-fetch": "^2.6.9",
-            "uuid": "^9.0.0"
+            "uuid": "^9.0.0",
+            "@metaplex/js@2>@solana/web3.js": "1.66.0"
         }
     }
 }
