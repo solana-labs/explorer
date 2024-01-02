@@ -11,6 +11,7 @@ import React, { useMemo } from 'react';
 import { ArrowRight, ChevronDown, ChevronUp, Key } from 'react-feather';
 
 import { PRE_INSTRUCTIONS } from '@/app/api/program-interface/sendTransaction';
+import { useScrollAnchor } from '@/app/providers/scroll-anchor';
 import { getAnchorProgramName } from '@/app/utils/anchor';
 
 require('@solana/wallet-adapter-react-ui/styles.css');
@@ -42,7 +43,9 @@ function MsaInstructionCard({
     const [inputAccountValues, setInputAccountValues] = React.useState<Record<string, string>>({});
     const [generatedSigners, setGeneratedSigners] = React.useState<Record<string, Keypair>>({});
     const [inputArgumentValues, setInputArgumentValues] = React.useState<Record<string, string>>({});
-    const [isExpanded, setExpanded] = React.useState<boolean>(false);
+    const [isExpanded, setExpanded] = React.useState<boolean>();
+
+    const scrollAnchorRef = useScrollAnchor(ix.name);
 
     const canSend = useMemo(
         () =>
@@ -204,7 +207,7 @@ function MsaInstructionCard({
     }, [isExpanded, setExpanded]);
 
     return (
-        <div className="card">
+        <div className="card" ref={scrollAnchorRef}>
             <div className="card-header">
                 <div className="row align-items-center">
                     <div className="col" style={{ display: 'flex', flexDirection: 'row' }}>
