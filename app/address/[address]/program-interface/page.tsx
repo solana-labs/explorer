@@ -1,7 +1,7 @@
 import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/get-readable-title-from-address';
 import { Metadata } from 'next/types';
 
-import AnchorAccountPageClient from './page-client';
+import ProgramInterfacePageClient from './page-client';
 
 type Props = Readonly<{
     params: {
@@ -11,11 +11,11 @@ type Props = Readonly<{
 
 export async function generateMetadata(props: AddressPageMetadataProps): Promise<Metadata> {
     return {
-        description: `Contents of the Anchor Account at address ${props.params.address} on Solana`,
-        title: `Anchor Account Data | ${await getReadableTitleFromAddress(props)} | Solana`,
+        description: `Human usable Solana actions for the program at address ${props.params.address} on Solana`,
+        title: `Program Interface | ${await getReadableTitleFromAddress(props)} | Solana`,
     };
 }
 
-export default function AnchorAccountPage(props: Props) {
-    return <AnchorAccountPageClient {...props} />;
+export default function ProgramInterfacePage(props: Props) {
+    return <ProgramInterfacePageClient {...props} />;
 }

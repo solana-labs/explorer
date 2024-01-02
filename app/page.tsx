@@ -71,7 +71,10 @@ function StakingComponent() {
 
     const activeStake = React.useMemo(() => {
         if (voteAccounts && delinquentStake) {
-            return voteAccounts.current.reduce((prev, current) => prev + current.activatedStake, BigInt(0)) + delinquentStake;
+            return (
+                voteAccounts.current.reduce((prev, current) => prev + current.activatedStake, BigInt(0)) +
+                delinquentStake
+            );
         }
     }, [voteAccounts, delinquentStake]);
 

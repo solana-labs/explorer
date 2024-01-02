@@ -1,15 +1,18 @@
-import { Cluster } from '@/app/utils/cluster';
 import { ErrorCard } from '@components/common/ErrorCard';
-import { BN, BorshAccountsCoder, BorshCoder, BorshInstructionCoder, Idl, Program } from '@project-serum/anchor';
+import { BN, Program } from '@project-serum/anchor';
 import { IdlInstruction } from '@project-serum/anchor/dist/cjs/idl';
 import { decode } from '@project-serum/anchor/dist/cjs/utils/bytes/bs58';
 import { useAnchorProgram } from '@providers/anchor';
 import { useCluster } from '@providers/cluster';
-import { getAnchorProgramName } from '@utils/anchor';
+import { useConnection, useWallet } from '@solana/wallet-adapter-react';
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { Keypair, MessageV0, PublicKey, VersionedTransaction } from '@solana/web3.js';
 import React, { useMemo } from 'react';
-import { ArrowRight, Key } from 'react-feather';
-import { clusterSlug } from '@/app/utils/cluster';
-import { Keypair, PublicKey } from '@solana/web3.js';
+import { ArrowRight, ChevronDown, ChevronUp, Key } from 'react-feather';
+
+import { PRE_INSTRUCTIONS } from '@/app/api/program-interface/sendTransaction';
+
+require('@solana/wallet-adapter-react-ui/styles.css');
 
 function WritableBadge() {
     return <span className={`badge bg-info-soft me-1`}>Writable</span>;
@@ -32,27 +35,29 @@ function MsaInstructionCard({
     ix: IdlInstruction;
     program: Program;
 }) {
-    const { cluster } = useCluster();
+    const { url } = useCluster();
+    const { connection } = useConnection();
+    const { publicKey, sendTransaction } = useWallet();
     const [inputAccountValues, setInputAccountValues] = React.useState<Record<string, string>>({});
     const [generatedSigners, setGeneratedSigners] = React.useState<Record<string, Keypair>>({});
     const [inputArgumentValues, setInputArgumentValues] = React.useState<Record<string, string>>({});
+    const [isExpanded, setExpanded] = React.useState<boolean>(false);
 
     const canSend = useMemo(
         () =>
-            Object.entries(inputAccountValues).filter(([_, val]) => val !== undefined).length >= ix.accounts.length &&
+            Object.entries(inputAccountValues).filter(([_, val]) => val !== undefined).length >=
+                preflightIx.accounts.length &&
             Object.entries(inputArgumentValues).filter(([_, val]) => val !== undefined).length >= ix.args.length,
-        [inputAccountValues, inputArgumentValues]
+        [inputAccountValues, inputArgumentValues, ix, preflightIx]
     );
 
     const onClick = useMemo(() => {
         return async () => {
-            // console.log(inputAccountValues);
             const accounts: Record<string, PublicKey> = {};
             preflightIx.accounts.forEach((account, key) => {
                 accounts[account.name] = new PublicKey(inputAccountValues[key]);
             });
 
-            // console.log(inputArgumentValues);
             const args: Record<string, any> = {};
             ix.args.forEach((arg, key) => {
                 switch (arg.type) {
@@ -88,21 +93,93 @@ function MsaInstructionCard({
                 }
             });
 
-            console.log(
-                'Your method instruction:',
-                await program.methods[ix.name](...Object.values(args))
-                    .accounts(accounts)
-                    .instruction()
-            );
-            console.log({
-                programId: program.programId.toBase58(),
-                cluster: clusterSlug(cluster),
-                instructionName: ix.name.slice(9),
-                accounts,
-                arguments: args,
+            const txIx = await program.methods[preflightIx.name](...Object.values(args))
+                .accounts(accounts)
+                .instruction();
+            txIx.keys = txIx.keys.map((meta, i) => ({
+                ...meta,
+                isSigner: (ix.accounts[i] as any).isSigner,
+                isWritable: (ix.accounts[i] as any).isMut,
+            }));
+
+            const response = await fetch(`/api/program-interface`, {
+                body: JSON.stringify({
+                    accounts,
+                    arguments: args,
+                    endpointUrl: url,
+                    instructionName: ix.name,
+                    payer: publicKey!.toBase58(),
+                    programId: program.programId.toBase58(),
+                    publicKey,
+                    txIx,
+                }),
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                method: 'POST',
             });
+            const data = await response.text();
+            console.log({ data });
+
+            const parsedResp: {
+                ix: {
+                    programId: string;
+                    data: number[];
+                    keys: { pubkey: string; isSigner: boolean; isWritable: boolean }[];
+                };
+            } = JSON.parse(data);
+
+            const {
+                context: { slot: minContextSlot },
+                value: { blockhash },
+            } = await connection.getLatestBlockhashAndContext();
+
+            const message = MessageV0.compile({
+                addressLookupTableAccounts: undefined,
+                instructions: PRE_INSTRUCTIONS.concat([
+                    {
+                        data: Buffer.from(parsedResp.ix.data),
+                        keys: parsedResp.ix.keys.map(meta => ({ ...meta, pubkey: new PublicKey(meta.pubkey) })),
+                        programId: new PublicKey(parsedResp.ix.programId),
+                    },
+                ]),
+                payerKey: publicKey!,
+                recentBlockhash: blockhash,
+            });
+
+            const tx = new VersionedTransaction(message);
+            console.log({ inputAccountValues });
+            console.log({ generatedSigners });
+            if (Object.values(generatedSigners).length > 0) {
+                Object.values(inputAccountValues).map((acc, idx) => {
+                    if (generatedSigners[acc] && txIx.keys[idx].isSigner) {
+                        console.log({ signer: acc });
+                        tx.sign([generatedSigners[acc]]);
+                    }
+                });
+            }
+
+            try {
+                const res = await connection.simulateTransaction(tx);
+                console.log({ simulation: res });
+                const txId = await sendTransaction(tx, connection, { minContextSlot });
+                console.log({ txId });
+            } catch (e) {
+                console.log(e);
+            }
         };
-    }, [inputAccountValues, inputArgumentValues]);
+    }, [
+        inputAccountValues,
+        inputArgumentValues,
+        publicKey,
+        program,
+        url,
+        connection,
+        ix,
+        preflightIx,
+        sendTransaction,
+        generatedSigners,
+    ]);
 
     const sendButton = useMemo(
         () => (
@@ -119,144 +196,169 @@ function MsaInstructionCard({
         [canSend, onClick]
     );
 
+    const toggleExpansion = useMemo(() => {
+        return () => {
+            setExpanded(!isExpanded);
+        };
+    }, [isExpanded, setExpanded]);
+
     return (
         <div className="card">
             <div className="card-header">
                 <div className="row align-items-center">
-                    <div className="col">
-                        <h3 className="card-header-title">{ix.name.slice(9)}</h3>
+                    <div className="col" style={{ display: 'flex', flexDirection: 'row' }}>
+                        <div
+                            style={{
+                                flexDirection: 'column',
+                                marginRight: '5px',
+                                marginTop: '-3px',
+                            }}
+                            onClick={toggleExpansion}
+                        >
+                            {isExpanded ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
+                        </div>
+                        <h3 className="card-header-title">{ix.name}</h3>
                     </div>
                 </div>
                 <div>{sendButton}</div>
             </div>
+            {isExpanded ? (
+                <>
+                    {(ix as any).docs ? <div className="card-header">{(ix as any).docs}</div> : null}
 
-            <div className="table-responsive mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <thead>
-                        <tr>
-                            <th className="w-1">Account Name</th>
-                            <th className="w-1"></th>
-                            <th className="w-1">Value</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {preflightIx.accounts.map((account, key) => {
-                            return (
-                                <tr key={key}>
-                                    {/* We have to get signer/mutable info from the ACTUAL ix */}
-                                    <td>
-                                        {account.name} {(ix.accounts[key] as any).isSigner ? <SignerBadge /> : null}
-                                        {(ix.accounts[key] as any).isMut ? <WritableBadge /> : null}
-                                    </td>
-                                    <td></td>
-                                    <td>
-                                        <div style={{ position: 'relative', width: '100%' }}>
-                                            <input
-                                                type="input"
-                                                className=""
-                                                style={{ width: '100%', paddingRight: '20px' }}
-                                                id={`card-input-${ix.name}-${account.name}-${key}`}
-                                                value={inputAccountValues[key] || ''}
-                                                onChange={e => {
-                                                    setInputAccountValues({
-                                                        ...inputAccountValues,
-                                                        [key]: e.target.value,
-                                                    });
-                                                }}
-                                            />
-                                            {!inputAccountValues[key] && (ix.accounts[key] as any).isSigner ? (
-                                                <Key
-                                                    className=""
-                                                    size={16}
-                                                    color={'#33a382'}
-                                                    style={{
-                                                        position: 'absolute',
-                                                        right: '5px',
-                                                        top: '50%',
-                                                        borderWidth: '2px',
-                                                        borderColor: '#33a382',
-                                                        borderRadius: '7px',
-                                                        transform: 'translateY(-50%)',
-                                                    }}
-                                                    onClick={() => {
-                                                        const generatedKeypair = Keypair.generate();
-                                                        const generatedAddress = generatedKeypair.publicKey.toBase58();
-
-                                                        setGeneratedSigners({
-                                                            ...generatedSigners,
-                                                            [generatedAddress]: generatedKeypair,
-                                                        });
-
-                                                        setInputAccountValues({
-                                                            ...inputAccountValues,
-                                                            [key]: generatedAddress,
-                                                        });
-                                                    }}
-                                                />
-                                            ) : null}
-                                            <label
-                                                className="form-check-label"
-                                                htmlFor={`card-input-${ix.name}-${account.name}-${key}`}
-                                            ></label>
-                                        </div>
-                                    </td>
+                    <div className="table-responsive mb-0">
+                        <table className="table table-sm table-nowrap card-table">
+                            <thead>
+                                <tr>
+                                    <th className="w-1">Account Name</th>
+                                    <th className="w-1"></th>
+                                    <th className="w-1">Value</th>
                                 </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
-            </div>
+                            </thead>
+                            <tbody>
+                                {preflightIx.accounts.map((account, key) => {
+                                    return (
+                                        <tr key={key}>
+                                            {/* We have to get signer/mutable info from the ACTUAL ix */}
+                                            <td>
+                                                {account.name}{' '}
+                                                {(ix.accounts[key] as any).isSigner ? <SignerBadge /> : null}
+                                                {(ix.accounts[key] as any).isMut ? <WritableBadge /> : null}
+                                            </td>
+                                            <td></td>
+                                            <td>
+                                                <div style={{ position: 'relative', width: '100%' }}>
+                                                    <input
+                                                        type="input"
+                                                        className=""
+                                                        style={{
+                                                            paddingRight: inputAccountValues[key] ? '0px' : '20px',
+                                                            width: '100%',
+                                                        }}
+                                                        id={`card-input-${ix.name}-${account.name}-${key}`}
+                                                        value={inputAccountValues[key] || ''}
+                                                        onChange={e => {
+                                                            setInputAccountValues({
+                                                                ...inputAccountValues,
+                                                                [key]: e.target.value,
+                                                            });
+                                                        }}
+                                                    />
+                                                    {!inputAccountValues[key] && (ix.accounts[key] as any).isSigner ? (
+                                                        <Key
+                                                            className=""
+                                                            size={16}
+                                                            color={'#33a382'}
+                                                            style={{
+                                                                borderColor: '#33a382',
+                                                                borderRadius: '7px',
+                                                                borderWidth: '2px',
+                                                                position: 'absolute',
+                                                                right: '5px',
+                                                                top: '50%',
+                                                                transform: 'translateY(-50%)',
+                                                            }}
+                                                            onClick={() => {
+                                                                const generatedKeypair = Keypair.generate();
+                                                                const generatedAddress =
+                                                                    generatedKeypair.publicKey.toBase58();
 
-            <div className="table-responsive mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <thead>
-                        <tr>
-                            <th className="w-1">Field</th>
-                            <th className="w-1">Type</th>
-                            <th className="w-1">Value</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {ix.args.map((arg, key) => {
-                            return (
-                                <tr key={key}>
-                                    <td>{arg.name}</td>
-                                    <td>{arg.type.toString()}</td>
-                                    <td>
-                                        <input
-                                            type="input"
-                                            className=""
-                                            style={{ width: '100%' }}
-                                            id={`card-input-${ix.name}-${arg.name}-${key}`}
-                                            value={inputArgumentValues[key] || ''}
-                                            onChange={e => {
-                                                setInputArgumentValues({
-                                                    ...inputAccountValues,
-                                                    [key]: e.target.value,
-                                                });
-                                            }}
-                                        />
-                                        <label
-                                            className="form-check-label"
-                                            htmlFor={`card-input-${ix.name}-${arg.name}-${key}`}
-                                        ></label>
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
-            </div>
+                                                                setGeneratedSigners({
+                                                                    ...generatedSigners,
+                                                                    [generatedAddress]: generatedKeypair,
+                                                                });
+
+                                                                setInputAccountValues({
+                                                                    ...inputAccountValues,
+                                                                    [key]: generatedAddress,
+                                                                });
+                                                            }}
+                                                        />
+                                                    ) : null}
+                                                    <label
+                                                        className="form-check-label"
+                                                        htmlFor={`card-input-${ix.name}-${account.name}-${key}`}
+                                                    ></label>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {ix.args.length > 0 ? (
+                        <div className="table-responsive mb-0">
+                            <table className="table table-sm table-nowrap card-table">
+                                <thead>
+                                    <tr>
+                                        <th className="w-1">Field</th>
+                                        <th className="w-1">Type</th>
+                                        <th className="w-1">Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {ix.args.map((arg, key) => {
+                                        return (
+                                            <tr key={key}>
+                                                <td>{arg.name}</td>
+                                                <td>{arg.type.toString()}</td>
+                                                <td>
+                                                    <input
+                                                        type="input"
+                                                        className=""
+                                                        style={{ width: '100%' }}
+                                                        id={`card-input-${ix.name}-${arg.name}-${key}`}
+                                                        value={inputArgumentValues[key] || ''}
+                                                        onChange={e => {
+                                                            setInputArgumentValues({
+                                                                ...inputAccountValues,
+                                                                [key]: e.target.value,
+                                                            });
+                                                        }}
+                                                    />
+                                                    <label
+                                                        className="form-check-label"
+                                                        htmlFor={`card-input-${ix.name}-${arg.name}-${key}`}
+                                                    ></label>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    ) : null}
+                </>
+            ) : null}
         </div>
     );
 }
 
 export function ProgramInterfaceCard({ programId }: { programId: string }) {
-    // const { lamports } = account;
     const { url } = useCluster();
     const anchorProgram = useAnchorProgram(programId.toString(), url);
-    // const rawData = account.data.raw;
-    const programName = getAnchorProgramName(anchorProgram) || 'Unknown Program';
 
     const interfaceIxs: {
         preflightIx: IdlInstruction;
@@ -270,7 +372,7 @@ export function ProgramInterfaceCard({ programId }: { programId: string }) {
 
             // Get the preflight instruction
             if (found.length > 0) {
-                interfaceIxs.push({ preflightIx: found[0], ix });
+                interfaceIxs.push({ ix, preflightIx: found[0] });
             }
         }
         return interfaceIxs;
@@ -280,6 +382,9 @@ export function ProgramInterfaceCard({ programId }: { programId: string }) {
 
     return (
         <div>
+            <div style={{ right: '5px' }}>
+                <WalletMultiButton />
+            </div>
             {interfaceIxs.map(({ preflightIx, ix }, idx) => (
                 <MsaInstructionCard preflightIx={preflightIx} ix={ix} program={anchorProgram} key={idx} />
             ))}

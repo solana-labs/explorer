@@ -46,6 +46,24 @@ import { Base58EncodedAddress } from 'web3js-experimental';
 
 import { FullTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
 
+require('@solana/wallet-adapter-react-ui/styles.css');
+
+import { WalletProvider } from '@solana/wallet-adapter-react';
+import { ConnectionProvider } from '@solana/wallet-adapter-react';
+import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
+
+function WalletAdapterProviders({ children }: { children: React.ReactNode }) {
+    const { url } = useCluster();
+
+    return (
+        <ConnectionProvider endpoint={url}>
+            <WalletProvider wallets={[]}>
+                <WalletModalProvider>{children}</WalletModalProvider>
+            </WalletProvider>
+        </ConnectionProvider>
+    );
+}
+
 const IDENTICON_WIDTH = 64;
 
 const TABS_LOOKUP: { [id: string]: Tab[] } = {
@@ -243,7 +261,9 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
 export default function AddressLayout({ children, params }: Props) {
     return (
         <AccountsProvider>
-            <AddressLayoutInner params={params}>{children}</AddressLayoutInner>
+            <WalletAdapterProviders>
+                <AddressLayoutInner params={params}>{children}</AddressLayoutInner>
+            </WalletAdapterProviders>
         </AccountsProvider>
     );
 }

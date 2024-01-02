@@ -1,10 +1,11 @@
 'use client';
 
-import { ProgramInterfaceCard } from '@/app/components/account/ProgramInterfaceCard';
 import { ParsedAccountRenderer } from '@components/account/ParsedAccountRenderer';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { Suspense } from 'react';
 import React from 'react';
+
+import { ProgramInterfaceCard } from '@/app/components/account/ProgramInterfaceCard';
 
 type Props = Readonly<{
     params: {
@@ -12,7 +13,7 @@ type Props = Readonly<{
     };
 }>;
 
-function AnchorAccountCardRenderer({
+function ProgramInterfaceCardRenderer({
     account,
     onNotFound,
 }: React.ComponentProps<React.ComponentProps<typeof ParsedAccountRenderer>['renderComponent']>) {
@@ -26,6 +27,6 @@ function AnchorAccountCardRenderer({
     );
 }
 
-export default function AnchorAccountPageClient({ params: { address } }: Props) {
-    return <ParsedAccountRenderer address={address} renderComponent={AnchorAccountCardRenderer} />;
+export default function ProgramInterfacePageClient({ params: { address } }: Props) {
+    return <ParsedAccountRenderer address={address} renderComponent={ProgramInterfaceCardRenderer} />;
 }
