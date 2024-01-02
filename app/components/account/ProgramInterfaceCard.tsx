@@ -11,6 +11,7 @@ import React, { useMemo } from 'react';
 import { ArrowRight, ChevronDown, ChevronUp, Key } from 'react-feather';
 
 import { PRE_INSTRUCTIONS } from '@/app/api/program-interface/sendTransaction';
+import { getAnchorProgramName } from '@/app/utils/anchor';
 
 require('@solana/wallet-adapter-react-ui/styles.css');
 
@@ -361,6 +362,7 @@ function MsaInstructionCard({
 export function ProgramInterfaceCard({ programId }: { programId: string }) {
     const { url } = useCluster();
     const anchorProgram = useAnchorProgram(programId.toString(), url);
+    const programName = getAnchorProgramName(anchorProgram);
 
     const interfaceIxs: {
         preflightIx: IdlInstruction;
@@ -384,8 +386,18 @@ export function ProgramInterfaceCard({ programId }: { programId: string }) {
 
     return (
         <div>
-            <div style={{ right: '5px' }}>
-                <WalletMultiButton />
+            <div className="card">
+                <div className="card-header">
+                    <div className="row">
+                        <h3 className="col card-header-title">{programName}</h3>
+                    </div>
+                </div>
+                <div style={{ padding: '15px' }}>
+                    {(anchorProgram.idl as any).docs ? (anchorProgram.idl as any).docs.join(' ') : 'No docs'}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '0 15px 15px 15px' }}>
+                    <WalletMultiButton />
+                </div>
             </div>
             {interfaceIxs.map(({ preflightIx, ix }, idx) => (
                 <MsaInstructionCard preflightIx={preflightIx} ix={ix} program={anchorProgram} key={idx} />
