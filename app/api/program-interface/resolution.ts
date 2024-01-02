@@ -269,7 +269,7 @@ export async function additionalAccountsRequest(
     instruction.keys = originalKeys.concat(additionalAccounts);
 
     // Reset original data
-    instruction.data = hashIxName(`${methodName}`);
+    instruction.data.set(hashIxName(`${methodName}`), 0);
 
     return { ix: instruction, lookupTable };
 }
