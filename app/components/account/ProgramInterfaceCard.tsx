@@ -224,7 +224,9 @@ function MsaInstructionCard({
             </div>
             {isExpanded ? (
                 <>
-                    {(ix as any).docs ? <div className="card-header">{(ix as any).docs}</div> : null}
+                    {(ix as any).docs ? (
+                        <div style={{ padding: '15px' }}>{((ix as any).docs as string[]).join(' ')}</div>
+                    ) : null}
 
                     <div className="table-responsive mb-0">
                         <table className="table table-sm table-nowrap card-table">
