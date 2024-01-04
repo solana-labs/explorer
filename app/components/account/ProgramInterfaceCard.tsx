@@ -1,3 +1,5 @@
+import 'react-toastify/dist/ReactToastify.css';
+
 import { ErrorCard } from '@components/common/ErrorCard';
 import { BN, Program } from '@project-serum/anchor';
 import { IdlInstruction } from '@project-serum/anchor/dist/cjs/idl';
@@ -8,12 +10,14 @@ import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { Keypair, MessageV0, PublicKey, VersionedTransaction } from '@solana/web3.js';
 import React, { useMemo } from 'react';
-import { ArrowRight, ChevronDown, ChevronUp, Key } from 'react-feather';
+import { ArrowRight, Check, ChevronDown, ChevronUp, Key, X as Xmark } from 'react-feather';
+import { toast, ToastContainer } from 'react-toastify';
 
 import { PRE_INSTRUCTIONS } from '@/app/api/program-interface/sendTransaction';
 import { useScrollAnchor } from '@/app/providers/scroll-anchor';
 import { getAnchorProgramName } from '@/app/utils/anchor';
 
+import { Signature } from '../common/Signature';
 require('@solana/wallet-adapter-react-ui/styles.css');
 
 function WritableBadge() {
@@ -44,6 +48,7 @@ function MsaInstructionCard({
     const [generatedSigners, setGeneratedSigners] = React.useState<Record<string, Keypair>>({});
     const [inputArgumentValues, setInputArgumentValues] = React.useState<Record<string, string>>({});
     const [isExpanded, setExpanded] = React.useState<boolean>();
+    const [txSigs, setTxSigs] = React.useState<{ sig: string; status: 'failed' | 'success' }[]>([]);
 
     const scrollAnchorRef = useScrollAnchor(ix.name);
 
@@ -125,17 +130,23 @@ function MsaInstructionCard({
             const data = await response.text();
             console.log({ data });
 
-            const parsedResp: {
+            let parsedResp: {
                 ix: {
                     programId: string;
                     data: number[];
                     keys: { pubkey: string; isSigner: boolean; isWritable: boolean }[];
                 };
-            } = JSON.parse(data);
+            };
+            try {
+                parsedResp = JSON.parse(data);
+            } catch (e) {
+                toast.warn(`Failed to compose transaction: ${data}`, { closeOnClick: true });
+                return;
+            }
 
             const {
                 context: { slot: minContextSlot },
-                value: { blockhash },
+                value: { blockhash, lastValidBlockHeight },
             } = await connection.getLatestBlockhashAndContext();
 
             const message = MessageV0.compile({
@@ -166,10 +177,50 @@ function MsaInstructionCard({
             try {
                 const res = await connection.simulateTransaction(tx);
                 console.log({ simulation: res });
+                if (res.value.err) {
+                    toast.warn(`Failed to simulate: ${res.value.logs}`, { closeOnClick: true });
+                    return;
+                }
+
                 const txId = await sendTransaction(tx, connection, { minContextSlot });
-                console.log({ txId });
+                const toastId = toast(<Signature signature={txId} link truncateChars={20} />, {
+                    autoClose: false,
+                    bodyStyle: {
+                        display: 'flex',
+                        flexDirection: 'row',
+                    },
+                });
+                const txResponse = await connection.confirmTransaction(
+                    { blockhash, lastValidBlockHeight, signature: txId },
+                    'confirmed'
+                );
+                if (txResponse.value.err) {
+                    setTxSigs([...txSigs, { sig: txId, status: 'failed' }]);
+                    toast.update(toastId, {
+                        autoClose: 5000,
+                        render: (
+                            <div>
+                                <Xmark /> Transaction failed: <Signature signature={txId} link truncateChars={20} />
+                            </div>
+                        ),
+                        type: toast.TYPE.ERROR,
+                    });
+                } else {
+                    setTxSigs([...txSigs, { sig: txId, status: 'success' }]);
+                    toast.update(toastId, {
+                        autoClose: 5000,
+                        render: (
+                            <div>
+                                <Check />
+                                Transaction success: <Signature signature={txId} link truncateChars={20} />
+                            </div>
+                        ),
+                        type: toast.TYPE.SUCCESS,
+                    });
+                }
             } catch (e) {
-                console.log(e);
+                toast.warn(`Failed to send: Transaction error`, { closeOnClick: true });
+                console.error(e);
             }
         };
     }, [
@@ -183,6 +234,7 @@ function MsaInstructionCard({
         preflightIx,
         sendTransaction,
         generatedSigners,
+        txSigs,
     ]);
 
     const sendButton = useMemo(
@@ -205,6 +257,41 @@ function MsaInstructionCard({
             setExpanded(!isExpanded);
         };
     }, [isExpanded, setExpanded]);
+
+    const ixTransactionHistory = useMemo(() => {
+        return txSigs.length > 0 ? (
+            <>
+                <table className="table table-sm table-nowrap card-table">
+                    <thead>
+                        <tr>
+                            <th className="text-muted w-1">Transaction Signature</th>
+                            <th className="text-muted w-1">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody className="list">
+                        {txSigs.map(({ sig, status }) => {
+                            const statusClass = status === 'failed' ? 'warning' : 'success';
+                            return (
+                                <tr key={sig}>
+                                    <td>
+                                        <Signature signature={sig} link truncateChars={60} />
+                                    </td>
+                                    <td>
+                                        <span className={`badge bg-${statusClass}-soft`}>
+                                            {status.charAt(0).toUpperCase() + status.slice(1)}
+                                        </span>
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+                <div className="card-footer">
+                    <div className="text-muted text-center">All Transactions</div>
+                </div>
+            </>
+        ) : null;
+    }, [txSigs]);
 
     return (
         <div className="card" ref={scrollAnchorRef}>
@@ -356,6 +443,7 @@ function MsaInstructionCard({
                             </table>
                         </div>
                     ) : null}
+                    {ixTransactionHistory}
                 </>
             ) : null}
         </div>
@@ -405,6 +493,7 @@ export function ProgramInterfaceCard({ programId }: { programId: string }) {
             {interfaceIxs.map(({ preflightIx, ix }, idx) => (
                 <MsaInstructionCard preflightIx={preflightIx} ix={ix} program={anchorProgram} key={idx} />
             ))}
+            <ToastContainer position="bottom-left" />
         </div>
     );
 }
