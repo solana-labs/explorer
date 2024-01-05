@@ -28,6 +28,18 @@ function SignerBadge() {
     return <span className={`badge bg-warning-soft me-1`}>Signer</span>;
 }
 
+function GenerateKp({ disabled, onClick }: { disabled: boolean; onClick: () => void }) {
+    return (
+        <button
+            disabled={disabled}
+            className={`btn d-flex align-items-center ${disabled ? 'btn-black' : 'btn-white active'}`}
+            onClick={onClick}
+        >
+            <Key className="me-2" size={13} /> Generate
+        </button>
+    );
+}
+
 /**
  * The given IdlInstruction is actually
  * a preflight instruction
@@ -241,7 +253,7 @@ function MsaInstructionCard({
         () => (
             <button
                 disabled={!canSend}
-                className={`btn btn-sm d-flex align-items-center ${canSend ? 'btn-black active' : 'btn-white'}`}
+                className={`btn d-flex align-items-center ${canSend ? 'btn-white active' : ''}`}
                 onClick={() => {
                     onClick();
                 }}
@@ -319,13 +331,20 @@ function MsaInstructionCard({
                         <div style={{ padding: '15px' }}>{((ix as any).docs as string[]).join(' ')}</div>
                     ) : null}
 
+                    <div className="card-header">
+                        <div className="row align-items-center">
+                            <div className="col" style={{ display: 'flex', flexDirection: 'row' }}>
+                                <h3 className="card-header-title">Accounts</h3>
+                            </div>
+                        </div>
+                    </div>
                     <div className="table-responsive mb-0">
                         <table className="table table-sm table-nowrap card-table">
                             <thead>
                                 <tr>
-                                    <th className="w-1">Account Name</th>
+                                    <th className="w-2">Account Name</th>
                                     <th className="w-1"></th>
-                                    <th className="w-1">Value</th>
+                                    <th className="w-2">Value</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -334,43 +353,24 @@ function MsaInstructionCard({
                                         <tr key={key}>
                                             {/* We have to get signer/mutable info from the ACTUAL ix */}
                                             <td>
-                                                {account.name}{' '}
-                                                {(ix.accounts[key] as any).isSigner ? <SignerBadge /> : null}
-                                                {(ix.accounts[key] as any).isMut ? <WritableBadge /> : null}
+                                                <div style={{ width: '100%' }}>
+                                                    {account.name}{' '}
+                                                    {(ix.accounts[key] as any).isSigner ? <SignerBadge /> : null}
+                                                    {(ix.accounts[key] as any).isMut ? <WritableBadge /> : null}
+                                                </div>
                                             </td>
-                                            <td></td>
-                                            <td>
-                                                <div style={{ position: 'relative', width: '100%' }}>
-                                                    <input
-                                                        type="input"
-                                                        className=""
-                                                        style={{
-                                                            paddingRight: inputAccountValues[key] ? '0px' : '20px',
-                                                            width: '100%',
-                                                        }}
-                                                        id={`card-input-${ix.name}-${account.name}-${key}`}
-                                                        value={inputAccountValues[key] || ''}
-                                                        onChange={e => {
-                                                            setInputAccountValues({
-                                                                ...inputAccountValues,
-                                                                [key]: e.target.value,
-                                                            });
-                                                        }}
-                                                    />
-                                                    {!inputAccountValues[key] && (ix.accounts[key] as any).isSigner ? (
-                                                        <Key
-                                                            className=""
-                                                            size={16}
-                                                            color={'#33a382'}
-                                                            style={{
-                                                                borderColor: '#33a382',
-                                                                borderRadius: '7px',
-                                                                borderWidth: '2px',
-                                                                position: 'absolute',
-                                                                right: '5px',
-                                                                top: '50%',
-                                                                transform: 'translateY(-50%)',
-                                                            }}
+                                            <td style={{ padding: '0px' }}>
+                                                <div
+                                                    style={{
+                                                        alignContent: 'center',
+                                                        display: 'flex',
+                                                        flexDirection: 'row',
+                                                        justifyContent: 'center',
+                                                    }}
+                                                >
+                                                    {(ix.accounts[key] as any).isSigner ? (
+                                                        <GenerateKp
+                                                            disabled={!!inputAccountValues[key]}
                                                             onClick={() => {
                                                                 const generatedKeypair = Keypair.generate();
                                                                 const generatedAddress =
@@ -388,6 +388,29 @@ function MsaInstructionCard({
                                                             }}
                                                         />
                                                     ) : null}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div
+                                                    style={{
+                                                        alignItems: 'center',
+                                                        display: 'flex',
+                                                        flexDirection: 'row',
+                                                        width: '100%',
+                                                    }}
+                                                >
+                                                    <input
+                                                        type="input"
+                                                        className="form-control"
+                                                        id={`card-input-${ix.name}-${account.name}-${key}`}
+                                                        value={inputAccountValues[key] || ''}
+                                                        onChange={e => {
+                                                            setInputAccountValues({
+                                                                ...inputAccountValues,
+                                                                [key]: e.target.value,
+                                                            });
+                                                        }}
+                                                    />
                                                     <label
                                                         className="form-check-label"
                                                         htmlFor={`card-input-${ix.name}-${account.name}-${key}`}
@@ -402,46 +425,55 @@ function MsaInstructionCard({
                     </div>
 
                     {ix.args.length > 0 ? (
-                        <div className="table-responsive mb-0">
-                            <table className="table table-sm table-nowrap card-table">
-                                <thead>
-                                    <tr>
-                                        <th className="w-1">Field</th>
-                                        <th className="w-1">Type</th>
-                                        <th className="w-1">Value</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {ix.args.map((arg, key) => {
-                                        return (
-                                            <tr key={key}>
-                                                <td>{arg.name}</td>
-                                                <td>{arg.type.toString()}</td>
-                                                <td>
-                                                    <input
-                                                        type="input"
-                                                        className=""
-                                                        style={{ width: '100%' }}
-                                                        id={`card-input-${ix.name}-${arg.name}-${key}`}
-                                                        value={inputArgumentValues[key] || ''}
-                                                        onChange={e => {
-                                                            setInputArgumentValues({
-                                                                ...inputAccountValues,
-                                                                [key]: e.target.value,
-                                                            });
-                                                        }}
-                                                    />
-                                                    <label
-                                                        className="form-check-label"
-                                                        htmlFor={`card-input-${ix.name}-${arg.name}-${key}`}
-                                                    ></label>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
+                        <>
+                            <div className="card-header">
+                                <div className="row align-items-center">
+                                    <div className="col" style={{ display: 'flex', flexDirection: 'row' }}>
+                                        <h3 className="card-header-title">Arguments</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="table-responsive mb-0">
+                                <table className="table table-sm table-nowrap card-table">
+                                    <thead>
+                                        <tr>
+                                            <th className="w-2">Field</th>
+                                            <th className="w-1">Type</th>
+                                            <th className="w-2">Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {ix.args.map((arg, key) => {
+                                            return (
+                                                <tr key={key}>
+                                                    <td>{arg.name}</td>
+                                                    <td>{arg.type.toString()}</td>
+                                                    <td>
+                                                        <input
+                                                            type="input"
+                                                            className="form-control"
+                                                            style={{ width: '100%' }}
+                                                            id={`card-input-${ix.name}-${arg.name}-${key}`}
+                                                            value={inputArgumentValues[key] || ''}
+                                                            onChange={e => {
+                                                                setInputArgumentValues({
+                                                                    ...inputAccountValues,
+                                                                    [key]: e.target.value,
+                                                                });
+                                                            }}
+                                                        />
+                                                        <label
+                                                            className="form-check-label"
+                                                            htmlFor={`card-input-${ix.name}-${arg.name}-${key}`}
+                                                        ></label>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </>
                     ) : null}
                     {ixTransactionHistory}
                 </>
