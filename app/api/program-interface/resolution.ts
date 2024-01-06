@@ -40,7 +40,7 @@ export async function resolveRemainingAccounts(
         addressLookupTableAccounts: slut ? [lookupTable!] : undefined,
         instructions: PRE_INSTRUCTIONS.concat(instructions),
         payerKey: payer,
-        recentBlockhash: (await connection.getLatestBlockhash()).blockhash,
+        recentBlockhash: (await connection.getLatestBlockhashAndContext()).value.blockhash,
     });
     const transaction = new anchor.web3.VersionedTransaction(message);
 

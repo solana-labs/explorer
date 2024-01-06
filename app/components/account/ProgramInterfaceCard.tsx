@@ -426,9 +426,9 @@ function MsaInstructionCard({
 
                     {ix.args.length > 0 ? (
                         <>
-                            <div className="card-header">
+                            <div className="card-header" style={{ borderTop: '1px solid #282d2b' }}>
                                 <div className="row align-items-center">
-                                    <div className="col" style={{ display: 'flex', flexDirection: 'row' }}>
+                                    <div className="col ">
                                         <h3 className="card-header-title">Arguments</h3>
                                     </div>
                                 </div>
@@ -449,23 +449,32 @@ function MsaInstructionCard({
                                                     <td>{arg.name}</td>
                                                     <td>{arg.type.toString()}</td>
                                                     <td>
-                                                        <input
-                                                            type="input"
-                                                            className="form-control"
-                                                            style={{ width: '100%' }}
-                                                            id={`card-input-${ix.name}-${arg.name}-${key}`}
-                                                            value={inputArgumentValues[key] || ''}
-                                                            onChange={e => {
-                                                                setInputArgumentValues({
-                                                                    ...inputAccountValues,
-                                                                    [key]: e.target.value,
-                                                                });
+                                                        <div
+                                                            style={{
+                                                                alignItems: 'center',
+                                                                display: 'flex',
+                                                                flexDirection: 'row',
+                                                                width: '100%',
                                                             }}
-                                                        />
-                                                        <label
-                                                            className="form-check-label"
-                                                            htmlFor={`card-input-${ix.name}-${arg.name}-${key}`}
-                                                        ></label>
+                                                        >
+                                                            <input
+                                                                type="input"
+                                                                className="form-control"
+                                                                style={{ width: '100%' }}
+                                                                id={`card-input-${ix.name}-${arg.name}-${key}`}
+                                                                value={inputArgumentValues[key] || ''}
+                                                                onChange={e => {
+                                                                    setInputArgumentValues({
+                                                                        ...inputAccountValues,
+                                                                        [key]: e.target.value,
+                                                                    });
+                                                                }}
+                                                            />
+                                                            <label
+                                                                className="form-check-label"
+                                                                htmlFor={`card-input-${ix.name}-${arg.name}-${key}`}
+                                                            ></label>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             );
