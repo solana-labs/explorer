@@ -465,7 +465,7 @@ function MsaInstructionCard({
                                                                 value={inputArgumentValues[key] || ''}
                                                                 onChange={e => {
                                                                     setInputArgumentValues({
-                                                                        ...inputAccountValues,
+                                                                        ...inputArgumentValues,
                                                                         [key]: e.target.value,
                                                                     });
                                                                 }}
