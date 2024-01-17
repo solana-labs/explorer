@@ -126,6 +126,13 @@ const TABS_LOOKUP: { [id: string]: Tab[] } = {
             title: 'Attributes',
         },
     ],
+    'spl-token-metadata-interface': [
+        {
+            path: 'spl-token-metadata-interface',
+            slug: 'spl-token-metadata-interface',
+            title: 'SPL Token Metadata',
+        },
+    ],
     'spl-token:mint': [
         {
             path: 'transfers',
@@ -475,7 +482,8 @@ export type MoreTabs =
     | 'anchor-account'
     | 'entries'
     | 'concurrent-merkle-tree'
-    | 'program-interface';
+    | 'program-interface'
+    | 'spl-token-metadata-interface';
 
 function MoreSection({ children, tabs }: { children: React.ReactNode; tabs: (JSX.Element | null)[] }) {
     return (
@@ -522,6 +530,16 @@ function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
         isAddressLookupTableAccount(account.owner.toBase58() as Base58EncodedAddress, account.data.raw)
     ) {
         tabs.push(...TABS_LOOKUP['address-lookup-table']);
+    }
+
+    // Add SPL Token Metadata Interface tab
+    console.log('Parsed data', parsedData);
+    if (
+        parsedData &&
+        parsedData.parsed.info &&
+        (parsedData.parsed.info.extensions as Record<string, string>[]).find(ext => ext.extension === 'metadataPointer')
+    ) {
+        tabs.push(TABS_LOOKUP['spl-token-metadata-interface'][0]);
     }
 
     // Add the key for Metaplex NFTs

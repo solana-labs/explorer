@@ -25,6 +25,7 @@
         "@solana/buffer-layout": "^3.0.0",
         "@solana/spl-account-compression": "^0.1.8",
         "@solana/spl-token": "^0.1.8",
+        "@solana/spl-token-metadata": "^0.1.2",
         "@solana/wallet-adapter-react": "^0.15.35",
         "@solana/wallet-adapter-react-ui": "^0.9.34",
         "@solana/wallet-adapter-wallets": "^0.19.24",
