@@ -537,6 +537,7 @@ function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
     if (
         parsedData &&
         parsedData.parsed.info &&
+        parsedData.parsed.info.extensions &&
         (parsedData.parsed.info.extensions as Record<string, string>[]).find(ext => ext.extension === 'metadataPointer')
     ) {
         tabs.push(TABS_LOOKUP['spl-token-metadata-interface'][0]);
