@@ -1,0 +1,79 @@
+import { PublicKey, Connection } from '@solana/web3.js';
+import { useState, useEffect } from 'react';
+import { useCluster } from '../providers/cluster';
+import { Cluster } from './cluster';
+import { TldParser, NameRecordHeader } from '@onsol/tldparser';
+import { DomainInfo } from './domain-info';
+import pLimit from 'p-limit';
+import * as BufferLayout from '@solana/buffer-layout';
+
+const stringToBuffer = (str: string) => Buffer.from(Array.from(str.split(',')).map(i => Number(i)));
+const tldLayout = BufferLayout.utf8(10, 'tld');
+const domainLayout = BufferLayout.utf8(32, 'domain');
+
+export const useUserANSDomains = (userAddress: string): [DomainInfo[] | null, boolean] => {
+    const { url, cluster } = useCluster();
+    const [result, setResult] = useState<DomainInfo[] | null>(null);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        const resolve = async () => {
+            // Allow only mainnet and custom
+            if (![Cluster.MainnetBeta, Cluster.Custom].includes(cluster)) return;
+            const connection = new Connection(url, 'confirmed');
+            try {
+                setLoading(true);
+
+                const parser = new TldParser(connection);
+                const allDomains = await parser.getAllUserDomains(userAddress);
+
+                if (!allDomains) {
+                    return;
+                }
+                let userDomains: DomainInfo[] = [];
+                const limit = pLimit(5);
+                let promises = allDomains.map(address =>
+                    limit(async () => {
+                        const domainRecord = await NameRecordHeader.fromAccountAddress(connection, address);
+
+                        // expired or not found
+                        if (!domainRecord?.owner) return;
+
+                        const domainParentNameAccount = await NameRecordHeader.fromAccountAddress(
+                            connection,
+                            domainRecord?.parentName
+                        );
+
+                        // not found
+                        if (!domainParentNameAccount?.owner) return;
+
+                        const tld = await parser.getTldFromParentAccount(domainRecord?.parentName);
+
+                        const domain = await parser.reverseLookupNameAccount(
+                            address,
+                            domainParentNameAccount?.owner
+                        );
+
+                        // domain not found or might be a subdomain.
+                        if (!domain) return;
+
+                        userDomains.push({
+                            name: `${domain}${tld}`,
+                            address,
+                        });
+                    })
+                );
+
+                await Promise.all(promises);
+                setResult(userDomains);
+            } catch (err) {
+                console.log(`Error fetching user domains ${err}`);
+            } finally {
+                setLoading(false);
+            }
+        };
+        resolve();
+    }, [userAddress, url]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    return [result, loading];
+};

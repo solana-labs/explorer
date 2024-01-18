@@ -8,7 +8,6 @@ import React, { useId } from 'react';
 import { Search } from 'react-feather';
 import { ActionMeta, InputActionMeta, ValueType } from 'react-select';
 import AsyncSelect from 'react-select/async';
-
 import { FetchedDomainInfo } from '../api/domain-info/[domain]/route';
 import { LOADER_IDS, LoaderName, PROGRAM_INFO_BY_ID, SPECIAL_IDS, SYSVAR_IDS } from '../utils/programs';
 import { searchTokens } from '../utils/token-search';
@@ -23,7 +22,7 @@ interface SearchOptions {
 }
 
 const hasDomainSyntax = (value: string) => {
-    return value.length > 4 && value.substring(value.length - 4) === '.sol';
+    return value.length > 4 && value.split('.').length === 2;
 };
 
 export function SearchBar() {
@@ -55,8 +54,7 @@ export function SearchBar() {
             console.error(`Failed to build token options for search: ${e instanceof Error ? e.message : e}`);
         }
         const tokenOptionsAppendable = tokenOptions ? [tokenOptions] : [];
-        const domainOptions =
-            hasDomainSyntax(search) && cluster === Cluster.MainnetBeta ? (await buildDomainOptions(search)) ?? [] : [];
+        const domainOptions = hasDomainSyntax(search) && cluster === Cluster.MainnetBeta ? (await buildDomainOptions(search)) ?? [] : [];
 
         return [...localOptions, ...tokenOptionsAppendable, ...domainOptions];
     }
