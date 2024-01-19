@@ -16,6 +16,7 @@ import { MintAccountInfo, MultisigAccountInfo, TokenAccount, TokenAccountInfo } 
 import {
     ConfidentialTransferFeeConfig,
     ConfidentialTransferMint,
+    DefaultAccountState,
     MintCloseAuthority,
     TokenExtension,
     TransferFeeConfig,
@@ -701,7 +702,15 @@ function TokenExtensionRows(mintInfo: MintAccountInfo, tokenExtension: TokenExte
                 </>
             );
         }
-        case 'defaultAccountState':
+        case 'defaultAccountState': {
+            const extension = create(tokenExtension.state, DefaultAccountState);
+            return (
+                <tr>
+                    <td>DefaultAccountState</td>
+                    <td className="text-lg-end">{extension.accountState}</td>
+                </tr>
+            );
+        }
         case 'nonTransferable':
         case 'interestBearingConfig':
         case 'permanentDelegate':
