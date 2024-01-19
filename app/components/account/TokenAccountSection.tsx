@@ -1014,7 +1014,14 @@ function TokenExtensionRows(decimals: number, tokenExtension: TokenExtension) {
                 </tr>
             );
         }
-        case 'nonTransferableAccount':
+        case 'nonTransferableAccount': {
+            return (
+                <tr>
+                    <td>Non-Transferable</td>
+                    <td className="text-lg-end">enabled</td>
+                </tr>
+            );
+        }
         case 'confidentialTransferFeeAmount':
         case 'tokenGroup':
         case 'tokenGroupMember':
