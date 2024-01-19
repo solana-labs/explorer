@@ -31,6 +31,7 @@ import {
     TransferFeeAmount,
     TransferFeeConfig,
     TransferHook,
+    TransferHookAccount,
 } from '@validators/accounts/token-extension';
 import { BigNumber } from 'bignumber.js';
 import { useEffect, useMemo, useState } from 'react';
@@ -936,7 +937,7 @@ function TokenExtensionRows(decimals: number, tokenExtension: TokenExtension) {
                     </tr>
                     <tr>
                         <td>Status</td>
-                        <td className="text-lg-end">{!extension.approved ?? 'not '}approved</td>
+                        <td className="text-lg-end">{!extension.approved && 'not '}approved</td>
                     </tr>
                     <tr>
                         <td>Elgamal Pubkey</td>
@@ -1004,7 +1005,15 @@ function TokenExtensionRows(decimals: number, tokenExtension: TokenExtension) {
                 </tr>
             );
         }
-        case 'transferHookAccount':
+        case 'transferHookAccount': {
+            const extension = create(tokenExtension.state, TransferHookAccount);
+            return (
+                <tr>
+                    <td>Transfer Hook Account</td>
+                    <td className="text-lg-end">{!extension.transferring && 'not '}transferring</td>
+                </tr>
+            );
+        }
         case 'nonTransferableAccount':
         case 'confidentialTransferFeeAmount':
         case 'tokenGroup':
