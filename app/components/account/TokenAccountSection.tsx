@@ -711,7 +711,14 @@ function TokenExtensionRows(mintInfo: MintAccountInfo, tokenExtension: TokenExte
                 </tr>
             );
         }
-        case 'nonTransferable':
+        case 'nonTransferable': {
+            return (
+                <tr>
+                    <td>Non-Transferable</td>
+                    <td className="text-lg-end">enabled</td>
+                </tr>
+            );
+        }
         case 'interestBearingConfig':
         case 'permanentDelegate':
         case 'transferHook':
