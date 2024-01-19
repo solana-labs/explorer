@@ -1032,14 +1032,28 @@ function TokenExtensionRows(decimals: number, tokenExtension: TokenExtension) {
                 </tr>
             );
         }
-        case 'tokenGroup':
-        case 'tokenGroupMember':
+        case 'tokenGroup': {
+            return (
+                <tr>
+                    <td>Group</td>
+                    <td className="text-lg-end">unparseable</td>
+                </tr>
+            );
+        }
+        case 'tokenGroupMember': {
+            return (
+                <tr>
+                    <td>Group Member</td>
+                    <td className="text-lg-end">unparseable</td>
+                </tr>
+            );
+        }
         case 'unparseableExtension':
         default:
             return (
                 <tr>
-                    <td>Extension</td>
-                    <td className="text-lg-end">Unparseable</td>
+                    <td>Unknown Extension</td>
+                    <td className="text-lg-end">unparseable</td>
                 </tr>
             );
     }
