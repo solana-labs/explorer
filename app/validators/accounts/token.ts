@@ -21,6 +21,7 @@ export const TokenAccountInfo = type({
     closeAuthority: optional(PublicKeyFromString),
     delegate: optional(PublicKeyFromString),
     delegatedAmount: optional(TokenAmount),
+    extensions: optional(array(TokenExtension)),
     isNative: boolean(),
     mint: PublicKeyFromString,
     owner: PublicKeyFromString,
