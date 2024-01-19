@@ -13,7 +13,12 @@ import { displayTimestampWithoutDate } from '@utils/date';
 import { abbreviatedNumber, normalizeTokenAmount } from '@utils/index';
 import { addressLabel } from '@utils/tx';
 import { MintAccountInfo, MultisigAccountInfo, TokenAccount, TokenAccountInfo } from '@validators/accounts/token';
-import { MintCloseAuthority, TokenExtension, TransferFeeAmount } from '@validators/accounts/token-extension';
+import {
+    MintCloseAuthority,
+    TokenExtension,
+    TransferFeeConfig,
+    TransferFeeAmount,
+} from '@validators/accounts/token-extension';
 import { BigNumber } from 'bignumber.js';
 import { useEffect, useMemo, useState } from 'react';
 import { ExternalLink, RefreshCw } from 'react-feather';
@@ -562,7 +567,78 @@ function TokenExtensionRows(mintInfo: MintAccountInfo, tokenExtension: TokenExte
                 </tr>
             );
         }
-        case 'transferFeeConfig':
+        case 'transferFeeConfig': {
+            const extension = create(tokenExtension.state, TransferFeeConfig);
+            return (
+                <>
+                    <tr>
+                        <h4>Transfer Fee Config</h4>
+                    </tr>
+                    {extension.transferFeeConfigAuthority && (
+                        <tr>
+                            <td>Transfer Fee Authority</td>
+                            <td className="text-lg-end">
+                                <Address pubkey={extension.transferFeeConfigAuthority} alignRight link />
+                            </td>
+                        </tr>
+                    )}
+                    <tr>
+                        <td>Older Fee Epoch</td>
+                        <td className="text-lg-end">{extension.olderTransferFee.epoch}</td>
+                    </tr>
+                    <tr>
+                        <td>Older Maximum Fee</td>
+                        <td className="text-lg-end">
+                            {normalizeTokenAmount(
+                                extension.olderTransferFee.maximumFee,
+                                mintInfo.decimals
+                            ).toLocaleString('en-US', {
+                                maximumFractionDigits: 20,
+                            })}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Older Fee Basis Points</td>
+                        <td className="text-lg-end">{extension.olderTransferFee.transferFeeBasisPoints}</td>
+                    </tr>
+                    <tr>
+                        <td>Newer Fee Epoch</td>
+                        <td className="text-lg-end">{extension.newerTransferFee.epoch}</td>
+                    </tr>
+                    <tr>
+                        <td>Newer Maximum Fee</td>
+                        <td className="text-lg-end">
+                            {normalizeTokenAmount(
+                                extension.newerTransferFee.maximumFee,
+                                mintInfo.decimals
+                            ).toLocaleString('en-US', {
+                                maximumFractionDigits: 20,
+                            })}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Newer Fee Basis Points</td>
+                        <td className="text-lg-end">{extension.newerTransferFee.transferFeeBasisPoints}</td>
+                    </tr>
+                    {extension.withdrawWithheldAuthority && (
+                        <tr>
+                            <td>Withdraw Withheld Fees Authority</td>
+                            <td className="text-lg-end">
+                                <Address pubkey={extension.withdrawWithheldAuthority} alignRight link />
+                            </td>
+                        </tr>
+                    )}
+                    <tr>
+                        <td>Withheld Amount</td>
+                        <td className="text-lg-end">
+                            {normalizeTokenAmount(extension.withheldAmount, mintInfo.decimals).toLocaleString('en-US', {
+                                maximumFractionDigits: 20,
+                            })}
+                        </td>
+                    </tr>
+                </>
+            );
+        }
         case 'confidentialTransferMint':
         case 'confidentialTransferAccount':
         case 'defaultAccountState':
