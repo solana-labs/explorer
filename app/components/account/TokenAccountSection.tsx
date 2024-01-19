@@ -17,7 +17,10 @@ import {
     ConfidentialTransferFeeConfig,
     ConfidentialTransferMint,
     DefaultAccountState,
+    GroupPointer,
+    GroupMemberPointer,
     InterestBearingConfig,
+    MetadataPointer,
     MintCloseAuthority,
     PermanentDelegate,
     TokenExtension,
@@ -794,10 +797,76 @@ function TokenExtensionRows(mintInfo: MintAccountInfo, tokenExtension: TokenExte
                 </>
             );
         }
-        case 'metadataPointer':
+        case 'metadataPointer': {
+            const extension = create(tokenExtension.state, MetadataPointer);
+            return (
+                <>
+                    {extension.metadataAddress && (
+                        <tr>
+                            <td>Token Metadata Address</td>
+                            <td className="text-lg-end">
+                                <Address pubkey={extension.metadataAddress} alignRight link />
+                            </td>
+                        </tr>
+                    )}
+                    {extension.authority && (
+                        <tr>
+                            <td>Metadata Pointer Authority</td>
+                            <td className="text-lg-end">
+                                <Address pubkey={extension.authority} alignRight link />
+                            </td>
+                        </tr>
+                    )}
+                </>
+            );
+        }
+        case 'groupPointer': {
+            const extension = create(tokenExtension.state, GroupPointer);
+            return (
+                <>
+                    {extension.groupAddress && (
+                        <tr>
+                            <td>Token Group Address</td>
+                            <td className="text-lg-end">
+                                <Address pubkey={extension.groupAddress} alignRight link />
+                            </td>
+                        </tr>
+                    )}
+                    {extension.authority && (
+                        <tr>
+                            <td>Group Pointer Authority</td>
+                            <td className="text-lg-end">
+                                <Address pubkey={extension.authority} alignRight link />
+                            </td>
+                        </tr>
+                    )}
+                </>
+            );
+        }
+        case 'groupMemberPointer': {
+            const extension = create(tokenExtension.state, GroupMemberPointer);
+            return (
+                <>
+                    {extension.memberAddress && (
+                        <tr>
+                            <td>Token Group Member Address</td>
+                            <td className="text-lg-end">
+                                <Address pubkey={extension.memberAddress} alignRight link />
+                            </td>
+                        </tr>
+                    )}
+                    {extension.authority && (
+                        <tr>
+                            <td>Member Pointer Authority</td>
+                            <td className="text-lg-end">
+                                <Address pubkey={extension.authority} alignRight link />
+                            </td>
+                        </tr>
+                    )}
+                </>
+            );
+        }
         case 'tokenMetadata':
-        case 'groupPointer':
-        case 'groupMemberPointer':
         case 'tokenGroup':
         case 'tokenGroupMember':
         case 'cpiGuard':
