@@ -24,6 +24,7 @@ import {
     MintCloseAuthority,
     PermanentDelegate,
     TokenExtension,
+    TokenMetadata,
     TransferFeeConfig,
     TransferFeeAmount,
     TransferHook,
@@ -803,7 +804,7 @@ function TokenExtensionRows(mintInfo: MintAccountInfo, tokenExtension: TokenExte
                 <>
                     {extension.metadataAddress && (
                         <tr>
-                            <td>Token Metadata Address</td>
+                            <td>Metadata Address</td>
                             <td className="text-lg-end">
                                 <Address pubkey={extension.metadataAddress} alignRight link />
                             </td>
@@ -866,7 +867,53 @@ function TokenExtensionRows(mintInfo: MintAccountInfo, tokenExtension: TokenExte
                 </>
             );
         }
-        case 'tokenMetadata':
+        case 'tokenMetadata': {
+            const extension = create(tokenExtension.state, TokenMetadata);
+            return (
+                <>
+                    <tr>
+                        <h4>Metadata</h4>
+                    </tr>
+                    <tr>
+                        <td>Mint address</td>
+                        <td className="text-lg-end">
+                            <Address pubkey={extension.mint} alignRight link />
+                        </td>
+                    </tr>
+                    {extension.updateAuthority && (
+                        <tr>
+                            <td>Update Authority</td>
+                            <td className="text-lg-end">
+                                <Address pubkey={extension.updateAuthority} alignRight link />
+                            </td>
+                        </tr>
+                    )}
+                    <tr>
+                        <td>Name</td>
+                        <td className="text-lg-end">{extension.name}</td>
+                    </tr>
+                    <tr>
+                        <td>Symbol</td>
+                        <td className="text-lg-end">{extension.symbol}</td>
+                    </tr>
+                    <tr>
+                        <td>URI</td>
+                        <td className="text-lg-end">
+                            <a rel="noopener noreferrer" target="_blank" href={extension.uri}>
+                                {extension.uri}
+                                <ExternalLink className="align-text-top ms-2" size={13} />
+                            </a>
+                        </td>
+                    </tr>
+                    {extension.additionalMetadata?.map(keyValuePair => (
+                        <tr key="{keyValuePair[0]}">
+                            <td>{keyValuePair[0]}</td>
+                            <td className="text-lg-end">{keyValuePair[1]}</td>
+                        </tr>
+                    ))}
+                </>
+            );
+        }
         case 'tokenGroup':
         case 'tokenGroupMember':
         case 'cpiGuard':
