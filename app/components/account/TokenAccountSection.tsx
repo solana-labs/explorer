@@ -17,6 +17,7 @@ import {
     ConfidentialTransferFeeConfig,
     ConfidentialTransferMint,
     DefaultAccountState,
+    InterestBearingConfig,
     MintCloseAuthority,
     TokenExtension,
     TransferFeeConfig,
@@ -719,7 +720,40 @@ function TokenExtensionRows(mintInfo: MintAccountInfo, tokenExtension: TokenExte
                 </tr>
             );
         }
-        case 'interestBearingConfig':
+        case 'interestBearingConfig': {
+            const extension = create(tokenExtension.state, InterestBearingConfig);
+            return (
+                <>
+                    <tr>
+                        <h4>Interest-Bearing</h4>
+                    </tr>
+                    {extension.rateAuthority && (
+                        <tr>
+                            <td>Authority</td>
+                            <td className="text-lg-end">
+                                <Address pubkey={extension.rateAuthority} alignRight link />
+                            </td>
+                        </tr>
+                    )}
+                    <tr>
+                        <td>Current Rate Basis Points</td>
+                        <td className="text-lg-end">{extension.currentRate}</td>
+                    </tr>
+                    <tr>
+                        <td>Pre-Current Average Rate</td>
+                        <td className="text-lg-end">{extension.preUpdateAverageRate}</td>
+                    </tr>
+                    <tr>
+                        <td>Last Update Timestamp</td>
+                        <td className="text-lg-end">{extension.lastUpdateTimestamp}</td>
+                    </tr>
+                    <tr>
+                        <td>Initialization Timestamp</td>
+                        <td className="text-lg-end">{extension.initializationTimestamp}</td>
+                    </tr>
+                </>
+            );
+        }
         case 'permanentDelegate':
         case 'transferHook':
         case 'metadataPointer':
