@@ -36,7 +36,15 @@ const getEthAddress = (link?: string) => {
     return address;
 };
 
-export function TokenAccountSection({ account, tokenAccount, tokenInfo }: { account: Account; tokenAccount: TokenAccount, tokenInfo?: FullLegacyTokenInfo }) {
+export function TokenAccountSection({
+    account,
+    tokenAccount,
+    tokenInfo,
+}: {
+    account: Account;
+    tokenAccount: TokenAccount;
+    tokenInfo?: FullLegacyTokenInfo;
+}) {
     const { cluster } = useCluster();
 
     try {
@@ -75,7 +83,15 @@ export function TokenAccountSection({ account, tokenAccount, tokenInfo }: { acco
     return <UnknownAccountCard account={account} />;
 }
 
-function FungibleTokenMintAccountCard({ account, mintInfo, tokenInfo }: { account: Account; mintInfo: MintAccountInfo, tokenInfo?: FullLegacyTokenInfo }) {
+function FungibleTokenMintAccountCard({
+    account,
+    mintInfo,
+    tokenInfo,
+}: {
+    account: Account;
+    mintInfo: MintAccountInfo;
+    tokenInfo?: FullLegacyTokenInfo;
+}) {
     const fetchInfo = useFetchAccountInfo();
     const refresh = () => fetchInfo(account.pubkey, 'parsed');
 
@@ -152,7 +168,11 @@ function FungibleTokenMintAccountCard({ account, mintInfo, tokenInfo }: { accoun
             <div className="card">
                 <div className="card-header">
                     <h3 className="card-header-title mb-0 d-flex align-items-center">
-                        {tokenInfo ? 'Overview' : account.owner.toBase58() === TOKEN_2022_PROGRAM_ID.toBase58() ? 'Token-2022 Mint' : 'Token Mint'}
+                        {tokenInfo
+                            ? 'Overview'
+                            : account.owner.toBase58() === TOKEN_2022_PROGRAM_ID.toBase58()
+                            ? 'Token-2022 Mint'
+                            : 'Token Mint'}
                     </h3>
                     <button className="btn btn-white btn-sm" onClick={refresh}>
                         <RefreshCw className="align-text-top me-2" size={13} />
@@ -356,22 +376,27 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
 
     const balance = info.isNative ? (
         <>
-            {'\u25ce'}<span className="font-monospace">{new BigNumber(info.tokenAmount.uiAmountString).toFormat(9)}</span>
+            {'\u25ce'}
+            <span className="font-monospace">{new BigNumber(info.tokenAmount.uiAmountString).toFormat(9)}</span>
         </>
-    ) : <>{info.tokenAmount.uiAmountString}</>;
+    ) : (
+        <>{info.tokenAmount.uiAmountString}</>
+    );
 
     useEffect(() => {
         if (info.isNative) {
             setSymbol('SOL');
         } else {
-            setSymbol(tokenInfo?.symbol)
+            setSymbol(tokenInfo?.symbol);
         }
-    }, [tokenInfo])
+    }, [tokenInfo]);
 
     return (
         <div className="card">
             <div className="card-header">
-                <h3 className="card-header-title mb-0 d-flex align-items-center">Token{ account.owner.toBase58() === TOKEN_2022_PROGRAM_ID.toBase58() && "-2022" } Account</h3>
+                <h3 className="card-header-title mb-0 d-flex align-items-center">
+                    Token{account.owner.toBase58() === TOKEN_2022_PROGRAM_ID.toBase58() && '-2022'} Account
+                </h3>
                 <button className="btn btn-white btn-sm" onClick={() => refresh(account.pubkey, 'parsed')}>
                     <RefreshCw className="align-text-top me-2" size={13} />
                     Refresh
@@ -439,9 +464,16 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
                             <td className="text-lg-end">
                                 {info.isNative ? (
                                     <>
-                                        {'\u25ce'}<span className="font-monospace">{new BigNumber(info.delegatedAmount ? info.delegatedAmount.uiAmountString : "0").toFormat(9)}</span>
+                                        {'\u25ce'}
+                                        <span className="font-monospace">
+                                            {new BigNumber(
+                                                info.delegatedAmount ? info.delegatedAmount.uiAmountString : '0'
+                                            ).toFormat(9)}
+                                        </span>
                                     </>
-                                ) : <>{info.delegatedAmount ? info.delegatedAmount.uiAmountString : "0"}</>}
+                                ) : (
+                                    <>{info.delegatedAmount ? info.delegatedAmount.uiAmountString : '0'}</>
+                                )}
                             </td>
                         </tr>
                     </>
