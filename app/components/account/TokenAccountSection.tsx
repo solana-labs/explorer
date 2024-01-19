@@ -14,6 +14,7 @@ import { abbreviatedNumber, normalizeTokenAmount } from '@utils/index';
 import { addressLabel } from '@utils/tx';
 import { MintAccountInfo, MultisigAccountInfo, TokenAccount, TokenAccountInfo } from '@validators/accounts/token';
 import {
+    ConfidentialTransferMint,
     MintCloseAuthority,
     TokenExtension,
     TransferFeeConfig,
@@ -639,7 +640,34 @@ function TokenExtensionRows(mintInfo: MintAccountInfo, tokenExtension: TokenExte
                 </>
             );
         }
-        case 'confidentialTransferMint':
+        case 'confidentialTransferMint': {
+            const extension = create(tokenExtension.state, ConfidentialTransferMint);
+            return (
+                <>
+                    <tr>
+                        <h4>Confidential Transfer</h4>
+                    </tr>
+                    {extension.authority && (
+                        <tr>
+                            <td>Authority</td>
+                            <td className="text-lg-end">
+                                <Address pubkey={extension.authority} alignRight link />
+                            </td>
+                        </tr>
+                    )}
+                    {extension.auditorElgamalPubkey && (
+                        <tr>
+                            <td>Auditor Elgamal Pubkey</td>
+                            <td className="text-lg-end">{extension.auditorElgamalPubkey}</td>
+                        </tr>
+                    )}
+                    <tr>
+                        <td>New Account Approval Policy</td>
+                        <td className="text-lg-end">{extension.autoApproveNewAccounts ? 'auto' : 'manual'}</td>
+                    </tr>
+                </>
+            );
+        }
         case 'confidentialTransferAccount':
         case 'defaultAccountState':
         case 'immutableOwner':
