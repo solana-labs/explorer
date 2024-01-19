@@ -13,7 +13,7 @@ import { displayTimestampWithoutDate } from '@utils/date';
 import { abbreviatedNumber, normalizeTokenAmount } from '@utils/index';
 import { addressLabel } from '@utils/tx';
 import { MintAccountInfo, MultisigAccountInfo, TokenAccount, TokenAccountInfo } from '@validators/accounts/token';
-import { MintCloseAuthority, TokenExtension } from '@validators/accounts/token-extension';
+import { MintCloseAuthority, TokenExtension, TransferFeeAmount } from '@validators/accounts/token-extension';
 import { BigNumber } from 'bignumber.js';
 import { useEffect, useMemo, useState } from 'react';
 import { ExternalLink, RefreshCw } from 'react-feather';
@@ -549,7 +549,19 @@ function TokenExtensionRows(mintInfo: MintAccountInfo, tokenExtension: TokenExte
                 return <></>;
             }
         }
-        case 'transferFeeAmount':
+        case 'transferFeeAmount': {
+            const extension = create(tokenExtension.state, TransferFeeAmount);
+            return (
+                <tr>
+                    <td>Withheld Amount</td>
+                    <td className="text-lg-end">
+                        {normalizeTokenAmount(extension.withheldAmount, mintInfo.decimals).toLocaleString('en-US', {
+                            maximumFractionDigits: 20,
+                        })}
+                    </td>
+                </tr>
+            );
+        }
         case 'transferFeeConfig':
         case 'confidentialTransferMint':
         case 'confidentialTransferAccount':
