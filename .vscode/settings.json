@@ -1,4 +1,12 @@
 {
   "typescript.tsdk": "node_modules/.pnpm/typescript@5.0.4/node_modules/typescript/lib",
-  "typescript.enablePromptUseWorkspaceTsdk": true
+"typescript.enablePromptUseWorkspaceTsdk": true,
+"cSpell.words": [
+    "devnet",
+    "Devnet",
+    "DEVNET",
+    "onsol",
+    "solana",
+    "tldparser"
+]
 }

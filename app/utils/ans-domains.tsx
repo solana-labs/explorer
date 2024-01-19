@@ -1,15 +1,11 @@
-import { PublicKey, Connection } from '@solana/web3.js';
+import { Connection } from '@solana/web3.js';
 import { useState, useEffect } from 'react';
 import { useCluster } from '../providers/cluster';
 import { Cluster } from './cluster';
 import { TldParser, NameRecordHeader } from '@onsol/tldparser';
 import { DomainInfo } from './domain-info';
 import pLimit from 'p-limit';
-import * as BufferLayout from '@solana/buffer-layout';
 
-const stringToBuffer = (str: string) => Buffer.from(Array.from(str.split(',')).map(i => Number(i)));
-const tldLayout = BufferLayout.utf8(10, 'tld');
-const domainLayout = BufferLayout.utf8(32, 'domain');
 
 export const useUserANSDomains = (userAddress: string): [DomainInfo[] | null, boolean] => {
     const { url, cluster } = useCluster();

@@ -1,13 +1,14 @@
 import { Connection } from '@solana/web3.js';
 import { NextResponse } from 'next/server';
+
 import { MAINNET_BETA_URL } from '@/app/utils/cluster';
 import { getDomainInfo, hasDomainSyntax } from '@/app/utils/domain-info';
-import { getANSDomainOwnerAndAddress, hasANSDomainSyntax } from '../../../utils/ans-domain-info';
+import { getANSDomainOwnerAndAddress, hasANSDomainSyntax } from '@/app/utils/ans-domain-info';
 
 type Params = {
     params: {
-        domain: string;
-    };
+        domain: string
+    }
 };
 
 export type FetchedDomainInfo = Awaited<ReturnType<typeof getDomainInfo>>;
