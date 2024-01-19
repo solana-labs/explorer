@@ -13,7 +13,7 @@ import { displayTimestampWithoutDate } from '@utils/date';
 import { abbreviatedNumber, normalizeTokenAmount } from '@utils/index';
 import { addressLabel } from '@utils/tx';
 import { MintAccountInfo, MultisigAccountInfo, TokenAccount, TokenAccountInfo } from '@validators/accounts/token';
-import { TokenExtension } from '@validators/accounts/token-extension';
+import { MintCloseAuthority, TokenExtension } from '@validators/accounts/token-extension';
 import { BigNumber } from 'bignumber.js';
 import { useEffect, useMemo, useState } from 'react';
 import { ExternalLink, RefreshCw } from 'react-feather';
@@ -534,7 +534,21 @@ function MultisigAccountCard({ account, info }: { account: Account; info: Multis
 
 function TokenExtensionRows(mintInfo: MintAccountInfo, tokenExtension: TokenExtension) {
     switch (tokenExtension.extension) {
-        case 'mintCloseAuthority':
+        case 'mintCloseAuthority': {
+            const extension = create(tokenExtension.state, MintCloseAuthority);
+            if (extension.closeAuthority) {
+                return (
+                    <tr>
+                        <td>Close Authority</td>
+                        <td className="text-lg-end">
+                            <Address pubkey={extension.closeAuthority} alignRight link />
+                        </td>
+                    </tr>
+                );
+            } else {
+                return <></>;
+            }
+        }
         case 'transferFeeAmount':
         case 'transferFeeConfig':
         case 'confidentialTransferMint':
