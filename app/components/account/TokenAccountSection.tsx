@@ -14,6 +14,7 @@ import { abbreviatedNumber, normalizeTokenAmount } from '@utils/index';
 import { addressLabel } from '@utils/tx';
 import { MintAccountInfo, MultisigAccountInfo, TokenAccount, TokenAccountInfo } from '@validators/accounts/token';
 import {
+    ConfidentialTransferFeeConfig,
     ConfidentialTransferMint,
     MintCloseAuthority,
     TokenExtension,
@@ -668,7 +669,38 @@ function TokenExtensionRows(mintInfo: MintAccountInfo, tokenExtension: TokenExte
                 </>
             );
         }
-        case 'confidentialTransferFeeConfig':
+        case 'confidentialTransferFeeConfig': {
+            const extension = create(tokenExtension.state, ConfidentialTransferFeeConfig);
+            return (
+                <>
+                    <tr>
+                        <h4>Confidential Transfer Fee</h4>
+                    </tr>
+                    {extension.authority && (
+                        <tr>
+                            <td>Authority</td>
+                            <td className="text-lg-end">
+                                <Address pubkey={extension.authority} alignRight link />
+                            </td>
+                        </tr>
+                    )}
+                    {extension.withdrawWithheldAuthorityElgamalPubkey && (
+                        <tr>
+                            <td>Auditor Elgamal Pubkey</td>
+                            <td className="text-lg-end">{extension.withdrawWithheldAuthorityElgamalPubkey}</td>
+                        </tr>
+                    )}
+                    <tr>
+                        <td>Harvest to Mint</td>
+                        <td className="text-lg-end">{extension.harvestToMintEnabled ? 'enabled' : 'disabled'}</td>
+                    </tr>
+                    <tr>
+                        <td>Withheld Amount</td>
+                        <td className="text-lg-end">{extension.withheldAmount}</td>
+                    </tr>
+                </>
+            );
+        }
         case 'defaultAccountState':
         case 'nonTransferable':
         case 'interestBearingConfig':

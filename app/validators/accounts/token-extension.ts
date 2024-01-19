@@ -91,7 +91,7 @@ export const ConfidentialTransferMint = type({
 export const ConfidentialTransferFeeConfig = type({
     authority: nullable(PublicKeyFromString),
     harvestToMintEnabled: boolean(),
-    withdrawWithheldAuthorityElgamalPubkey: nullable(PublicKeyFromString),
+    withdrawWithheldAuthorityElgamalPubkey: nullable(string()),
     withheldAmount: string(),
 });
 
