@@ -23,6 +23,7 @@ import {
     TokenExtension,
     TransferFeeConfig,
     TransferFeeAmount,
+    TransferHook,
 } from '@validators/accounts/token-extension';
 import { BigNumber } from 'bignumber.js';
 import { useEffect, useMemo, useState } from 'react';
@@ -770,7 +771,29 @@ function TokenExtensionRows(mintInfo: MintAccountInfo, tokenExtension: TokenExte
                 return <></>;
             }
         }
-        case 'transferHook':
+        case 'transferHook': {
+            const extension = create(tokenExtension.state, TransferHook);
+            return (
+                <>
+                    {extension.programId && (
+                        <tr>
+                            <td>Transfer Hook Program Id</td>
+                            <td className="text-lg-end">
+                                <Address pubkey={extension.programId} alignRight link />
+                            </td>
+                        </tr>
+                    )}
+                    {extension.authority && (
+                        <tr>
+                            <td>Transfer Hook Authority</td>
+                            <td className="text-lg-end">
+                                <Address pubkey={extension.authority} alignRight link />
+                            </td>
+                        </tr>
+                    )}
+                </>
+            );
+        }
         case 'metadataPointer':
         case 'tokenMetadata':
         case 'groupPointer':
