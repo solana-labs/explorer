@@ -15,6 +15,7 @@ import { addressLabel } from '@utils/tx';
 import { MintAccountInfo, MultisigAccountInfo, TokenAccount, TokenAccountInfo } from '@validators/accounts/token';
 import {
     ConfidentialTransferAccount,
+    ConfidentialTransferFeeAmount,
     ConfidentialTransferFeeConfig,
     ConfidentialTransferMint,
     CpiGuard,
@@ -1022,7 +1023,15 @@ function TokenExtensionRows(decimals: number, tokenExtension: TokenExtension) {
                 </tr>
             );
         }
-        case 'confidentialTransferFeeAmount':
+        case 'confidentialTransferFeeAmount': {
+            const extension = create(tokenExtension.state, ConfidentialTransferFeeAmount);
+            return (
+                <tr>
+                    <td>Confidential Withheld Amount</td>
+                    <td className="text-lg-end">{extension.withheldAmount}</td>
+                </tr>
+            );
+        }
         case 'tokenGroup':
         case 'tokenGroupMember':
         case 'unparseableExtension':
