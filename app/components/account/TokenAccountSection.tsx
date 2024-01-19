@@ -14,6 +14,7 @@ import { abbreviatedNumber, normalizeTokenAmount } from '@utils/index';
 import { addressLabel } from '@utils/tx';
 import { MintAccountInfo, MultisigAccountInfo, TokenAccount, TokenAccountInfo } from '@validators/accounts/token';
 import {
+    ConfidentialTransferAccount,
     ConfidentialTransferFeeConfig,
     ConfidentialTransferMint,
     CpiGuard,
@@ -925,7 +926,66 @@ function TokenExtensionRows(decimals: number, tokenExtension: TokenExtension) {
                 </tr>
             );
         }
-        case 'confidentialTransferAccount':
+        case 'confidentialTransferAccount': {
+            const extension = create(tokenExtension.state, ConfidentialTransferAccount);
+            return (
+                <>
+                    <tr>
+                        <h4>Confidential Transfer</h4>
+                    </tr>
+                    <tr>
+                        <td>Status</td>
+                        <td className="text-lg-end">{!extension.approved ?? 'not '}approved</td>
+                    </tr>
+                    <tr>
+                        <td>Elgamal Pubkey</td>
+                        <td className="text-lg-end">{extension.elgamalPubkey}</td>
+                    </tr>
+                    <tr>
+                        <td>Confidential Credits</td>
+                        <td className="text-lg-end">{extension.allowConfidentialCredits ? 'enabled' : 'disabled'}</td>
+                    </tr>
+                    <tr>
+                        <td>Non-confidential Credits</td>
+                        <td className="text-lg-end">
+                            {extension.allowNonConfidentialCredits ? 'enabled' : 'disabled'}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Available Balance</td>
+                        <td className="text-lg-end">{extension.availableBalance}</td>
+                    </tr>
+                    <tr>
+                        <td>Decryptable Available Balance</td>
+                        <td className="text-lg-end">{extension.decryptableAvailableBalance}</td>
+                    </tr>
+                    <tr>
+                        <td>Pending Balance, Low Bits</td>
+                        <td className="text-lg-end">{extension.pendingBalanceLo}</td>
+                    </tr>
+                    <tr>
+                        <td>Pending Balance, High Bits</td>
+                        <td className="text-lg-end">{extension.pendingBalanceHi}</td>
+                    </tr>
+                    <tr>
+                        <td>Pending Balance Credit Counter</td>
+                        <td className="text-lg-end">{extension.pendingBalanceCreditCounter}</td>
+                    </tr>
+                    <tr>
+                        <td>Expected Pending Balance Credit Counter</td>
+                        <td className="text-lg-end">{extension.expectedPendingBalanceCreditCounter}</td>
+                    </tr>
+                    <tr>
+                        <td>Actual Pending Balance Credit Counter</td>
+                        <td className="text-lg-end">{extension.actualPendingBalanceCreditCounter}</td>
+                    </tr>
+                    <tr>
+                        <td>Maximum Pending Balance Credit Counter</td>
+                        <td className="text-lg-end">{extension.maximumPendingBalanceCreditCounter}</td>
+                    </tr>
+                </>
+            );
+        }
         case 'immutableOwner':
         case 'memoTransfer':
         case 'transferHookAccount':
