@@ -668,25 +668,25 @@ function TokenExtensionRows(mintInfo: MintAccountInfo, tokenExtension: TokenExte
                 </>
             );
         }
-        case 'confidentialTransferAccount':
+        case 'confidentialTransferFeeConfig':
         case 'defaultAccountState':
-        case 'immutableOwner':
-        case 'memoTransfer':
         case 'nonTransferable':
         case 'interestBearingConfig':
-        case 'cpiGuard':
         case 'permanentDelegate':
-        case 'nonTransferableAccount':
-        case 'confidentialTransferFeeConfig':
-        case 'confidentialTransferFeeAmount':
         case 'transferHook':
-        case 'transferHookAccount':
         case 'metadataPointer':
         case 'tokenMetadata':
         case 'groupPointer':
         case 'groupMemberPointer':
         case 'tokenGroup':
         case 'tokenGroupMember':
+        case 'cpiGuard':
+        case 'confidentialTransferAccount':
+        case 'immutableOwner':
+        case 'memoTransfer':
+        case 'transferHookAccount':
+        case 'nonTransferableAccount':
+        case 'confidentialTransferFeeAmount':
         case 'unparseableExtension':
         default:
             return (
