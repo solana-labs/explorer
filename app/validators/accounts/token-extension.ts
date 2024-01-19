@@ -1,5 +1,5 @@
 import { PublicKeyFromString } from '@validators/pubkey';
-import { any, array, boolean, enums, Infer, number, optional, string, type } from 'superstruct';
+import { any, array, boolean, enums, Infer, nullable, number, string, type } from 'superstruct';
 
 export type TokenExtensionType = Infer<typeof ExtensionType>;
 const ExtensionType = enums([
@@ -44,8 +44,8 @@ const TransferFee = type({
 export const TransferFeeConfig = type({
     newerTransferFee: TransferFee,
     olderTransferFee: TransferFee,
-    transferFeeConfigAuthority: optional(PublicKeyFromString),
-    withdrawWithheldAuthority: optional(PublicKeyFromString),
+    transferFeeConfigAuthority: nullable(PublicKeyFromString),
+    withdrawWithheldAuthority: nullable(PublicKeyFromString),
     withheldAmount: number(),
 });
 
@@ -54,7 +54,7 @@ export const TransferFeeAmount = type({
 });
 
 export const MintCloseAuthority = type({
-    closeAuthority: optional(PublicKeyFromString),
+    closeAuthority: nullable(PublicKeyFromString),
 });
 
 const AccountState = enums(['initialized', 'frozen']);
@@ -71,7 +71,7 @@ export const CpiGuard = type({
 });
 
 export const PermanentDelegate = type({
-    delegate: optional(PublicKeyFromString),
+    delegate: nullable(PublicKeyFromString),
 });
 
 export const InterestBearingConfig = type({
@@ -79,19 +79,19 @@ export const InterestBearingConfig = type({
     initializationTimestamp: number(),
     lastUpdateTimestamp: number(),
     preUpdateAverageRate: number(),
-    rateAuthority: optional(PublicKeyFromString),
+    rateAuthority: nullable(PublicKeyFromString),
 });
 
 export const ConfidentialTransferMint = type({
-    auditorElgamalPubkey: optional(PublicKeyFromString),
-    authority: optional(PublicKeyFromString),
+    auditorElgamalPubkey: nullable(string()),
+    authority: nullable(PublicKeyFromString),
     autoApproveNewAccounts: boolean(),
 });
 
 export const ConfidentialTransferFeeConfig = type({
-    authority: optional(PublicKeyFromString),
+    authority: nullable(PublicKeyFromString),
     harvestToMintEnabled: boolean(),
-    withdrawWithheldAuthorityElgamalPubkey: optional(PublicKeyFromString),
+    withdrawWithheldAuthorityElgamalPubkey: nullable(PublicKeyFromString),
     withheldAmount: string(),
 });
 
@@ -115,8 +115,8 @@ export const ConfidentialTransferFeeAmount = type({
 });
 
 export const MetadataPointer = type({
-    authority: optional(PublicKeyFromString),
-    metadataAddress: optional(PublicKeyFromString),
+    authority: nullable(PublicKeyFromString),
+    metadataAddress: nullable(PublicKeyFromString),
 });
 
 export const TokenMetadata = type({
@@ -124,13 +124,13 @@ export const TokenMetadata = type({
     mint: PublicKeyFromString,
     name: string(),
     symbol: string(),
-    updateAuthority: optional(PublicKeyFromString),
+    updateAuthority: nullable(PublicKeyFromString),
     uri: string(),
 });
 
 export const TransferHook = type({
-    authority: optional(PublicKeyFromString),
-    programId: optional(PublicKeyFromString),
+    authority: nullable(PublicKeyFromString),
+    programId: nullable(PublicKeyFromString),
 });
 
 export const TransferHookAccount = type({
@@ -138,20 +138,20 @@ export const TransferHookAccount = type({
 });
 
 export const GroupPointer = type({
-    authority: optional(PublicKeyFromString),
-    groupAddress: optional(PublicKeyFromString),
+    authority: nullable(PublicKeyFromString),
+    groupAddress: nullable(PublicKeyFromString),
 });
 
 export const GroupMemberPointer = type({
-    authority: optional(PublicKeyFromString),
-    memberAddress: optional(PublicKeyFromString),
+    authority: nullable(PublicKeyFromString),
+    memberAddress: nullable(PublicKeyFromString),
 });
 
 export const TokenGroup = type({
     maxSize: number(),
     mint: PublicKeyFromString,
     size: number(),
-    updateAuthority: optional(PublicKeyFromString),
+    updateAuthority: nullable(PublicKeyFromString),
 });
 
 export const TokenGroupMember = type({
