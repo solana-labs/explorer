@@ -16,6 +16,7 @@ import { MintAccountInfo, MultisigAccountInfo, TokenAccount, TokenAccountInfo } 
 import {
     ConfidentialTransferFeeConfig,
     ConfidentialTransferMint,
+    CpiGuard,
     DefaultAccountState,
     GroupMemberPointer,
     GroupPointer,
@@ -600,12 +601,12 @@ function TokenExtensionRows(decimals: number, tokenExtension: TokenExtension) {
                     <tr>
                         <td>Older Maximum Fee</td>
                         <td className="text-lg-end">
-                            {normalizeTokenAmount(
-                                extension.olderTransferFee.maximumFee,
-                                decimals
-                            ).toLocaleString('en-US', {
-                                maximumFractionDigits: 20,
-                            })}
+                            {normalizeTokenAmount(extension.olderTransferFee.maximumFee, decimals).toLocaleString(
+                                'en-US',
+                                {
+                                    maximumFractionDigits: 20,
+                                }
+                            )}
                         </td>
                     </tr>
                     <tr>
@@ -619,12 +620,12 @@ function TokenExtensionRows(decimals: number, tokenExtension: TokenExtension) {
                     <tr>
                         <td>Newer Maximum Fee</td>
                         <td className="text-lg-end">
-                            {normalizeTokenAmount(
-                                extension.newerTransferFee.maximumFee,
-                                decimals
-                            ).toLocaleString('en-US', {
-                                maximumFractionDigits: 20,
-                            })}
+                            {normalizeTokenAmount(extension.newerTransferFee.maximumFee, decimals).toLocaleString(
+                                'en-US',
+                                {
+                                    maximumFractionDigits: 20,
+                                }
+                            )}
                         </td>
                     </tr>
                     <tr>
@@ -915,7 +916,15 @@ function TokenExtensionRows(decimals: number, tokenExtension: TokenExtension) {
                 </>
             );
         }
-        case 'cpiGuard':
+        case 'cpiGuard': {
+            const extension = create(tokenExtension.state, CpiGuard);
+            return (
+                <tr>
+                    <td>CPI Guard</td>
+                    <td className="text-lg-end">{extension.lockCpi ? 'enabled' : 'disabled'}</td>
+                </tr>
+            );
+        }
         case 'confidentialTransferAccount':
         case 'immutableOwner':
         case 'memoTransfer':
