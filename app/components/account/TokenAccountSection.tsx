@@ -19,6 +19,7 @@ import {
     DefaultAccountState,
     InterestBearingConfig,
     MintCloseAuthority,
+    PermanentDelegate,
     TokenExtension,
     TransferFeeConfig,
     TransferFeeAmount,
@@ -754,7 +755,21 @@ function TokenExtensionRows(mintInfo: MintAccountInfo, tokenExtension: TokenExte
                 </>
             );
         }
-        case 'permanentDelegate':
+        case 'permanentDelegate': {
+            const extension = create(tokenExtension.state, PermanentDelegate);
+            if (extension.delegate) {
+                return (
+                    <tr>
+                        <td>Permanent Delegate</td>
+                        <td className="text-lg-end">
+                            <Address pubkey={extension.delegate} alignRight link />
+                        </td>
+                    </tr>
+                );
+            } else {
+                return <></>;
+            }
+        }
         case 'transferHook':
         case 'metadataPointer':
         case 'tokenMetadata':
