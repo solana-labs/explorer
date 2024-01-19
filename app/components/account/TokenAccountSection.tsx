@@ -17,16 +17,16 @@ import {
     ConfidentialTransferFeeConfig,
     ConfidentialTransferMint,
     DefaultAccountState,
-    GroupPointer,
     GroupMemberPointer,
+    GroupPointer,
     InterestBearingConfig,
     MetadataPointer,
     MintCloseAuthority,
     PermanentDelegate,
     TokenExtension,
     TokenMetadata,
-    TransferFeeConfig,
     TransferFeeAmount,
+    TransferFeeConfig,
     TransferHook,
 } from '@validators/accounts/token-extension';
 import { BigNumber } from 'bignumber.js';
@@ -271,7 +271,7 @@ function FungibleTokenMintAccountCard({
                             </td>
                         </tr>
                     )}
-                    {mintInfo.extensions?.map(extension => TokenExtensionRows(mintInfo, extension))}
+                    {mintInfo.extensions?.map(extension => TokenExtensionRows(mintInfo.decimals, extension))}
                 </TableCardBody>
             </div>
         </>
@@ -495,6 +495,7 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
                         </tr>
                     </>
                 )}
+                {info.extensions?.map(extension => TokenExtensionRows(info.tokenAmount.decimals, extension))}
             </TableCardBody>
         </div>
     );
@@ -547,7 +548,7 @@ function MultisigAccountCard({ account, info }: { account: Account; info: Multis
     );
 }
 
-function TokenExtensionRows(mintInfo: MintAccountInfo, tokenExtension: TokenExtension) {
+function TokenExtensionRows(decimals: number, tokenExtension: TokenExtension) {
     switch (tokenExtension.extension) {
         case 'mintCloseAuthority': {
             const extension = create(tokenExtension.state, MintCloseAuthority);
@@ -570,7 +571,7 @@ function TokenExtensionRows(mintInfo: MintAccountInfo, tokenExtension: TokenExte
                 <tr>
                     <td>Withheld Amount</td>
                     <td className="text-lg-end">
-                        {normalizeTokenAmount(extension.withheldAmount, mintInfo.decimals).toLocaleString('en-US', {
+                        {normalizeTokenAmount(extension.withheldAmount, decimals).toLocaleString('en-US', {
                             maximumFractionDigits: 20,
                         })}
                     </td>
@@ -601,7 +602,7 @@ function TokenExtensionRows(mintInfo: MintAccountInfo, tokenExtension: TokenExte
                         <td className="text-lg-end">
                             {normalizeTokenAmount(
                                 extension.olderTransferFee.maximumFee,
-                                mintInfo.decimals
+                                decimals
                             ).toLocaleString('en-US', {
                                 maximumFractionDigits: 20,
                             })}
@@ -620,7 +621,7 @@ function TokenExtensionRows(mintInfo: MintAccountInfo, tokenExtension: TokenExte
                         <td className="text-lg-end">
                             {normalizeTokenAmount(
                                 extension.newerTransferFee.maximumFee,
-                                mintInfo.decimals
+                                decimals
                             ).toLocaleString('en-US', {
                                 maximumFractionDigits: 20,
                             })}
@@ -641,7 +642,7 @@ function TokenExtensionRows(mintInfo: MintAccountInfo, tokenExtension: TokenExte
                     <tr>
                         <td>Withheld Amount</td>
                         <td className="text-lg-end">
-                            {normalizeTokenAmount(extension.withheldAmount, mintInfo.decimals).toLocaleString('en-US', {
+                            {normalizeTokenAmount(extension.withheldAmount, decimals).toLocaleString('en-US', {
                                 maximumFractionDigits: 20,
                             })}
                         </td>
@@ -914,8 +915,6 @@ function TokenExtensionRows(mintInfo: MintAccountInfo, tokenExtension: TokenExte
                 </>
             );
         }
-        case 'tokenGroup':
-        case 'tokenGroupMember':
         case 'cpiGuard':
         case 'confidentialTransferAccount':
         case 'immutableOwner':
@@ -923,6 +922,8 @@ function TokenExtensionRows(mintInfo: MintAccountInfo, tokenExtension: TokenExte
         case 'transferHookAccount':
         case 'nonTransferableAccount':
         case 'confidentialTransferFeeAmount':
+        case 'tokenGroup':
+        case 'tokenGroupMember':
         case 'unparseableExtension':
         default:
             return (
