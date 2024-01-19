@@ -13,6 +13,7 @@ import { displayTimestampWithoutDate } from '@utils/date';
 import { abbreviatedNumber, normalizeTokenAmount } from '@utils/index';
 import { addressLabel } from '@utils/tx';
 import { MintAccountInfo, MultisigAccountInfo, TokenAccount, TokenAccountInfo } from '@validators/accounts/token';
+import { TokenExtension } from '@validators/accounts/token-extension';
 import { BigNumber } from 'bignumber.js';
 import { useEffect, useMemo, useState } from 'react';
 import { ExternalLink, RefreshCw } from 'react-feather';
@@ -255,6 +256,7 @@ function FungibleTokenMintAccountCard({
                             </td>
                         </tr>
                     )}
+                    {mintInfo.extensions?.map(extension => TokenExtensionRows(mintInfo, extension))}
                 </TableCardBody>
             </div>
         </>
@@ -528,4 +530,40 @@ function MultisigAccountCard({ account, info }: { account: Account; info: Multis
             </TableCardBody>
         </div>
     );
+}
+
+function TokenExtensionRows(mintInfo: MintAccountInfo, tokenExtension: TokenExtension) {
+    switch (tokenExtension.extension) {
+        case 'mintCloseAuthority':
+        case 'transferFeeAmount':
+        case 'transferFeeConfig':
+        case 'confidentialTransferMint':
+        case 'confidentialTransferAccount':
+        case 'defaultAccountState':
+        case 'immutableOwner':
+        case 'memoTransfer':
+        case 'nonTransferable':
+        case 'interestBearingConfig':
+        case 'cpiGuard':
+        case 'permanentDelegate':
+        case 'nonTransferableAccount':
+        case 'confidentialTransferFeeConfig':
+        case 'confidentialTransferFeeAmount':
+        case 'transferHook':
+        case 'transferHookAccount':
+        case 'metadataPointer':
+        case 'tokenMetadata':
+        case 'groupPointer':
+        case 'groupMemberPointer':
+        case 'tokenGroup':
+        case 'tokenGroupMember':
+        case 'unparseableExtension':
+        default:
+            return (
+                <tr>
+                    <td>Extension</td>
+                    <td className="text-lg-end">Unparseable</td>
+                </tr>
+            );
+    }
 }
