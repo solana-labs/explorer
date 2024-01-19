@@ -986,7 +986,14 @@ function TokenExtensionRows(decimals: number, tokenExtension: TokenExtension) {
                 </>
             );
         }
-        case 'immutableOwner':
+        case 'immutableOwner': {
+            return (
+                <tr>
+                    <td>Immutable Owner</td>
+                    <td className="text-lg-end">enabled</td>
+                </tr>
+            );
+        }
         case 'memoTransfer':
         case 'transferHookAccount':
         case 'nonTransferableAccount':
