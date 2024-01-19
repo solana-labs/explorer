@@ -22,6 +22,7 @@ import {
     GroupMemberPointer,
     GroupPointer,
     InterestBearingConfig,
+    MemoTransfer,
     MetadataPointer,
     MintCloseAuthority,
     PermanentDelegate,
@@ -994,7 +995,15 @@ function TokenExtensionRows(decimals: number, tokenExtension: TokenExtension) {
                 </tr>
             );
         }
-        case 'memoTransfer':
+        case 'memoTransfer': {
+            const extension = create(tokenExtension.state, MemoTransfer);
+            return (
+                <tr>
+                    <td>Require Memo on Incoming Transfers</td>
+                    <td className="text-lg-end">{extension.requireIncomingTransferMemos ? 'enabled' : 'disabled'}</td>
+                </tr>
+            );
+        }
         case 'transferHookAccount':
         case 'nonTransferableAccount':
         case 'confidentialTransferFeeAmount':
