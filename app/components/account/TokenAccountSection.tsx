@@ -1017,7 +1017,7 @@ function TokenExtensionRows(decimals: number, tokenExtension: TokenExtension) {
             const extension = create(tokenExtension.state, TransferHookAccount);
             return (
                 <tr>
-                    <td>Transfer Hook Account</td>
+                    <td>Transfer Hook Status</td>
                     <td className="text-lg-end">{!extension.transferring && 'not '}transferring</td>
                 </tr>
             );
