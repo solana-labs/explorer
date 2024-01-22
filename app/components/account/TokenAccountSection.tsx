@@ -9,7 +9,7 @@ import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { CoingeckoStatus, useCoinGecko } from '@utils/coingecko';
-import { displayTimestampWithoutDate } from '@utils/date';
+import { displayTimestamp, displayTimestampWithoutDate } from '@utils/date';
 import { abbreviatedNumber, normalizeTokenAmount } from '@utils/index';
 import { addressLabel } from '@utils/tx';
 import { MintAccountInfo, MultisigAccountInfo, TokenAccount, TokenAccountInfo } from '@validators/accounts/token';
@@ -757,11 +757,11 @@ function TokenExtensionRows(decimals: number, tokenExtension: TokenExtension) {
                     </tr>
                     <tr>
                         <td>Last Update Timestamp</td>
-                        <td className="text-lg-end">{extension.lastUpdateTimestamp}</td>
+                        <td className="text-lg-end">{displayTimestamp(extension.lastUpdateTimestamp * 1000)}</td>
                     </tr>
                     <tr>
                         <td>Initialization Timestamp</td>
-                        <td className="text-lg-end">{extension.initializationTimestamp}</td>
+                        <td className="text-lg-end">{displayTimestamp(extension.initializationTimestamp * 1000)}</td>
                     </tr>
                 </>
             );
