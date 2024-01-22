@@ -911,12 +911,19 @@ function TokenExtensionRows(decimals: number, tokenExtension: TokenExtension) {
                             </a>
                         </td>
                     </tr>
-                    {extension.additionalMetadata?.map(keyValuePair => (
-                        <tr key="{keyValuePair[0]}">
-                            <td>{keyValuePair[0]}</td>
-                            <td className="text-lg-end">{keyValuePair[1]}</td>
-                        </tr>
-                    ))}
+                    {extension.additionalMetadata?.length > 0 && (
+                        <>
+                            <tr>
+                                <h5>Additional Metadata</h5>
+                            </tr>
+                            {extension.additionalMetadata?.map(keyValuePair => (
+                                <tr key="{keyValuePair[0]}">
+                                    <td>{keyValuePair[0]}</td>
+                                    <td className="text-lg-end">{keyValuePair[1]}</td>
+                                </tr>
+                            ))}
+                        </>
+                    )}
                 </>
             );
         }
