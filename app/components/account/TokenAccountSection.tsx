@@ -601,10 +601,11 @@ function cmpExtension(a: TokenExtension, b: TokenExtension) {
 
 function TokenExtensionRows(
     tokenExtension: TokenExtension,
-    epoch: bigint,
+    maybeEpoch: bigint | undefined,
     decimals: number,
     symbol: string | undefined
 ) {
+    const epoch = maybeEpoch || 0n; // fallback to 0 if not provided
     switch (tokenExtension.extension) {
         case 'mintCloseAuthority': {
             const extension = create(tokenExtension.state, MintCloseAuthority);
