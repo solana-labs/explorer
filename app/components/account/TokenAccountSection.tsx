@@ -276,7 +276,9 @@ function FungibleTokenMintAccountCard({
                             </td>
                         </tr>
                     )}
-                    {mintInfo.extensions?.map(extension => TokenExtensionRows(mintInfo.decimals, extension))}
+                    {mintInfo.extensions?.map(extension =>
+                        TokenExtensionRows(extension, mintInfo.decimals, tokenInfo?.symbol)
+                    )}
                 </TableCardBody>
             </div>
         </>
@@ -500,7 +502,7 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
                         </tr>
                     </>
                 )}
-                {info.extensions?.map(extension => TokenExtensionRows(info.tokenAmount.decimals, extension))}
+                {info.extensions?.map(extension => TokenExtensionRows(extension, info.tokenAmount.decimals, symbol))}
             </TableCardBody>
         </div>
     );
@@ -553,7 +555,7 @@ function MultisigAccountCard({ account, info }: { account: Account; info: Multis
     );
 }
 
-function TokenExtensionRows(decimals: number, tokenExtension: TokenExtension) {
+function TokenExtensionRows(tokenExtension: TokenExtension, decimals: number, symbol: string | undefined) {
     switch (tokenExtension.extension) {
         case 'mintCloseAuthority': {
             const extension = create(tokenExtension.state, MintCloseAuthority);
@@ -574,7 +576,7 @@ function TokenExtensionRows(decimals: number, tokenExtension: TokenExtension) {
             const extension = create(tokenExtension.state, TransferFeeAmount);
             return (
                 <tr>
-                    <td>Withheld Amount</td>
+                    <td>Withheld Amount {typeof symbol === 'string' && `(${symbol})`}</td>
                     <td className="text-lg-end">
                         {normalizeTokenAmount(extension.withheldAmount, decimals).toLocaleString('en-US', {
                             maximumFractionDigits: 20,
@@ -603,7 +605,7 @@ function TokenExtensionRows(decimals: number, tokenExtension: TokenExtension) {
                         <td className="text-lg-end">{extension.olderTransferFee.epoch}</td>
                     </tr>
                     <tr>
-                        <td>Older Maximum Fee</td>
+                        <td>Older Maximum Fee {typeof symbol === 'string' && `(${symbol})`}</td>
                         <td className="text-lg-end">
                             {normalizeTokenAmount(extension.olderTransferFee.maximumFee, decimals).toLocaleString(
                                 'en-US',
@@ -622,7 +624,7 @@ function TokenExtensionRows(decimals: number, tokenExtension: TokenExtension) {
                         <td className="text-lg-end">{extension.newerTransferFee.epoch}</td>
                     </tr>
                     <tr>
-                        <td>Newer Maximum Fee</td>
+                        <td>Newer Maximum Fee {typeof symbol === 'string' && `(${symbol})`}</td>
                         <td className="text-lg-end">
                             {normalizeTokenAmount(extension.newerTransferFee.maximumFee, decimals).toLocaleString(
                                 'en-US',
@@ -645,7 +647,7 @@ function TokenExtensionRows(decimals: number, tokenExtension: TokenExtension) {
                         </tr>
                     )}
                     <tr>
-                        <td>Withheld Amount</td>
+                        <td>Withheld Amount {typeof symbol === 'string' && `(${symbol})`}</td>
                         <td className="text-lg-end">
                             {normalizeTokenAmount(extension.withheldAmount, decimals).toLocaleString('en-US', {
                                 maximumFractionDigits: 20,
@@ -709,7 +711,7 @@ function TokenExtensionRows(decimals: number, tokenExtension: TokenExtension) {
                         <td className="text-lg-end">{extension.harvestToMintEnabled ? 'enabled' : 'disabled'}</td>
                     </tr>
                     <tr>
-                        <td>Withheld Amount</td>
+                        <td>Encrypted Withheld Amount {typeof symbol === 'string' && `(${symbol})`}</td>
                         <td className="text-lg-end">{extension.withheldAmount}</td>
                     </tr>
                 </>
@@ -1034,7 +1036,7 @@ function TokenExtensionRows(decimals: number, tokenExtension: TokenExtension) {
             const extension = create(tokenExtension.state, ConfidentialTransferFeeAmount);
             return (
                 <tr>
-                    <td>Confidential Withheld Amount</td>
+                    <td>Encrypted Withheld Amount {typeof symbol === 'string' && `(${symbol})`}</td>
                     <td className="text-lg-end">{extension.withheldAmount}</td>
                 </tr>
             );
