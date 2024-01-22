@@ -614,8 +614,8 @@ function TokenExtensionRows(decimals: number, tokenExtension: TokenExtension) {
                         </td>
                     </tr>
                     <tr>
-                        <td>Older Fee Basis Points</td>
-                        <td className="text-lg-end">{extension.olderTransferFee.transferFeeBasisPoints}</td>
+                        <td>Older Fee Rate</td>
+                        <td className="text-lg-end">{`${extension.olderTransferFee.transferFeeBasisPoints / 100}%`}</td>
                     </tr>
                     <tr>
                         <td>Newer Fee Epoch</td>
@@ -633,8 +633,8 @@ function TokenExtensionRows(decimals: number, tokenExtension: TokenExtension) {
                         </td>
                     </tr>
                     <tr>
-                        <td>Newer Fee Basis Points</td>
-                        <td className="text-lg-end">{extension.newerTransferFee.transferFeeBasisPoints}</td>
+                        <td>Newer Fee Rate</td>
+                        <td className="text-lg-end">{`${extension.newerTransferFee.transferFeeBasisPoints / 100}%`}</td>
                     </tr>
                     {extension.withdrawWithheldAuthority && (
                         <tr>
@@ -748,12 +748,12 @@ function TokenExtensionRows(decimals: number, tokenExtension: TokenExtension) {
                         </tr>
                     )}
                     <tr>
-                        <td>Current Rate Basis Points</td>
-                        <td className="text-lg-end">{extension.currentRate}</td>
+                        <td>Current Rate</td>
+                        <td className="text-lg-end">{`${extension.currentRate / 100}%`}</td>
                     </tr>
                     <tr>
                         <td>Pre-Current Average Rate</td>
-                        <td className="text-lg-end">{extension.preUpdateAverageRate}</td>
+                        <td className="text-lg-end">{`${extension.preUpdateAverageRate / 100}%`}</td>
                     </tr>
                     <tr>
                         <td>Last Update Timestamp</td>
