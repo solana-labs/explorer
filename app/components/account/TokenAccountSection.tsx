@@ -28,6 +28,8 @@ import {
     MintCloseAuthority,
     PermanentDelegate,
     TokenExtension,
+    TokenGroup,
+    TokenGroupMember,
     TokenMetadata,
     TransferFeeAmount,
     TransferFeeConfig,
@@ -865,7 +867,7 @@ function TokenExtensionRows(
                 <>
                     {extension.metadataAddress && (
                         <tr>
-                            <td>Metadata Address</td>
+                            <td>Metadata</td>
                             <td className="text-lg-end">
                                 <Address pubkey={extension.metadataAddress} alignRight link />
                             </td>
@@ -888,7 +890,7 @@ function TokenExtensionRows(
                 <>
                     {extension.groupAddress && (
                         <tr>
-                            <td>Token Group Address</td>
+                            <td>Token Group</td>
                             <td className="text-lg-end">
                                 <Address pubkey={extension.groupAddress} alignRight link />
                             </td>
@@ -911,7 +913,7 @@ function TokenExtensionRows(
                 <>
                     {extension.memberAddress && (
                         <tr>
-                            <td>Token Group Member Address</td>
+                            <td>Token Group Member</td>
                             <td className="text-lg-end">
                                 <Address pubkey={extension.memberAddress} alignRight link />
                             </td>
@@ -936,7 +938,7 @@ function TokenExtensionRows(
                         <h4>Metadata</h4>
                     </tr>
                     <tr>
-                        <td>Mint address</td>
+                        <td>Mint</td>
                         <td className="text-lg-end">
                             <Address pubkey={extension.mint} alignRight link />
                         </td>
@@ -1095,19 +1097,61 @@ function TokenExtensionRows(
             );
         }
         case 'tokenGroup': {
+            const extension = create(tokenExtension.state, TokenGroup);
             return (
-                <tr>
-                    <td>Group</td>
-                    <td className="text-lg-end">unparseable</td>
-                </tr>
+                <>
+                    <tr>
+                        <h4>Group</h4>
+                    </tr>
+                    <tr>
+                        <td>Mint</td>
+                        <td className="text-lg-end">
+                            <Address pubkey={extension.mint} alignRight link />
+                        </td>
+                    </tr>
+                    {extension.updateAuthority && (
+                        <tr>
+                            <td>Update Authority</td>
+                            <td className="text-lg-end">
+                                <Address pubkey={extension.updateAuthority} alignRight link />
+                            </td>
+                        </tr>
+                    )}
+                    <tr>
+                        <td>Current Size</td>
+                        <td className="text-lg-end">{extension.size}</td>
+                    </tr>
+                    <tr>
+                        <td>Max Size</td>
+                        <td className="text-lg-end">{extension.maxSize}</td>
+                    </tr>
+                </>
             );
         }
         case 'tokenGroupMember': {
+            const extension = create(tokenExtension.state, TokenGroupMember);
             return (
-                <tr>
-                    <td>Group Member</td>
-                    <td className="text-lg-end">unparseable</td>
-                </tr>
+                <>
+                    <tr>
+                        <h4>Group Member</h4>
+                    </tr>
+                    <tr>
+                        <td>Mint</td>
+                        <td className="text-lg-end">
+                            <Address pubkey={extension.mint} alignRight link />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Group</td>
+                        <td className="text-lg-end">
+                            <Address pubkey={extension.group} alignRight link />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Member Number</td>
+                        <td className="text-lg-end">{extension.memberNumber}</td>
+                    </tr>
+                </>
             );
         }
         case 'unparseableExtension':
