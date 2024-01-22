@@ -122,6 +122,8 @@ function FungibleTokenMintAccountCard({
     const assetContractAddress = getEthAddress(tokenInfo?.extensions?.assetContract);
 
     const coinInfo = useCoinGecko(tokenInfo?.extensions?.coingeckoId);
+    const mintExtensions = mintInfo.extensions?.slice();
+    mintExtensions?.sort(cmpExtension);
 
     let tokenPriceInfo;
     let tokenPriceDecimals = 2;
@@ -278,7 +280,7 @@ function FungibleTokenMintAccountCard({
                             </td>
                         </tr>
                     )}
-                    {mintInfo.extensions?.map(extension =>
+                    {mintExtensions?.map(extension =>
                         TokenExtensionRows(extension, epoch, mintInfo.decimals, tokenInfo?.symbol)
                     )}
                 </TableCardBody>
@@ -400,6 +402,8 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
     const swrKey = useMemo(() => getTokenInfoSwrKey(info.mint.toString(), cluster, url), [cluster, url]);
     const { data: tokenInfo } = useSWR(swrKey, fetchTokenInfo);
     const [symbol, setSymbol] = useState<string | undefined>(undefined);
+    const accountExtensions = info.extensions?.slice();
+    accountExtensions?.sort(cmpExtension);
 
     const balance = info.isNative ? (
         <>
@@ -505,7 +509,7 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
                         </tr>
                     </>
                 )}
-                {info.extensions?.map(extension =>
+                {accountExtensions?.map(extension =>
                     TokenExtensionRows(extension, epoch, info.tokenAmount.decimals, symbol)
                 )}
             </TableCardBody>
@@ -558,6 +562,39 @@ function MultisigAccountCard({ account, info }: { account: Account; info: Multis
             </TableCardBody>
         </div>
     );
+}
+
+function cmpExtension(a: TokenExtension, b: TokenExtension) {
+    // be sure that extensions with a header row always come later
+    const sortedExtensionTypes = [
+        'transferFeeAmount',
+        'mintCloseAuthority',
+        'defaultAccountState',
+        'immutableOwner',
+        'memoTransfer',
+        'nonTransferable',
+        'nonTransferableAccount',
+        'cpiGuard',
+        'permanentDelegate',
+        'transferHook',
+        'transferHookAccount',
+        'metadataPointer',
+        'groupPointer',
+        'groupMemberPointer',
+        // everything below this comment includes a header row
+        'confidentialTransferAccount',
+        'confidentialTransferFeeConfig',
+        'confidentialTransferFeeAmount',
+        'confidentialTransferMint',
+        'interestBearingConfig',
+        'transferFeeConfig',
+        'tokenGroup',
+        'tokenGroupMember',
+        'tokenMetadata',
+        // always keep this last
+        'unparseableExtension',
+    ];
+    return sortedExtensionTypes.indexOf(a.extension) - sortedExtensionTypes.indexOf(b.extension);
 }
 
 function TokenExtensionRows(
