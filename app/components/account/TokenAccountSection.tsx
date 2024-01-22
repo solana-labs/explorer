@@ -114,6 +114,8 @@ function FungibleTokenMintAccountCard({
     tokenInfo?: FullLegacyTokenInfo;
 }) {
     const fetchInfo = useFetchAccountInfo();
+    const { clusterInfo } = useCluster();
+    const epoch = clusterInfo?.epochInfo.epoch;
     const refresh = () => fetchInfo(account.pubkey, 'parsed');
 
     const bridgeContractAddress = getEthAddress(tokenInfo?.extensions?.bridgeContract);
@@ -277,7 +279,7 @@ function FungibleTokenMintAccountCard({
                         </tr>
                     )}
                     {mintInfo.extensions?.map(extension =>
-                        TokenExtensionRows(extension, mintInfo.decimals, tokenInfo?.symbol)
+                        TokenExtensionRows(extension, epoch, mintInfo.decimals, tokenInfo?.symbol)
                     )}
                 </TableCardBody>
             </div>
@@ -392,7 +394,8 @@ async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', str
 
 function TokenAccountCard({ account, info }: { account: Account; info: TokenAccountInfo }) {
     const refresh = useFetchAccountInfo();
-    const { cluster, url } = useCluster();
+    const { cluster, clusterInfo, url } = useCluster();
+    const epoch = clusterInfo?.epochInfo.epoch;
     const label = addressLabel(account.pubkey.toBase58(), cluster);
     const swrKey = useMemo(() => getTokenInfoSwrKey(info.mint.toString(), cluster, url), [cluster, url]);
     const { data: tokenInfo } = useSWR(swrKey, fetchTokenInfo);
@@ -502,7 +505,9 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
                         </tr>
                     </>
                 )}
-                {info.extensions?.map(extension => TokenExtensionRows(extension, info.tokenAmount.decimals, symbol))}
+                {info.extensions?.map(extension =>
+                    TokenExtensionRows(extension, epoch, info.tokenAmount.decimals, symbol)
+                )}
             </TableCardBody>
         </div>
     );
@@ -555,7 +560,12 @@ function MultisigAccountCard({ account, info }: { account: Account; info: Multis
     );
 }
 
-function TokenExtensionRows(tokenExtension: TokenExtension, decimals: number, symbol: string | undefined) {
+function TokenExtensionRows(
+    tokenExtension: TokenExtension,
+    epoch: bigint,
+    decimals: number,
+    symbol: string | undefined
+) {
     switch (tokenExtension.extension) {
         case 'mintCloseAuthority': {
             const extension = create(tokenExtension.state, MintCloseAuthority);
@@ -601,11 +611,14 @@ function TokenExtensionRows(tokenExtension: TokenExtension, decimals: number, sy
                         </tr>
                     )}
                     <tr>
-                        <td>Older Fee Epoch</td>
+                        <td>{extension.newerTransferFee.epoch > epoch ? 'Current' : 'Previous'} Fee Epoch</td>
                         <td className="text-lg-end">{extension.olderTransferFee.epoch}</td>
                     </tr>
                     <tr>
-                        <td>Older Maximum Fee {typeof symbol === 'string' && `(${symbol})`}</td>
+                        <td>
+                            {extension.newerTransferFee.epoch > epoch ? 'Current' : 'Previous'} Maximum Fee{' '}
+                            {typeof symbol === 'string' && `(${symbol})`}
+                        </td>
                         <td className="text-lg-end">
                             {normalizeTokenAmount(extension.olderTransferFee.maximumFee, decimals).toLocaleString(
                                 'en-US',
@@ -616,15 +629,18 @@ function TokenExtensionRows(tokenExtension: TokenExtension, decimals: number, sy
                         </td>
                     </tr>
                     <tr>
-                        <td>Older Fee Rate</td>
+                        <td>{extension.newerTransferFee.epoch > epoch ? 'Current' : 'Previous'} Fee Rate</td>
                         <td className="text-lg-end">{`${extension.olderTransferFee.transferFeeBasisPoints / 100}%`}</td>
                     </tr>
                     <tr>
-                        <td>Newer Fee Epoch</td>
+                        <td>{extension.newerTransferFee.epoch > epoch ? 'Future' : 'Current'} Fee Epoch</td>
                         <td className="text-lg-end">{extension.newerTransferFee.epoch}</td>
                     </tr>
                     <tr>
-                        <td>Newer Maximum Fee {typeof symbol === 'string' && `(${symbol})`}</td>
+                        <td>
+                            {extension.newerTransferFee.epoch > epoch ? 'Future' : 'Current'} Maximum Fee{' '}
+                            {typeof symbol === 'string' && `(${symbol})`}
+                        </td>
                         <td className="text-lg-end">
                             {normalizeTokenAmount(extension.newerTransferFee.maximumFee, decimals).toLocaleString(
                                 'en-US',
@@ -635,7 +651,7 @@ function TokenExtensionRows(tokenExtension: TokenExtension, decimals: number, sy
                         </td>
                     </tr>
                     <tr>
-                        <td>Newer Fee Rate</td>
+                        <td>{extension.newerTransferFee.epoch > epoch ? 'Future' : 'Current'} Fee Rate</td>
                         <td className="text-lg-end">{`${extension.newerTransferFee.transferFeeBasisPoints / 100}%`}</td>
                     </tr>
                     {extension.withdrawWithheldAuthority && (
