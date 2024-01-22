@@ -1,6 +1,6 @@
 import { Address } from '@components/common/Address';
-import { BorshInstructionCoder, Idl, Program } from '@project-serum/anchor';
-import { IdlField, IdlInstruction, IdlType, IdlTypeDef } from '@project-serum/anchor/dist/cjs/idl';
+import { BorshInstructionCoder, Idl, Program } from '@coral-xyz/anchor';
+import { IdlField, IdlInstruction, IdlType, IdlTypeDef } from '@coral-xyz/anchor/dist/cjs/idl';
 import { useAnchorProgram } from '@providers/anchor';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
@@ -54,11 +54,11 @@ export function getAnchorAccountsFromInstruction(
     program: Program
 ):
     | {
-          name: string;
-          isMut: boolean;
-          isSigner: boolean;
-          pda?: object;
-      }[]
+        name: string;
+        isMut: boolean;
+        isSigner: boolean;
+        pda?: object;
+    }[]
     | null {
     if (decodedIx) {
         // get ix accounts
@@ -161,7 +161,9 @@ function mapField(key: string, value: any, type: IdlType, idl: Idl, keySuffix?: 
         type === 'i64' ||
         type === 'f64' ||
         type === 'u128' ||
-        type === 'i128'
+        type === 'i128' ||
+        type === 'u256' ||
+        type === 'i256'
     ) {
         return (
             <SimpleRow
@@ -225,6 +227,8 @@ function mapField(key: string, value: any, type: IdlType, idl: Idl, keySuffix?: 
                     </Fragment>
                 </ExpandableRow>
             );
+        } else if (fieldType?.type.kind === "alias") {
+            return mapField(fieldType.name, value, fieldType.type.value, idl, keySuffix, nestingLevel);
         } else {
             const enumVariantName = Object.keys(value)[0];
             const variant = fieldType.type.variants.find(
@@ -417,8 +421,8 @@ function typeDisplayName(
     type:
         | IdlType
         | {
-              enum: string;
-          }
+            enum: string;
+        }
 ): string {
     switch (type) {
         case 'bool':
@@ -434,6 +438,8 @@ function typeDisplayName(
         case 'f64':
         case 'u128':
         case 'i128':
+        case 'u256':
+        case 'i256':
         case 'bytes':
         case 'string':
             return type.toString();
@@ -445,6 +451,6 @@ function typeDisplayName(
             if ('option' in type) return `${typeDisplayName(type.option)} (optional)`;
             if ('vec' in type) return `${typeDisplayName(type.vec)}[]`;
             if ('array' in type) return `${typeDisplayName(type.array[0])}[${type.array[1]}]`;
-            return 'unkonwn';
+            return 'unknown';
     }
 }
