@@ -1,5 +1,5 @@
+import { AnchorProvider, Idl, Program, Wallet } from '@coral-xyz/anchor';
 import { NodeWallet } from '@metaplex/js';
-import { Idl, Program, Provider } from '@project-serum/anchor';
 import { Connection, Keypair } from '@solana/web3.js';
 
 const cachedAnchorProgramPromises: Record<
@@ -14,7 +14,7 @@ export function useAnchorProgram(programAddress: string, url: string): Program |
     if (cacheEntry === undefined) {
         const promise = Program.at(
             programAddress,
-            new Provider(new Connection(url), new NodeWallet(Keypair.generate()), {})
+            new AnchorProvider(new Connection(url), new NodeWallet(Keypair.generate()) as Wallet, {})
         )
             .then(program => {
                 cachedAnchorProgramPromises[key] = {

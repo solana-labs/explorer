@@ -1,6 +1,6 @@
 import { Address } from '@components/common/Address';
-import { BorshInstructionCoder, Idl, Instruction, Program } from '@project-serum/anchor';
-import { IdlInstruction } from '@project-serum/anchor/dist/cjs/idl';
+import { BorshInstructionCoder, Idl, Instruction, Program } from '@coral-xyz/anchor';
+import { IdlInstruction } from '@coral-xyz/anchor/dist/cjs/idl';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import {
     getAnchorAccountsFromInstruction,
@@ -39,11 +39,11 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
     const { ixAccounts, decodedIxData, ixDef } = useMemo(() => {
         let ixAccounts:
             | {
-                  name: string;
-                  isMut: boolean;
-                  isSigner: boolean;
-                  pda?: object;
-              }[]
+                name: string;
+                isMut: boolean;
+                isSigner: boolean;
+                pda?: object;
+            }[]
             | null = null;
         let decodedIxData: Instruction | null = null;
         let ixDef: IdlInstruction | undefined;
