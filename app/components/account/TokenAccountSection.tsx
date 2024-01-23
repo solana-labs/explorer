@@ -9,10 +9,33 @@ import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { CoingeckoStatus, useCoinGecko } from '@utils/coingecko';
-import { displayTimestampWithoutDate } from '@utils/date';
+import { displayTimestamp, displayTimestampWithoutDate } from '@utils/date';
 import { abbreviatedNumber, normalizeTokenAmount } from '@utils/index';
 import { addressLabel } from '@utils/tx';
 import { MintAccountInfo, MultisigAccountInfo, TokenAccount, TokenAccountInfo } from '@validators/accounts/token';
+import {
+    ConfidentialTransferAccount,
+    ConfidentialTransferFeeAmount,
+    ConfidentialTransferFeeConfig,
+    ConfidentialTransferMint,
+    CpiGuard,
+    DefaultAccountState,
+    GroupMemberPointer,
+    GroupPointer,
+    InterestBearingConfig,
+    MemoTransfer,
+    MetadataPointer,
+    MintCloseAuthority,
+    PermanentDelegate,
+    TokenExtension,
+    TokenGroup,
+    TokenGroupMember,
+    TokenMetadata,
+    TransferFeeAmount,
+    TransferFeeConfig,
+    TransferHook,
+    TransferHookAccount,
+} from '@validators/accounts/token-extension';
 import { BigNumber } from 'bignumber.js';
 import { useEffect, useMemo, useState } from 'react';
 import { ExternalLink, RefreshCw } from 'react-feather';
@@ -36,7 +59,15 @@ const getEthAddress = (link?: string) => {
     return address;
 };
 
-export function TokenAccountSection({ account, tokenAccount, tokenInfo }: { account: Account; tokenAccount: TokenAccount, tokenInfo?: FullLegacyTokenInfo }) {
+export function TokenAccountSection({
+    account,
+    tokenAccount,
+    tokenInfo,
+}: {
+    account: Account;
+    tokenAccount: TokenAccount;
+    tokenInfo?: FullLegacyTokenInfo;
+}) {
     const { cluster } = useCluster();
 
     try {
@@ -75,14 +106,26 @@ export function TokenAccountSection({ account, tokenAccount, tokenInfo }: { acco
     return <UnknownAccountCard account={account} />;
 }
 
-function FungibleTokenMintAccountCard({ account, mintInfo, tokenInfo }: { account: Account; mintInfo: MintAccountInfo, tokenInfo?: FullLegacyTokenInfo }) {
+function FungibleTokenMintAccountCard({
+    account,
+    mintInfo,
+    tokenInfo,
+}: {
+    account: Account;
+    mintInfo: MintAccountInfo;
+    tokenInfo?: FullLegacyTokenInfo;
+}) {
     const fetchInfo = useFetchAccountInfo();
+    const { clusterInfo } = useCluster();
+    const epoch = clusterInfo?.epochInfo.epoch;
     const refresh = () => fetchInfo(account.pubkey, 'parsed');
 
     const bridgeContractAddress = getEthAddress(tokenInfo?.extensions?.bridgeContract);
     const assetContractAddress = getEthAddress(tokenInfo?.extensions?.assetContract);
 
     const coinInfo = useCoinGecko(tokenInfo?.extensions?.coingeckoId);
+    const mintExtensions = mintInfo.extensions?.slice();
+    mintExtensions?.sort(cmpExtension);
 
     let tokenPriceInfo;
     let tokenPriceDecimals = 2;
@@ -152,7 +195,11 @@ function FungibleTokenMintAccountCard({ account, mintInfo, tokenInfo }: { accoun
             <div className="card">
                 <div className="card-header">
                     <h3 className="card-header-title mb-0 d-flex align-items-center">
-                        {tokenInfo ? 'Overview' : account.owner.toBase58() === TOKEN_2022_PROGRAM_ID.toBase58() ? 'Token-2022 Mint' : 'Token Mint'}
+                        {tokenInfo
+                            ? 'Overview'
+                            : account.owner.toBase58() === TOKEN_2022_PROGRAM_ID.toBase58()
+                            ? 'Token-2022 Mint'
+                            : 'Token Mint'}
                     </h3>
                     <button className="btn btn-white btn-sm" onClick={refresh}>
                         <RefreshCw className="align-text-top me-2" size={13} />
@@ -234,6 +281,9 @@ function FungibleTokenMintAccountCard({ account, mintInfo, tokenInfo }: { accoun
                                 </Copyable>
                             </td>
                         </tr>
+                    )}
+                    {mintExtensions?.map(extension =>
+                        TokenExtensionRows(extension, epoch, mintInfo.decimals, tokenInfo?.symbol)
                     )}
                 </TableCardBody>
             </div>
@@ -348,30 +398,38 @@ async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', str
 
 function TokenAccountCard({ account, info }: { account: Account; info: TokenAccountInfo }) {
     const refresh = useFetchAccountInfo();
-    const { cluster, url } = useCluster();
+    const { cluster, clusterInfo, url } = useCluster();
+    const epoch = clusterInfo?.epochInfo.epoch;
     const label = addressLabel(account.pubkey.toBase58(), cluster);
     const swrKey = useMemo(() => getTokenInfoSwrKey(info.mint.toString(), cluster, url), [cluster, url]);
     const { data: tokenInfo } = useSWR(swrKey, fetchTokenInfo);
     const [symbol, setSymbol] = useState<string | undefined>(undefined);
+    const accountExtensions = info.extensions?.slice();
+    accountExtensions?.sort(cmpExtension);
 
     const balance = info.isNative ? (
         <>
-            {'\u25ce'}<span className="font-monospace">{new BigNumber(info.tokenAmount.uiAmountString).toFormat(9)}</span>
+            {'\u25ce'}
+            <span className="font-monospace">{new BigNumber(info.tokenAmount.uiAmountString).toFormat(9)}</span>
         </>
-    ) : <>{info.tokenAmount.uiAmountString}</>;
+    ) : (
+        <>{info.tokenAmount.uiAmountString}</>
+    );
 
     useEffect(() => {
         if (info.isNative) {
             setSymbol('SOL');
         } else {
-            setSymbol(tokenInfo?.symbol)
+            setSymbol(tokenInfo?.symbol);
         }
-    }, [tokenInfo])
+    }, [tokenInfo]);
 
     return (
         <div className="card">
             <div className="card-header">
-                <h3 className="card-header-title mb-0 d-flex align-items-center">Token{ account.owner.toBase58() === TOKEN_2022_PROGRAM_ID.toBase58() && "-2022" } Account</h3>
+                <h3 className="card-header-title mb-0 d-flex align-items-center">
+                    Token{account.owner.toBase58() === TOKEN_2022_PROGRAM_ID.toBase58() && '-2022'} Account
+                </h3>
                 <button className="btn btn-white btn-sm" onClick={() => refresh(account.pubkey, 'parsed')}>
                     <RefreshCw className="align-text-top me-2" size={13} />
                     Refresh
@@ -439,12 +497,22 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
                             <td className="text-lg-end">
                                 {info.isNative ? (
                                     <>
-                                        {'\u25ce'}<span className="font-monospace">{new BigNumber(info.delegatedAmount ? info.delegatedAmount.uiAmountString : "0").toFormat(9)}</span>
+                                        {'\u25ce'}
+                                        <span className="font-monospace">
+                                            {new BigNumber(
+                                                info.delegatedAmount ? info.delegatedAmount.uiAmountString : '0'
+                                            ).toFormat(9)}
+                                        </span>
                                     </>
-                                ) : <>{info.delegatedAmount ? info.delegatedAmount.uiAmountString : "0"}</>}
+                                ) : (
+                                    <>{info.delegatedAmount ? info.delegatedAmount.uiAmountString : '0'}</>
+                                )}
                             </td>
                         </tr>
                     </>
+                )}
+                {accountExtensions?.map(extension =>
+                    TokenExtensionRows(extension, epoch, info.tokenAmount.decimals, symbol)
                 )}
             </TableCardBody>
         </div>
@@ -496,4 +564,604 @@ function MultisigAccountCard({ account, info }: { account: Account; info: Multis
             </TableCardBody>
         </div>
     );
+}
+
+function cmpExtension(a: TokenExtension, b: TokenExtension) {
+    // be sure that extensions with a header row always come later
+    const sortedExtensionTypes = [
+        'transferFeeAmount',
+        'mintCloseAuthority',
+        'defaultAccountState',
+        'immutableOwner',
+        'memoTransfer',
+        'nonTransferable',
+        'nonTransferableAccount',
+        'cpiGuard',
+        'permanentDelegate',
+        'transferHook',
+        'transferHookAccount',
+        'metadataPointer',
+        'groupPointer',
+        'groupMemberPointer',
+        // everything below this comment includes a header row
+        'confidentialTransferAccount',
+        'confidentialTransferFeeConfig',
+        'confidentialTransferFeeAmount',
+        'confidentialTransferMint',
+        'interestBearingConfig',
+        'transferFeeConfig',
+        'tokenGroup',
+        'tokenGroupMember',
+        'tokenMetadata',
+        // always keep this last
+        'unparseableExtension',
+    ];
+    return sortedExtensionTypes.indexOf(a.extension) - sortedExtensionTypes.indexOf(b.extension);
+}
+
+function TokenExtensionRows(
+    tokenExtension: TokenExtension,
+    maybeEpoch: bigint | undefined,
+    decimals: number,
+    symbol: string | undefined
+) {
+    const epoch = maybeEpoch || 0n; // fallback to 0 if not provided
+    switch (tokenExtension.extension) {
+        case 'mintCloseAuthority': {
+            const extension = create(tokenExtension.state, MintCloseAuthority);
+            if (extension.closeAuthority) {
+                return (
+                    <tr>
+                        <td>Close Authority</td>
+                        <td className="text-lg-end">
+                            <Address pubkey={extension.closeAuthority} alignRight link />
+                        </td>
+                    </tr>
+                );
+            } else {
+                return <></>;
+            }
+        }
+        case 'transferFeeAmount': {
+            const extension = create(tokenExtension.state, TransferFeeAmount);
+            return (
+                <tr>
+                    <td>Withheld Amount {typeof symbol === 'string' && `(${symbol})`}</td>
+                    <td className="text-lg-end">
+                        {normalizeTokenAmount(extension.withheldAmount, decimals).toLocaleString('en-US', {
+                            maximumFractionDigits: 20,
+                        })}
+                    </td>
+                </tr>
+            );
+        }
+        case 'transferFeeConfig': {
+            const extension = create(tokenExtension.state, TransferFeeConfig);
+            return (
+                <>
+                    <tr>
+                        <h4>Transfer Fee Config</h4>
+                    </tr>
+                    {extension.transferFeeConfigAuthority && (
+                        <tr>
+                            <td>Transfer Fee Authority</td>
+                            <td className="text-lg-end">
+                                <Address pubkey={extension.transferFeeConfigAuthority} alignRight link />
+                            </td>
+                        </tr>
+                    )}
+                    <tr>
+                        <td>{extension.newerTransferFee.epoch > epoch ? 'Current' : 'Previous'} Fee Epoch</td>
+                        <td className="text-lg-end">{extension.olderTransferFee.epoch}</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            {extension.newerTransferFee.epoch > epoch ? 'Current' : 'Previous'} Maximum Fee{' '}
+                            {typeof symbol === 'string' && `(${symbol})`}
+                        </td>
+                        <td className="text-lg-end">
+                            {normalizeTokenAmount(extension.olderTransferFee.maximumFee, decimals).toLocaleString(
+                                'en-US',
+                                {
+                                    maximumFractionDigits: 20,
+                                }
+                            )}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>{extension.newerTransferFee.epoch > epoch ? 'Current' : 'Previous'} Fee Rate</td>
+                        <td className="text-lg-end">{`${extension.olderTransferFee.transferFeeBasisPoints / 100}%`}</td>
+                    </tr>
+                    <tr>
+                        <td>{extension.newerTransferFee.epoch > epoch ? 'Future' : 'Current'} Fee Epoch</td>
+                        <td className="text-lg-end">{extension.newerTransferFee.epoch}</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            {extension.newerTransferFee.epoch > epoch ? 'Future' : 'Current'} Maximum Fee{' '}
+                            {typeof symbol === 'string' && `(${symbol})`}
+                        </td>
+                        <td className="text-lg-end">
+                            {normalizeTokenAmount(extension.newerTransferFee.maximumFee, decimals).toLocaleString(
+                                'en-US',
+                                {
+                                    maximumFractionDigits: 20,
+                                }
+                            )}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>{extension.newerTransferFee.epoch > epoch ? 'Future' : 'Current'} Fee Rate</td>
+                        <td className="text-lg-end">{`${extension.newerTransferFee.transferFeeBasisPoints / 100}%`}</td>
+                    </tr>
+                    {extension.withdrawWithheldAuthority && (
+                        <tr>
+                            <td>Withdraw Withheld Fees Authority</td>
+                            <td className="text-lg-end">
+                                <Address pubkey={extension.withdrawWithheldAuthority} alignRight link />
+                            </td>
+                        </tr>
+                    )}
+                    <tr>
+                        <td>Withheld Amount {typeof symbol === 'string' && `(${symbol})`}</td>
+                        <td className="text-lg-end">
+                            {normalizeTokenAmount(extension.withheldAmount, decimals).toLocaleString('en-US', {
+                                maximumFractionDigits: 20,
+                            })}
+                        </td>
+                    </tr>
+                </>
+            );
+        }
+        case 'confidentialTransferMint': {
+            const extension = create(tokenExtension.state, ConfidentialTransferMint);
+            return (
+                <>
+                    <tr>
+                        <h4>Confidential Transfer</h4>
+                    </tr>
+                    {extension.authority && (
+                        <tr>
+                            <td>Authority</td>
+                            <td className="text-lg-end">
+                                <Address pubkey={extension.authority} alignRight link />
+                            </td>
+                        </tr>
+                    )}
+                    {extension.auditorElgamalPubkey && (
+                        <tr>
+                            <td>Auditor Elgamal Pubkey</td>
+                            <td className="text-lg-end">{extension.auditorElgamalPubkey}</td>
+                        </tr>
+                    )}
+                    <tr>
+                        <td>New Account Approval Policy</td>
+                        <td className="text-lg-end">{extension.autoApproveNewAccounts ? 'auto' : 'manual'}</td>
+                    </tr>
+                </>
+            );
+        }
+        case 'confidentialTransferFeeConfig': {
+            const extension = create(tokenExtension.state, ConfidentialTransferFeeConfig);
+            return (
+                <>
+                    <tr>
+                        <h4>Confidential Transfer Fee</h4>
+                    </tr>
+                    {extension.authority && (
+                        <tr>
+                            <td>Authority</td>
+                            <td className="text-lg-end">
+                                <Address pubkey={extension.authority} alignRight link />
+                            </td>
+                        </tr>
+                    )}
+                    {extension.withdrawWithheldAuthorityElgamalPubkey && (
+                        <tr>
+                            <td>Auditor Elgamal Pubkey</td>
+                            <td className="text-lg-end">{extension.withdrawWithheldAuthorityElgamalPubkey}</td>
+                        </tr>
+                    )}
+                    <tr>
+                        <td>Harvest to Mint</td>
+                        <td className="text-lg-end">{extension.harvestToMintEnabled ? 'enabled' : 'disabled'}</td>
+                    </tr>
+                    <tr>
+                        <td>Encrypted Withheld Amount {typeof symbol === 'string' && `(${symbol})`}</td>
+                        <td className="text-lg-end">{extension.withheldAmount}</td>
+                    </tr>
+                </>
+            );
+        }
+        case 'defaultAccountState': {
+            const extension = create(tokenExtension.state, DefaultAccountState);
+            return (
+                <tr>
+                    <td>DefaultAccountState</td>
+                    <td className="text-lg-end">{extension.accountState}</td>
+                </tr>
+            );
+        }
+        case 'nonTransferable': {
+            return (
+                <tr>
+                    <td>Non-Transferable</td>
+                    <td className="text-lg-end">enabled</td>
+                </tr>
+            );
+        }
+        case 'interestBearingConfig': {
+            const extension = create(tokenExtension.state, InterestBearingConfig);
+            return (
+                <>
+                    <tr>
+                        <h4>Interest-Bearing</h4>
+                    </tr>
+                    {extension.rateAuthority && (
+                        <tr>
+                            <td>Authority</td>
+                            <td className="text-lg-end">
+                                <Address pubkey={extension.rateAuthority} alignRight link />
+                            </td>
+                        </tr>
+                    )}
+                    <tr>
+                        <td>Current Rate</td>
+                        <td className="text-lg-end">{`${extension.currentRate / 100}%`}</td>
+                    </tr>
+                    <tr>
+                        <td>Pre-Current Average Rate</td>
+                        <td className="text-lg-end">{`${extension.preUpdateAverageRate / 100}%`}</td>
+                    </tr>
+                    <tr>
+                        <td>Last Update Timestamp</td>
+                        <td className="text-lg-end">{displayTimestamp(extension.lastUpdateTimestamp * 1000)}</td>
+                    </tr>
+                    <tr>
+                        <td>Initialization Timestamp</td>
+                        <td className="text-lg-end">{displayTimestamp(extension.initializationTimestamp * 1000)}</td>
+                    </tr>
+                </>
+            );
+        }
+        case 'permanentDelegate': {
+            const extension = create(tokenExtension.state, PermanentDelegate);
+            if (extension.delegate) {
+                return (
+                    <tr>
+                        <td>Permanent Delegate</td>
+                        <td className="text-lg-end">
+                            <Address pubkey={extension.delegate} alignRight link />
+                        </td>
+                    </tr>
+                );
+            } else {
+                return <></>;
+            }
+        }
+        case 'transferHook': {
+            const extension = create(tokenExtension.state, TransferHook);
+            return (
+                <>
+                    {extension.programId && (
+                        <tr>
+                            <td>Transfer Hook Program Id</td>
+                            <td className="text-lg-end">
+                                <Address pubkey={extension.programId} alignRight link />
+                            </td>
+                        </tr>
+                    )}
+                    {extension.authority && (
+                        <tr>
+                            <td>Transfer Hook Authority</td>
+                            <td className="text-lg-end">
+                                <Address pubkey={extension.authority} alignRight link />
+                            </td>
+                        </tr>
+                    )}
+                </>
+            );
+        }
+        case 'metadataPointer': {
+            const extension = create(tokenExtension.state, MetadataPointer);
+            return (
+                <>
+                    {extension.metadataAddress && (
+                        <tr>
+                            <td>Metadata</td>
+                            <td className="text-lg-end">
+                                <Address pubkey={extension.metadataAddress} alignRight link />
+                            </td>
+                        </tr>
+                    )}
+                    {extension.authority && (
+                        <tr>
+                            <td>Metadata Pointer Authority</td>
+                            <td className="text-lg-end">
+                                <Address pubkey={extension.authority} alignRight link />
+                            </td>
+                        </tr>
+                    )}
+                </>
+            );
+        }
+        case 'groupPointer': {
+            const extension = create(tokenExtension.state, GroupPointer);
+            return (
+                <>
+                    {extension.groupAddress && (
+                        <tr>
+                            <td>Token Group</td>
+                            <td className="text-lg-end">
+                                <Address pubkey={extension.groupAddress} alignRight link />
+                            </td>
+                        </tr>
+                    )}
+                    {extension.authority && (
+                        <tr>
+                            <td>Group Pointer Authority</td>
+                            <td className="text-lg-end">
+                                <Address pubkey={extension.authority} alignRight link />
+                            </td>
+                        </tr>
+                    )}
+                </>
+            );
+        }
+        case 'groupMemberPointer': {
+            const extension = create(tokenExtension.state, GroupMemberPointer);
+            return (
+                <>
+                    {extension.memberAddress && (
+                        <tr>
+                            <td>Token Group Member</td>
+                            <td className="text-lg-end">
+                                <Address pubkey={extension.memberAddress} alignRight link />
+                            </td>
+                        </tr>
+                    )}
+                    {extension.authority && (
+                        <tr>
+                            <td>Member Pointer Authority</td>
+                            <td className="text-lg-end">
+                                <Address pubkey={extension.authority} alignRight link />
+                            </td>
+                        </tr>
+                    )}
+                </>
+            );
+        }
+        case 'tokenMetadata': {
+            const extension = create(tokenExtension.state, TokenMetadata);
+            return (
+                <>
+                    <tr>
+                        <h4>Metadata</h4>
+                    </tr>
+                    <tr>
+                        <td>Mint</td>
+                        <td className="text-lg-end">
+                            <Address pubkey={extension.mint} alignRight link />
+                        </td>
+                    </tr>
+                    {extension.updateAuthority && (
+                        <tr>
+                            <td>Update Authority</td>
+                            <td className="text-lg-end">
+                                <Address pubkey={extension.updateAuthority} alignRight link />
+                            </td>
+                        </tr>
+                    )}
+                    <tr>
+                        <td>Name</td>
+                        <td className="text-lg-end">{extension.name}</td>
+                    </tr>
+                    <tr>
+                        <td>Symbol</td>
+                        <td className="text-lg-end">{extension.symbol}</td>
+                    </tr>
+                    <tr>
+                        <td>URI</td>
+                        <td className="text-lg-end">
+                            <a rel="noopener noreferrer" target="_blank" href={extension.uri}>
+                                {extension.uri}
+                                <ExternalLink className="align-text-top ms-2" size={13} />
+                            </a>
+                        </td>
+                    </tr>
+                    {extension.additionalMetadata?.length > 0 && (
+                        <>
+                            <tr>
+                                <h5>Additional Metadata</h5>
+                            </tr>
+                            {extension.additionalMetadata?.map(keyValuePair => (
+                                <tr key="{keyValuePair[0]}">
+                                    <td>{keyValuePair[0]}</td>
+                                    <td className="text-lg-end">{keyValuePair[1]}</td>
+                                </tr>
+                            ))}
+                        </>
+                    )}
+                </>
+            );
+        }
+        case 'cpiGuard': {
+            const extension = create(tokenExtension.state, CpiGuard);
+            return (
+                <tr>
+                    <td>CPI Guard</td>
+                    <td className="text-lg-end">{extension.lockCpi ? 'enabled' : 'disabled'}</td>
+                </tr>
+            );
+        }
+        case 'confidentialTransferAccount': {
+            const extension = create(tokenExtension.state, ConfidentialTransferAccount);
+            return (
+                <>
+                    <tr>
+                        <h4>Confidential Transfer</h4>
+                    </tr>
+                    <tr>
+                        <td>Status</td>
+                        <td className="text-lg-end">{!extension.approved && 'not '}approved</td>
+                    </tr>
+                    <tr>
+                        <td>Elgamal Pubkey</td>
+                        <td className="text-lg-end">{extension.elgamalPubkey}</td>
+                    </tr>
+                    <tr>
+                        <td>Confidential Credits</td>
+                        <td className="text-lg-end">{extension.allowConfidentialCredits ? 'enabled' : 'disabled'}</td>
+                    </tr>
+                    <tr>
+                        <td>Non-confidential Credits</td>
+                        <td className="text-lg-end">
+                            {extension.allowNonConfidentialCredits ? 'enabled' : 'disabled'}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Available Balance</td>
+                        <td className="text-lg-end">{extension.availableBalance}</td>
+                    </tr>
+                    <tr>
+                        <td>Decryptable Available Balance</td>
+                        <td className="text-lg-end">{extension.decryptableAvailableBalance}</td>
+                    </tr>
+                    <tr>
+                        <td>Pending Balance, Low Bits</td>
+                        <td className="text-lg-end">{extension.pendingBalanceLo}</td>
+                    </tr>
+                    <tr>
+                        <td>Pending Balance, High Bits</td>
+                        <td className="text-lg-end">{extension.pendingBalanceHi}</td>
+                    </tr>
+                    <tr>
+                        <td>Pending Balance Credit Counter</td>
+                        <td className="text-lg-end">{extension.pendingBalanceCreditCounter}</td>
+                    </tr>
+                    <tr>
+                        <td>Expected Pending Balance Credit Counter</td>
+                        <td className="text-lg-end">{extension.expectedPendingBalanceCreditCounter}</td>
+                    </tr>
+                    <tr>
+                        <td>Actual Pending Balance Credit Counter</td>
+                        <td className="text-lg-end">{extension.actualPendingBalanceCreditCounter}</td>
+                    </tr>
+                    <tr>
+                        <td>Maximum Pending Balance Credit Counter</td>
+                        <td className="text-lg-end">{extension.maximumPendingBalanceCreditCounter}</td>
+                    </tr>
+                </>
+            );
+        }
+        case 'immutableOwner': {
+            return (
+                <tr>
+                    <td>Immutable Owner</td>
+                    <td className="text-lg-end">enabled</td>
+                </tr>
+            );
+        }
+        case 'memoTransfer': {
+            const extension = create(tokenExtension.state, MemoTransfer);
+            return (
+                <tr>
+                    <td>Require Memo on Incoming Transfers</td>
+                    <td className="text-lg-end">{extension.requireIncomingTransferMemos ? 'enabled' : 'disabled'}</td>
+                </tr>
+            );
+        }
+        case 'transferHookAccount': {
+            const extension = create(tokenExtension.state, TransferHookAccount);
+            return (
+                <tr>
+                    <td>Transfer Hook Status</td>
+                    <td className="text-lg-end">{!extension.transferring && 'not '}transferring</td>
+                </tr>
+            );
+        }
+        case 'nonTransferableAccount': {
+            return (
+                <tr>
+                    <td>Non-Transferable</td>
+                    <td className="text-lg-end">enabled</td>
+                </tr>
+            );
+        }
+        case 'confidentialTransferFeeAmount': {
+            const extension = create(tokenExtension.state, ConfidentialTransferFeeAmount);
+            return (
+                <tr>
+                    <td>Encrypted Withheld Amount {typeof symbol === 'string' && `(${symbol})`}</td>
+                    <td className="text-lg-end">{extension.withheldAmount}</td>
+                </tr>
+            );
+        }
+        case 'tokenGroup': {
+            const extension = create(tokenExtension.state, TokenGroup);
+            return (
+                <>
+                    <tr>
+                        <h4>Group</h4>
+                    </tr>
+                    <tr>
+                        <td>Mint</td>
+                        <td className="text-lg-end">
+                            <Address pubkey={extension.mint} alignRight link />
+                        </td>
+                    </tr>
+                    {extension.updateAuthority && (
+                        <tr>
+                            <td>Update Authority</td>
+                            <td className="text-lg-end">
+                                <Address pubkey={extension.updateAuthority} alignRight link />
+                            </td>
+                        </tr>
+                    )}
+                    <tr>
+                        <td>Current Size</td>
+                        <td className="text-lg-end">{extension.size}</td>
+                    </tr>
+                    <tr>
+                        <td>Max Size</td>
+                        <td className="text-lg-end">{extension.maxSize}</td>
+                    </tr>
+                </>
+            );
+        }
+        case 'tokenGroupMember': {
+            const extension = create(tokenExtension.state, TokenGroupMember);
+            return (
+                <>
+                    <tr>
+                        <h4>Group Member</h4>
+                    </tr>
+                    <tr>
+                        <td>Mint</td>
+                        <td className="text-lg-end">
+                            <Address pubkey={extension.mint} alignRight link />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Group</td>
+                        <td className="text-lg-end">
+                            <Address pubkey={extension.group} alignRight link />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Member Number</td>
+                        <td className="text-lg-end">{extension.memberNumber}</td>
+                    </tr>
+                </>
+            );
+        }
+        case 'unparseableExtension':
+        default:
+            return (
+                <tr>
+                    <td>Unknown Extension</td>
+                    <td className="text-lg-end">unparseable</td>
+                </tr>
+            );
+    }
 }
