@@ -38,9 +38,11 @@ import { PublicKey } from '@solana/web3.js';
 import { Cluster, ClusterStatus } from '@utils/cluster';
 import { FEATURE_PROGRAM_ID } from '@utils/parseFeatureAccount';
 import { useClusterPath } from '@utils/url';
+import { MetadataPointer, TokenMetadata } from '@validators/accounts/token-extension'
 import Link from 'next/link';
 import { redirect, useSelectedLayoutSegment } from 'next/navigation';
 import React, { PropsWithChildren } from 'react';
+import { create } from 'superstruct';
 import useSWRImmutable from 'swr/immutable';
 import { Base58EncodedAddress } from 'web3js-experimental';
 
@@ -248,8 +250,24 @@ function AccountHeader({ address, account, tokenInfo, isTokenInfoLoading }: { ad
         let token;
         let unverified = false;
 
+        const metadataExtension = mintInfo.extensions?.find(({ extension }: { extension: string }) => extension === 'tokenMetadata');
+        const metadataPointerExtension = mintInfo.extensions?.find(({ extension }: { extension: string }) => extension === 'metadataPointer');
+
+        if (metadataPointerExtension && metadataExtension) {
+            const tokenMetadata = create(metadataExtension.state, TokenMetadata);
+            const { metadataAddress } = create(metadataPointerExtension.state, MetadataPointer);
+
+            // Handles the basic case where MetadataPointer is reference the Token Metadata extension directly
+            // Does not handle the case where MetadataPointer is pointing at a separate account.
+            if (metadataAddress.toString() === address) {
+                token = {
+                    name: tokenMetadata.name,
+                }
+            }
+        }
+
         // Fall back to legacy token list when there is stub metadata (blank uri), updatable by default by the mint authority
-        if (!parsedData?.nftData?.metadata.data.uri && tokenInfo) {
+        else if (!parsedData?.nftData?.metadata.data.uri && tokenInfo) {
             token = tokenInfo;
         } else if (parsedData?.nftData) {
             token = {
