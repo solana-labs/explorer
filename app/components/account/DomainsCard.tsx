@@ -4,7 +4,7 @@ import { Address } from '@components/common/Address';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { useUserDomains } from '@utils/name-service';
-import { useUserANSDomains } from "../../utils/ans-domains";
+import { useUserANSDomains } from '../../utils/ans-domains';
 
 import React from 'react';
 
