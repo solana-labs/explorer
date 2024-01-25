@@ -2,8 +2,7 @@ import { Connection } from '@solana/web3.js';
 import { NextResponse } from 'next/server';
 
 import { MAINNET_BETA_URL } from '@/app/utils/cluster';
-import { getDomainInfo, hasDomainSyntax } from '@/app/utils/domain-info';
-import { getANSDomainOwnerAndAddress, hasANSDomainSyntax } from '@/app/utils/ans-domain-info';
+import { getDomainInfo, getANSDomainInfo } from '@/app/utils/domain-info';
 
 type Params = {
     params: {
@@ -19,13 +18,9 @@ export async function GET(_request: Request, { params: { domain } }: Params) {
     // We only fetch domains on mainnet
     const connection = new Connection(MAINNET_BETA_URL);
 
-    let domainInfo = null;
-
-    if (hasDomainSyntax(domain)) {
-        domainInfo = await getDomainInfo(domain, connection);
-    } else if (hasANSDomainSyntax(domain)) {
-        domainInfo = await getANSDomainOwnerAndAddress(domain, connection);
-    }
+    const domainInfo = await domain.substring(domain.length - 4) === '.sol'
+        ? getDomainInfo(domain, connection)
+        : getANSDomainInfo(domain, connection);
 
     return NextResponse.json(domainInfo, {
         headers: {
