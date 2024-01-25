@@ -1,11 +1,4 @@
 {
   "typescript.tsdk": "node_modules/.pnpm/typescript@5.0.4/node_modules/typescript/lib",
-"typescript.enablePromptUseWorkspaceTsdk": true,
-"cSpell.words": [
-    "Appendable",
-    "sysvar",
-    "Sysvar",
-    "SYSVAR",
-    "Sysvars"
-]
+  "typescript.enablePromptUseWorkspaceTsdk": true
 }
