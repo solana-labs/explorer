@@ -13,7 +13,7 @@ type Params = {
 export type FetchedDomainInfo = Awaited<ReturnType<typeof getDomainInfo>>;
 
 export async function GET(
-    _request: Request, 
+    _request: Request,
     { params: { domain } }: Params
 ) {
     // Intentionally using legacy web3js for compatibility with bonfida library
