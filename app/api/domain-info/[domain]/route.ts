@@ -20,9 +20,7 @@ export async function GET(
     // This is an API route so won't affect client bundle
     // We only fetch domains on mainnet
     const connection = new Connection(MAINNET_BETA_URL);
-    const domainInfo = await domain.substring(domain.length - 4) === '.sol'
-        ? getDomainInfo(domain, connection)
-        : getANSDomainInfo(domain, connection);
+    const domainInfo = await (domain.substring(domain.length - 4) === '.sol' ? getDomainInfo(domain, connection) : getANSDomainInfo(domain, connection));
 
     return NextResponse.json(domainInfo, {
         headers: {
