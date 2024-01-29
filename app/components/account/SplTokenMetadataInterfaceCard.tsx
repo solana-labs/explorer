@@ -1,15 +1,15 @@
 import { base64 } from '@project-serum/anchor/dist/cjs/utils/bytes';
 import { createEmitInstruction, TokenMetadata, unpack as deserializeTokenMetadata } from '@solana/spl-token-metadata';
 import { useConnection } from '@solana/wallet-adapter-react';
-import { MessageV0, PublicKey, VersionedTransaction } from '@solana/web3.js';
-import { useEffect, useMemo, useState } from 'react';
+import { Connection, MessageV0, PublicKey, VersionedTransaction } from '@solana/web3.js';
+import { useMemo, useState } from 'react';
 import useAsyncEffect from 'use-async-effect';
 
 import { useMintAccountInfo } from '@/app/providers/accounts';
 
 import { Address } from '../common/Address';
 
-enum LoadingState {
+export enum LoadingState {
     Idle,
     Loading,
     MintMissing,
@@ -55,7 +55,7 @@ function SplTokenMetadata({ metadata }: { metadata: TokenMetadata }) {
     );
 }
 
-async function getTokenMetadata(connection: any, programId: PublicKey, metadataPointer: PublicKey) {
+async function getTokenMetadata(connection: Connection, programId: PublicKey, metadataPointer: PublicKey) {
     const ix = createEmitInstruction({ metadata: metadataPointer, programId });
     const message = MessageV0.compile({
         instructions: [ix],
@@ -70,80 +70,83 @@ async function getTokenMetadata(connection: any, programId: PublicKey, metadataP
         replaceRecentBlockhash: true,
         sigVerify: false,
     });
-    console.log('Simul result:', result);
+
     if (result.value.returnData) {
-        console.log(result.value.returnData);
         const buffer = base64.decode(result.value.returnData.data[0]);
-        console.log(buffer.length);
         return deserializeTokenMetadata(buffer);
     }
     return null;
 }
 
-export function SplTokenMetadataInterfaceCard({ mint }: { mint: string }) {
+export function useTokenMetadata(mint: string) {
     const { connection } = useConnection();
 
-    const [loading, setLoading] = useState<LoadingState>(LoadingState.Idle);
-    const [metadata, setMetadata] = useState<TokenMetadata | null>(null);
-    const [metadataAuthority, setMetadataAuthority] = useState<string | null>(null);
-    const [metadataPointer, setMetadataPointer] = useState<string | null>(null);
-
     const mintInfo = useMintAccountInfo(mint);
-    const [extensions, setExtensions] = useState<Record<string, any>[] | null>(null);
 
-    useEffect(() => {
-        console.log('mintInfo:', mintInfo);
-        if (!mintInfo || !(mintInfo as any).extensions) {
-            setLoading(LoadingState.MintMissing);
+    let initialLoadingState = LoadingState.Idle;
+    if (!mintInfo || !(mintInfo as any).extensions) {
+        initialLoadingState = LoadingState.MintMissing;
+    }
+    const extensions = (mintInfo as any).extensions;
+    const metadataPointerExt = extensions.find((ext: any) => ext.extension === 'metadataPointer');
+
+    if (!metadataPointerExt) {
+        initialLoadingState = LoadingState.MetadataExtensionMissing;
+    }
+    const metadataPointer = metadataPointerExt.state.metadataAddress;
+    const metadataAuthority = metadataPointerExt.state.authority;
+
+    const [loading, setLoading] = useState<LoadingState>(initialLoadingState);
+    const [metadata, setMetadata] = useState<TokenMetadata | null>(null);
+    const [programOwner, setProgramOwner] = useState<PublicKey | null>(null);
+
+    // Use cached data from the mint account if possible
+    if (metadataPointer === mint) {
+        const tokenMetadataExt = (mintInfo as any).extensions.find((ext: any) => ext.extension === 'tokenMetadata');
+        if (tokenMetadataExt) {
+            setLoading(LoadingState.MetadataFound);
+            const mintMetadata: TokenMetadata = tokenMetadataExt.state;
+            setMetadata(mintMetadata);
         }
+        setLoading(LoadingState.MetadataExtensionMissing);
+    }
 
-        const extensions = (mintInfo as any).extensions;
-        setExtensions(extensions);
-        const metadataPointerExt = extensions.find((ext: any) => ext.extension === 'metadataPointer');
-        if (!metadataPointerExt) {
-            setLoading(LoadingState.MetadataExtensionMissing);
-        } else {
-            setMetadataPointer(metadataPointerExt.state.metadataAddress);
-            setMetadataAuthority(metadataPointerExt.state.authority);
-        }
-    }, [mintInfo]);
-
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     useAsyncEffect(async () => {
-        if (extensions === null || metadataPointer === null) {
-            console.log('F');
-            setLoading(LoadingState.MetadataExtensionMissing);
-            return;
-        }
-
-        // Use cached data from the mint account if possible
-        if (metadataPointer === mint) {
-            const tokenMetadataExt = extensions.find((ext: any) => ext.extension === 'tokenMetadata');
-            if (tokenMetadataExt) {
-                setLoading(LoadingState.MetadataFound);
-                const mintMetadata: TokenMetadata = tokenMetadataExt.state;
-                setMetadata(mintMetadata);
-                return;
-            }
-            setLoading(LoadingState.MetadataExtensionMissing);
+        if (metadata) {
             return;
         }
 
         setLoading(LoadingState.Loading);
+
         const metadataAccountInfo = await connection.getAccountInfo(new PublicKey(metadataPointer));
         if (!metadataAccountInfo) {
             setLoading(LoadingState.MetadataAccountMissing);
             return;
         }
 
-        const metadata = await getTokenMetadata(connection, metadataAccountInfo.owner, new PublicKey(metadataPointer));
-        if (metadata) {
-            setMetadata(metadata);
+        setProgramOwner(metadataAccountInfo.owner);
+        const tokenMetadata = await getTokenMetadata(
+            connection,
+            metadataAccountInfo.owner,
+            new PublicKey(metadataPointer)
+        );
+
+        if (tokenMetadata) {
+            setMetadata(tokenMetadata);
             setLoading(LoadingState.MetadataFound);
         } else {
             setLoading(LoadingState.MetadataAccountMissing);
         }
-    }, [mint, connection, mintInfo, metadataPointer]);
+    }, [connection, metadataPointer, metadata]);
+
+    return useMemo(
+        () => ({ loading, metadata, metadataAuthority, metadataPointer, programOwner }),
+        [loading, metadata, metadataAuthority, metadataPointer, programOwner]
+    );
+}
+
+export function SplTokenMetadataInterfaceCard({ mint }: { mint: string }) {
+    const { loading, metadata, metadataAuthority, metadataPointer, programOwner } = useTokenMetadata(mint);
 
     const metadataCard = useMemo(() => {
         return (
@@ -178,6 +181,10 @@ export function SplTokenMetadataInterfaceCard({ mint }: { mint: string }) {
                         </thead>
                         <tbody>
                             <tr>
+                                <td>Program</td>
+                                <td>{programOwner ? <Address pubkey={programOwner} link /> : 'Missing'}</td>
+                            </tr>
+                            <tr>
                                 <td>Metadata Address</td>
                                 <td>
                                     {metadataPointer ? (
@@ -203,7 +210,7 @@ export function SplTokenMetadataInterfaceCard({ mint }: { mint: string }) {
                 </div>
             </div>
         );
-    }, [loading, metadata, metadataAuthority, metadataPointer, mint]);
+    }, [metadataAuthority, metadataPointer, metadataCard, programOwner]);
 
     return card;
 }

@@ -62,7 +62,7 @@ export function isTokenProgramData(data: { program: string }): data is TokenProg
     try {
         assertIsTokenProgram(data.program);
         return true;
-    } catch(e) {
+    } catch (e) {
         return false;
     }
 }
@@ -97,6 +97,17 @@ export type AddressLookupTableProgramData = {
     parsed: ParsedAddressLookupTableAccount;
 };
 
+type ExtensionRecord = Record<string, string> & { extension: string };
+export type TokenMintExtensionData = {
+    program: 'spl-token-2022';
+    parsed: {
+        type: 'mint';
+        info: {
+            extensions: ExtensionRecord[];
+        };
+    };
+};
+
 export type ParsedData =
     | UpgradeableLoaderAccountData
     | StakeProgramData
@@ -105,7 +116,8 @@ export type ParsedData =
     | NonceProgramData
     | SysvarProgramData
     | ConfigProgramData
-    | AddressLookupTableProgramData;
+    | AddressLookupTableProgramData
+    | TokenMintExtensionData;
 
 export interface AccountData {
     parsed?: ParsedData;

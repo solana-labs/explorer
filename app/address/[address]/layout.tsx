@@ -52,6 +52,9 @@ import { WalletProvider } from '@solana/wallet-adapter-react';
 import { ConnectionProvider } from '@solana/wallet-adapter-react';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 
+import { Token22NFTHeader } from '@/app/components/Token22MetadataHeader';
+import isT22NFT from '@/app/providers/accounts/utils/isT22NFT';
+
 function WalletAdapterProviders({ children }: { children: React.ReactNode }) {
     const { url } = useCluster();
 
@@ -295,6 +298,10 @@ function AccountHeader({
         return <MetaplexNFTHeader nftData={parsedData.nftData} address={address} />;
     }
 
+    if (isT22NFT(parsedData)) {
+        return <Token22NFTHeader mint={address} />;
+    }
+
     const nftokenNFT = account && isNFTokenAccount(account);
     if (nftokenNFT && account) {
         return <NFTokenAccountHeader account={account} />;
@@ -534,12 +541,7 @@ function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
 
     // Add SPL Token Metadata Interface tab
     console.log('Parsed data', parsedData);
-    if (
-        parsedData &&
-        parsedData.parsed.info &&
-        parsedData.parsed.info.extensions &&
-        (parsedData.parsed.info.extensions as Record<string, string>[]).find(ext => ext.extension === 'metadataPointer')
-    ) {
+    if (isT22NFT(parsedData)) {
         tabs.push(TABS_LOOKUP['spl-token-metadata-interface'][0]);
     }
 
