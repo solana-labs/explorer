@@ -107,6 +107,8 @@ function ClusterToggle() {
     return (
         <div className="btn-group-toggle d-flex flex-wrap mb-4">
             {CLUSTERS.map((net, index) => {
+                if (net === Cluster.MainnetBeta && process.env.NEXT_PUBLIC_MAINNET_ENABLED !== 'true') return null;
+
                 const active = net === cluster;
                 if (net === Cluster.Custom)
                     return <CustomClusterInput key={index} activeSuffix={activeSuffix} active={active} />;

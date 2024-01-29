@@ -46,6 +46,27 @@ import { Base58EncodedAddress } from 'web3js-experimental';
 
 import { FullTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
 
+require('@solana/wallet-adapter-react-ui/styles.css');
+
+import { WalletProvider } from '@solana/wallet-adapter-react';
+import { ConnectionProvider } from '@solana/wallet-adapter-react';
+import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
+
+import { Token22NFTHeader } from '@/app/components/Token22MetadataHeader';
+import isT22NFT from '@/app/providers/accounts/utils/isT22NFT';
+
+function WalletAdapterProviders({ children }: { children: React.ReactNode }) {
+    const { url } = useCluster();
+
+    return (
+        <ConnectionProvider endpoint={url}>
+            <WalletProvider wallets={[]}>
+                <WalletModalProvider>{children}</WalletModalProvider>
+            </WalletProvider>
+        </ConnectionProvider>
+    );
+}
+
 const IDENTICON_WIDTH = 64;
 
 const TABS_LOOKUP: { [id: string]: Tab[] } = {
@@ -61,6 +82,13 @@ const TABS_LOOKUP: { [id: string]: Tab[] } = {
             path: 'security',
             slug: 'security',
             title: 'Security',
+        },
+    ],
+    msa: [
+        {
+            path: 'program-interface',
+            slug: 'program-interface',
+            title: 'Program Interface',
         },
     ],
     'nftoken:collection': [
@@ -99,6 +127,13 @@ const TABS_LOOKUP: { [id: string]: Tab[] } = {
             path: 'attributes',
             slug: 'attributes',
             title: 'Attributes',
+        },
+    ],
+    'spl-token-metadata-interface': [
+        {
+            path: 'spl-token-metadata-interface',
+            slug: 'spl-token-metadata-interface',
+            title: 'SPL Token Metadata',
         },
     ],
     'spl-token:mint': [
@@ -192,7 +227,9 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
     const infoParsed = info?.data?.data.parsed;
 
     const { data: fullTokenInfo, isLoading: isFullTokenInfoLoading } = useSWRImmutable(
-        infoStatus === FetchStatus.Fetched && infoParsed && isTokenProgramData(infoParsed) && pubkey ? ['get-full-token-info', address, cluster, url] : null,
+        infoStatus === FetchStatus.Fetched && infoParsed && isTokenProgramData(infoParsed) && pubkey
+            ? ['get-full-token-info', address, cluster, url]
+            : null,
         fetchFullTokenInfo
     );
 
@@ -207,13 +244,23 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
         <div className="container mt-n3">
             <div className="header">
                 <div className="header-body">
-                    <AccountHeader address={address} account={info?.data} tokenInfo={fullTokenInfo} isTokenInfoLoading={isFullTokenInfoLoading} />
+                    <AccountHeader
+                        address={address}
+                        account={info?.data}
+                        tokenInfo={fullTokenInfo}
+                        isTokenInfoLoading={isFullTokenInfoLoading}
+                    />
                 </div>
             </div>
             {!pubkey ? (
                 <ErrorCard text={`Address "${address}" is not valid`} />
             ) : (
-                <DetailsSections info={info} pubkey={pubkey} tokenInfo={fullTokenInfo} isTokenInfoLoading={isFullTokenInfoLoading}>
+                <DetailsSections
+                    info={info}
+                    pubkey={pubkey}
+                    tokenInfo={fullTokenInfo}
+                    isTokenInfoLoading={isFullTokenInfoLoading}
+                >
                     {children}
                 </DetailsSections>
             )}
@@ -224,12 +271,24 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
 export default function AddressLayout({ children, params }: Props) {
     return (
         <AccountsProvider>
-            <AddressLayoutInner params={params}>{children}</AddressLayoutInner>
+            <WalletAdapterProviders>
+                <AddressLayoutInner params={params}>{children}</AddressLayoutInner>
+            </WalletAdapterProviders>
         </AccountsProvider>
     );
 }
 
-function AccountHeader({ address, account, tokenInfo, isTokenInfoLoading }: { address: string; account?: Account, tokenInfo?: FullTokenInfo, isTokenInfoLoading: boolean }) {
+function AccountHeader({
+    address,
+    account,
+    tokenInfo,
+    isTokenInfoLoading,
+}: {
+    address: string;
+    account?: Account;
+    tokenInfo?: FullTokenInfo;
+    isTokenInfoLoading: boolean;
+}) {
     const mintInfo = useMintAccountInfo(address);
 
     const parsedData = account?.data.parsed;
@@ -237,6 +296,10 @@ function AccountHeader({ address, account, tokenInfo, isTokenInfoLoading }: { ad
 
     if (isMetaplexNFT(parsedData, mintInfo) && parsedData.nftData) {
         return <MetaplexNFTHeader nftData={parsedData.nftData} address={address} />;
+    }
+
+    if (isT22NFT(parsedData)) {
+        return <Token22NFTHeader mint={address} />;
     }
 
     const nftokenNFT = account && isNFTokenAccount(account);
@@ -314,7 +377,7 @@ function DetailsSections({
     tab,
     info,
     tokenInfo,
-    isTokenInfoLoading
+    isTokenInfoLoading,
 }: {
     children: React.ReactNode;
     pubkey: PublicKey;
@@ -348,7 +411,7 @@ function DetailsSections({
     );
 }
 
-function InfoSection({ account, tokenInfo }: { account: Account, tokenInfo?: FullTokenInfo }) {
+function InfoSection({ account, tokenInfo }: { account: Account; tokenInfo?: FullTokenInfo }) {
     const parsedData = account.data.parsed;
     const rawData = account.data.raw;
 
@@ -425,7 +488,9 @@ export type MoreTabs =
     | 'anchor-program'
     | 'anchor-account'
     | 'entries'
-    | 'concurrent-merkle-tree';
+    | 'concurrent-merkle-tree'
+    | 'program-interface'
+    | 'spl-token-metadata-interface';
 
 function MoreSection({ children, tabs }: { children: React.ReactNode; tabs: (JSX.Element | null)[] }) {
     return (
@@ -467,12 +532,25 @@ function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
     }
 
     // Add the key for address lookup tables
-    if (account.data.raw && isAddressLookupTableAccount(account.owner.toBase58() as Base58EncodedAddress, account.data.raw)) {
+    if (
+        account.data.raw &&
+        isAddressLookupTableAccount(account.owner.toBase58() as Base58EncodedAddress, account.data.raw)
+    ) {
         tabs.push(...TABS_LOOKUP['address-lookup-table']);
     }
 
+    // Add SPL Token Metadata Interface tab
+    console.log('Parsed data', parsedData);
+    if (isT22NFT(parsedData)) {
+        tabs.push(TABS_LOOKUP['spl-token-metadata-interface'][0]);
+    }
+
     // Add the key for Metaplex NFTs
-    if (parsedData && (programTypeKey === 'spl-token:mint' || programTypeKey == 'spl-token-2022:mint') && (parsedData as TokenProgramData).nftData) {
+    if (
+        parsedData &&
+        (programTypeKey === 'spl-token:mint' || programTypeKey == 'spl-token-2022:mint') &&
+        (parsedData as TokenProgramData).nftData
+    ) {
         tabs.push(...TABS_LOOKUP[`${programTypeKey}:metaplexNFT`]);
     }
 
@@ -545,6 +623,20 @@ function getAnchorTabs(pubkey: PublicKey, account: Account) {
         tab: anchorProgramTab,
     });
 
+    const programInterfaceTab: Tab = {
+        path: 'program-interface',
+        slug: 'program-interface',
+        title: 'Program Interface',
+    };
+    tabComponents.push({
+        component: (
+            <React.Suspense key={programInterfaceTab.slug} fallback={<></>}>
+                <ProgramInterfaceLink tab={programInterfaceTab} address={pubkey.toString()} pubkey={pubkey} />
+            </React.Suspense>
+        ),
+        tab: programInterfaceTab,
+    });
+
     const accountDataTab: Tab = {
         path: 'anchor-account',
         slug: 'anchor-account',
@@ -563,6 +655,25 @@ function getAnchorTabs(pubkey: PublicKey, account: Account) {
 }
 
 function AnchorProgramLink({ tab, address, pubkey }: { tab: Tab; address: string; pubkey: PublicKey }) {
+    const { url } = useCluster();
+    const anchorProgram = useAnchorProgram(pubkey.toString(), url);
+    const anchorProgramPath = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
+    const selectedLayoutSegment = useSelectedLayoutSegment();
+    const isActive = selectedLayoutSegment === tab.path;
+    if (!anchorProgram) {
+        return null;
+    }
+
+    return (
+        <li key={tab.slug} className="nav-item">
+            <Link className={`${isActive ? 'active ' : ''}nav-link`} href={anchorProgramPath}>
+                {tab.title}
+            </Link>
+        </li>
+    );
+}
+
+function ProgramInterfaceLink({ tab, address, pubkey }: { tab: Tab; address: string; pubkey: PublicKey }) {
     const { url } = useCluster();
     const anchorProgram = useAnchorProgram(pubkey.toString(), url);
     const anchorProgramPath = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
