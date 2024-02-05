@@ -9,6 +9,7 @@ import { getProgramName } from '@utils/tx';
 import React, { Fragment, ReactNode, useState } from 'react';
 import { ChevronDown, ChevronUp, CornerDownRight } from 'react-feather';
 import ReactJson from 'react-json-view';
+import { HexData } from '../components/common/HexData';
 
 export function getAnchorProgramName(program: Program | null): string | undefined {
     return program ? snakeToTitleCase(program.idl.name) : undefined;
@@ -174,7 +175,7 @@ function mapField(key: string, value: any, type: IdlType, idl: Idl, keySuffix?: 
                 <div>{numberWithSeparator(value.toString())}</div>
             </SimpleRow>
         );
-    } else if (type === 'bool' || type === 'bytes' || type === 'string') {
+    } else if (type === 'bool' || type === 'string') {
         return (
             <SimpleRow
                 key={keySuffix ? `${key}-${keySuffix}` : key}
@@ -186,6 +187,8 @@ function mapField(key: string, value: any, type: IdlType, idl: Idl, keySuffix?: 
                 <div>{value.toString()}</div>
             </SimpleRow>
         );
+    } else if (type === 'bytes') {
+        return <HexData raw={Buffer.from(value)} />
     } else if (type === 'publicKey') {
         return (
             <SimpleRow
