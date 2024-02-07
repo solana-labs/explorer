@@ -1,10 +1,11 @@
+import { NameRecordHeader,TldParser } from '@onsol/tldparser';
 import { Connection } from '@solana/web3.js';
-import { useState, useEffect } from 'react';
+import pLimit from 'p-limit';
+import { useEffect,useState } from 'react';
+
 import { useCluster } from '../providers/cluster';
 import { Cluster } from './cluster';
-import { TldParser, NameRecordHeader } from '@onsol/tldparser';
 import { DomainInfo } from './domain-info';
-import pLimit from 'p-limit';
 
 
 export const useUserANSDomains = (userAddress: string): [DomainInfo[] | null, boolean] => {
@@ -26,9 +27,9 @@ export const useUserANSDomains = (userAddress: string): [DomainInfo[] | null, bo
                 if (!allDomains) {
                     return;
                 }
-                let userDomains: DomainInfo[] = [];
+                const userDomains: DomainInfo[] = [];
                 const limit = pLimit(5);
-                let promises = allDomains.map(address =>
+                const promises = allDomains.map(address =>
                     limit(async () => {
                         const domainRecord = await NameRecordHeader.fromAccountAddress(connection, address);
 
@@ -54,8 +55,8 @@ export const useUserANSDomains = (userAddress: string): [DomainInfo[] | null, bo
                         if (!domain) return;
 
                         userDomains.push({
-                            name: `${domain}${tld}`,
                             address,
+                            name: `${domain}${tld}`,
                         });
                     })
                 );
