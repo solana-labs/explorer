@@ -83,6 +83,7 @@ export enum PROGRAM_NAMES {
     SOLANART_GO = 'Solanart - Global offers',
     STEPN_DEX = 'STEPN Dex',
     OPENBOOK_DEX = 'OpenBook Dex',
+    NIFTY_ASSET = 'Nifty Asset Program',
 }
 
 const ALL_CLUSTERS = [Cluster.Custom, Cluster.Devnet, Cluster.Testnet, Cluster.MainnetBeta];
@@ -420,6 +421,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: [Cluster.MainnetBeta],
         name: PROGRAM_NAMES.WORMHOLE_TOKEN,
     },
+    AssetGtQBTSgm5s91d1RAQod5JmaZiJDxqsgtqrZud73: {
+        deployments: [Cluster.Devnet, Cluster.MainnetBeta],
+        name: PROGRAM_NAMES.NIFTY_ASSET,
+    },
 };
 
 export const SPECIAL_IDS: { [key: string]: string } = {
@@ -441,19 +446,20 @@ export const SYSVAR_IDS: { [key: string]: string } = {
 };
 
 export const TOKEN_IDS: { [key: string]: string } = {
-  TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA: 'Token Program',
-  TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb: 'Token-2022 Program',
+    TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA: 'Token Program',
+    TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb: 'Token-2022 Program',
 } as const;
 
 export type TokenProgram = 'spl-token' | 'spl-token-2022';
 export function assertIsTokenProgram(program: string): asserts program is TokenProgram {
-    if (program !== 'spl-token' && program !== 'spl-token-2022') throw new Error("Expected token program name of `spl-token` or `spl-token-2022`");
+    if (program !== 'spl-token' && program !== 'spl-token-2022')
+        throw new Error('Expected token program name of `spl-token` or `spl-token-2022`');
 }
 export function isTokenProgram(program: string): program is TokenProgram {
     try {
         assertIsTokenProgram(program);
         return true;
-    } catch(e) {
+    } catch (e) {
         return false;
     }
 }

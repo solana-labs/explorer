@@ -26,9 +26,18 @@ dependencies:
   '@metaplex-foundation/mpl-token-metadata':
     specifier: ^1.1.0
     version: 1.1.0
+  '@metaplex-foundation/umi':
+    specifier: ^0.9.1
+    version: 0.9.1
+  '@metaplex-foundation/umi-web3js-adapters':
+    specifier: ^0.9.1
+    version: 0.9.1(@metaplex-foundation/umi@0.9.1)(@solana/web3.js@1.66.0)
   '@metaplex/js':
     specifier: ^4.12.0
     version: 4.12.0(@metaplex-foundation/mpl-auction@0.0.2)(@metaplex-foundation/mpl-core@0.0.2)(@metaplex-foundation/mpl-metaplex@0.0.5)(@metaplex-foundation/mpl-token-metadata@1.1.0)(@metaplex-foundation/mpl-token-vault@0.0.2)(@solana/spl-token@0.1.8)(@solana/web3.js@1.66.0)
+  '@nifty-oss/asset':
+    specifier: 0.0.1-alpha.0
+    version: 0.0.1-alpha.0(@metaplex-foundation/umi@0.9.1)
   '@project-serum/anchor':
     specifier: ^0.23.0
     version: 0.23.0
@@ -2183,6 +2192,14 @@ packages:
       - utf-8-validate
     dev: false
 
+  /@metaplex-foundation/mpl-toolbox@0.8.1(@metaplex-foundation/umi@0.9.1):
+    resolution: {integrity: sha512-PYU+qU6hg+h6V42z+MDnBTiWZXTTzWhIn5ieyRZYyszTru/LiJKHdsHGKe1VBfuXEuRdfRhAzivMjquZVaqO4A==}
+    peerDependencies:
+      '@metaplex-foundation/umi': ^0.8.2
+    dependencies:
+      '@metaplex-foundation/umi': 0.9.1
+    dev: false
+
   /@metaplex-foundation/umi-options@0.8.9:
     resolution: {integrity: sha512-jSQ61sZMPSAk/TXn8v8fPqtz3x8d0/blVZXLLbpVbo2/T5XobiI6/MfmlUosAjAUaQl6bHRF8aIIqZEFkJiy4A==}
     dev: false
@@ -2217,6 +2234,35 @@ packages:
       '@metaplex-foundation/umi-serializers-core': 0.8.9
       '@metaplex-foundation/umi-serializers-encodings': 0.8.9
       '@metaplex-foundation/umi-serializers-numbers': 0.8.9
+    dev: false
+
+  /@metaplex-foundation/umi-serializers@0.9.0:
+    resolution: {integrity: sha512-hAOW9Djl4w4ioKeR4erDZl5IG4iJdP0xA19ZomdaCbMhYAAmG/FEs5khh0uT2mq53/MnzWcXSUPoO8WBN4Q+Vg==}
+    dependencies:
+      '@metaplex-foundation/umi-options': 0.8.9
+      '@metaplex-foundation/umi-public-keys': 0.8.9
+      '@metaplex-foundation/umi-serializers-core': 0.8.9
+      '@metaplex-foundation/umi-serializers-encodings': 0.8.9
+      '@metaplex-foundation/umi-serializers-numbers': 0.8.9
+    dev: false
+
+  /@metaplex-foundation/umi-web3js-adapters@0.9.1(@metaplex-foundation/umi@0.9.1)(@solana/web3.js@1.66.0):
+    resolution: {integrity: sha512-O6lQGJFebRM8P67ajvUpuctJ/J39Lylp4wyg8E1tHmFxUsdBC7M9qBixi/WmCiNKgSfVrq6MmiYaba3OSrtqwg==}
+    peerDependencies:
+      '@metaplex-foundation/umi': ^0.9.1
+      '@solana/web3.js': ^1.72.0
+    dependencies:
+      '@metaplex-foundation/umi': 0.9.1
+      '@solana/web3.js': 1.66.0
+      buffer: 6.0.3
+    dev: false
+
+  /@metaplex-foundation/umi@0.9.1:
+    resolution: {integrity: sha512-IhHoOvp4vfO/++YL+78+iVuLM53+FDwUOZDYgH6lx0jYXyQ27BeaieeR5i+q3A9dz4KxQo5Nzc5aCA1109QGCQ==}
+    dependencies:
+      '@metaplex-foundation/umi-options': 0.8.9
+      '@metaplex-foundation/umi-public-keys': 0.8.9
+      '@metaplex-foundation/umi-serializers': 0.9.0
     dev: false
 
   /@metaplex/js@4.12.0(@metaplex-foundation/mpl-auction@0.0.2)(@metaplex-foundation/mpl-core@0.0.2)(@metaplex-foundation/mpl-metaplex@0.0.5)(@metaplex-foundation/mpl-token-metadata@1.1.0)(@metaplex-foundation/mpl-token-vault@0.0.2)(@solana/spl-token@0.1.8)(@solana/web3.js@1.66.0):
@@ -2340,6 +2386,15 @@ packages:
     requiresBuild: true
     dev: false
     optional: true
+
+  /@nifty-oss/asset@0.0.1-alpha.0(@metaplex-foundation/umi@0.9.1):
+    resolution: {integrity: sha512-DfVZpiDEDCHAkDutDQplXQVWqpqgvehUc733Tb8Z6VwNcpt9UX9p/8XLD3s9VVAO0N0dR5HX00YXOLOdRsm3HA==}
+    peerDependencies:
+      '@metaplex-foundation/umi': ^0.9.1
+    dependencies:
+      '@metaplex-foundation/mpl-toolbox': 0.8.1(@metaplex-foundation/umi@0.9.1)
+      '@metaplex-foundation/umi': 0.9.1
+    dev: false
 
   /@noble/curves@1.1.0:
     resolution: {integrity: sha512-091oBExgENk/kGj3AZmtBDMpxQPDtxQABR2B9lb1JbVTs6ytdzZNwvhxQ4MWasRNEzlbEH8jCWFCwhF/Obj5AA==}
