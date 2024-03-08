@@ -42,7 +42,7 @@ import Link from 'next/link';
 import { redirect, useSelectedLayoutSegment } from 'next/navigation';
 import React, { PropsWithChildren } from 'react';
 import useSWRImmutable from 'swr/immutable';
-import { Base58EncodedAddress } from 'web3js-experimental';
+import { Address } from 'web3js-experimental';
 
 import { FullTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
 
@@ -387,7 +387,7 @@ function InfoSection({ account, tokenInfo }: { account: Account, tokenInfo?: Ful
         parsedData.parsed.type === 'lookupTable'
     ) {
         return <AddressLookupTableAccountSection account={account} lookupTableAccount={parsedData.parsed.info} />;
-    } else if (rawData && isAddressLookupTableAccount(account.owner.toBase58() as Base58EncodedAddress, rawData)) {
+    } else if (rawData && isAddressLookupTableAccount(account.owner.toBase58() as Address, rawData)) {
         return <AddressLookupTableAccountSection account={account} data={rawData} />;
     } else if (account.owner.toBase58() === FEATURE_PROGRAM_ID) {
         return <FeatureAccountSection account={account} />;
@@ -467,7 +467,7 @@ function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
     }
 
     // Add the key for address lookup tables
-    if (account.data.raw && isAddressLookupTableAccount(account.owner.toBase58() as Base58EncodedAddress, account.data.raw)) {
+    if (account.data.raw && isAddressLookupTableAccount(account.owner.toBase58() as Address, account.data.raw)) {
         tabs.push(...TABS_LOOKUP['address-lookup-table']);
     }
 
