@@ -3,12 +3,15 @@
 import { useClusterPath } from '@/app/utils/url';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { toWeb3JsPublicKey } from '@metaplex-foundation/umi-web3js-adapters';
-import { Asset, ExtensionType, getExtension } from '@nifty-oss/asset';
+import { Asset, ExtensionType, OperatorType, getExtension } from '@nifty-oss/asset';
+import Link from 'next/link';
 import { AlertOctagon, Check, ExternalLink } from 'react-feather';
 import { Address } from '../../common/Address';
+import { Copyable } from '../../common/Copyable';
 import { InfoTooltip } from '../../common/InfoTooltip';
 import { getDelegateRolePills } from './AssetAccountCard';
 import { KNOWN_IMAGE_EXTENSIONS } from './types';
+import { PublicKey } from '@solana/web3.js';
 
 export function NiftyAssetExtensionsCard({ asset }: { asset: Asset }) {
     return (
@@ -318,6 +321,8 @@ function getRoyalties(asset: Asset) {
         return null;
     }
 
+    const addressPath = useClusterPath({ pathname: `/address/${asset.publicKey.toString()}/nifty-asset-ruleset` });
+
     return (
         <div className="inner-cards">
             <div className="card-header align-items-center">
@@ -332,11 +337,17 @@ function getRoyalties(asset: Asset) {
                 <tr>
                     <td className="text-muted">Constraint</td>
                     <td className="text-lg-end">
-                        <h3 className="mb-0">
-                            <span className="badge badge-pill bg-info-soft">
-                                {royalties.constraint.type.toString()}
-                            </span>
-                        </h3>
+                        {royalties.constraint.type === 'Empty' ? (
+                            <h3 className="mb-0">
+                                <span className="badge badge-pill bg-info-soft">
+                                    {royalties.constraint.type.toString()}
+                                </span>
+                            </h3>
+                        ) : (
+                            <Copyable text={asset.publicKey.toString()} replaceText={false}>
+                                <Link href={addressPath}>Rule Set</Link>
+                            </Copyable>
+                        )}
                     </td>
                 </tr>
             </TableCardBody>

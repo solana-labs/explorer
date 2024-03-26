@@ -1,15 +1,9 @@
 'use client';
 
-import { AddressLookupTableAccountSection } from '@components/account/address-lookup-table/AddressLookupTableAccountSection';
-import { isAddressLookupTableAccount } from '@components/account/address-lookup-table/types';
+import { NiftyAssetAccountHeader } from '@/app/components/account/nifty-asset/AssetAccountHeader';
 import { ConfigAccountSection } from '@components/account/ConfigAccountSection';
 import { FeatureAccountSection } from '@components/account/FeatureAccountSection';
 import { MetaplexNFTHeader } from '@components/account/MetaplexNFTHeader';
-import { isNFTokenAccount, parseNFTokenCollectionAccount } from '@components/account/nftoken/isNFTokenAccount';
-import { NFTOKEN_ADDRESS } from '@components/account/nftoken/nftoken';
-import { NFTokenAccountHeader } from '@components/account/nftoken/NFTokenAccountHeader';
-import { NFTokenAccountSection } from '@components/account/nftoken/NFTokenAccountSection';
-import { NiftyAssetAccountHeader } from '@/app/components/account/nifty-asset/AssetAccountHeader';
 import { NonceAccountSection } from '@components/account/NonceAccountSection';
 import { StakeAccountSection } from '@components/account/StakeAccountSection';
 import { SysvarAccountSection } from '@components/account/SysvarAccountSection';
@@ -17,14 +11,20 @@ import { TokenAccountSection } from '@components/account/TokenAccountSection';
 import { UnknownAccountCard } from '@components/account/UnknownAccountCard';
 import { UpgradeableLoaderAccountSection } from '@components/account/UpgradeableLoaderAccountSection';
 import { VoteAccountSection } from '@components/account/VoteAccountSection';
+import { AddressLookupTableAccountSection } from '@components/account/address-lookup-table/AddressLookupTableAccountSection';
+import { isAddressLookupTableAccount } from '@components/account/address-lookup-table/types';
+import { NFTokenAccountHeader } from '@components/account/nftoken/NFTokenAccountHeader';
+import { NFTokenAccountSection } from '@components/account/nftoken/NFTokenAccountSection';
+import { isNFTokenAccount, parseNFTokenCollectionAccount } from '@components/account/nftoken/isNFTokenAccount';
+import { NFTOKEN_ADDRESS } from '@components/account/nftoken/nftoken';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { Identicon } from '@components/common/Identicon';
 import { LoadingCard } from '@components/common/LoadingCard';
 import {
     Account,
     AccountsProvider,
-    isTokenProgramData,
     TokenProgramData,
+    isTokenProgramData,
     useAccountInfo,
     useFetchAccountInfo,
     useMintAccountInfo,
@@ -45,10 +45,10 @@ import React, { PropsWithChildren } from 'react';
 import useSWRImmutable from 'swr/immutable';
 import { Base58EncodedAddress } from 'web3js-experimental';
 
-import { FullTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
-import { isNiftyAssetAccount } from '@/app/components/account/nifty-asset/types';
-import { ASSET_PROGRAM_ID, Asset, ExtensionType, getAssetAccountDataSerializer, getExtension } from '@nifty-oss/asset';
 import { NiftyAssetAccountCard } from '@/app/components/account/nifty-asset/AssetAccountCard';
+import { isNiftyAssetAccount } from '@/app/components/account/nifty-asset/types';
+import { FullTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
+import { ASSET_PROGRAM_ID, Asset, ExtensionType, getAssetAccountDataSerializer, getExtension } from '@nifty-oss/asset';
 
 const IDENTICON_WIDTH = 64;
 
@@ -459,7 +459,8 @@ export type MoreTabs =
     | 'entries'
     | 'concurrent-merkle-tree'
     | 'nifty-asset-metadata'
-    | 'nifty-asset-extensions';
+    | 'nifty-asset-extensions'
+    | 'nifty-asset-ruleset';
 
 function MoreSection({ children, tabs }: { children: React.ReactNode; tabs: (JSX.Element | null)[] }) {
     return (
@@ -541,6 +542,16 @@ function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
                     path: 'nifty-asset-metadata',
                     slug: 'nifty-asset-metadata',
                     title: 'Metadata',
+                });
+            }
+
+            const royalties = getExtension(asset, ExtensionType.Royalties);
+
+            if (royalties && royalties.constraint.type !== 'Empty') {
+                tabs.push({
+                    path: 'nifty-asset-ruleset',
+                    slug: 'nifty-asset-ruleset',
+                    title: 'Rule Set',
                 });
             }
 
