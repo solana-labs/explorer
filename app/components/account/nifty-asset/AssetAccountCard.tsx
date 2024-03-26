@@ -2,7 +2,7 @@ import { Address } from '@components/common/Address';
 import { SolBalance } from '@components/common/SolBalance';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { toWeb3JsPublicKey } from '@metaplex-foundation/umi-web3js-adapters';
-import { Asset, State, getAssetAccountDataSerializer } from '@nifty-oss/asset';
+import { Asset, Delegate, DelegateRole, State, getAssetAccountDataSerializer } from '@nifty-oss/asset';
 import { Account } from '@providers/accounts';
 import { useCluster } from '@providers/cluster';
 import { addressLabel } from '@utils/tx';
@@ -80,10 +80,10 @@ export function NiftyAssetAccountCard({ account }: { account: Account }) {
 
                 {asset && (
                     <tr>
-                        <td>Delegate</td>
+                        <td>Delegate {asset.delegate && getDelegateRolePills(asset.delegate)}</td>
                         <td className="text-lg-end">
                             {asset.delegate ? (
-                                <Address pubkey={toWeb3JsPublicKey(asset.delegate.address)} alignRight link />
+                                <Address pubkey={toWeb3JsPublicKey(asset.delegate.address!)} alignRight link />
                             ) : (
                                 <div className="text-muted">None</div>
                             )}
@@ -108,4 +108,14 @@ export function NiftyAssetAccountCard({ account }: { account: Account }) {
             </TableCardBody>
         </div>
     );
+}
+
+export function getDelegateRolePills(delegate: Delegate) {
+    const roles: JSX.Element[] = [];
+
+    delegate.roles.map(role => {
+        roles.push(<span className="badge me-2 badge-pill bg-info-soft">{`${DelegateRole[role]}`}</span>);
+    });
+
+    return roles;
 }
