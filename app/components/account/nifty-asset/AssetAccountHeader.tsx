@@ -213,7 +213,7 @@ function getStandardPill(standard: Standard) {
         return (
             <div className={'d-inline-flex ms-2'}>
                 <span className="badge badge-pill bg-gray-soft">{`${
-                    standard === Standard.Soulbound ? 'SOULBOUND' : 'SUBSCRIPTION'
+                    standard === Standard.Soulbound ? 'SOULBOUND' : 'MANAGED'
                 }`}</span>
             </div>
         );

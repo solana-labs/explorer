@@ -7,6 +7,7 @@ import { Asset, ExtensionType, getExtension } from '@nifty-oss/asset';
 import { AlertOctagon, Check, ExternalLink } from 'react-feather';
 import { Address } from '../../common/Address';
 import { InfoTooltip } from '../../common/InfoTooltip';
+import { getDelegateRolePills } from './AssetAccountCard';
 import { KNOWN_IMAGE_EXTENSIONS } from './types';
 
 export function NiftyAssetExtensionsCard({ asset }: { asset: Asset }) {
@@ -20,8 +21,42 @@ export function NiftyAssetExtensionsCard({ asset }: { asset: Asset }) {
             {getCreators(asset)}
             {getGrouping(asset)}
             {getLinks(asset)}
+            {getManager(asset)}
             {getMetadata(asset)}
             {getRoyalties(asset)}
+        </div>
+    );
+}
+
+function getManager(asset: Asset) {
+    const manager = getExtension(asset, ExtensionType.Manager);
+
+    if (!manager) {
+        return null;
+    }
+
+    return (
+        <div className="inner-cards">
+            <div className="card-header align-items-center">
+                <h3 className="card-header-title">Manager</h3>
+            </div>
+
+            <div className="table-responsive mb-0">
+                <table className="table table-sm card-table">
+                    <tbody className="list">
+                        <tr>
+                            <td>Delegate {manager.delegate && getDelegateRolePills(manager.delegate)}</td>
+                            <td className="text-lg-end">
+                                {manager.delegate ? (
+                                    <Address pubkey={toWeb3JsPublicKey(manager.delegate.address!)} alignRight link />
+                                ) : (
+                                    <div className="text-muted">None</div>
+                                )}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 }
@@ -47,7 +82,7 @@ function getMetadata(asset: Asset) {
                             {metadata.symbol.length > 0 ? (
                                 <td className="text-lg-end">{metadata.symbol}</td>
                             ) : (
-                                <div className="text-muted end-0">None</div>
+                                <td className="text-muted text-lg-end">None</td>
                             )}
                         </tr>
                         <tr>
@@ -55,7 +90,7 @@ function getMetadata(asset: Asset) {
                             {metadata.description.length > 0 ? (
                                 <td className="w-50 text-lg-end">{metadata.description}</td>
                             ) : (
-                                <div className="text-muted">None</div>
+                                <td className="text-muted text-lg-end">None</td>
                             )}
                         </tr>
                         <tr>
@@ -67,7 +102,7 @@ function getMetadata(asset: Asset) {
                                         <ExternalLink className="align-text-top ms-2" size={13} />
                                     </a>
                                 ) : (
-                                    <div className="text-muted">None</div>
+                                    <div className="text-muted text-lg-end">None</div>
                                 )}
                             </td>
                         </tr>
@@ -98,7 +133,15 @@ function getGrouping(asset: Asset) {
                 </tr>
                 <tr>
                     <td className="text-muted">Maximum Size</td>
-                    <td className="text-lg-end">{grouping.maxSize.toString()}</td>
+                    <td className="text-lg-end">
+                        {grouping.maxSize === 0n ? (
+                            <h3 className="mb-0">
+                                <span className="badge badge-pill bg-info-soft">Unlimited</span>
+                            </h3>
+                        ) : (
+                            grouping.maxSize.toString()
+                        )}
+                    </td>
                 </tr>
             </TableCardBody>
         </div>
