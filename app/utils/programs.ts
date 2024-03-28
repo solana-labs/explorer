@@ -43,6 +43,7 @@ export enum PROGRAM_NAMES {
     MARINADE = 'Marinade Staking Program',
     MERCURIAL = 'Mercurial Stable Swap Program',
     METAPLEX = 'Metaplex Program',
+    METAPLEX_CORE = 'Metaplex Core Program',
     NFT_AUCTION = 'NFT Auction Program',
     NFT_CANDY_MACHINE = 'NFT Candy Machine Program',
     NFT_CANDY_MACHINE_V2 = 'NFT Candy Machine Program V2',
@@ -195,6 +196,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     CLoCKyJ6DXBJqqu2VWx9RLbgnwwR6BMHHuyasVmfMzBh: {
         deployments: [Cluster.MainnetBeta, Cluster.Devnet],
         name: PROGRAM_NAMES.CLOCKWORK_2,
+    },
+    CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d: {
+        deployments: [Cluster.Devnet],
+        name: PROGRAM_NAMES.METAPLEX_CORE,
     },
     ComputeBudget111111111111111111111111111111: {
         deployments: ALL_CLUSTERS,
@@ -441,8 +446,8 @@ export const SYSVAR_IDS: { [key: string]: string } = {
 };
 
 export const TOKEN_IDS: { [key: string]: string } = {
-  TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA: 'Token Program',
-  TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb: 'Token-2022 Program',
+    TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA: 'Token Program',
+    TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb: 'Token-2022 Program',
 } as const;
 
 export type TokenProgram = 'spl-token' | 'spl-token-2022';
@@ -453,7 +458,7 @@ export function isTokenProgram(program: string): program is TokenProgram {
     try {
         assertIsTokenProgram(program);
         return true;
-    } catch(e) {
+    } catch (e) {
         return false;
     }
 }

@@ -44,6 +44,7 @@ import React, { PropsWithChildren } from 'react';
 import useSWRImmutable from 'swr/immutable';
 import { Base58EncodedAddress } from 'web3js-experimental';
 
+// import { isCoreAccount } from '@/app/components/account/mplCore/isCoreAccount';
 import { FullTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
 
 const IDENTICON_WIDTH = 64;
@@ -239,6 +240,15 @@ function AccountHeader({ address, account, tokenInfo, isTokenInfoLoading }: { ad
         return <MetaplexNFTHeader nftData={parsedData.nftData} address={address} />;
     }
 
+    // if (account && isCoreAccount(account)) {
+    //     return (
+    //         <>
+    //             <h6 className="header-pretitle">Details</h6>
+    //             <h2 className="header-title">Core Account</h2>
+    //         </>
+    //     );
+    // }
+
     const nftokenNFT = account && isNFTokenAccount(account);
     if (nftokenNFT && account) {
         return <NFTokenAccountHeader account={account} />;
@@ -249,12 +259,12 @@ function AccountHeader({ address, account, tokenInfo, isTokenInfoLoading }: { ad
         let unverified = false;
 
         // Fall back to legacy token list when there is stub metadata (blank uri), updatable by default by the mint authority
-        if (!parsedData?.nftData?.metadata.data.uri && tokenInfo) {
+        if (!parsedData?.nftData?.metadata.uri && tokenInfo) {
             token = tokenInfo;
         } else if (parsedData?.nftData) {
             token = {
                 logoURI: parsedData?.nftData?.json?.image,
-                name: parsedData?.nftData?.json?.name ?? parsedData?.nftData.metadata.data.name,
+                name: parsedData?.nftData?.json?.name ?? parsedData?.nftData.metadata.name,
             };
             if (!tokenInfo?.verified) {
                 unverified = true;

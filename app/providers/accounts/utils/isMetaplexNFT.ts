@@ -1,3 +1,4 @@
+import { isSome } from '@metaplex-foundation/umi';
 import { MintAccountInfo } from '@validators/accounts/token';
 
 import { isTokenProgramData, ParsedData, TokenProgramData } from '..';
@@ -6,12 +7,16 @@ export default function isMetaplexNFT(
     parsedData?: ParsedData,
     mintInfo?: MintAccountInfo
 ): parsedData is TokenProgramData {
+    let tokenStandard = null;
+    if (parsedData && isTokenProgramData(parsedData) && parsedData.nftData && isSome(parsedData.nftData.metadata.tokenStandard)) {
+        tokenStandard = parsedData.nftData.metadata.tokenStandard.value;
+    }
     return !!(
         parsedData &&
         isTokenProgramData(parsedData) &&
         parsedData.parsed.type === 'mint' &&
         parsedData.nftData &&
         mintInfo?.decimals === 0 &&
-        (parseInt(mintInfo.supply) === 1 || parsedData.nftData.metadata.tokenStandard === 1)
+        (parseInt(mintInfo.supply) === 1 || tokenStandard === 1)
     );
 }
