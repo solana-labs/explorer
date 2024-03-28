@@ -36,8 +36,8 @@ dependencies:
     specifier: ^4.12.0
     version: 4.12.0(@metaplex-foundation/mpl-auction@0.0.2)(@metaplex-foundation/mpl-core@0.0.2)(@metaplex-foundation/mpl-metaplex@0.0.5)(@metaplex-foundation/mpl-token-metadata@1.1.0)(@metaplex-foundation/mpl-token-vault@0.0.2)(@solana/spl-token@0.1.8)(@solana/web3.js@1.66.0)
   '@nifty-oss/asset':
-    specifier: 0.0.1-alpha.2
-    version: 0.0.1-alpha.2(@metaplex-foundation/umi@0.9.1)
+    specifier: 0.1.0
+    version: 0.1.0(@metaplex-foundation/umi@0.9.1)
   '@project-serum/anchor':
     specifier: ^0.23.0
     version: 0.23.0
@@ -2192,14 +2192,6 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@metaplex-foundation/mpl-toolbox@0.8.1(@metaplex-foundation/umi@0.9.1):
-    resolution: {integrity: sha512-PYU+qU6hg+h6V42z+MDnBTiWZXTTzWhIn5ieyRZYyszTru/LiJKHdsHGKe1VBfuXEuRdfRhAzivMjquZVaqO4A==}
-    peerDependencies:
-      '@metaplex-foundation/umi': ^0.8.2
-    dependencies:
-      '@metaplex-foundation/umi': 0.9.1
-    dev: false
-
   /@metaplex-foundation/umi-options@0.8.9:
     resolution: {integrity: sha512-jSQ61sZMPSAk/TXn8v8fPqtz3x8d0/blVZXLLbpVbo2/T5XobiI6/MfmlUosAjAUaQl6bHRF8aIIqZEFkJiy4A==}
     dev: false
@@ -2387,12 +2379,11 @@ packages:
     dev: false
     optional: true
 
-  /@nifty-oss/asset@0.0.1-alpha.2(@metaplex-foundation/umi@0.9.1):
-    resolution: {integrity: sha512-cgS4798TAZJrgVqHLP8R6u6Mkk5fzddi1A5aYf/NarkspJ42wDeAunMJPVORRWwi+3eLiqs4/+7VsiFtlLzrBw==}
+  /@nifty-oss/asset@0.1.0(@metaplex-foundation/umi@0.9.1):
+    resolution: {integrity: sha512-6rXmgDfRye0SUhRaoN0h6TYbo87YPUeocuKCfQbTcU7NNcxecLwpJU5sol7CNM2sR3uaJ1t9Q4is4844ATEwVQ==}
     peerDependencies:
       '@metaplex-foundation/umi': ^0.9.1
     dependencies:
-      '@metaplex-foundation/mpl-toolbox': 0.8.1(@metaplex-foundation/umi@0.9.1)
       '@metaplex-foundation/umi': 0.9.1
     dev: false
 
