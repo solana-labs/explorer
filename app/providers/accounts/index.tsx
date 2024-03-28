@@ -1,6 +1,8 @@
 'use client';
 
-import { MetadataJson, programs } from '@metaplex/js';
+import { fetchMetadata, findMetadataPda, Metadata } from '@metaplex-foundation/mpl-token-metadata';
+import { createUmi } from '@metaplex-foundation/umi-bundle-defaults';
+import { fromWeb3JsPublicKey } from '@metaplex-foundation/umi-web3js-adapters';
 import getEditionInfo, { EditionInfo } from '@providers/accounts/utils/getEditionInfo';
 import * as Cache from '@providers/cache';
 import { ActionType, FetchStatus } from '@providers/cache';
@@ -38,8 +40,6 @@ import { RewardsProvider } from './rewards';
 import { TokensProvider } from './tokens';
 export { useAccountHistory } from './history';
 
-const Metadata = programs.metadata.Metadata;
-
 export type StakeProgramData = {
     program: 'stake';
     parsed: StakeAccount;
@@ -53,8 +53,8 @@ export type UpgradeableLoaderAccountData = {
 };
 
 export type NFTData = {
-    metadata: programs.metadata.MetadataData;
-    json: MetadataJson | undefined;
+    metadata: Metadata;
+    json: any | undefined;
     editionInfo: EditionInfo;
 };
 
@@ -62,7 +62,7 @@ export function isTokenProgramData(data: { program: string }): data is TokenProg
     try {
         assertIsTokenProgram(data.program);
         return true;
-    } catch(e) {
+    } catch (e) {
         return false;
     }
 }
@@ -138,7 +138,7 @@ class MultipleAccountFetcher {
         private cluster: Cluster,
         private url: string,
         private dataMode: FetchAccountDataMode
-    ) {}
+    ) { }
     fetch = (pubkey: PublicKey) => {
         if (this.pubkeys !== undefined) this.pubkeys.add(pubkey.toBase58());
         if (this.fetchTimeout === undefined) {
@@ -391,16 +391,18 @@ async function handleParsedAccountData(
             try {
                 // Generate a PDA and check for a Metadata Account
                 if (parsed.type === 'mint') {
-                    const metadata = await Metadata.load(connection, await Metadata.getPDA(accountKey));
+                    const umi = createUmi(connection.rpcEndpoint);
+                    const mint = fromWeb3JsPublicKey(accountKey);
+                    const metadata = await fetchMetadata(umi, findMetadataPda(umi, { mint }));
                     if (metadata) {
                         // We have a valid Metadata account. Try and pull edition data.
                         const editionInfo = await getEditionInfo(metadata, connection);
                         const id = pubkeyToString(accountKey);
-                        const metadataJSON = await getMetaDataJSON(id, metadata.data);
+                        const metadataJSON = await getMetaDataJSON(id, metadata);
                         nftData = {
                             editionInfo,
                             json: metadataJSON,
-                            metadata: metadata.data,
+                            metadata: metadata,
                         };
                     }
                 }
@@ -421,10 +423,10 @@ const IMAGE_MIME_TYPE_REGEX = /data:image\/(svg\+xml|png|jpeg|gif)/g;
 
 const getMetaDataJSON = async (
     id: string,
-    metadata: programs.metadata.MetadataData
-): Promise<MetadataJson | undefined> => {
+    metadata: Metadata
+): Promise<any | undefined> => {
     return new Promise(resolve => {
-        const uri = metadata.data.uri;
+        const uri = metadata.uri;
         if (!uri) return resolve(undefined);
 
         const processJson = (extended: any) => {
@@ -436,7 +438,7 @@ const getMetaDataJSON = async (
                 extended.image =
                     extended.image.startsWith('http') || IMAGE_MIME_TYPE_REGEX.test(extended.image)
                         ? extended.image
-                        : `${metadata.data.uri}/${extended.image}`;
+                        : `${metadata.uri}/${extended.image}`;
             }
 
             return extended;

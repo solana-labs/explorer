@@ -1,39 +1,33 @@
-import { programs } from '@metaplex/js';
+import { deserializeEdition, deserializeMasterEdition, Edition, fetchMasterEdition, findMasterEditionPda, Key, MasterEdition, Metadata } from '@metaplex-foundation/mpl-token-metadata';
+import { publicKey } from '@metaplex-foundation/umi';
+import { createUmi } from '@metaplex-foundation/umi-bundle-defaults';
 import { Connection } from '@solana/web3.js';
 
-const {
-    metadata: { Metadata, MasterEdition, MetadataKey },
-} = programs;
-
-type MasterEditionData = programs.metadata.MasterEditionV1Data | programs.metadata.MasterEditionV2Data;
-type EditionData = programs.metadata.EditionData;
-
 export type EditionInfo = {
-    masterEdition?: MasterEditionData;
-    edition?: EditionData;
+    masterEdition?: MasterEdition;
+    edition?: Edition;
 };
 
 export default async function getEditionInfo(
-    metadata: programs.metadata.Metadata,
+    metadata: Metadata,
     connection: Connection
 ): Promise<EditionInfo> {
+    const umi = createUmi(connection.rpcEndpoint);
+    const editionPda = findMasterEditionPda(umi, { mint: metadata.mint });
     try {
-        const edition = (await Metadata.getEdition(connection, metadata.data.mint)).data;
+        const edition = await umi.rpc.getAccount(publicKey(editionPda));
 
-        if (edition) {
-            if (edition.key === MetadataKey.MasterEditionV1 || edition.key === MetadataKey.MasterEditionV2) {
+        if (edition.exists) {
+            if (edition.data[0] === Key.MasterEditionV1 || edition.data[0] === Key.MasterEditionV2) {
                 return {
                     edition: undefined,
-                    masterEdition: edition as MasterEditionData,
+                    masterEdition: deserializeMasterEdition(edition),
                 };
-            }
-
-            // This is an Edition NFT. Pull the Parent (MasterEdition)
-            const masterEdition = (await MasterEdition.load(connection, (edition as EditionData).parent)).data;
-            if (masterEdition) {
+            } else if (edition.data[0] === Key.EditionV1) {
+                const editionData = deserializeEdition(edition);
                 return {
-                    edition: edition as EditionData,
-                    masterEdition,
+                    edition: editionData,
+                    masterEdition: await fetchMasterEdition(umi, editionData.parent),
                 };
             }
         }

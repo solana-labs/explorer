@@ -1,7 +1,6 @@
 import { Stream } from '@cloudflare/stream-react';
 import { LoadingArtPlaceholder } from '@components/common/LoadingArtPlaceholder';
 import ErrorLogo from '@img/logos-solana/dark-solana-logo.svg';
-import { MetadataJson, MetaDataJsonCategory, MetadataJsonFile } from '@metaplex/js';
 import { PublicKey } from '@solana/web3.js';
 import { getLast } from '@utils/index';
 import Image from 'next/image';
@@ -48,7 +47,7 @@ const VideoArtContent = ({
     uri,
     animationURL,
 }: {
-    files?: (MetadataJsonFile | string)[];
+    files?: string[];
     uri?: string;
     animationURL?: string;
 }) => {
@@ -107,7 +106,7 @@ const VideoArtContent = ({
     return content;
 };
 
-const HTMLContent = ({ animationUrl, files }: { animationUrl?: string; files?: (MetadataJsonFile | string)[] }) => {
+const HTMLContent = ({ animationUrl, files }: { animationUrl?: string; files?: string[] }) => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [showError, setShowError] = useState<boolean>(false);
     const htmlURL = files && files.length > 0 && typeof files[0] === 'string' ? files[0] : animationUrl;
@@ -153,12 +152,12 @@ export const ArtContent = ({
     files,
     data,
 }: {
-    category?: MetaDataJsonCategory;
+    category?: string;
     pubkey?: PublicKey | string;
     uri?: string;
     animationURL?: string;
-    files?: (MetadataJsonFile | string)[];
-    data: MetadataJson | undefined;
+    files?: string[];
+    data: any | undefined;
 }) => {
     if (pubkey && data) {
         uri = data.image;
