@@ -1,14 +1,9 @@
 'use client';
 
-import { AddressLookupTableAccountSection } from '@components/account/address-lookup-table/AddressLookupTableAccountSection';
-import { isAddressLookupTableAccount } from '@components/account/address-lookup-table/types';
+import { NiftyAssetAccountHeader } from '@/app/components/account/nifty-asset/AssetAccountHeader';
 import { ConfigAccountSection } from '@components/account/ConfigAccountSection';
 import { FeatureAccountSection } from '@components/account/FeatureAccountSection';
 import { MetaplexNFTHeader } from '@components/account/MetaplexNFTHeader';
-import { isNFTokenAccount, parseNFTokenCollectionAccount } from '@components/account/nftoken/isNFTokenAccount';
-import { NFTOKEN_ADDRESS } from '@components/account/nftoken/nftoken';
-import { NFTokenAccountHeader } from '@components/account/nftoken/NFTokenAccountHeader';
-import { NFTokenAccountSection } from '@components/account/nftoken/NFTokenAccountSection';
 import { NonceAccountSection } from '@components/account/NonceAccountSection';
 import { StakeAccountSection } from '@components/account/StakeAccountSection';
 import { SysvarAccountSection } from '@components/account/SysvarAccountSection';
@@ -16,14 +11,20 @@ import { TokenAccountSection } from '@components/account/TokenAccountSection';
 import { UnknownAccountCard } from '@components/account/UnknownAccountCard';
 import { UpgradeableLoaderAccountSection } from '@components/account/UpgradeableLoaderAccountSection';
 import { VoteAccountSection } from '@components/account/VoteAccountSection';
+import { AddressLookupTableAccountSection } from '@components/account/address-lookup-table/AddressLookupTableAccountSection';
+import { isAddressLookupTableAccount } from '@components/account/address-lookup-table/types';
+import { NFTokenAccountHeader } from '@components/account/nftoken/NFTokenAccountHeader';
+import { NFTokenAccountSection } from '@components/account/nftoken/NFTokenAccountSection';
+import { isNFTokenAccount, parseNFTokenCollectionAccount } from '@components/account/nftoken/isNFTokenAccount';
+import { NFTOKEN_ADDRESS } from '@components/account/nftoken/nftoken';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { Identicon } from '@components/common/Identicon';
 import { LoadingCard } from '@components/common/LoadingCard';
 import {
     Account,
     AccountsProvider,
-    isTokenProgramData,
     TokenProgramData,
+    isTokenProgramData,
     useAccountInfo,
     useFetchAccountInfo,
     useMintAccountInfo,
@@ -44,7 +45,10 @@ import React, { PropsWithChildren } from 'react';
 import useSWRImmutable from 'swr/immutable';
 import { Base58EncodedAddress } from 'web3js-experimental';
 
+import { NiftyAssetAccountCard } from '@/app/components/account/nifty-asset/AssetAccountCard';
+import { isNiftyAssetAccount } from '@/app/components/account/nifty-asset/types';
 import { FullTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
+import { ASSET_PROGRAM_ID, Asset, ExtensionType, getAssetAccountDataSerializer, getExtension } from '@nifty-oss/asset';
 
 const IDENTICON_WIDTH = 64;
 
@@ -192,7 +196,9 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
     const infoParsed = info?.data?.data.parsed;
 
     const { data: fullTokenInfo, isLoading: isFullTokenInfoLoading } = useSWRImmutable(
-        infoStatus === FetchStatus.Fetched && infoParsed && isTokenProgramData(infoParsed) && pubkey ? ['get-full-token-info', address, cluster, url] : null,
+        infoStatus === FetchStatus.Fetched && infoParsed && isTokenProgramData(infoParsed) && pubkey
+            ? ['get-full-token-info', address, cluster, url]
+            : null,
         fetchFullTokenInfo
     );
 
@@ -207,13 +213,23 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
         <div className="container mt-n3">
             <div className="header">
                 <div className="header-body">
-                    <AccountHeader address={address} account={info?.data} tokenInfo={fullTokenInfo} isTokenInfoLoading={isFullTokenInfoLoading} />
+                    <AccountHeader
+                        address={address}
+                        account={info?.data}
+                        tokenInfo={fullTokenInfo}
+                        isTokenInfoLoading={isFullTokenInfoLoading}
+                    />
                 </div>
             </div>
             {!pubkey ? (
                 <ErrorCard text={`Address "${address}" is not valid`} />
             ) : (
-                <DetailsSections info={info} pubkey={pubkey} tokenInfo={fullTokenInfo} isTokenInfoLoading={isFullTokenInfoLoading}>
+                <DetailsSections
+                    info={info}
+                    pubkey={pubkey}
+                    tokenInfo={fullTokenInfo}
+                    isTokenInfoLoading={isFullTokenInfoLoading}
+                >
                     {children}
                 </DetailsSections>
             )}
@@ -229,7 +245,17 @@ export default function AddressLayout({ children, params }: Props) {
     );
 }
 
-function AccountHeader({ address, account, tokenInfo, isTokenInfoLoading }: { address: string; account?: Account, tokenInfo?: FullTokenInfo, isTokenInfoLoading: boolean }) {
+function AccountHeader({
+    address,
+    account,
+    tokenInfo,
+    isTokenInfoLoading,
+}: {
+    address: string;
+    account?: Account;
+    tokenInfo?: FullTokenInfo;
+    isTokenInfoLoading: boolean;
+}) {
     const mintInfo = useMintAccountInfo(address);
 
     const parsedData = account?.data.parsed;
@@ -242,6 +268,10 @@ function AccountHeader({ address, account, tokenInfo, isTokenInfoLoading }: { ad
     const nftokenNFT = account && isNFTokenAccount(account);
     if (nftokenNFT && account) {
         return <NFTokenAccountHeader account={account} />;
+    }
+
+    if (account && isNiftyAssetAccount(account.owner, account.data.raw)) {
+        return <NiftyAssetAccountHeader account={account} />;
     }
 
     if (isToken && !isTokenInfoLoading) {
@@ -314,7 +344,7 @@ function DetailsSections({
     tab,
     info,
     tokenInfo,
-    isTokenInfoLoading
+    isTokenInfoLoading,
 }: {
     children: React.ReactNode;
     pubkey: PublicKey;
@@ -348,7 +378,7 @@ function DetailsSections({
     );
 }
 
-function InfoSection({ account, tokenInfo }: { account: Account, tokenInfo?: FullTokenInfo }) {
+function InfoSection({ account, tokenInfo }: { account: Account; tokenInfo?: FullTokenInfo }) {
     const parsedData = account.data.parsed;
     const rawData = account.data.raw;
 
@@ -371,6 +401,8 @@ function InfoSection({ account, tokenInfo }: { account: Account, tokenInfo?: Ful
         );
     } else if (account.owner.toBase58() === NFTOKEN_ADDRESS) {
         return <NFTokenAccountSection account={account} />;
+    } else if (account.owner.toBase58() === ASSET_PROGRAM_ID) {
+        return <NiftyAssetAccountCard account={account} />;
     } else if (parsedData && isTokenProgramData(parsedData)) {
         return <TokenAccountSection account={account} tokenAccount={parsedData.parsed} tokenInfo={tokenInfo} />;
     } else if (parsedData && parsedData.program === 'nonce') {
@@ -425,7 +457,10 @@ export type MoreTabs =
     | 'anchor-program'
     | 'anchor-account'
     | 'entries'
-    | 'concurrent-merkle-tree';
+    | 'concurrent-merkle-tree'
+    | 'nifty-asset-metadata'
+    | 'nifty-asset-extensions'
+    | 'nifty-asset-ruleset';
 
 function MoreSection({ children, tabs }: { children: React.ReactNode; tabs: (JSX.Element | null)[] }) {
     return (
@@ -467,12 +502,19 @@ function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
     }
 
     // Add the key for address lookup tables
-    if (account.data.raw && isAddressLookupTableAccount(account.owner.toBase58() as Base58EncodedAddress, account.data.raw)) {
+    if (
+        account.data.raw &&
+        isAddressLookupTableAccount(account.owner.toBase58() as Base58EncodedAddress, account.data.raw)
+    ) {
         tabs.push(...TABS_LOOKUP['address-lookup-table']);
     }
 
     // Add the key for Metaplex NFTs
-    if (parsedData && (programTypeKey === 'spl-token:mint' || programTypeKey == 'spl-token-2022:mint') && (parsedData as TokenProgramData).nftData) {
+    if (
+        parsedData &&
+        (programTypeKey === 'spl-token:mint' || programTypeKey == 'spl-token-2022:mint') &&
+        (parsedData as TokenProgramData).nftData
+    ) {
         tabs.push(...TABS_LOOKUP[`${programTypeKey}:metaplexNFT`]);
     }
 
@@ -488,8 +530,42 @@ function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
         }
     }
 
+    const isNiftyAsset = account && isNiftyAssetAccount(account.owner, account.data.raw);
+    if (isNiftyAsset && account.data.raw) {
+        const asset = account && (getAssetAccountDataSerializer().deserialize(account.data.raw)[0] as Asset);
+
+        if (asset.extensions.length > 0) {
+            const metadata = getExtension(asset, ExtensionType.Metadata);
+
+            if (metadata && metadata.uri.length > 0) {
+                tabs.push({
+                    path: 'nifty-asset-metadata',
+                    slug: 'nifty-asset-metadata',
+                    title: 'Metadata',
+                });
+            }
+
+            const royalties = getExtension(asset, ExtensionType.Royalties);
+
+            if (royalties && royalties.constraint.type !== 'Empty') {
+                tabs.push({
+                    path: 'nifty-asset-ruleset',
+                    slug: 'nifty-asset-ruleset',
+                    title: 'Rule Set',
+                });
+            }
+
+            tabs.push({
+                path: 'nifty-asset-extensions',
+                slug: 'nifty-asset-extensions',
+                title: 'Extensions',
+            });
+        }
+    }
+
     if (
         !isNFToken &&
+        !isNiftyAsset &&
         (!parsedData || !(TOKEN_TABS_HIDDEN.includes(parsedData.program) || TOKEN_TABS_HIDDEN.includes(programTypeKey)))
     ) {
         tabs.push({
