@@ -2,6 +2,7 @@ import { Address } from '@components/common/Address';
 import { Copyable } from '@components/common/Copyable';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { TableCardBody } from '@components/common/TableCardBody';
+import { isSome } from '@metaplex-foundation/umi';
 import { Account, NFTData, TokenProgramData, useFetchAccountInfo } from '@providers/accounts';
 import { TOKEN_2022_PROGRAM_ID } from '@providers/accounts/tokens';
 import isMetaplexNFT from '@providers/accounts/utils/isMetaplexNFT';
@@ -198,8 +199,8 @@ function FungibleTokenMintAccountCard({
                         {tokenInfo
                             ? 'Overview'
                             : account.owner.toBase58() === TOKEN_2022_PROGRAM_ID.toBase58()
-                            ? 'Token-2022 Mint'
-                            : 'Token Mint'}
+                                ? 'Token-2022 Mint'
+                                : 'Token Mint'}
                     </h3>
                     <button className="btn btn-white btn-sm" onClick={refresh}>
                         <RefreshCw className="align-text-top me-2" size={13} />
@@ -320,31 +321,31 @@ function NonFungibleTokenMintAccountCard({
                         <Address pubkey={account.pubkey} alignRight raw />
                     </td>
                 </tr>
-                {nftData.editionInfo.masterEdition?.maxSupply && (
+                {nftData.editionInfo.masterEdition && isSome(nftData.editionInfo.masterEdition.maxSupply) && (
                     <tr>
                         <td>Max Total Supply</td>
                         <td className="text-lg-end">
-                            {nftData.editionInfo.masterEdition.maxSupply.toNumber() === 0
+                            {nftData.editionInfo.masterEdition.maxSupply.value === 0n
                                 ? 1
-                                : nftData.editionInfo.masterEdition.maxSupply.toNumber()}
+                                : Number(nftData.editionInfo.masterEdition.maxSupply.value)}
                         </td>
                     </tr>
                 )}
-                {nftData?.editionInfo.masterEdition?.supply && (
+                {nftData && nftData.editionInfo.masterEdition && nftData.editionInfo.masterEdition.supply && (
                     <tr>
                         <td>Current Supply</td>
                         <td className="text-lg-end">
-                            {nftData.editionInfo.masterEdition.supply.toNumber() === 0
+                            {nftData.editionInfo.masterEdition.supply === 0n
                                 ? 1
-                                : nftData.editionInfo.masterEdition.supply.toNumber()}
+                                : Number(nftData.editionInfo.masterEdition.supply)}
                         </td>
                     </tr>
                 )}
-                {!!collection?.verified && (
+                {collection && isSome(collection) && collection.value.verified && (
                     <tr>
                         <td>Verified Collection Address</td>
                         <td className="text-lg-end">
-                            <Address pubkey={new PublicKey(collection.key)} alignRight link />
+                            <Address pubkey={new PublicKey(collection.value.key)} alignRight link />
                         </td>
                     </tr>
                 )}
@@ -381,10 +382,10 @@ function NonFungibleTokenMintAccountCard({
                         </td>
                     </tr>
                 )}
-                {nftData?.metadata.data && (
+                {nftData?.metadata && (
                     <tr>
                         <td>Seller Fee</td>
-                        <td className="text-lg-end">{`${nftData?.metadata.data.sellerFeeBasisPoints / 100}%`}</td>
+                        <td className="text-lg-end">{`${nftData?.metadata.sellerFeeBasisPoints / 100}%`}</td>
                     </tr>
                 )}
             </TableCardBody>

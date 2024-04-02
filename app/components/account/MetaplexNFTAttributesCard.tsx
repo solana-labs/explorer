@@ -14,7 +14,7 @@ export function MetaplexNFTAttributesCard({ nftData }: { nftData: NFTData }) {
 
     async function fetchMetadataAttributes() {
         try {
-            const response = await fetch(nftData.metadata.data.uri);
+            const response = await fetch(nftData.metadata.uri);
             const metadata = await response.json();
 
             // Verify if the attributes value is an array
