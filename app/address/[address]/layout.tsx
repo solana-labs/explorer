@@ -239,15 +239,6 @@ function AccountHeader({ address, account, tokenInfo, isTokenInfoLoading }: { ad
         return <MetaplexNFTHeader nftData={parsedData.nftData} address={address} />;
     }
 
-    // if (account && isCoreAccount(account)) {
-    //     return (
-    //         <>
-    //             <h6 className="header-pretitle">Details</h6>
-    //             <h2 className="header-title">Core Account</h2>
-    //         </>
-    //     );
-    // }
-
     const nftokenNFT = account && isNFTokenAccount(account);
     if (nftokenNFT && account) {
         return <NFTokenAccountHeader account={account} />;
