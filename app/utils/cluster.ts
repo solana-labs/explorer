@@ -41,7 +41,7 @@ export function clusterName(cluster: Cluster): string {
 
 export const MAINNET_BETA_URL = 'https://api.mainnet-beta.solana.com';
 export const TESTNET_URL = 'https://api.testnet.solana.com';
-export const DEVNET_URL = 'https://wispy-proud-butterfly.solana-devnet.quiknode.pro/47f7e86096c0fc7c3f2ecd30b0db25652df6e672/';
+export const DEVNET_URL = 'https://api.devnet.solana.com';
 
 export function clusterUrl(cluster: Cluster, customUrl: string): string {
     const modifyUrl = (url: string): string => {
