@@ -2,6 +2,7 @@ import { InfoTooltip } from '@components/common/InfoTooltip';
 import { ArtContent } from '@components/common/NFTArt';
 import { Creator } from '@metaplex-foundation/mpl-token-metadata';
 import { isSome } from '@metaplex-foundation/umi';
+import * as Umi from '@metaplex-foundation/umi';
 import { NFTData, useFetchAccountInfo, useMintAccountInfo } from '@providers/accounts';
 import { EditionInfo } from '@providers/accounts/utils/getEditionInfo';
 import { PublicKey } from '@solana/web3.js';
@@ -13,7 +14,7 @@ import useAsyncEffect from 'use-async-effect';
 
 export function MetaplexNFTHeader({ nftData, address }: { nftData: NFTData; address: string }) {
     const collection = nftData.metadata.collection;
-    let collectionAddress = null;
+    let collectionAddress: Umi.PublicKey | null = null;
     let verified = false;
     if (collection && isSome(collection)) {
         collectionAddress = collection.value.key;
