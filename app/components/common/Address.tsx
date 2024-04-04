@@ -1,6 +1,8 @@
 'use client';
 
-import { Connection, programs } from '@metaplex/js';
+import { fetchMetadata, findMetadataPda, Metadata } from '@metaplex-foundation/mpl-token-metadata';
+import { publicKey } from '@metaplex-foundation/umi';
+import { createUmi } from '@metaplex-foundation/umi-bundle-defaults';
 import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
 import { displayAddress, TokenLabelInfo } from '@utils/tx';
@@ -54,7 +56,7 @@ export function Address({
 
     const metaplexData = useTokenMetadata(useMetadata, address);
     if (metaplexData && metaplexData.data) {
-        addressLabel = metaplexData.data.data.name;
+        addressLabel = metaplexData.data.name;
     }
 
     const tokenInfo = useTokenInfo(fetchTokenLabelInfo, address);
@@ -94,18 +96,18 @@ export function Address({
     );
 }
 const useTokenMetadata = (useMetadata: boolean | undefined, pubkey: string) => {
-    const [data, setData] = useState<programs.metadata.MetadataData>();
+    const [data, setData] = useState<Metadata>();
     const { url } = useCluster();
 
     useAsyncEffect(async isMounted => {
         if (!useMetadata) return;
         if (pubkey && !data) {
             try {
-                const pda = await programs.metadata.Metadata.getPDA(pubkey);
-                const connection = new Connection(url);
-                const metadata = await programs.metadata.Metadata.load(connection, pda);
+                const umi = createUmi(url);
+                const pda = findMetadataPda(umi, { mint: publicKey(pubkey) });
+                const metadata = await fetchMetadata(umi, pda);
                 if (isMounted()) {
-                    setData(metadata.data);
+                    setData(metadata);
                 }
             } catch {
                 if (isMounted()) {

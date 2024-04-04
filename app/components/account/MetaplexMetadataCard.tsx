@@ -2,6 +2,8 @@ import { NFTData } from '@providers/accounts';
 import ReactJson from 'react-json-view';
 
 export function MetaplexMetadataCard({ nftData }: { nftData: NFTData }) {
+    // Here we grossly stringify and parse the metadata to avoid the bigints which ReactJsonView does not support.
+    const json = JSON.parse(JSON.stringify(nftData.metadata, (_, v) => typeof v === 'bigint' ? v.toString() : v));
     return (
         <>
             <div className="card">
@@ -14,7 +16,7 @@ export function MetaplexMetadataCard({ nftData }: { nftData: NFTData }) {
                 </div>
 
                 <div className="card metadata-json-viewer m-4">
-                    <ReactJson src={nftData.metadata} theme={'solarized'} style={{ padding: 25 }} />
+                    <ReactJson src={json} theme={'solarized'} style={{ padding: 25 }} />
                 </div>
             </div>
         </>

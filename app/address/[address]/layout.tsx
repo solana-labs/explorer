@@ -249,12 +249,12 @@ function AccountHeader({ address, account, tokenInfo, isTokenInfoLoading }: { ad
         let unverified = false;
 
         // Fall back to legacy token list when there is stub metadata (blank uri), updatable by default by the mint authority
-        if (!parsedData?.nftData?.metadata.data.uri && tokenInfo) {
+        if (!parsedData?.nftData?.metadata.uri && tokenInfo) {
             token = tokenInfo;
         } else if (parsedData?.nftData) {
             token = {
                 logoURI: parsedData?.nftData?.json?.image,
-                name: parsedData?.nftData?.json?.name ?? parsedData?.nftData.metadata.data.name,
+                name: parsedData?.nftData?.json?.name ?? parsedData?.nftData.metadata.name,
             };
             if (!tokenInfo?.verified) {
                 unverified = true;
