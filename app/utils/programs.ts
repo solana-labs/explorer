@@ -198,7 +198,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: PROGRAM_NAMES.CLOCKWORK_2,
     },
     CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d: {
-        deployments: [Cluster.Devnet],
+        deployments: [Cluster.Devnet, Cluster.MainnetBeta],
         name: PROGRAM_NAMES.METAPLEX_CORE,
     },
     ComputeBudget111111111111111111111111111111: {

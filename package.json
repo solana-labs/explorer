@@ -15,6 +15,7 @@
         "@bonfida/spl-name-service": "0.1.30",
         "@cloudflare/stream-react": "^1.2.0",
         "@metamask/jazzicon": "^2.0.0",
+        "@metaplex-foundation/mpl-core": "^0.4.4",
         "@metaplex-foundation/mpl-token-metadata": "^3.2.1",
         "@metaplex-foundation/umi": "^0.8.2",
         "@metaplex-foundation/umi-bundle-defaults": "^0.8.2",

@@ -44,6 +44,8 @@ import React, { PropsWithChildren } from 'react';
 import useSWRImmutable from 'swr/immutable';
 import { Base58EncodedAddress } from 'web3js-experimental';
 
+import { CoreAssetHeader } from '@/app/components/account/mplCore/CoreAssetHeader';
+import { isCoreAccount } from '@/app/components/account/mplCore/isCoreAccount';
 import { FullTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
 
 const IDENTICON_WIDTH = 64;
@@ -237,6 +239,10 @@ function AccountHeader({ address, account, tokenInfo, isTokenInfoLoading }: { ad
 
     if (isMetaplexNFT(parsedData, mintInfo) && parsedData.nftData) {
         return <MetaplexNFTHeader nftData={parsedData.nftData} address={address} />;
+    }
+
+    if (account && isCoreAccount(account)) {
+        return <CoreAssetHeader account={account} />;
     }
 
     const nftokenNFT = account && isNFTokenAccount(account);
@@ -501,6 +507,15 @@ function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
             path: 'domains',
             slug: 'domains',
             title: 'Domains',
+        });
+    }
+
+    const isCoreAsset = account && isCoreAccount(account);
+    if (isCoreAsset) {
+        tabs.push({
+            path: 'core-metadata',
+            slug: 'metadata',
+            title: 'Metadata',
         });
     }
 
