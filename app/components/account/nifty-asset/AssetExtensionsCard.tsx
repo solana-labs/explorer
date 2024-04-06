@@ -12,6 +12,7 @@ import { InfoTooltip } from '../../common/InfoTooltip';
 import { getDelegateRolePills } from './AssetAccountCard';
 import { KNOWN_IMAGE_EXTENSIONS } from './types';
 import { PublicKey } from '@solana/web3.js';
+import { HexData } from '../../common/HexData';
 
 export function NiftyAssetExtensionsCard({ asset }: { asset: Asset }) {
     return (
@@ -26,6 +27,7 @@ export function NiftyAssetExtensionsCard({ asset }: { asset: Asset }) {
             {getLinks(asset)}
             {getManager(asset)}
             {getMetadata(asset)}
+            {getProxy(asset)}
             {getRoyalties(asset)}
         </div>
     );
@@ -348,6 +350,47 @@ function getRoyalties(asset: Asset) {
                                 <Link href={addressPath}>Rule Set</Link>
                             </Copyable>
                         )}
+                    </td>
+                </tr>
+            </TableCardBody>
+        </div>
+    );
+}
+
+function getProxy(asset: Asset) {
+    const proxy = getExtension(asset, ExtensionType.Proxy);
+
+    if (!proxy) {
+        return null;
+    }
+
+    return (
+        <div className="inner-cards">
+            <div className="card-header align-items-center">
+                <h3 className="card-header-title">Proxy</h3>
+            </div>
+
+            <TableCardBody>
+                <tr>
+                    <td className="text-muted">Program</td>
+                    <td className="text-lg-end">
+                        <Address pubkey={toWeb3JsPublicKey(proxy.program)} alignRight link />
+                    </td>
+                </tr>
+                <tr>
+                    <td className="text-muted">Seeds (Hex)</td>
+                    <td className="text-lg-end">
+                        <HexData raw={Buffer.from(proxy.seeds)} />
+                    </td>
+                </tr>
+                <tr>
+                    <td className="text-muted">Bump</td>
+                    <td className="text-lg-end">{proxy.bump}</td>
+                </tr>
+                <tr>
+                    <td className="text-muted">Authority</td>
+                    <td className="text-lg-end">
+                        <Address pubkey={toWeb3JsPublicKey(proxy.authority)} alignRight link />
                     </td>
                 </tr>
             </TableCardBody>

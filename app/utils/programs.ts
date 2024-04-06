@@ -176,6 +176,11 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: ALL_CLUSTERS,
         name: PROGRAM_NAMES.ADDRESS_LOOKUP_TABLE,
     },
+    // nifty asset
+    AssetGtQBTSgm5s91d1RAQod5JmaZiJDxqsgtqrZud73: {
+        deployments: [Cluster.Devnet, Cluster.MainnetBeta],
+        name: PROGRAM_NAMES.NIFTY_ASSET,
+    },
     BJ3jrUzddfuSrZHXSCxMUUQsjKEyLmuuyZebkcaFp2fg: {
         deployments: [Cluster.MainnetBeta],
         name: PROGRAM_NAMES.SERUM_1,
@@ -420,10 +425,6 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     wormDTUJ6AWPNvk59vGQbDvGJmqbDTdgWgAqcLBCgUb: {
         deployments: [Cluster.MainnetBeta],
         name: PROGRAM_NAMES.WORMHOLE_TOKEN,
-    },
-    AssetGtQBTSgm5s91d1RAQod5JmaZiJDxqsgtqrZud73: {
-        deployments: [Cluster.Devnet, Cluster.MainnetBeta],
-        name: PROGRAM_NAMES.NIFTY_ASSET,
     },
 };
 
