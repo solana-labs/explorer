@@ -148,6 +148,16 @@ function getGrouping(asset: Asset) {
                         )}
                     </td>
                 </tr>
+                <tr>
+                    <td className="text-muted">Delegate</td>
+                    <td className="text-lg-end">
+                        {grouping.delegate ? (
+                            <Address pubkey={toWeb3JsPublicKey(grouping.delegate)} alignRight link />
+                        ) : (
+                            <div className="text-muted text-lg-end">None</div>
+                        )}
+                    </td>
+                </tr>
             </TableCardBody>
         </div>
     );
@@ -390,7 +400,11 @@ function getProxy(asset: Asset) {
                 <tr>
                     <td className="text-muted">Authority</td>
                     <td className="text-lg-end">
-                        <Address pubkey={toWeb3JsPublicKey(proxy.authority)} alignRight link />
+                        {proxy.authority ? (
+                            <Address pubkey={toWeb3JsPublicKey(proxy.authority)} alignRight link />
+                        ) : (
+                            <div className="text-muted text-lg-end">None</div>
+                        )}
                     </td>
                 </tr>
             </TableCardBody>
