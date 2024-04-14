@@ -3,13 +3,13 @@
     "name": "Inspect transactions, accounts, blocks, and more on the Solana blockchain",
     "icons": [
         {
-            "src": "favicon.ico",
+            "src": "favicon.svg",
             "sizes": "64x64 32x32 24x24 16x16",
-            "type": "image/x-icon"
+            "type": "image/svg"
         },
         {
-            "src": "apple-icon.png",
-            "type": "image/png",
+            "src": "favicon.svg",
+            "type": "image/svg",
             "sizes": "512x512"
         }
     ],
