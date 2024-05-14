@@ -82,7 +82,7 @@ export function MetaplexNFTHeader({ nftData, address }: { nftData: NFTData; addr
 }
 
 type Creator = programs.metadata.Creator;
-function getCreatorDropdownItems(creators: Creator[] | null) {
+export function getCreatorDropdownItems(creators: Creator[] | null) {
     const CreatorHeader = () => {
         const creatorTooltip = 'Verified creators signed the metadata associated with this NFT when it was created.';
 
@@ -170,11 +170,11 @@ function getSaleTypePill(hasPrimarySaleHappened: boolean) {
     );
 }
 
-function getIsMutablePill(isMutable: boolean) {
+export function getIsMutablePill(isMutable: boolean) {
     return <span className="badge badge-pill bg-dark">{`${isMutable ? 'Mutable' : 'Immutable'}`}</span>;
 }
 
-function getVerifiedCollectionPill() {
+export function getVerifiedCollectionPill() {
     const onchainVerifiedToolTip =
         'This NFT has been verified as a member of an on-chain collection. This tag guarantees authenticity.';
     return (

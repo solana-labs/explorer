@@ -62,7 +62,7 @@ export function isTokenProgramData(data: { program: string }): data is TokenProg
     try {
         assertIsTokenProgram(data.program);
         return true;
-    } catch(e) {
+    } catch (e) {
         return false;
     }
 }
