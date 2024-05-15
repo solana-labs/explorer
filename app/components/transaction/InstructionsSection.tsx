@@ -42,6 +42,7 @@ import { intoTransactionInstruction } from '@utils/tx';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
+import { AddressLookupTableInstructionDetailsCard } from '../instruction/address-lookup-table/AddressLookupTableInstructionDetailsCard';
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
 import { isMangoInstruction } from '../instruction/mango/types';
 
@@ -181,6 +182,8 @@ function InstructionCard({
                         <TokenDetailsCard {...props} key={key} />
                     </ErrorBoundary>
                 );
+            case 'address-lookup-table':
+                return <AddressLookupTableInstructionDetailsCard {...props} key={key} />;
             case 'bpf-loader':
                 return <BpfLoaderDetailsCard {...props} key={key} />;
             case 'bpf-upgradeable-loader':
