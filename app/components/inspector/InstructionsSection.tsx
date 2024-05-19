@@ -90,7 +90,9 @@ function InstructionCard({
             innerCards: undefined,
             ix: transactionInstruction,
             // Always display success since it is too complicated to determine
-            // based on the logs which ix actually failed.
+            // based on the simulation and pass that result here. Could be added
+            // later if desired, possibly similar to innerCards from parsing tx
+            // sim logs.
             result: { err: null},
             // Signature is not needed.
             signature: '',
