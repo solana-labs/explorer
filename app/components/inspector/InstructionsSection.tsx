@@ -2,7 +2,7 @@ import { HexData } from '@components/common/HexData';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { useCluster } from '@providers/cluster';
 import { useScrollAnchor } from '@providers/scroll-anchor';
-import { AccountMeta, MessageCompiledInstruction, TransactionInstruction, VersionedMessage } from '@solana/web3.js';
+import { AccountMeta, MessageCompiledInstruction, PublicKey, TransactionInstruction, VersionedMessage } from '@solana/web3.js';
 import getInstructionCardScrollAnchorId from '@utils/get-instruction-card-scroll-anchor-id';
 import { getProgramName } from '@utils/tx';
 import React from 'react';
@@ -47,13 +47,16 @@ function InstructionCard({
         ),
     ];
 
-    const accountMetas = ix.accountKeyIndexes.map((accountIndex, index) => {
-        let lookup;
+    const { cluster, url } = useCluster();
+    const programName = getProgramName(programId.toBase58(), cluster);
+
+    const accountMetas = ix.accountKeyIndexes.map((accountIndex, _index) => {
+        let lookup: PublicKey;
         if (accountIndex >= message.staticAccountKeys.length) {
             const lookupIndex = accountIndex - message.staticAccountKeys.length;
             lookup = lookupsForAccountKeyIndex[lookupIndex].lookupTableKey;
         } else {
-            lookup = message.staticAccountKeys[index];
+            lookup = message.staticAccountKeys[accountIndex];
         }
 
         const signer = accountIndex < message.header.numRequiredSignatures;
@@ -73,8 +76,6 @@ function InstructionCard({
     });
 
     const [expanded, setExpanded] = React.useState(false);
-    const { cluster, url } = useCluster();
-    const programName = getProgramName(programId.toBase58(), cluster);
     const anchorProgram = useAnchorProgram(programId.toString(), url);
     const scrollAnchorRef = useScrollAnchor(getInstructionCardScrollAnchorId([index + 1]));
 
