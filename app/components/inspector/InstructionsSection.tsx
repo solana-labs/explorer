@@ -31,7 +31,11 @@ function InstructionCard({
     ix: MessageCompiledInstruction;
     index: number;
 }) {
+    const [expanded, setExpanded] = React.useState(false);
+    const { cluster, url } = useCluster();
     const programId = message.staticAccountKeys[ix.programIdIndex];
+    const programName = getProgramName(programId.toBase58(), cluster);
+    const scrollAnchorRef = useScrollAnchor(getInstructionCardScrollAnchorId([index + 1]));
     const lookupsForAccountKeyIndex = [
         ...message.addressTableLookups.flatMap(lookup =>
             lookup.writableIndexes.map(index => ({
@@ -46,40 +50,34 @@ function InstructionCard({
             }))
         ),
     ];
-
-    const { cluster, url } = useCluster();
-    const programName = getProgramName(programId.toBase58(), cluster);
-
-    const accountMetas = ix.accountKeyIndexes.map((accountIndex, _index) => {
-        let lookup: PublicKey;
-        if (accountIndex >= message.staticAccountKeys.length) {
-            const lookupIndex = accountIndex - message.staticAccountKeys.length;
-            lookup = lookupsForAccountKeyIndex[lookupIndex].lookupTableKey;
-        } else {
-            lookup = message.staticAccountKeys[accountIndex];
-        }
-
-        const signer = accountIndex < message.header.numRequiredSignatures;
-        const writable = message.isAccountWritable(accountIndex);
-        const accountMeta: AccountMeta = {
-            isSigner: signer,
-            isWritable: writable,
-            pubkey: lookup,
-        };
-        return accountMeta;
-    });
-
-    const transactionInstruction: TransactionInstruction = new TransactionInstruction({
-        data: Buffer.from(message.compiledInstructions[index].data),
-        keys: accountMetas,
-        programId: programId,
-    });
-
-    const [expanded, setExpanded] = React.useState(false);
     const anchorProgram = useAnchorProgram(programId.toString(), url);
-    const scrollAnchorRef = useScrollAnchor(getInstructionCardScrollAnchorId([index + 1]));
 
     if (anchorProgram) {
+        const accountMetas = ix.accountKeyIndexes.map((accountIndex, _index) => {
+            let lookup: PublicKey;
+            if (accountIndex >= message.staticAccountKeys.length) {
+                const lookupIndex = accountIndex - message.staticAccountKeys.length;
+                lookup = lookupsForAccountKeyIndex[lookupIndex].lookupTableKey;
+            } else {
+                lookup = message.staticAccountKeys[accountIndex];
+            }
+
+            const isSigner = accountIndex < message.header.numRequiredSignatures;
+            const isWritable = message.isAccountWritable(accountIndex);
+            const accountMeta: AccountMeta = {
+                isSigner,
+                isWritable,
+                pubkey: lookup,
+            };
+            return accountMeta;
+        });
+
+        const transactionInstruction: TransactionInstruction = new TransactionInstruction({
+            data: Buffer.from(message.compiledInstructions[index].data),
+            keys: accountMetas,
+            programId: programId,
+        });
+
         return AnchorDetailsCard({
             anchorProgram: anchorProgram,
             childIndex: undefined,
