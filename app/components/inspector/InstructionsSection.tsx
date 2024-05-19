@@ -83,9 +83,15 @@ function InstructionCard({
             anchorProgram: anchorProgram,
             childIndex: undefined,
             index: index,
+            // Inner cards and child are not used since we do not know what CPIs
+            // will be called until simulation happens, and even then, all we
+            // get is logs, not the TransactionInstructions
             innerCards: undefined,
             ix: transactionInstruction,
+            // Always display success since it is too complicated to determine
+            // based on the logs which ix actually failed.
             result: { err: null},
+            // Signature is not needed.
             signature: '',
         });
     }
