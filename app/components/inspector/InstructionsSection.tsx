@@ -1,4 +1,3 @@
-import { useAnchorProgram } from '@/app/providers/anchor';
 import { HexData } from '@components/common/HexData';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { useCluster } from '@providers/cluster';
@@ -8,8 +7,10 @@ import getInstructionCardScrollAnchorId from '@utils/get-instruction-card-scroll
 import { getProgramName } from '@utils/tx';
 import React from 'react';
 
-import { AddressFromLookupTableWithContext, AddressWithContext, programValidator } from './AddressWithContext';
+import { useAnchorProgram } from '@/app/providers/anchor';
+
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
+import { AddressFromLookupTableWithContext, AddressWithContext, programValidator } from './AddressWithContext';
 
 export function InstructionsSection({ message }: { message: VersionedMessage }) {
     return (
@@ -79,13 +80,13 @@ function InstructionCard({
 
     if (anchorProgram) {
         return AnchorDetailsCard({
-            ix: transactionInstruction,
+            anchorProgram: anchorProgram,
+            childIndex: undefined,
             index: index,
+            innerCards: undefined,
+            ix: transactionInstruction,
             result: { err: null},
             signature: '',
-            innerCards: undefined,
-            childIndex: undefined,
-            anchorProgram: anchorProgram,
         });
     }
 
