@@ -2,8 +2,9 @@
 
 import { MetaplexNFTAttributesCard } from '@components/account/MetaplexNFTAttributesCard';
 import { ParsedAccountRenderer } from '@components/account/ParsedAccountRenderer';
-import { isTokenProgramData } from '@providers/accounts';
-import React from 'react';
+import React, { Suspense } from 'react';
+
+import { LoadingCard } from '@/app/components/common/LoadingCard';
 
 type Props = Readonly<{
     params: {
@@ -15,11 +16,11 @@ function MetaplexNFTAttributesCardRenderer({
     account,
     onNotFound,
 }: React.ComponentProps<React.ComponentProps<typeof ParsedAccountRenderer>['renderComponent']>) {
-    const parsedData = account?.data?.parsed;
-    if (!parsedData || !isTokenProgramData(parsedData) || parsedData.parsed.type !== 'mint' || !parsedData.nftData) {
-        return onNotFound();
-    }
-    return <MetaplexNFTAttributesCard nftData={parsedData.nftData} />;
+    return (
+        <Suspense fallback={<LoadingCard />}>
+            {<MetaplexNFTAttributesCard account={account} onNotFound={onNotFound} />}
+        </Suspense>
+    );
 }
 
 export default function MetaplexNFTAttributesPageClient({ params: { address } }: Props) {

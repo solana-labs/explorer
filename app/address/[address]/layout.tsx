@@ -514,6 +514,21 @@ function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
         tabs.push(...TABS_LOOKUP[`${programTypeKey}:metaplexNFT`]);
     }
 
+    if (!tabs.find(tab => tab.slug === 'metadata')) {
+        tabs.push(
+            {
+                path: 'metadata',
+                slug: 'metadata',
+                title: 'Metadata',
+            },
+            {
+                path: 'attributes',
+                slug: 'attributes',
+                title: 'Attributes',
+            }
+        );
+    }
+
     const isNFToken = account && isNFTokenAccount(account);
     if (isNFToken) {
         const collection = parseNFTokenCollectionAccount(account);
