@@ -53,7 +53,7 @@ function CompressedMetadataCard({ compressedNft }: { compressedNft: CompressedNf
                 </div>
 
                 <div className="card metadata-json-viewer m-4">
-                    <ReactJson src={metadataJson} theme={'solarized'} style={{ padding: 25 }} />
+                    <ReactJson src={metadataJson} theme={'solarized'} style={{ padding: 25 }} name={false} />
                 </div>
             </div>
         </>

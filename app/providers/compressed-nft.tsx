@@ -7,6 +7,7 @@ const cachedNftPromises: CacheType<CompressedNft | null> = {};
 
 const cachedPromises = {
     compressedNft: {} as CacheType<CompressedNft | null>,
+    compressedNftProof: {} as CacheType<CompressedNftProof | null>,
     nftMetadataJson: {} as CacheType<any>,
 };
 
@@ -66,21 +67,48 @@ export const useCompressedNft = makeCache<{ address: string; url: string }, Comp
             method: 'POST',
         })
             .then(response => response.json())
-            .then((response: DasApiResponse) => {
+            .then((response: DasApiResponse<CompressedNft>) => {
                 if ('error' in response) {
                     throw new Error(response.error.message);
                 }
 
-                return response.result as CompressedNft;
+                return response.result;
             });
     }
 );
 
-export type DasApiResponse =
+export const useCompressedNftProof = makeCache<{ address: string; url: string }, CompressedNftProof | null>(
+    'compressedNftProof',
+    ({ address, url }) => `proof-${address}-${url}`,
+    async ({ address, url }) => {
+        return fetch(`${url}`, {
+            body: JSON.stringify({
+                id: address,
+                jsonrpc: '2.0',
+                method: 'getAssetProof',
+                params: {
+                    id: address,
+                },
+            }),
+            method: 'POST',
+        })
+            .then(response => response.json())
+            .then((response: DasApiResponse<CompressedNftProof>) => {
+                if ('error' in response) {
+                    throw new Error(response.error.message);
+                }
+
+                return response.result;
+            });
+    }
+);
+
+type DasResponseTypes = CompressedNft | CompressedNftProof;
+export type DasApiResponse<T extends DasResponseTypes> =
     | {
           jsonrpc: string;
           id: string;
-          result: CompressedNft;
+          result: T;
       }
     | {
           jsonrpc: string;
@@ -164,4 +192,12 @@ export type CompressedNft = {
     };
     mutable: boolean;
     burnt: boolean;
+};
+
+export type CompressedNftProof = {
+    root: string;
+    proof: string[];
+    node_index: number;
+    leaf: string;
+    tree_id: string;
 };

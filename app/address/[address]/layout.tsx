@@ -203,7 +203,6 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
     // Fetch account on load
     React.useEffect(() => {
         if (!info && status === ClusterStatus.Connected && pubkey) {
-            // console.log('fired');
             fetchAccount(pubkey, 'parsed');
         }
     }, [address, status]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -467,7 +466,8 @@ export type MoreTabs =
     | 'anchor-program'
     | 'anchor-account'
     | 'entries'
-    | 'concurrent-merkle-tree';
+    | 'concurrent-merkle-tree'
+    | 'compression';
 
 function MoreSection({ children, tabs }: { children: React.ReactNode; tabs: (JSX.Element | null)[] }) {
     return (
@@ -538,6 +538,11 @@ function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
                 title: 'Attributes',
             }
         );
+        tabs.push({
+            path: 'compression',
+            slug: 'compression',
+            title: 'Compression',
+        });
     }
 
     const isNFToken = account && isNFTokenAccount(account);
