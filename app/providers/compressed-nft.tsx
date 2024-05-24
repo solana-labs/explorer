@@ -76,48 +76,6 @@ export const useCompressedNft = makeCache<{ address: string; url: string }, Comp
     }
 );
 
-// export function useCompressedNft(address: string, url: string): CompressedNft | null {
-//     const key = `${address}-${url}`;
-//     const cacheEntry = cachedNftPromises[key];
-
-//     if (cacheEntry === undefined) {
-//         const promise = fetch(`${url}`, {
-//             body: JSON.stringify({
-//                 id: address,
-//                 jsonrpc: '2.0',
-//                 method: 'getAsset',
-//                 params: {
-//                     id: address,
-//                 },
-//             }),
-//             method: 'POST',
-//         })
-//             .then(response => response.json())
-//             .then((response: DasApiResponse) => {
-//                 if ('error' in response) {
-//                     throw new Error(response.error.message);
-//                 }
-
-//                 const assetInfo: CompressedNft = response.result;
-//                 cachedNftPromises[key] = {
-//                     __type: 'result',
-//                     result: assetInfo,
-//                 };
-//             })
-//             .catch(_ => {
-//                 cachedNftPromises[key] = { __type: 'result', result: null };
-//             });
-//         cachedNftPromises[key] = {
-//             __type: 'promise',
-//             promise,
-//         };
-//         throw promise;
-//     } else if (cacheEntry.__type === 'promise') {
-//         throw cacheEntry.promise;
-//     }
-//     return cacheEntry.result;
-// }
-
 export type DasApiResponse =
     | {
           jsonrpc: string;
