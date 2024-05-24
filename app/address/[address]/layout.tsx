@@ -41,6 +41,7 @@ import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 import { redirect, useSelectedLayoutSegment } from 'next/navigation';
 import React, { PropsWithChildren, Suspense } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import useSWRImmutable from 'swr/immutable';
 import { Base58EncodedAddress } from 'web3js-experimental';
 
@@ -202,6 +203,7 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
     // Fetch account on load
     React.useEffect(() => {
         if (!info && status === ClusterStatus.Connected && pubkey) {
+            // console.log('fired');
             fetchAccount(pubkey, 'parsed');
         }
     }, [address, status]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -323,16 +325,22 @@ function AccountHeader({
         );
     }
 
-    if (account) {
-        return <CompressedNftAccountHeader account={account} />;
-    }
-
-    return (
+    const fallback = (
         <>
             <h6 className="header-pretitle">Details</h6>
             <h2 className="header-title">Account</h2>
         </>
     );
+    if (account) {
+        return (
+            <ErrorBoundary fallback={fallback}>
+                <Suspense fallback={fallback}>
+                    <CompressedNftAccountHeader account={account} />
+                </Suspense>
+            </ErrorBoundary>
+        );
+    }
+    return fallback;
 }
 
 function DetailsSections({
@@ -419,10 +427,13 @@ function InfoSection({ account, tokenInfo }: { account: Account; tokenInfo?: Ful
     } else if (account.owner.toBase58() === FEATURE_PROGRAM_ID) {
         return <FeatureAccountSection account={account} />;
     } else {
+        const fallback = <UnknownAccountCard account={account} />;
         return (
-            <Suspense fallback={<UnknownAccountCard account={account} />}>
-                <CompressedNftCard account={account} />
-            </Suspense>
+            <ErrorBoundary fallback={fallback}>
+                <Suspense fallback={fallback}>
+                    <CompressedNftCard account={account} />
+                </Suspense>
+            </ErrorBoundary>
         );
     }
 }

@@ -69,21 +69,11 @@ export function CompressedNftCard({ account }: { account: Account }) {
     );
 }
 
-function NoHeader() {
-    return (
-        <>
-            <h6 className="header-pretitle">Details</h6>
-            <h2 className="header-title">Account</h2>
-        </>
-    );
-}
-
 export function CompressedNftAccountHeader({ account }: { account: Account }) {
     const { url } = useCluster();
     const compressedNft = useCompressedNft({ address: account.pubkey.toString(), url });
-    if (!compressedNft) return NoHeader();
+    if (!compressedNft) throw new Error('Compressed NFT not found');
 
-    // LoadingCard
     if (compressedNft) {
         return (
             <Suspense fallback={<LoadingArtPlaceholder />}>
@@ -91,9 +81,9 @@ export function CompressedNftAccountHeader({ account }: { account: Account }) {
             </Suspense>
         );
     }
-
-    return NoHeader();
+    return <div />;
 }
+
 export function CompressedNFTHeader({ compressedNft }: { compressedNft: CompressedNft }) {
     const metadataJson = useMetadataJsonLink(compressedNft.content.json_uri);
     const dropdownRef = createRef<HTMLButtonElement>();
