@@ -140,7 +140,7 @@ export function NiftyAssetHeader({ address, asset }: { address: PublicKey; asset
                         >
                             Creators <ChevronDown size={15} className="align-text-top" />
                         </button>
-                        <div className="dropdown-menu mt-2">{getCreatorDropdownItems(creators.creators)}</div>
+                        <div className="dropdown-menu mt-2">{getCreatorDropdownItems(creators.values)}</div>
                     </div>
                 )}
             </div>

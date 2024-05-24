@@ -36,8 +36,8 @@ dependencies:
     specifier: ^4.12.0
     version: 4.12.0(@metaplex-foundation/mpl-auction@0.0.2)(@metaplex-foundation/mpl-core@0.0.2)(@metaplex-foundation/mpl-metaplex@0.0.5)(@metaplex-foundation/mpl-token-metadata@1.1.0)(@metaplex-foundation/mpl-token-vault@0.0.2)(@solana/spl-token@0.1.8)(@solana/web3.js@1.66.0)
   '@nifty-oss/asset':
-    specifier: ^0.3.0
-    version: 0.3.0(@metaplex-foundation/umi@0.9.1)
+    specifier: ^0.6.0
+    version: 0.6.0(@metaplex-foundation/umi@0.9.1)
   '@project-serum/anchor':
     specifier: ^0.23.0
     version: 0.23.0
@@ -2379,8 +2379,8 @@ packages:
     dev: false
     optional: true
 
-  /@nifty-oss/asset@0.3.0(@metaplex-foundation/umi@0.9.1):
-    resolution: {integrity: sha512-2pAzMLYxCF2s/2NdKSxL/KwMhw/X6U2l2fHYpVkJbeym9h7kKe53mStiwXvX/hmFKGuWpfCySk8Qz6JUtUEUhA==}
+  /@nifty-oss/asset@0.6.0(@metaplex-foundation/umi@0.9.1):
+    resolution: {integrity: sha512-hSNmPYQZz1llBvHsLI1qqLfP3lSWLLsysa2jI9mjHEtcANMqross6nYZRyz5OKgsFTiZ838exS9Rv1ysUVX3yg==}
     peerDependencies:
       '@metaplex-foundation/umi': ^0.9.1
     dependencies:
