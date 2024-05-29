@@ -266,25 +266,18 @@ function AccountHeader({ address, account, tokenInfo, isTokenInfoLoading }: { ad
 
 
             // Checks the uri, if it's json, return the the json's image tag
-            try {
-                if (tokenMetadata.uri.endsWith('.json')) {
-                    fetch(tokenMetadata.uri)
-                        .then(response => response.json())
-                        .then(metadata => {
-                            if (metadata && metadata.image) {
-                                token.logoURI = metadata.image;
-                            }
-                        })
-                        .catch(e => {
-                            token.logoURI = tokenMetadata.uri;
-                        });
-                } else {
-                    token.logoURI = tokenMetadata.uri;
-                }
-            } catch {
+            if (tokenMetadata.uri.endsWith('.json')) {
+                fetch(tokenMetadata.uri)
+                    .then(response => response.json())
+                    .then(metadata => {
+                        token.logoURI = metadata?.image || tokenMetadata.uri;
+                    })
+                    .catch(() => {
+                        token.logoURI = tokenMetadata.uri;
+                    });
+            } else {
                 token.logoURI = tokenMetadata.uri;
             }
-
         }
 
         // Fall back to legacy token list when there is stub metadata (blank uri), updatable by default by the mint authority
