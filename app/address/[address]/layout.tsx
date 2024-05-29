@@ -19,8 +19,6 @@ import { VoteAccountSection } from '@components/account/VoteAccountSection';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { Identicon } from '@components/common/Identicon';
 import { LoadingCard } from '@components/common/LoadingCard';
-import { create } from 'superstruct';
-import { MetadataPointer, TokenMetadata } from '@validators/accounts/token-extension'
 import {
     Account,
     AccountsProvider,
@@ -40,9 +38,11 @@ import { PublicKey } from '@solana/web3.js';
 import { Cluster, ClusterStatus } from '@utils/cluster';
 import { FEATURE_PROGRAM_ID } from '@utils/parseFeatureAccount';
 import { useClusterPath } from '@utils/url';
+import { MetadataPointer, TokenMetadata } from '@validators/accounts/token-extension'
 import Link from 'next/link';
 import { redirect, useSelectedLayoutSegment } from 'next/navigation';
 import React, { PropsWithChildren } from 'react';
+import { create } from 'superstruct';
 import useSWRImmutable from 'swr/immutable';
 import { Base58EncodedAddress } from 'web3js-experimental';
 
@@ -261,8 +261,8 @@ function AccountHeader({ address, account, tokenInfo, isTokenInfoLoading }: { ad
             // Does not handle the case where MetadataPointer is pointing at a separate account.
             if (metadataAddress?.toString() === address) {
                 token = {
-                    name: tokenMetadata.name,
-                    logoURI: tokenMetadata.uri
+                    logoURI: tokenMetadata.uri,
+                    name: tokenMetadata.name
                 }
             }
 
