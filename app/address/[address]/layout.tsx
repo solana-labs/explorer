@@ -281,7 +281,7 @@ function AccountHeader({ address, account, tokenInfo, isTokenInfoLoading }: { ad
                 } else {
                     token.logoURI = tokenMetadata.uri;
                 }
-            } catch (e) {
+            } catch {
                 token.logoURI = tokenMetadata.uri;
             }
 
