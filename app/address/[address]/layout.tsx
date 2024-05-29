@@ -19,6 +19,8 @@ import { VoteAccountSection } from '@components/account/VoteAccountSection';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { Identicon } from '@components/common/Identicon';
 import { LoadingCard } from '@components/common/LoadingCard';
+import { create } from 'superstruct';
+import { MetadataPointer, TokenMetadata } from '@validators/accounts/token-extension'
 import {
     Account,
     AccountsProvider,
@@ -248,8 +250,26 @@ function AccountHeader({ address, account, tokenInfo, isTokenInfoLoading }: { ad
         let token;
         let unverified = false;
 
+        const metadataExtension = mintInfo?.extensions?.find(({ extension }: { extension: string }) => extension === 'tokenMetadata');
+        const metadataPointerExtension = mintInfo?.extensions?.find(({ extension }: { extension: string }) => extension === 'metadataPointer');
+
+        if (metadataPointerExtension && metadataExtension) {
+            const tokenMetadata = create(metadataExtension.state, TokenMetadata);
+            const { metadataAddress } = create(metadataPointerExtension.state, MetadataPointer);
+
+            // Handles the basic case where MetadataPointer is reference the Token Metadata extension directly
+            // Does not handle the case where MetadataPointer is pointing at a separate account.
+            if (metadataAddress?.toString() === address) {
+                token = {
+                    name: tokenMetadata.name,
+                    logoURI: tokenMetadata.uri
+                }
+            }
+
+        }
+
         // Fall back to legacy token list when there is stub metadata (blank uri), updatable by default by the mint authority
-        if (!parsedData?.nftData?.metadata.data.uri && tokenInfo) {
+        else if (!parsedData?.nftData?.metadata.data.uri && tokenInfo) {
             token = tokenInfo;
         } else if (parsedData?.nftData) {
             token = {
