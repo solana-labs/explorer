@@ -41,9 +41,9 @@ import { useClusterPath } from '@utils/url';
 import { MetadataPointer, TokenMetadata } from '@validators/accounts/token-extension'
 import Link from 'next/link';
 import { redirect, useSelectedLayoutSegment } from 'next/navigation';
-import { create } from 'superstruct';
 import React, { PropsWithChildren, Suspense } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
+import { create } from 'superstruct';
 import useSWRImmutable from 'swr/immutable';
 import { Base58EncodedAddress } from 'web3js-experimental';
 
