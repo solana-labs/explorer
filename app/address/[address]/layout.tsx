@@ -247,11 +247,12 @@ function AccountHeader({ address, account, tokenInfo, isTokenInfoLoading }: { ad
     }
 
     if (isToken && !isTokenInfoLoading) {
-        let token;
+        let token: { logoURI?: string; name?: string } = {};
         let unverified = false;
 
         const metadataExtension = mintInfo?.extensions?.find(({ extension }: { extension: string }) => extension === 'tokenMetadata');
         const metadataPointerExtension = mintInfo?.extensions?.find(({ extension }: { extension: string }) => extension === 'metadataPointer');
+
 
         if (metadataPointerExtension && metadataExtension) {
             const tokenMetadata = create(metadataExtension.state, TokenMetadata);
@@ -260,10 +261,28 @@ function AccountHeader({ address, account, tokenInfo, isTokenInfoLoading }: { ad
             // Handles the basic case where MetadataPointer is reference the Token Metadata extension directly
             // Does not handle the case where MetadataPointer is pointing at a separate account.
             if (metadataAddress?.toString() === address) {
-                token = {
-                    logoURI: tokenMetadata.uri,
-                    name: tokenMetadata.name
+                token.name = tokenMetadata.name
+            }
+
+
+            // Checks the uri, if it's json, return the the json's image tag
+            try {
+                if (tokenMetadata.uri.endsWith('.json')) {
+                    fetch(tokenMetadata.uri)
+                        .then(response => response.json())
+                        .then(metadata => {
+                            if (metadata && metadata.image) {
+                                token.logoURI = metadata.image;
+                            }
+                        })
+                        .catch(e => {
+                            token.logoURI = tokenMetadata.uri;
+                        });
+                } else {
+                    token.logoURI = tokenMetadata.uri;
                 }
+            } catch (e) {
+                token.logoURI = tokenMetadata.uri;
             }
 
         }
