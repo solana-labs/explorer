@@ -41,11 +41,13 @@ import { useClusterPath } from '@utils/url';
 import { MetadataPointer, TokenMetadata } from '@validators/accounts/token-extension'
 import Link from 'next/link';
 import { redirect, useSelectedLayoutSegment } from 'next/navigation';
-import React, { PropsWithChildren } from 'react';
 import { create } from 'superstruct';
+import React, { PropsWithChildren, Suspense } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import useSWRImmutable from 'swr/immutable';
 import { Base58EncodedAddress } from 'web3js-experimental';
 
+import { CompressedNftAccountHeader, CompressedNftCard } from '@/app/components/account/CompressedNftCard';
 import { FullTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
 
 const IDENTICON_WIDTH = 64;
@@ -194,7 +196,9 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
     const infoParsed = info?.data?.data.parsed;
 
     const { data: fullTokenInfo, isLoading: isFullTokenInfoLoading } = useSWRImmutable(
-        infoStatus === FetchStatus.Fetched && infoParsed && isTokenProgramData(infoParsed) && pubkey ? ['get-full-token-info', address, cluster, url] : null,
+        infoStatus === FetchStatus.Fetched && infoParsed && isTokenProgramData(infoParsed) && pubkey
+            ? ['get-full-token-info', address, cluster, url]
+            : null,
         fetchFullTokenInfo
     );
 
@@ -209,13 +213,23 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
         <div className="container mt-n3">
             <div className="header">
                 <div className="header-body">
-                    <AccountHeader address={address} account={info?.data} tokenInfo={fullTokenInfo} isTokenInfoLoading={isFullTokenInfoLoading} />
+                    <AccountHeader
+                        address={address}
+                        account={info?.data}
+                        tokenInfo={fullTokenInfo}
+                        isTokenInfoLoading={isFullTokenInfoLoading}
+                    />
                 </div>
             </div>
             {!pubkey ? (
                 <ErrorCard text={`Address "${address}" is not valid`} />
             ) : (
-                <DetailsSections info={info} pubkey={pubkey} tokenInfo={fullTokenInfo} isTokenInfoLoading={isFullTokenInfoLoading}>
+                <DetailsSections
+                    info={info}
+                    pubkey={pubkey}
+                    tokenInfo={fullTokenInfo}
+                    isTokenInfoLoading={isFullTokenInfoLoading}
+                >
                     {children}
                 </DetailsSections>
             )}
@@ -231,7 +245,17 @@ export default function AddressLayout({ children, params }: Props) {
     );
 }
 
-function AccountHeader({ address, account, tokenInfo, isTokenInfoLoading }: { address: string; account?: Account, tokenInfo?: FullTokenInfo, isTokenInfoLoading: boolean }) {
+function AccountHeader({
+    address,
+    account,
+    tokenInfo,
+    isTokenInfoLoading,
+}: {
+    address: string;
+    account?: Account;
+    tokenInfo?: FullTokenInfo;
+    isTokenInfoLoading: boolean;
+}) {
     const mintInfo = useMintAccountInfo(address);
 
     const parsedData = account?.data.parsed;
@@ -316,12 +340,22 @@ function AccountHeader({ address, account, tokenInfo, isTokenInfoLoading }: { ad
         );
     }
 
-    return (
+    const fallback = (
         <>
             <h6 className="header-pretitle">Details</h6>
             <h2 className="header-title">Account</h2>
         </>
     );
+    if (account) {
+        return (
+            <ErrorBoundary fallback={fallback}>
+                <Suspense fallback={fallback}>
+                    <CompressedNftAccountHeader account={account} />
+                </Suspense>
+            </ErrorBoundary>
+        );
+    }
+    return fallback;
 }
 
 function DetailsSections({
@@ -330,7 +364,7 @@ function DetailsSections({
     tab,
     info,
     tokenInfo,
-    isTokenInfoLoading
+    isTokenInfoLoading,
 }: {
     children: React.ReactNode;
     pubkey: PublicKey;
@@ -364,7 +398,7 @@ function DetailsSections({
     );
 }
 
-function InfoSection({ account, tokenInfo }: { account: Account, tokenInfo?: FullTokenInfo }) {
+function InfoSection({ account, tokenInfo }: { account: Account; tokenInfo?: FullTokenInfo }) {
     const parsedData = account.data.parsed;
     const rawData = account.data.raw;
 
@@ -408,7 +442,14 @@ function InfoSection({ account, tokenInfo }: { account: Account, tokenInfo?: Ful
     } else if (account.owner.toBase58() === FEATURE_PROGRAM_ID) {
         return <FeatureAccountSection account={account} />;
     } else {
-        return <UnknownAccountCard account={account} />;
+        const fallback = <UnknownAccountCard account={account} />;
+        return (
+            <ErrorBoundary fallback={fallback}>
+                <Suspense fallback={fallback}>
+                    <CompressedNftCard account={account} />
+                </Suspense>
+            </ErrorBoundary>
+        );
     }
 }
 
@@ -441,7 +482,8 @@ export type MoreTabs =
     | 'anchor-program'
     | 'anchor-account'
     | 'entries'
-    | 'concurrent-merkle-tree';
+    | 'concurrent-merkle-tree'
+    | 'compression';
 
 function MoreSection({ children, tabs }: { children: React.ReactNode; tabs: (JSX.Element | null)[] }) {
     return (
@@ -483,13 +525,40 @@ function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
     }
 
     // Add the key for address lookup tables
-    if (account.data.raw && isAddressLookupTableAccount(account.owner.toBase58() as Base58EncodedAddress, account.data.raw)) {
+    if (
+        account.data.raw &&
+        isAddressLookupTableAccount(account.owner.toBase58() as Base58EncodedAddress, account.data.raw)
+    ) {
         tabs.push(...TABS_LOOKUP['address-lookup-table']);
     }
 
     // Add the key for Metaplex NFTs
-    if (parsedData && (programTypeKey === 'spl-token:mint' || programTypeKey == 'spl-token-2022:mint') && (parsedData as TokenProgramData).nftData) {
+    if (
+        parsedData &&
+        (programTypeKey === 'spl-token:mint' || programTypeKey == 'spl-token-2022:mint') &&
+        (parsedData as TokenProgramData).nftData
+    ) {
         tabs.push(...TABS_LOOKUP[`${programTypeKey}:metaplexNFT`]);
+    }
+
+    if (!tabs.find(tab => tab.slug === 'metadata')) {
+        tabs.push(
+            {
+                path: 'metadata',
+                slug: 'metadata',
+                title: 'Metadata',
+            },
+            {
+                path: 'attributes',
+                slug: 'attributes',
+                title: 'Attributes',
+            }
+        );
+        tabs.push({
+            path: 'compression',
+            slug: 'compression',
+            title: 'Compression',
+        });
     }
 
     const isNFToken = account && isNFTokenAccount(account);
