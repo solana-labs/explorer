@@ -263,20 +263,6 @@ function AccountHeader({ address, account, tokenInfo, isTokenInfoLoading }: { ad
             if (metadataAddress?.toString() === address) {
                 token.name = tokenMetadata.name
             }
-
-
-            if (tokenMetadata.uri.endsWith('.json')) {
-                fetch(tokenMetadata.uri)
-                    .then(response => response.json())
-                    .then(metadata => {
-                        token.logoURI = metadata.image;
-                    })
-                    .catch(() => {
-                        console.error("Failed to resolve image from metadata pointer")
-                    });
-            } else {
-                token.logoURI = tokenMetadata.uri
-            }
     }
         // Fall back to legacy token list when there is stub metadata (blank uri), updatable by default by the mint authority
         else if (!parsedData?.nftData?.metadata.data.uri && tokenInfo) {
