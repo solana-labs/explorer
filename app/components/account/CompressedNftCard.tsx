@@ -149,7 +149,7 @@ export function CompressedNFTHeader({ compressedNft }: { compressedNft: Compress
 
 function getCompressedNftPill() {
     const onchainVerifiedToolTip =
-        'This NFT does not have on-chain data, but can be transferred and traded on-chain normally. This tag guarantees that this compressed NFT has the correct format.';
+        'This NFT does not have a corresponding account, but uses verified ledger data to allow for transfers and trades. The existence of this tag ensures that the compressed NFT is verifiably up-to-date with the chain.';
     return (
         <div className={'d-inline-flex align-items-center ms-2'}>
             <span className="badge badge-pill bg-dark">{'Compressed'}</span>
