@@ -38,7 +38,7 @@ import { PublicKey } from '@solana/web3.js';
 import { Cluster, ClusterStatus } from '@utils/cluster';
 import { FEATURE_PROGRAM_ID } from '@utils/parseFeatureAccount';
 import { useClusterPath } from '@utils/url';
-import { MetadataPointer, TokenMetadata } from '@validators/accounts/token-extension'
+import { MetadataPointer, TokenMetadata } from '@validators/accounts/token-extension';
 import Link from 'next/link';
 import { redirect, useSelectedLayoutSegment } from 'next/navigation';
 import React, { PropsWithChildren, Suspense } from 'react';
@@ -48,6 +48,7 @@ import useSWRImmutable from 'swr/immutable';
 import { Base58EncodedAddress } from 'web3js-experimental';
 
 import { CompressedNftAccountHeader, CompressedNftCard } from '@/app/components/account/CompressedNftCard';
+import { useCompressedNft } from '@/app/providers/compressed-nft';
 import { FullTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
 
 const IDENTICON_WIDTH = 64;
@@ -503,7 +504,7 @@ function MoreSection({ children, tabs }: { children: React.ReactNode; tabs: (JSX
 function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
     const address = pubkey.toBase58();
     const parsedData = account.data.parsed;
-    const tabs: Tab[] = [
+    const tabs: (Tab & { compressed?: boolean })[] = [
         {
             path: '',
             slug: 'history',
@@ -541,24 +542,23 @@ function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
         tabs.push(...TABS_LOOKUP[`${programTypeKey}:metaplexNFT`]);
     }
 
-    if (!tabs.find(tab => tab.slug === 'metadata')) {
+    // Compressed NFT tabs
+    if ((!account.data.raw || account.data.raw.length === 0) && !account.data.parsed) {
         tabs.push(
             {
+                compressed: true,
                 path: 'metadata',
                 slug: 'metadata',
                 title: 'Metadata',
             },
             {
+                compressed: true,
                 path: 'attributes',
                 slug: 'attributes',
                 title: 'Attributes',
-            }
+            },
+            { compressed: true, path: 'compression', slug: 'compression', title: 'Compression' }
         );
-        tabs.push({
-            path: 'compression',
-            slug: 'compression',
-            title: 'Compression',
-        });
     }
 
     const isNFToken = account && isNFTokenAccount(account);
@@ -595,7 +595,13 @@ function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
 
     return tabs.map(tab => {
         return {
-            component: <Tab address={address} key={tab.slug} path={tab.path} title={tab.title} />,
+            component: !tab.compressed ? (
+                <Tab address={address} key={tab.slug} path={tab.path} title={tab.title} />
+            ) : (
+                <React.Suspense key={tab.slug} fallback={<></>}>
+                    <CompressedNftLink tab={tab} address={pubkey.toString()} pubkey={pubkey} />
+                </React.Suspense>
+            ),
             tab,
         };
     });
@@ -679,6 +685,28 @@ function AccountDataLink({ address, tab, programId }: { address: string; tab: Ta
     return (
         <li key={tab.slug} className="nav-item">
             <Link className={`${isActive ? 'active ' : ''}nav-link`} href={accountDataPath}>
+                {tab.title}
+            </Link>
+        </li>
+    );
+}
+
+// Checks that a compressed NFT exists at the given address and returns a link to the tab
+function CompressedNftLink({ tab, address, pubkey }: { tab: Tab; address: string; pubkey: PublicKey }) {
+    const { url } = useCluster();
+    const compressedNft = useCompressedNft({ address: pubkey.toString(), url });
+    const tabPath = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
+
+    const selectedLayoutSegment = useSelectedLayoutSegment();
+    const isActive = selectedLayoutSegment === tab.path;
+
+    if (!compressedNft || !compressedNft.compression.compressed) {
+        return null;
+    }
+
+    return (
+        <li key={tab.slug} className="nav-item">
+            <Link className={`${isActive ? 'active ' : ''}nav-link`} href={tabPath}>
                 {tab.title}
             </Link>
         </li>
