@@ -64,6 +64,9 @@ export const useCompressedNft = makeCache<{ address: string; url: string }, Comp
                     id: address,
                 },
             }),
+            headers: {
+                'content-type': 'application/json',
+            },
             method: 'POST',
         })
             .then(response => response.json())
