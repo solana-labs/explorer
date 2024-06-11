@@ -258,10 +258,10 @@ function AccountHeader({
     isTokenInfoLoading: boolean;
 }) {
     interface State {
-      name: string,
-      image: string ,
-    }    
-    const [tokenData, setTokenData] = React.useState<State>({image: "", name: ""});
+        name: string;
+        image: string;
+    }
+    const [tokenData, setTokenData] = React.useState<State>({ image: '', name: '' });
     const mintInfo = useMintAccountInfo(address);
 
     const parsedData = account?.data.parsed;
@@ -280,9 +280,12 @@ function AccountHeader({
         let token: { logoURI?: string; name?: string } = {};
         let unverified = false;
 
-        const metadataExtension = mintInfo?.extensions?.find(({ extension }: { extension: string }) => extension === 'tokenMetadata');
-        const metadataPointerExtension = mintInfo?.extensions?.find(({ extension }: { extension: string }) => extension === 'metadataPointer');
-
+        const metadataExtension = mintInfo?.extensions?.find(
+            ({ extension }: { extension: string }) => extension === 'tokenMetadata'
+        );
+        const metadataPointerExtension = mintInfo?.extensions?.find(
+            ({ extension }: { extension: string }) => extension === 'metadataPointer'
+        );
 
         if (metadataPointerExtension && metadataExtension) {
             const tokenMetadata = create(metadataExtension.state, TokenMetadata);
@@ -291,7 +294,7 @@ function AccountHeader({
             (async () => {
                 // Avoid re-renders once tokenData has been set
                 if (!tokenData.name && !tokenData.image) {
-                    const response =  await fetch(tokenMetadata.uri);
+                    const response = await fetch(tokenMetadata.uri);
                     setTokenData(await response.json());
                 }
             })();
@@ -302,7 +305,7 @@ function AccountHeader({
                 token.name = tokenData?.name;
                 token.logoURI = tokenData?.image;
             }
-    }
+        }
         // Fall back to legacy token list when there is stub metadata (blank uri), updatable by default by the mint authority
         else if (!parsedData?.nftData?.metadata.data.uri && tokenInfo) {
             token = tokenInfo;
