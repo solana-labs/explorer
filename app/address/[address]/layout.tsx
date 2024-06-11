@@ -257,7 +257,11 @@ function AccountHeader({
     tokenInfo?: FullTokenInfo;
     isTokenInfoLoading: boolean;
 }) {
-    const [tokenData, setTokenData] = React.useState("");
+    interface State {
+      name: string,
+      image: string ,
+    }    
+    const [tokenData, setTokenData] = React.useState<State>({image: "", name: ""});
     const mintInfo = useMintAccountInfo(address);
 
     const parsedData = account?.data.parsed;
@@ -286,7 +290,7 @@ function AccountHeader({
 
             (async () => {
                 // Avoid re-renders once tokenData has been set
-                if (typeof tokenData !== 'object') {
+                if (!tokenData.name && !tokenData.image) {
                     const response =  await fetch(tokenMetadata.uri);
                     setTokenData(await response.json());
                 }
