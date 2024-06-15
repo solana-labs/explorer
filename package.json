@@ -70,6 +70,7 @@
         "@types/bs58": "4.0.1",
         "@types/chart.js": "^2.9.34",
         "@types/node": "18.16.3",
+        "@types/pako": "^2.0.3",
         "@types/react": "18.2.0",
         "@types/react-dom": "18.2.1",
         "@types/react-select": "3.1.2",
