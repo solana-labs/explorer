@@ -6,9 +6,9 @@ import ReactJson from 'react-json-view';
 
 export function AnchorProgramCard({ programId }: { programId: string }) {
     const { url } = useCluster();
-    const program = useAnchorProgram(programId, url);
+    const { idl } = useAnchorProgram(programId, url);
 
-    if (!program) {
+    if (!idl) {
         return null;
     }
 
@@ -24,7 +24,7 @@ export function AnchorProgramCard({ programId }: { programId: string }) {
                 </div>
 
                 <div className="card metadata-json-viewer m-4">
-                    <ReactJson src={program.idl} theme={'solarized'} style={{ padding: 25 }} collapsed={1} />
+                    <ReactJson src={idl} theme={'solarized'} style={{ padding: 25 }} collapsed={1} name={null} />
                 </div>
             </div>
         </>

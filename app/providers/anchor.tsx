@@ -6,15 +6,13 @@ import pako from 'pako';
 import { useEffect, useMemo } from 'react';
 
 import { useAccountInfo, useFetchAccountInfo } from './accounts';
-import { useCluster } from './cluster';
 
 const cachedAnchorProgramPromises: Record<
     string,
-    void | { __type: 'promise'; promise: Promise<void> } | { __type: 'result'; result: Program<Idl> | null }
+    void | { __type: 'promise'; promise: Promise<void> } | { __type: 'result'; result: Idl | null }
 > = {};
 
-function useProgramElf(programAddress: string) {
-    const { url } = useCluster();
+function useIdlFromSolanaProgramBinary(programAddress: string): Idl | null {
     const fetchAccountInfo = useFetchAccountInfo();
     const programInfo = useAccountInfo(programAddress);
     const programDataAddress: string | undefined = programInfo?.data?.data.parsed?.parsed.info['programData'];
@@ -39,14 +37,13 @@ function useProgramElf(programAddress: string) {
             const raw = Buffer.from(programDataInfo.data.data.raw.slice(offset));
 
             try {
-                const idl = parseIdlFromElf(raw);
-                return new Program(idl, programAddress, getProvider(url));
-            } catch (_e) {
+                return parseIdlFromElf(raw);
+            } catch (e) {
                 return null;
             }
         }
         return null;
-    }, [programDataInfo, programInfo, programAddress, url]);
+    }, [programDataInfo, programInfo]);
     return param;
 }
 
@@ -82,16 +79,21 @@ function getProvider(url: string) {
     return new Provider(new Connection(url), new NodeWallet(Keypair.generate()), {});
 }
 
-function useAnchorIdlAccount(programAddress: string, url: string): Program | null {
+function useIdlFromAnchorProgramSeed(programAddress: string, url: string): Idl | null {
     const key = `${programAddress}-${url}`;
     const cacheEntry = cachedAnchorProgramPromises[key];
 
     if (cacheEntry === undefined) {
-        const promise = Program.at(programAddress, getProvider(url))
-            .then(program => {
+        const programId = new PublicKey(programAddress);
+        const promise = Program.fetchIdl<Idl>(programId, getProvider(url))
+            .then(idl => {
+                if (!idl) {
+                    throw new Error(`IDL not found for program: ${programAddress.toString()}`);
+                }
+
                 cachedAnchorProgramPromises[key] = {
                     __type: 'result',
-                    result: program,
+                    result: idl,
                 };
             })
             .catch(_ => {
@@ -108,10 +110,19 @@ function useAnchorIdlAccount(programAddress: string, url: string): Program | nul
     return cacheEntry.result;
 }
 
-export function useAnchorProgram(programAddress: string, url: string): Program | null {
-    const idlFromBinary = useProgramElf(programAddress);
-    const idlFromAccount = useAnchorIdlAccount(programAddress, url);
-    return idlFromBinary ?? idlFromAccount;
+export function useAnchorProgram(programAddress: string, url: string): { program: Program | null; idl: Idl | null } {
+    const idlFromBinary = useIdlFromSolanaProgramBinary(programAddress);
+    const idlFromAnchorProgram = useIdlFromAnchorProgramSeed(programAddress, url);
+    const idl = idlFromBinary ?? idlFromAnchorProgram;
+    const program: Program<Idl> | null = useMemo(() => {
+        if (!idl) return null;
+        try {
+            return new Program(idl, new PublicKey(programAddress), getProvider(url));
+        } catch (e) {
+            return null;
+        }
+    }, [idl, programAddress, url]);
+    return { idl, program };
 }
 
 export type AnchorAccount = {
