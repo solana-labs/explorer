@@ -23,7 +23,7 @@ export function AnchorProgramName({
     url: string;
     defaultName?: string;
 }) {
-    const program = useAnchorProgram(programId.toString(), url);
+    const { program } = useAnchorProgram(programId.toString(), url);
     const programName = getAnchorProgramName(program) || defaultName;
     return <>{programName}</>;
 }
