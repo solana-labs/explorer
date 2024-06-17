@@ -72,7 +72,6 @@ export function CompressedNftCard({ account }: { account: Account }) {
 export function CompressedNftAccountHeader({ account }: { account: Account }) {
     const { url } = useCluster();
     const compressedNft = useCompressedNft({ address: account.pubkey.toString(), url });
-    if (!compressedNft) throw new Error('Compressed NFT not found');
 
     if (compressedNft) {
         return (
