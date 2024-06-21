@@ -647,7 +647,7 @@ function getAnchorTabs(pubkey: PublicKey, account: Account) {
     tabComponents.push({
         component: (
             <React.Suspense key={anchorProgramTab.slug} fallback={<></>}>
-                <AnchorProgramLink tab={anchorProgramTab} address={pubkey.toString()} pubkey={pubkey} />
+                <AnchorProgramIdlLink tab={anchorProgramTab} address={pubkey.toString()} pubkey={pubkey} />
             </React.Suspense>
         ),
         tab: anchorProgramTab,
@@ -670,13 +670,13 @@ function getAnchorTabs(pubkey: PublicKey, account: Account) {
     return tabComponents;
 }
 
-function AnchorProgramLink({ tab, address, pubkey }: { tab: Tab; address: string; pubkey: PublicKey }) {
+function AnchorProgramIdlLink({ tab, address, pubkey }: { tab: Tab; address: string; pubkey: PublicKey }) {
     const { url } = useCluster();
-    const anchorProgram = useAnchorProgram(pubkey.toString(), url);
+    const { idl } = useAnchorProgram(pubkey.toString(), url);
     const anchorProgramPath = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
     const selectedLayoutSegment = useSelectedLayoutSegment();
     const isActive = selectedLayoutSegment === tab.path;
-    if (!anchorProgram) {
+    if (!idl) {
         return null;
     }
 
@@ -691,7 +691,7 @@ function AnchorProgramLink({ tab, address, pubkey }: { tab: Tab; address: string
 
 function AccountDataLink({ address, tab, programId }: { address: string; tab: Tab; programId: PublicKey }) {
     const { url } = useCluster();
-    const accountAnchorProgram = useAnchorProgram(programId.toString(), url);
+    const { program: accountAnchorProgram } = useAnchorProgram(programId.toString(), url);
     const accountDataPath = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
     const selectedLayoutSegment = useSelectedLayoutSegment();
     const isActive = selectedLayoutSegment === tab.path;

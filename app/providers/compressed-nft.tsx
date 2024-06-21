@@ -1,60 +1,14 @@
-type CacheType<P> = Record<
-    string,
-    void | { __type: 'promise'; promise: Promise<void> } | { __type: 'result'; result: P }
->;
+import useSWRImmutable from 'swr/immutable';
 
-const cachedNftPromises: CacheType<CompressedNft | null> = {};
-
-const cachedPromises = {
-    compressedNft: {} as CacheType<CompressedNft | null>,
-    compressedNftProof: {} as CacheType<CompressedNftProof | null>,
-    nftMetadataJson: {} as CacheType<any>,
-};
-
-function makeCache<Params, CacheValueType>(
-    cacheName: keyof typeof cachedPromises,
-    keygen: (params: Params) => string,
-    action: (params: Params) => Promise<CacheValueType>
-): (params: Params) => CacheValueType {
-    return (params: Params) => {
-        const key = keygen(params);
-        const cacheEntry = cachedPromises[cacheName][key];
-
-        if (cacheEntry === undefined) {
-            const promise = action(params)
-                .then((value: CacheValueType) => {
-                    cachedPromises[cacheName][key] = {
-                        __type: 'result',
-                        result: value,
-                    };
-                })
-                .catch(_ => {
-                    cachedNftPromises[key] = { __type: 'result', result: null };
-                });
-            cachedPromises[cacheName][key] = {
-                __type: 'promise',
-                promise,
-            };
-            throw promise;
-        } else if (cacheEntry.__type === 'promise') {
-            throw cacheEntry.promise;
-        }
-        return cacheEntry.result;
-    };
+export function useMetadataJsonLink(url: string) {
+    const { data, error } = useSWRImmutable(url, async (url: string) => {
+        return fetch(url).then(response => response.json());
+    });
+    return error ? null : data;
 }
 
-export const useMetadataJsonLink = makeCache<string, any>(
-    'nftMetadataJson',
-    (url: string) => url,
-    async (url: string) => {
-        return fetch(url).then(response => response.json());
-    }
-);
-
-export const useCompressedNft = makeCache<{ address: string; url: string }, CompressedNft | null>(
-    'compressedNft',
-    ({ address, url }) => `${address}-${url}`,
-    async ({ address, url }) => {
+export function useCompressedNft({ address, url }: { address: string; url: string }): CompressedNft | null {
+    const { data, error } = useSWRImmutable([address, url], async ([address, url]): Promise<CompressedNft | null> => {
         return fetch(`${url}`, {
             body: JSON.stringify({
                 id: address,
@@ -72,18 +26,17 @@ export const useCompressedNft = makeCache<{ address: string; url: string }, Comp
             .then(response => response.json())
             .then((response: DasApiResponse<CompressedNft>) => {
                 if ('error' in response) {
-                    throw new Error(response.error.message);
+                    return null;
                 }
 
                 return response.result;
             });
-    }
-);
+    });
+    return error ? null : data ?? null;
+}
 
-export const useCompressedNftProof = makeCache<{ address: string; url: string }, CompressedNftProof | null>(
-    'compressedNftProof',
-    ({ address, url }) => `proof-${address}-${url}`,
-    async ({ address, url }) => {
+export function useCompressedNftProof({ address, url }: { address: string; url: string }): CompressedNftProof | null {
+    const { data, error } = useSWRImmutable([address, url], async ([address, url]) => {
         return fetch(`${url}`, {
             body: JSON.stringify({
                 id: address,
@@ -103,8 +56,9 @@ export const useCompressedNftProof = makeCache<{ address: string; url: string },
 
                 return response.result;
             });
-    }
-);
+    });
+    return error ? null : data ?? null;
+}
 
 type DasResponseTypes = CompressedNft | CompressedNftProof;
 export type DasApiResponse<T extends DasResponseTypes> =
