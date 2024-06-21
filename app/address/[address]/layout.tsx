@@ -257,6 +257,11 @@ function AccountHeader({
     tokenInfo?: FullTokenInfo;
     isTokenInfoLoading: boolean;
 }) {
+    interface State {
+        name: string;
+        image: string;
+    }
+    const [tokenData, setTokenData] = React.useState<State>({ image: '', name: '' });
     const mintInfo = useMintAccountInfo(address);
 
     const parsedData = account?.data.parsed;
@@ -286,10 +291,19 @@ function AccountHeader({
             const tokenMetadata = create(metadataExtension.state, TokenMetadata);
             const { metadataAddress } = create(metadataPointerExtension.state, MetadataPointer);
 
+            (async () => {
+                // Avoid re-renders once tokenData has been set
+                if (!tokenData.name && !tokenData.image) {
+                    const response = await fetch(tokenMetadata.uri);
+                    setTokenData(await response.json());
+                }
+            })();
+
             // Handles the basic case where MetadataPointer is reference the Token Metadata extension directly
             // Does not handle the case where MetadataPointer is pointing at a separate account.
             if (metadataAddress?.toString() === address) {
-                token.name = tokenMetadata.name;
+                token.name = tokenData?.name;
+                token.logoURI = tokenData?.image;
             }
         }
         // Fall back to legacy token list when there is stub metadata (blank uri), updatable by default by the mint authority
