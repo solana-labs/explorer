@@ -292,10 +292,14 @@ function AccountHeader({
             const { metadataAddress } = create(metadataPointerExtension.state, MetadataPointer);
 
             (async () => {
-                // Avoid re-renders once tokenData has been set
-                if (!tokenData.name && !tokenData.image) {
-                    const response = await fetch(tokenMetadata.uri);
-                    setTokenData(await response.json());
+                try {
+                    // Avoid re-renders once tokenData has been set
+                    if (!tokenData.name && !tokenData.image) {
+                        const response = await fetch(tokenMetadata.uri);
+                        setTokenData(await response.json());
+                    }
+                } catch (err) {
+                    console.error(err);
                 }
             })();
 
