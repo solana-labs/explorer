@@ -8,55 +8,66 @@ export function useMetadataJsonLink(url: string) {
 }
 
 export function useCompressedNft({ address, url }: { address: string; url: string }): CompressedNft | null {
-    const { data, error } = useSWRImmutable([address, url], async ([address, url]): Promise<CompressedNft | null> => {
-        return fetch(`${url}`, {
-            body: JSON.stringify({
-                id: address,
-                jsonrpc: '2.0',
-                method: 'getAsset',
-                params: {
+    const { data, error } = useSWRImmutable(
+        ['getAsset', address, url],
+        async ([_prefix, address, url]): Promise<CompressedNft | null> => {
+            return fetch(`${url}`, {
+                body: JSON.stringify({
                     id: address,
+                    jsonrpc: '2.0',
+                    method: 'getAsset',
+                    params: {
+                        id: address,
+                    },
+                }),
+                headers: {
+                    'content-type': 'application/json',
                 },
-            }),
-            headers: {
-                'content-type': 'application/json',
-            },
-            method: 'POST',
-        })
-            .then(response => response.json())
-            .then((response: DasApiResponse<CompressedNft>) => {
-                if ('error' in response) {
-                    return null;
-                }
+                method: 'POST',
+            })
+                .then(response => response.json())
+                .then((response: DasApiResponse<CompressedNft>) => {
+                    if ('error' in response) {
+                        return null;
+                    }
 
-                return response.result;
-            });
-    });
+                    return response.result;
+                });
+        },
+        { suspense: true }
+    );
     return error ? null : data ?? null;
 }
 
 export function useCompressedNftProof({ address, url }: { address: string; url: string }): CompressedNftProof | null {
-    const { data, error } = useSWRImmutable([address, url], async ([address, url]) => {
-        return fetch(`${url}`, {
-            body: JSON.stringify({
-                id: address,
-                jsonrpc: '2.0',
-                method: 'getAssetProof',
-                params: {
+    const { data, error } = useSWRImmutable(
+        ['getAssetProof', address, url],
+        async ([_prefix, address, url]) => {
+            return fetch(`${url}`, {
+                body: JSON.stringify({
                     id: address,
+                    jsonrpc: '2.0',
+                    method: 'getAssetProof',
+                    params: {
+                        id: address,
+                    },
+                }),
+                headers: {
+                    'content-type': 'application/json',
                 },
-            }),
-            method: 'POST',
-        })
-            .then(response => response.json())
-            .then((response: DasApiResponse<CompressedNftProof>) => {
-                if ('error' in response) {
-                    throw new Error(response.error.message);
-                }
+                method: 'POST',
+            })
+                .then(response => response.json())
+                .then((response: DasApiResponse<CompressedNftProof>) => {
+                    if ('error' in response) {
+                        throw new Error(response.error.message);
+                    }
 
-                return response.result;
-            });
-    });
+                    return response.result;
+                });
+        },
+        { suspense: true }
+    );
     return error ? null : data ?? null;
 }
 
