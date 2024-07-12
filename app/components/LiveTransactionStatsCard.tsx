@@ -4,13 +4,13 @@ import { TableCardBody } from '@components/common/TableCardBody';
 import { StatsNotReady } from '@components/StatsNotReady';
 import { ClusterStatsStatus, PERF_UPDATE_SEC, usePerformanceInfo } from '@providers/stats/solanaClusterStats';
 import { PerformanceInfo } from '@providers/stats/solanaPerformanceInfo';
-import { PingInfo, PingRollupInfo, PingStatus, useSolanaPingInfo } from '@providers/stats/SolanaPingProvider';
+// import { PingInfo, PingRollupInfo, PingStatus, useSolanaPingInfo } from '@providers/stats/SolanaPingProvider';
 import { BarElement, CategoryScale, Chart, ChartData, ChartOptions, LinearScale, Tooltip } from 'chart.js';
 import classNames from 'classnames';
 import React from 'react';
 import { Bar } from 'react-chartjs-2';
 import CountUp from 'react-countup';
-import { RefreshCw } from 'react-feather';
+// import { RefreshCw } from 'react-feather';
 
 Chart.register(BarElement, CategoryScale, LinearScale, Tooltip);
 
@@ -266,224 +266,224 @@ function AnimatedTransactionCount({ info }: { info: PerformanceInfo }) {
     );
 }
 
-function PingStatsCardBody({ series, setSeries }: { series: Series; setSeries: SetSeries }) {
-    const pingInfo = useSolanaPingInfo();
+// function PingStatsCardBody({ series, setSeries }: { series: Series; setSeries: SetSeries }) {
+//     const pingInfo = useSolanaPingInfo();
+//
+//     if (pingInfo.status !== PingStatus.Ready) {
+//         return <PingStatsNotReady error={pingInfo.status === PingStatus.Error} retry={pingInfo.retry} />;
+//     }
+//
+//     return <PingBarChart pingInfo={pingInfo} series={series} setSeries={setSeries} />;
+// }
 
-    if (pingInfo.status !== PingStatus.Ready) {
-        return <PingStatsNotReady error={pingInfo.status === PingStatus.Error} retry={pingInfo.retry} />;
-    }
+// type StatsNotReadyProps = { error: boolean; retry?: () => void };
+// function PingStatsNotReady({ error, retry }: StatsNotReadyProps) {
+//     if (error) {
+//         return (
+//             <div className="card-body text-center">
+//                 There was a problem loading xolana ping stats.{' '}
+//                 {retry && (
+//                     <button
+//                         className="btn btn-white btn-sm"
+//                         onClick={() => {
+//                             retry();
+//                         }}
+//                     >
+//                         <RefreshCw className="align-text-top me-2" size={13} />
+//                         Try Again
+//                     </button>
+//                 )}
+//             </div>
+//         );
+//     }
+//
+//     return (
+//         <div className="card-body text-center">
+//             <span className="align-text-top spinner-grow spinner-grow-sm me-2"></span>
+//             Loading
+//         </div>
+//     );
+// }
+//
+// const PING_CHART_OPTIONS: ChartOptions<'bar'> = {
+//     animation: false,
+//     interaction: {
+//         intersect: false,
+//         mode: 'index',
+//     },
+//     plugins: {
+//         tooltip: {
+//             enabled: false, // Disable the on-canvas tooltip
+//             external(context) {
+//                 // Tooltip Element
+//                 let tooltipEl = document.getElementById('chartjs-tooltip');
+//
+//                 // Create element on first render
+//                 if (!tooltipEl) {
+//                     tooltipEl = document.createElement('div');
+//                     tooltipEl.id = 'chartjs-tooltip';
+//                     tooltipEl.innerHTML = '<div class="content"></div>';
+//                     document.body.appendChild(tooltipEl);
+//                 }
+//
+//                 // Hide if no tooltip
+//                 const tooltipModel = context.tooltip;
+//                 if (tooltipModel.opacity === 0) {
+//                     tooltipEl.style.opacity = '0';
+//                     return;
+//                 }
+//
+//                 // Set caret Position
+//                 tooltipEl.classList.remove('above', 'below', 'no-transform');
+//                 if (tooltipModel.yAlign) {
+//                     tooltipEl.classList.add(tooltipModel.yAlign);
+//                 } else {
+//                     tooltipEl.classList.add('no-transform');
+//                 }
+//
+//                 // Set Text
+//                 if (tooltipModel.body) {
+//                     const { label } = tooltipModel.dataPoints[0];
+//                     const tooltipContent = tooltipEl.querySelector('div');
+//                     if (tooltipContent) {
+//                         tooltipContent.innerHTML = `${label}`;
+//                     }
+//                 }
+//
+//                 const position = context.chart.canvas.getBoundingClientRect();
+//
+//                 // Display, position, and set styles for font
+//                 tooltipEl.style.opacity = '1';
+//                 tooltipEl.style.position = 'absolute';
+//                 tooltipEl.style.left = position.left + window.pageXOffset + tooltipModel.caretX + 'px';
+//                 tooltipEl.style.top = position.top + window.pageYOffset + tooltipModel.caretY + 'px';
+//                 tooltipEl.style.pointerEvents = 'none';
+//             },
+//             intersect: false,
+//         },
+//     },
+//     resizeDelay: 0,
+//     scales: {
+//         x: {
+//             grid: {
+//                 display: false,
+//             },
+//             ticks: {
+//                 display: false,
+//             },
+//         },
+//         y: {
+//             grid: {
+//                 display: false,
+//             },
+//             min: 0,
+//             ticks: {
+//                 display: true,
+//                 font: {
+//                     size: 10,
+//                 },
+//                 stepSize: 100,
+//                 textStrokeColor: '#EEE',
+//             },
+//         },
+//     },
+// };
 
-    return <PingBarChart pingInfo={pingInfo} series={series} setSeries={setSeries} />;
-}
-
-type StatsNotReadyProps = { error: boolean; retry?: () => void };
-function PingStatsNotReady({ error, retry }: StatsNotReadyProps) {
-    if (error) {
-        return (
-            <div className="card-body text-center">
-                There was a problem loading xolana ping stats.{' '}
-                {retry && (
-                    <button
-                        className="btn btn-white btn-sm"
-                        onClick={() => {
-                            retry();
-                        }}
-                    >
-                        <RefreshCw className="align-text-top me-2" size={13} />
-                        Try Again
-                    </button>
-                )}
-            </div>
-        );
-    }
-
-    return (
-        <div className="card-body text-center">
-            <span className="align-text-top spinner-grow spinner-grow-sm me-2"></span>
-            Loading
-        </div>
-    );
-}
-
-const PING_CHART_OPTIONS: ChartOptions<'bar'> = {
-    animation: false,
-    interaction: {
-        intersect: false,
-        mode: 'index',
-    },
-    plugins: {
-        tooltip: {
-            enabled: false, // Disable the on-canvas tooltip
-            external(context) {
-                // Tooltip Element
-                let tooltipEl = document.getElementById('chartjs-tooltip');
-
-                // Create element on first render
-                if (!tooltipEl) {
-                    tooltipEl = document.createElement('div');
-                    tooltipEl.id = 'chartjs-tooltip';
-                    tooltipEl.innerHTML = '<div class="content"></div>';
-                    document.body.appendChild(tooltipEl);
-                }
-
-                // Hide if no tooltip
-                const tooltipModel = context.tooltip;
-                if (tooltipModel.opacity === 0) {
-                    tooltipEl.style.opacity = '0';
-                    return;
-                }
-
-                // Set caret Position
-                tooltipEl.classList.remove('above', 'below', 'no-transform');
-                if (tooltipModel.yAlign) {
-                    tooltipEl.classList.add(tooltipModel.yAlign);
-                } else {
-                    tooltipEl.classList.add('no-transform');
-                }
-
-                // Set Text
-                if (tooltipModel.body) {
-                    const { label } = tooltipModel.dataPoints[0];
-                    const tooltipContent = tooltipEl.querySelector('div');
-                    if (tooltipContent) {
-                        tooltipContent.innerHTML = `${label}`;
-                    }
-                }
-
-                const position = context.chart.canvas.getBoundingClientRect();
-
-                // Display, position, and set styles for font
-                tooltipEl.style.opacity = '1';
-                tooltipEl.style.position = 'absolute';
-                tooltipEl.style.left = position.left + window.pageXOffset + tooltipModel.caretX + 'px';
-                tooltipEl.style.top = position.top + window.pageYOffset + tooltipModel.caretY + 'px';
-                tooltipEl.style.pointerEvents = 'none';
-            },
-            intersect: false,
-        },
-    },
-    resizeDelay: 0,
-    scales: {
-        x: {
-            grid: {
-                display: false,
-            },
-            ticks: {
-                display: false,
-            },
-        },
-        y: {
-            grid: {
-                display: false,
-            },
-            min: 0,
-            ticks: {
-                display: true,
-                font: {
-                    size: 10,
-                },
-                stepSize: 100,
-                textStrokeColor: '#EEE',
-            },
-        },
-    },
-};
-
-function PingBarChart({
-    pingInfo,
-    series,
-    setSeries,
-}: {
-    pingInfo: PingRollupInfo;
-    series: Series;
-    setSeries: SetSeries;
-}) {
-    const seriesData = pingInfo[series] || [];
-    const maxMean = seriesData.reduce((a, b) => {
-        return Math.max(a, b.mean);
-    }, 0);
-    const seriesLength = seriesData.length;
-    const backgroundColor = (val: PingInfo) => {
-        if (val.submitted === 0) {
-            return '#08a274';
-        }
-
-        if (val.loss >= 0.25 && val.loss <= 0.5) {
-            return '#FFA500';
-        }
-
-        return val.loss > 0.5 ? '#f00' : '#00D192';
-    };
-    const chartData: ChartData<'bar'> = {
-        datasets: [
-            {
-                backgroundColor: seriesData.map(backgroundColor),
-                borderWidth: 0,
-                data: seriesData.map(val => {
-                    if (val.submitted === 0) {
-                        return maxMean * 0.5;
-                    }
-                    return val.mean || 0;
-                }),
-                hoverBackgroundColor: seriesData.map(backgroundColor),
-                minBarLength: 2,
-            },
-        ],
-        labels: seriesData.map((val, i) => {
-            if (val.submitted === 0) {
-                return `
-            <div class="label">
-              <p class="mb-0">Ping statistics unavailable</p>
-              ${SERIES_INFO[series].label(seriesLength - i)}min ago
-            </div>
-            `;
-            }
-
-            return `
-            <div class="value">${val.mean} ms</div>
-            <div class="label">
-              <p class="mb-0">${val.confirmed} of ${val.submitted} confirmed</p>
-            ${
-                val.loss
-                    ? `<p class="mb-0">${val.loss.toLocaleString(undefined, {
-                          minimumFractionDigits: 2,
-                          style: 'percent',
-                      })} loss</p>`
-                    : ''
-            }
-            ${SERIES_INFO[series].label(seriesLength - i)}min ago
-            </div>
-          `;
-        }),
-    };
-
-    return (
-        <div className="card-body py-3">
-            <div className="align-box-row align-items-start justify-content-between">
-                <div className="d-flex justify-content-between w-100">
-                    <span className="mb-0 font-size-sm">Average Ping Time</span>
-
-                    <div className="font-size-sm">
-                        {SERIES.map(key => (
-                            <button
-                                key={key}
-                                onClick={() => setSeries(key)}
-                                className={classNames('btn btn-sm btn-white ms-2', {
-                                    active: series === key,
-                                })}
-                            >
-                                {SERIES_INFO[key].interval}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                <div id="perf-history" className="mt-3 d-flex justify-content-end flex-row w-100">
-                    <div className="w-100">
-                        <Bar data={chartData} options={PING_CHART_OPTIONS} height={80} />
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}
+// function PingBarChart({
+//     pingInfo,
+//     series,
+//     setSeries,
+// }: {
+//     pingInfo: PingRollupInfo;
+//     series: Series;
+//     setSeries: SetSeries;
+// }) {
+//     const seriesData = pingInfo[series] || [];
+//     const maxMean = seriesData.reduce((a, b) => {
+//         return Math.max(a, b.mean);
+//     }, 0);
+//     const seriesLength = seriesData.length;
+//     const backgroundColor = (val: PingInfo) => {
+//         if (val.submitted === 0) {
+//             return '#08a274';
+//         }
+//
+//         if (val.loss >= 0.25 && val.loss <= 0.5) {
+//             return '#FFA500';
+//         }
+//
+//         return val.loss > 0.5 ? '#f00' : '#00D192';
+//     };
+//     const chartData: ChartData<'bar'> = {
+//         datasets: [
+//             {
+//                 backgroundColor: seriesData.map(backgroundColor),
+//                 borderWidth: 0,
+//                 data: seriesData.map(val => {
+//                     if (val.submitted === 0) {
+//                         return maxMean * 0.5;
+//                     }
+//                     return val.mean || 0;
+//                 }),
+//                 hoverBackgroundColor: seriesData.map(backgroundColor),
+//                 minBarLength: 2,
+//             },
+//         ],
+//         labels: seriesData.map((val, i) => {
+//             if (val.submitted === 0) {
+//                 return `
+//             <div class="label">
+//               <p class="mb-0">Ping statistics unavailable</p>
+//               ${SERIES_INFO[series].label(seriesLength - i)}min ago
+//             </div>
+//             `;
+//             }
+//
+//             return `
+//             <div class="value">${val.mean} ms</div>
+//             <div class="label">
+//               <p class="mb-0">${val.confirmed} of ${val.submitted} confirmed</p>
+//             ${
+//                 val.loss
+//                     ? `<p class="mb-0">${val.loss.toLocaleString(undefined, {
+//                           minimumFractionDigits: 2,
+//                           style: 'percent',
+//                       })} loss</p>`
+//                     : ''
+//             }
+//             ${SERIES_INFO[series].label(seriesLength - i)}min ago
+//             </div>
+//           `;
+//         }),
+//     };
+//
+//     return (
+//         <div className="card-body py-3">
+//             <div className="align-box-row align-items-start justify-content-between">
+//                 <div className="d-flex justify-content-between w-100">
+//                     <span className="mb-0 font-size-sm">Average Ping Time</span>
+//
+//                     <div className="font-size-sm">
+//                         {SERIES.map(key => (
+//                             <button
+//                                 key={key}
+//                                 onClick={() => setSeries(key)}
+//                                 className={classNames('btn btn-sm btn-white ms-2', {
+//                                     active: series === key,
+//                                 })}
+//                             >
+//                                 {SERIES_INFO[key].interval}
+//                             </button>
+//                         ))}
+//                     </div>
+//                 </div>
+//
+//                 <div id="perf-history" className="mt-3 d-flex justify-content-end flex-row w-100">
+//                     <div className="w-100">
+//                         <Bar data={chartData} options={PING_CHART_OPTIONS} height={80} />
+//                     </div>
+//                 </div>
+//             </div>
+//         </div>
+//     );
+// }
