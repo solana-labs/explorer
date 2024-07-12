@@ -281,7 +281,7 @@ function PingStatsNotReady({ error, retry }: StatsNotReadyProps) {
     if (error) {
         return (
             <div className="card-body text-center">
-                There was a problem loading solana ping stats.{' '}
+                There was a problem loading xolana ping stats.{' '}
                 {retry && (
                     <button
                         className="btn btn-white btn-sm"

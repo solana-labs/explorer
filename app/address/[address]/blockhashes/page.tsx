@@ -7,8 +7,8 @@ type Props = Readonly<{
 }>;
 
 export const metadata = {
-    description: `Recent blockhashes on Solana`,
-    title: `Recent Blockhashes | Solana`,
+    description: `Recent blockhashes on Xolana`,
+    title: `Recent Blockhashes | Xolana`,
 };
 
 export default function RecentBlockhashesPage(props: Props) {

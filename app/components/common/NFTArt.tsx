@@ -10,7 +10,7 @@ import { useState } from 'react';
 
 export const MAX_TIME_LOADING_IMAGE = 5000; /* 5 seconds */
 
-const ErrorPlaceHolder = () => <Image src={ErrorLogo} width={120} height={120} alt="Solana Logo" />;
+const ErrorPlaceHolder = () => <Image src={ErrorLogo} width={120} height={120} alt="Xolana Logo" />;
 
 const ViewOriginalArtContentLink = ({ src }: { src: string }) => {
     if (!src) {

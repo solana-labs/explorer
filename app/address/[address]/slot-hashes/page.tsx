@@ -7,8 +7,8 @@ type Props = Readonly<{
 }>;
 
 export const metadata = {
-    description: `Hashes of each slot on Solana`,
-    title: `Slot Hashes | Solana`,
+    description: `Hashes of each slot on Xolana`,
+    title: `Slot Hashes | Xolana`,
 };
 
 export default function SlotHashesPage(props: Props) {
