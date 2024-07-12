@@ -11,32 +11,41 @@ export enum Cluster {
     Custom,
 }
 
-export const CLUSTERS = [Cluster.MainnetBeta, Cluster.Testnet, Cluster.Devnet, Cluster.Custom];
+export const CLUSTERS = [
+  Cluster.MainnetBeta,
+    // Cluster.Testnet,
+    // Cluster.Devnet,
+    Cluster.Custom
+];
 
 export function clusterSlug(cluster: Cluster): string {
     switch (cluster) {
         case Cluster.MainnetBeta:
             return 'mainnet-beta';
-        case Cluster.Testnet:
-            return 'testnet';
-        case Cluster.Devnet:
-            return 'devnet';
+        // case Cluster.Testnet:
+        //     return 'testnet';
+        // case Cluster.Devnet:
+        //     return 'devnet';
         case Cluster.Custom:
             return 'custom';
     }
+
+    return '';
 }
 
 export function clusterName(cluster: Cluster): string {
     switch (cluster) {
         case Cluster.MainnetBeta:
-            return 'Mainnet Beta';
-        case Cluster.Testnet:
-            return 'Testnet';
-        case Cluster.Devnet:
-            return 'Devnet';
+            return 'X1 Alphanet';
+        // case Cluster.Testnet:
+        //     return 'Testnet';
+        // case Cluster.Devnet:
+        //     return 'Devnet';
         case Cluster.Custom:
             return 'Custom';
     }
+
+    return '';
 }
 
 export const MAINNET_BETA_URL = 'https://api.mainnet-beta.solana.com';
