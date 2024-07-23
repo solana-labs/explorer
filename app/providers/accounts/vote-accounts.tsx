@@ -4,12 +4,12 @@ import React from 'react';
 import { createDefaultRpcTransport, createSolanaRpc } from 'web3js-experimental';
 
 type VoteAccountInfo = Readonly<{
-    activatedStake: bigint,
+    activatedStake: bigint;
 }>;
 
 type VoteAccounts = Readonly<{
-    current: VoteAccountInfo[],
-    delinquent: VoteAccountInfo[],
+    current: VoteAccountInfo[];
+    delinquent: VoteAccountInfo[];
 }>;
 
 async function fetchVoteAccounts(
@@ -25,13 +25,11 @@ async function fetchVoteAccounts(
         const voteAccounts: VoteAccounts = {
             current: voteAccountsResponse.current.map(c => ({ activatedStake: c.activatedStake })),
             delinquent: voteAccountsResponse.delinquent.map(d => ({ activatedStake: d.activatedStake })),
-        }
+        };
 
         setVoteAccounts(voteAccounts);
     } catch (error) {
-        if (cluster !== Cluster.Custom) {
-            console.error(error, { url });
-        }
+        console.error(error, { url });
     }
 }
 

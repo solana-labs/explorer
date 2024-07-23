@@ -66,42 +66,55 @@ async function fetchAccountTokens(dispatch: Dispatch, pubkey: PublicKey, cluster
         const { value: tokenAccounts } = await new Connection(url, 'processed').getParsedTokenAccountsByOwner(pubkey, {
             programId: TOKEN_PROGRAM_ID,
         });
-        const { value: token2022Accounts } = await new Connection(url, 'processed').getParsedTokenAccountsByOwner(pubkey, {
-            programId: TOKEN_2022_PROGRAM_ID,
-        });
+        const { value: token2022Accounts } = await new Connection(url, 'processed').getParsedTokenAccountsByOwner(
+            pubkey,
+            {
+                programId: TOKEN_2022_PROGRAM_ID,
+            }
+        );
 
-        const tokens: TokenInfoWithPubkey[] = tokenAccounts.concat(token2022Accounts).slice(0, 101).map(accountInfo => {
-            const parsedInfo = accountInfo.account.data.parsed.info;
-            const info = create(parsedInfo, TokenAccountInfo);
-            return { info, pubkey: accountInfo.pubkey };
-        });
+        const tokens: TokenInfoWithPubkey[] = tokenAccounts
+            .concat(token2022Accounts)
+            .slice(0, 101)
+            .map(accountInfo => {
+                const parsedInfo = accountInfo.account.data.parsed.info;
+                const info = create(parsedInfo, TokenAccountInfo);
+                return { info, pubkey: accountInfo.pubkey };
+            });
 
         // Fetch symbols and logos for tokens
-        const tokenMintInfos = await getTokenInfos(tokens.map(t => t.info.mint), cluster, url);
+        const tokenMintInfos = await getTokenInfos(
+            tokens.map(t => t.info.mint),
+            cluster,
+            url
+        );
         if (tokenMintInfos) {
-            const mappedTokenInfos = Object.fromEntries(tokenMintInfos.map(t => [t.address, {
-                logoURI: t.logoURI,
-                name: t.name,
-                symbol: t.symbol
-            }]))
+            const mappedTokenInfos = Object.fromEntries(
+                tokenMintInfos.map(t => [
+                    t.address,
+                    {
+                        logoURI: t.logoURI,
+                        name: t.name,
+                        symbol: t.symbol,
+                    },
+                ])
+            );
             tokens.forEach(t => {
-                const tokenInfo = mappedTokenInfos[t.info.mint.toString()]
+                const tokenInfo = mappedTokenInfos[t.info.mint.toString()];
                 if (tokenInfo) {
                     t.logoURI = tokenInfo.logoURI ?? undefined;
                     t.symbol = tokenInfo.symbol;
                     t.name = tokenInfo.name;
                 }
-            })
+            });
         }
 
         data = {
-            tokens
+            tokens,
         };
         status = FetchStatus.Fetched;
     } catch (error) {
-        if (cluster !== Cluster.Custom) {
-            console.error(error, { url });
-        }
+        console.error(error, { url });
         status = FetchStatus.FetchFailed;
     }
     dispatch({ data, key, status, type: ActionType.Update, url });

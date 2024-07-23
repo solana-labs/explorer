@@ -66,9 +66,7 @@ async function fetch(dispatch: Dispatch, cluster: Cluster, url: string) {
             return supply;
         });
     } catch (err) {
-        if (cluster !== Cluster.Custom) {
-            console.error(err, { url });
-        }
+        console.error(err, { url });
         dispatch('Failed to fetch supply');
     }
 }

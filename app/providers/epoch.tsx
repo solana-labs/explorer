@@ -112,9 +112,8 @@ export async function fetchEpoch(
         status = FetchStatus.Fetched;
     } catch (err) {
         status = FetchStatus.FetchFailed;
-        if (cluster !== Cluster.Custom) {
-            console.error(err, { epoch: epoch.toString() });
-        }
+
+        console.error(err, { epoch: epoch.toString() });
     }
 
     dispatch({

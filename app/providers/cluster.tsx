@@ -1,8 +1,7 @@
 'use client';
 
-import { Cluster, clusterName, ClusterStatus, clusterUrl, DEFAULT_CLUSTER } from '@utils/cluster';
-import { localStorageIsAvailable } from '@utils/local-storage';
-import { ReadonlyURLSearchParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { type Cluster, clusters, ClusterStatus } from '@utils/cluster';
+import { ReadonlyURLSearchParams, useSearchParams } from 'next/navigation';
 import React, { createContext, useContext, useEffect, useReducer, useState } from 'react';
 import { createDefaultRpcTransport, createSolanaRpc } from 'web3js-experimental';
 
@@ -30,18 +29,15 @@ type SetShowModal = React.Dispatch<React.SetStateAction<boolean>>;
 
 interface State {
     cluster: Cluster;
-    customUrl: string;
     clusterInfo?: ClusterInfo;
     status: ClusterStatus;
 }
-
-const DEFAULT_CUSTOM_URL = 'http://localhost:8899';
 
 function clusterReducer(state: State, action: Action): State {
     switch (action.status) {
         case ClusterStatus.Connected:
         case ClusterStatus.Failure: {
-            if (state.cluster !== action.cluster || state.customUrl !== action.customUrl) return state;
+            if (state.cluster !== action.cluster) return state;
             return action;
         }
         case ClusterStatus.Connecting: {
@@ -52,17 +48,8 @@ function clusterReducer(state: State, action: Action): State {
 
 function parseQuery(searchParams: ReadonlyURLSearchParams | null): Cluster {
     const clusterParam = searchParams?.get('cluster');
-    switch (clusterParam) {
-        case 'custom':
-            return Cluster.Custom;
-        case 'devnet':
-            return Cluster.Devnet;
-        case 'testnet':
-            return Cluster.Testnet;
-        case 'mainnet-beta':
-        default:
-            return Cluster.MainnetBeta;
-    }
+
+    return clusters.get(clusterParam ?? '') || clusters.default;
 }
 
 const ModalContext = createContext<[boolean, SetShowModal] | undefined>(undefined);
@@ -70,39 +57,20 @@ const StateContext = createContext<State | undefined>(undefined);
 const DispatchContext = createContext<Dispatch | undefined>(undefined);
 
 type ClusterProviderProps = { children: React.ReactNode };
+
 export function ClusterProvider({ children }: ClusterProviderProps) {
     const [state, dispatch] = useReducer(clusterReducer, {
-        cluster: DEFAULT_CLUSTER,
-        customUrl: DEFAULT_CUSTOM_URL,
+        cluster: clusters.default,
         status: ClusterStatus.Connecting,
     });
     const modalState = useState(false);
     const searchParams = useSearchParams();
     const cluster = parseQuery(searchParams);
-    const enableCustomUrl = localStorageIsAvailable() && localStorage.getItem('enableCustomUrl') !== null;
-    const customUrl = (enableCustomUrl && searchParams?.get('customUrl')) || state.customUrl;
-    const pathname = usePathname();
-    const router = useRouter();
-
-    // Remove customUrl param if dev setting is disabled
-    useEffect(() => {
-        if (!enableCustomUrl && searchParams?.has('customUrl')) {
-            const newSearchParams = new URLSearchParams();
-            searchParams.forEach((value, key) => {
-                if (key === 'customUrl') {
-                    return;
-                }
-                newSearchParams.set(key, value);
-            });
-            const nextQueryString = newSearchParams.toString();
-            router.push(`${pathname}${nextQueryString ? `?${nextQueryString}` : ''}`);
-        }
-    }, [enableCustomUrl]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Reconnect to cluster when params change
     useEffect(() => {
-        updateCluster(dispatch, cluster, customUrl);
-    }, [cluster, customUrl]); // eslint-disable-line react-hooks/exhaustive-deps
+        updateCluster(dispatch, cluster.cluster);
+    }, [cluster]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <StateContext.Provider value={state}>
@@ -113,18 +81,16 @@ export function ClusterProvider({ children }: ClusterProviderProps) {
     );
 }
 
-async function updateCluster(dispatch: Dispatch, cluster: Cluster, customUrl: string) {
+async function updateCluster(dispatch: Dispatch, lookup: string) {
+    const cluster = clusters.get(lookup) || clusters.default;
+
     dispatch({
         cluster,
-        customUrl,
         status: ClusterStatus.Connecting,
     });
 
     try {
-        // validate url
-        new URL(customUrl);
-
-        const transportUrl = clusterUrl(cluster, customUrl);
+        const transportUrl = cluster.uri;
         const transport = createDefaultRpcTransport({ url: transportUrl });
         const rpc = createSolanaRpc({ transport });
 
@@ -143,30 +109,16 @@ async function updateCluster(dispatch: Dispatch, cluster: Cluster, customUrl: st
                 epochSchedule: epochSchedule as EpochSchedule,
                 firstAvailableBlock: firstAvailableBlock as bigint,
             },
-            customUrl,
             status: ClusterStatus.Connected,
         });
     } catch (error) {
-        if (cluster !== Cluster.Custom) {
-            console.error(error, { clusterUrl: clusterUrl(cluster, customUrl) });
-        }
+        console.error(error);
+
         dispatch({
-            cluster,
-            customUrl,
+            cluster: clusters.default,
             status: ClusterStatus.Failure,
         });
     }
-}
-
-export function useUpdateCustomUrl() {
-    const dispatch = useContext(DispatchContext);
-    if (!dispatch) {
-        throw new Error(`useUpdateCustomUrl must be used within a ClusterProvider`);
-    }
-
-    return (customUrl: string) => {
-        updateCluster(dispatch, Cluster.Custom, customUrl);
-    };
 }
 
 export function useCluster() {
@@ -176,8 +128,8 @@ export function useCluster() {
     }
     return {
         ...context,
-        name: clusterName(context.cluster),
-        url: clusterUrl(context.cluster, context.customUrl),
+        name: context.cluster.name,
+        url: context.cluster.uri,
     };
 }
 

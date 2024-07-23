@@ -5,12 +5,12 @@ import * as Cache from '@providers/cache';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { Connection, InflationReward, PublicKey } from '@solana/web3.js';
-import { Cluster } from '@utils/cluster';
+import { Cluster, SolanaCluster } from '@utils/cluster';
 import React from 'react';
 
-const REWARDS_AVAILABLE_EPOCH = new Map<Cluster, number>([
-    [Cluster.MainnetBeta, 132],
-    [Cluster.Testnet, 43],
+const REWARDS_AVAILABLE_EPOCH = new Map<SolanaCluster, number>([
+    [SolanaCluster.MainnetBeta, 132],
+    [SolanaCluster.Testnet, 43],
 ]);
 
 const PAGE_SIZE = 15;
@@ -84,7 +84,7 @@ async function fetchRewards(
         url,
     });
 
-    const lowestAvailableEpoch = REWARDS_AVAILABLE_EPOCH.get(cluster) || 0;
+    const lowestAvailableEpoch = REWARDS_AVAILABLE_EPOCH.get(cluster.cluster as SolanaCluster) || 0;
     const connection = new Connection(url);
 
     if (!fromEpoch) {
@@ -92,9 +92,7 @@ async function fetchRewards(
             const epochInfo = await connection.getEpochInfo();
             fromEpoch = epochInfo.epoch - 1;
         } catch (error) {
-            if (cluster !== Cluster.Custom) {
-                console.error(error, { url });
-            }
+            console.error(error, { url });
 
             return dispatch({
                 key: pubkey.toBase58(),
@@ -114,9 +112,7 @@ async function fetchRewards(
             const result = await connection.getInflationReward([pubkey], epoch);
             return result[0];
         } catch (error) {
-            if (cluster !== Cluster.Custom) {
-                console.error(error, { url });
-            }
+            console.error(error, { url });
         }
         return null;
     };
