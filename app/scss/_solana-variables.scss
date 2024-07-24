@@ -95,3 +95,10 @@ $link-color: $primary-dark;
 .text-rainbow-5 {
     color: #1dd79b;
 }
+
+@media (max-width: 575px) {
+    .bg-validator-row {
+        background-color: #b45be1 !important;
+    }
+}
+

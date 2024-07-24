@@ -12,6 +12,7 @@ export function Navbar() {
     const [collapse, setCollapse] = React.useState(false);
     const homePath = useClusterPath({ pathname: '/' });
     const supplyPath = useClusterPath({ pathname: '/supply' });
+    const validatorsPath = useClusterPath({ pathname: '/validators' });
     const inspectorPath = useClusterPath({ pathname: '/tx/inspector' });
     const selectedLayoutSegment = useSelectedLayoutSegment();
     const selectedLayoutSegments = useSelectedLayoutSegments();
@@ -31,28 +32,36 @@ export function Navbar() {
                     <ul className="navbar-nav me-auto">
                         <li className="nav-item">
                             <Link
-                                className={`nav-link${selectedLayoutSegment === null ? ' active' : ''}`}
-                                href={homePath}
+                              className={`nav-link${selectedLayoutSegment === null ? ' active' : ''}`}
+                              href={homePath}
                             >
                                 Cluster Stats
                             </Link>
                         </li>
                         <li className="nav-item">
                             <Link
-                                className={`nav-link${selectedLayoutSegment === 'supply' ? ' active' : ''}`}
-                                href={supplyPath}
+                              className={`nav-link${selectedLayoutSegment === 'validators' ? ' active' : ''}`}
+                              href={validatorsPath}
+                            >
+                                Validators
+                            </Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link
+                              className={`nav-link${selectedLayoutSegment === 'supply' ? ' active' : ''}`}
+                              href={supplyPath}
                             >
                                 Supply
                             </Link>
                         </li>
                         <li className="nav-item">
                             <Link
-                                className={`nav-link${
-                                    selectedLayoutSegments[0] === 'tx' && selectedLayoutSegments[1] === '(inspector)'
-                                        ? ' active'
-                                        : ''
-                                }`}
-                                href={inspectorPath}
+                              className={`nav-link${
+                                selectedLayoutSegments[0] === 'tx' && selectedLayoutSegments[1] === '(inspector)'
+                                  ? ' active'
+                                  : ''
+                              }`}
+                              href={inspectorPath}
                             >
                                 Inspector
                             </Link>
@@ -61,7 +70,7 @@ export function Navbar() {
                 </div>
 
                 <div className="d-none d-md-block">
-                    <ClusterStatusButton />
+                    <ClusterStatusButton/>
                 </div>
             </div>
         </nav>
