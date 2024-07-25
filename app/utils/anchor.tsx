@@ -347,7 +347,7 @@ function SimpleRow({
     return (
         <tr
             style={{
-                ...(nestingLevel === 0 ? {} : { backgroundColor: '#141816' }),
+                ...(nestingLevel === 0 ? {} : { backgroundColor: '#102A3E' }),
             }}
         >
             <td className="d-flex flex-row">
@@ -380,7 +380,7 @@ export function ExpandableRow({
         <>
             <tr
                 style={{
-                    ...(nestingLevel === 0 ? {} : { backgroundColor: '#141816' }),
+                    ...(nestingLevel === 0 ? {} : { backgroundColor: '#102A3E' }),
                 }}
             >
                 <td className="d-flex flex-row">

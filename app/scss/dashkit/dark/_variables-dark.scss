@@ -15,19 +15,19 @@ $gray-200: #edf2f9 !default;
 $gray-300: #e3ebf6 !default;
 $gray-400: #d2ddec !default;
 $gray-500: #b1c2d9 !default;
-$gray-600: #95aac9 !default;
+$gray-600: #1A6B85 !default; // Deep Aqua from the logo
 $gray-700: #6e84a3 !default;
 $gray-800: #3b506c !default;
 $gray-900: #283e59 !default;
-$black: #12263f !default;
+$black: #102A3E !default; // Deeper shade of black
 
-$gray-600-dark: #244166 !default;
-$gray-700-dark: #1e3a5c !default;
-$gray-800-dark: #152e4d !default;
+$gray-600-dark: #343a37 !default; // Keeping the existing color
+$gray-700-dark: #1C3A4D !default; // Lighter Blue Gray for card backgrounds
+$gray-800-dark: #1e2423 !default;
 $gray-900-dark: #132a46 !default;
-$black-dark: #12263f !default;
+$black-dark: #102A3E !default;
 
-$primary: #2c7be5 !default;
+$primary: #3DA8F5 !default; // Light Blue from the logo
 $light: $gray-800-dark !default;
 $lighter: $gray-900-dark !default;
 
@@ -35,7 +35,7 @@ $lighter: $gray-900-dark !default;
 //
 // Settings for the `<body>` element.
 
-$body-bg: $black-dark !default;
+$body-bg: #102A3E !default; // Dark Blue from the logo
 $body-color: $white !default;
 
 // Components
@@ -193,7 +193,7 @@ $navbar-light-input-border-color: $black-dark !default;
 // Cards
 
 $card-outline-color: $gray-800-dark !default;
-$card-box-shadow: 0 0.75rem 1.5rem transparentize($black-dark, 0.5) !default;
+$card-box-shadow: 0 0.5rem 1rem transparentize($black-dark, 0.75) !default;
 
 // Auth
 

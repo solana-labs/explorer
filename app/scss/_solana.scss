@@ -32,7 +32,7 @@ ul.log-messages {
     max-height: 20rem;
     overflow: auto;
     font-size: 0.8125rem;
-    font-family: SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+    font-family: 'Nunito', sans-serif;
 }
 
 .popover-container {
@@ -56,7 +56,7 @@ ul.log-messages {
         }
 
         .popover-body {
-            color: white;
+            color: $white;
         }
 
         .arrow.right {
@@ -262,7 +262,7 @@ ul.tree ul {
 
 ul.tree li {
     margin-left: 0.35em;
-    border-left: thin solid #808080;
+    border-left: thin solid $gray-700-dark;
 }
 
 ul.tree li:last-child {
@@ -274,13 +274,13 @@ ul.tree li:before {
     height: 0.6em;
     margin-right: 0.1em;
     vertical-align: top;
-    border-bottom: thin solid #808080;
+    border-bottom: thin solid $gray-700-dark;
     content: '';
     display: inline-block;
 }
 
 ul.tree li:last-child:before {
-    border-left: thin solid #808080;
+    border-left: thin solid $gray-700-dark;
 }
 
 div.inner-cards {
@@ -314,9 +314,9 @@ div.inner-cards {
 
     div.content {
         font-size: 12px;
-        color: white;
+        color: $white;
         margin: 0px;
-        background: rgba(0, 0, 0, 0.9);
+        background: $gray-900-dark;
         border-radius: 4px;
         text-align: center;
         overflow: hidden;
@@ -324,13 +324,11 @@ div.inner-cards {
 
     div.label {
         padding: 10px;
-        background: #111;
     }
 
     div.value {
         padding: 10px;
-        background: black;
-        border-bottom: 1px solid #333;
+        border-bottom: 1px solid $gray-800-dark;
     }
 
     &:after {
@@ -341,7 +339,6 @@ div.inner-cards {
         left: 50%;
         top: -1px;
         border-right: 10px solid transparent;
-        border-top: 10px solid #111;
         border-left: 10px solid transparent;
         -webkit-transform: translate(-50%, 0);
         transform: translate(-50%, 0);
@@ -355,8 +352,8 @@ div.inner-cards {
 }
 
 .alert-danger.alert-scam {
-    background: red;
-    border: 1px solid red;
+    background: $danger;
+    border: 1px solid $danger;
 }
 
 pre.data-wrap,
@@ -440,47 +437,5 @@ p.updated-time {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    width: 150px;
-}
-
-.no-overflow-with-ellipsis {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-// security-txt css hacks
-.security-txt ul {
-    list-style: none;
-    text-align: right;
-    margin: 0;
-    padding-inline-start: 0;
-}
-
-.security-txt p,
-pre {
-    text-align: left !important;
-    margin: 0;
-}
-
-.security-txt a {
-    white-space: nowrap;
-}
-
-.security-txt td {
-    white-space: unset;
-}
-
-.security-txt code {
-    white-space: pre-wrap;
-    display: block;
-}
-
-.security-txt-link-color-hack-reee {
-    color: white;
-}
-
-.metadata-json-viewer .string-value {
-    word-break: break-all;
+    justify-content: center
 }

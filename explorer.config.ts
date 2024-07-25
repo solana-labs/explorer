@@ -1,24 +1,13 @@
 const explorer = {
     clusters: [
         {
-            cluster: 'mainnet',
-            name: 'Mainnet Beta',
-            uri: 'https://explorer-api.mainnet-beta.solana.com',
-        },
-        {
-            cluster: 'testnet',
-            name: 'Testnet',
-            uri: 'https://explorer-api.testnet.solana.com',
-        },
-        {
-            cluster: 'devnet',
-            name: 'Devnet',
-            uri: 'https://explorer-api.testnet.solana.com',
+            cluster: 'zumanet',
+            name: 'Zumanet',
+            uri: 'http://145.40.115.243:8899',
         },
     ],
     features: {
-        addCluster: true,
-        pingStats: true,
+        pingStats: false,
     },
     metadata: {
         description: 'Explorer is a simple file explorer',

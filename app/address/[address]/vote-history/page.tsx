@@ -11,8 +11,8 @@ type Props = Readonly<{
 
 export async function generateMetadata(props: AddressPageMetadataProps): Promise<Metadata> {
     return {
-        description: `Vote history of the address ${props.params.address} by slot on Solana`,
-        title: `Vote History | ${await getReadableTitleFromAddress(props)} | Solana`,
+        description: `Vote history of the address ${props.params.address} by slot`,
+        title: `Vote History | ${await getReadableTitleFromAddress(props)} | Zuma`,
     };
 }
 
