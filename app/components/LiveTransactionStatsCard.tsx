@@ -12,6 +12,8 @@ import { Bar } from 'react-chartjs-2';
 import CountUp from 'react-countup';
 import { RefreshCw } from 'react-feather';
 
+import explorer from '@/explorer.config';
+
 Chart.register(BarElement, CategoryScale, LinearScale, Tooltip);
 
 type Series = 'short' | 'medium' | 'long';
@@ -40,7 +42,7 @@ export function LiveTransactionStatsCard() {
                 <h4 className="card-header-title">Live Transaction Stats</h4>
             </div>
             <TpsCardBody series={series} setSeries={setSeries} />
-            <PingStatsCardBody series={series} setSeries={setSeries} />
+            {explorer.features.pingStats && <PingStatsCardBody series={series} setSeries={setSeries} />}
         </div>
     );
 }
@@ -64,6 +66,7 @@ const TPS_CHART_OPTIONS = (historyMaxTps: number): ChartOptions<'bar'> => {
         },
         plugins: {
             tooltip: {
+                displayColors: true,
                 enabled: false, // Disable the on-canvas tooltip
                 external(context) {
                     // Tooltip Element
@@ -115,6 +118,7 @@ const TPS_CHART_OPTIONS = (historyMaxTps: number): ChartOptions<'bar'> => {
                 intersect: false,
             },
         },
+
         resizeDelay: 0,
         scales: {
             x: {
@@ -160,16 +164,17 @@ function TpsBarChart({ performanceInfo, series, setSeries }: TpsBarChartProps) {
 
     const seriesLength = seriesData.length;
     const chartData: ChartData<'bar'> = {
+        // TODO: Pull color from theme
         datasets: [
             {
-                backgroundColor: '#00D192',
+                backgroundColor: '#3DA8F5',
                 borderWidth: 0,
                 data: seriesData.map(val => val || 0),
-                hoverBackgroundColor: '#00D192',
+                hoverBackgroundColor: '#34B2C9',
             },
         ],
         labels: seriesData.map((val, i) => {
-            return `${SERIES_INFO[series].label(seriesLength - i)}min ago`;
+            return `${SERIES_INFO[series].label(seriesLength - i)} min ago`;
         }),
     };
 

@@ -21,7 +21,7 @@ export function StatsNotReady({ error }: { error: boolean }) {
         };
     }, [setTimedOut, cluster, error]);
 
-    if (error || !active) {
+    if (!active) {
         return (
             <div className="card-body text-center">
                 There was a problem loading cluster stats.{' '}

@@ -77,9 +77,7 @@ async function fetchRawTransaction(dispatch: Dispatch, signature: TransactionSig
             url,
         });
     } catch (error) {
-        if (cluster !== Cluster.Custom) {
-            console.error(error, { url });
-        }
+        console.error(error, { url });
     }
 }
 

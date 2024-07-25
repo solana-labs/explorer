@@ -2,21 +2,15 @@
 
 import { useCluster } from '@providers/cluster';
 import { useStatsProvider } from '@providers/stats/solanaClusterStats';
-import { Cluster, clusterSlug } from '@utils/cluster';
+import { Cluster } from '@utils/cluster';
 import { fetch } from 'cross-fetch';
 import React from 'react';
 import useTabVisibility from 'use-tab-visibility';
 
 const FETCH_PING_INTERVAL = 60 * 1000;
 
-function getPingUrl(cluster: Cluster) {
-    const slug = clusterSlug(cluster);
-
-    if (slug === 'custom') {
-        return undefined;
-    }
-
-    return `https://ping.solana.com/${slug}/last6hours`;
+function getPingUrl({ cluster }: Cluster) {
+    return `https://ping.solana.com/${cluster}/last6hours`;
 }
 
 export type PingMetric = {

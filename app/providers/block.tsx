@@ -105,9 +105,7 @@ export async function fetchBlock(dispatch: Dispatch, url: string, cluster: Clust
         }
     } catch (err) {
         status = FetchStatus.FetchFailed;
-        if (cluster !== Cluster.Custom) {
-            console.error(err, { tags: { url } });
-        }
+        console.error(err, { tags: { url } });
     }
 
     dispatch({

@@ -10,8 +10,8 @@ type Props = Readonly<{
 
 export async function generateMetadata({ params: { epoch } }: Props): Promise<Metadata> {
     return {
-        description: `Summary of ${epoch} on Solana`,
-        title: `Epoch | ${epoch} | Solana`,
+        description: `Summary of ${epoch}`,
+        title: `Epoch | ${epoch} | Zuma`,
     };
 }
 

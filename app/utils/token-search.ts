@@ -8,7 +8,7 @@
 
 import { Base58EncodedAddress } from 'web3js-experimental';
 
-import { Cluster } from './cluster';
+import { Cluster, SolanaCluster } from './cluster';
 
 type TokenSearchApiResponseToken = {
     address: Base58EncodedAddress;
@@ -37,11 +37,13 @@ export async function searchTokens(search: string, cluster: Cluster): Promise<Se
         return [];
     }
 
+    const slug = cluster.cluster;
+
     // See https://github.com/solflare-wallet/utl-sdk/blob/master/src/types.ts#L5
     let chainId: number;
-    if (cluster === Cluster.MainnetBeta) chainId = 101;
-    else if (cluster === Cluster.Testnet) chainId = 102;
-    else if (cluster === Cluster.Devnet) chainId = 103;
+    if (slug === SolanaCluster.MainnetBeta) chainId = 101;
+    else if (slug === SolanaCluster.Testnet) chainId = 102;
+    else if (slug === SolanaCluster.Devnet) chainId = 103;
     else {
         return [];
     }

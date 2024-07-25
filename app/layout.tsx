@@ -7,13 +7,13 @@ import { Navbar } from '@components/Navbar';
 import { SearchBar } from '@components/SearchBar';
 import { ClusterProvider } from '@providers/cluster';
 import { ScrollAnchorProvider } from '@providers/scroll-anchor';
-import { Rubik } from 'next/font/google';
+import { Nunito } from 'next/font/google';
 import { Metadata } from 'next/types';
 
 export const metadata: Metadata = {
-    description: 'Inspect transactions, accounts, blocks, and more on the Solana blockchain',
+    description: 'Inspect transactions, accounts, blocks, and more on the Zuma SVM blockchain',
     manifest: '/manifest.json',
-    title: 'Explorer | Solana',
+    title: 'Explorer  | Zuma',
     viewport: {
         initialScale: 1,
         maximumScale: 1,
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     },
 };
 
-const rubikFont = Rubik({
+const font = Nunito({
     display: 'swap',
     subsets: ['latin'],
     variable: '--explorer-default-font',
@@ -36,7 +36,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        <html lang="en" className={`${rubikFont.variable}`}>
+        <html lang="en" className={`${font.variable}`}>
             <body>
                 <ScrollAnchorProvider>
                     <ClusterProvider>

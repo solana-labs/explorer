@@ -24,7 +24,7 @@ export function getProgramName(address: string, cluster: Cluster): string {
 
 function programLabel(address: string, cluster: Cluster): string | undefined {
     const programInfo = PROGRAM_INFO_BY_ID[address];
-    if (programInfo && programInfo.deployments.includes(cluster)) {
+    if (programInfo && (!programInfo.deployments || programInfo.deployments.includes(cluster.cluster))) {
         return programInfo.name;
     }
 

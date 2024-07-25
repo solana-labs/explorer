@@ -4,7 +4,7 @@ import * as Cache from '@providers/cache';
 import { ActionType, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { Connection, SignatureResult, TransactionConfirmationStatus, TransactionSignature } from '@solana/web3.js';
-import { Cluster } from '@utils/cluster';
+import { Cluster, SolanaCluster } from '@utils/cluster';
 import React from 'react';
 
 import { DetailsProvider } from './parsed';
@@ -90,7 +90,7 @@ export async function fetchTransactionStatus(
             try {
                 blockTime = await connection.getBlockTime(value.slot);
             } catch (error) {
-                if (cluster === Cluster.MainnetBeta && confirmations === 'max') {
+                if (cluster.cluster === SolanaCluster.MainnetBeta && confirmations === 'max') {
                     console.error(error, { slot: `${value.slot}` });
                 }
             }
@@ -107,9 +107,8 @@ export async function fetchTransactionStatus(
         data = { info, signature };
         fetchStatus = FetchStatus.Fetched;
     } catch (error) {
-        if (cluster !== Cluster.Custom) {
-            console.error(error, { url });
-        }
+        console.error(error, { url });
+
         fetchStatus = FetchStatus.FetchFailed;
     }
 

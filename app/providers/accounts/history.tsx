@@ -139,9 +139,7 @@ async function fetchAccountHistory(
         };
         status = FetchStatus.Fetched;
     } catch (error) {
-        if (cluster !== Cluster.Custom) {
-            console.error(error, { url });
-        }
+        console.error(error, { url });
         status = FetchStatus.FetchFailed;
     }
 
@@ -151,9 +149,7 @@ async function fetchAccountHistory(
             const signatures = history.fetched.map(signature => signature.signature).concat(additionalSignatures || []);
             transactionMap = await fetchParsedTransactions(url, signatures);
         } catch (error) {
-            if (cluster !== Cluster.Custom) {
-                console.error(error, { url });
-            }
+            console.error(error, { url });
             status = FetchStatus.FetchFailed;
         }
     }

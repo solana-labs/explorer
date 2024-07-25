@@ -1,7 +1,7 @@
 import { Connection, PublicKey } from '@solana/web3.js';
 import { ChainId, Client, Token, UtlConfig } from '@solflare-wallet/utl-sdk';
 
-import { Cluster } from './cluster';
+import { Cluster, SolanaCluster } from './cluster';
 
 type TokenExtensions = {
     readonly website?: string;
@@ -40,9 +40,10 @@ type FullLegacyTokenInfoList = {
 };
 
 function getChainId(cluster: Cluster): ChainId | undefined {
-    if (cluster === Cluster.MainnetBeta) return ChainId.MAINNET;
-    else if (cluster === Cluster.Testnet) return ChainId.TESTNET;
-    else if (cluster === Cluster.Devnet) return ChainId.DEVNET;
+    const slug = cluster.cluster;
+    if (slug === SolanaCluster.MainnetBeta) return ChainId.MAINNET;
+    else if (slug === SolanaCluster.Testnet) return ChainId.TESTNET;
+    else if (slug === SolanaCluster.Devnet) return ChainId.DEVNET;
     else return undefined;
 }
 
@@ -74,8 +75,8 @@ export async function getTokenInfo(
 }
 
 type UtlApiResponse = {
-    content: Token[]
-}
+    content: Token[];
+};
 
 export async function getTokenInfoWithoutOnChainFallback(
     address: PublicKey,
@@ -89,17 +90,17 @@ export async function getTokenInfoWithoutOnChainFallback(
     const response = await fetch(`https://token-list-api.solana.cloud/v1/mints?chainId=${chainId}`, {
         body: JSON.stringify({ addresses: [address.toBase58()] }),
         headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
         },
         method: 'POST',
-    })
+    });
 
     if (response.status >= 400) {
         console.error(`Error calling UTL API for address ${address} on chain ID ${chainId}. Status ${response.status}`);
-        return undefined
+        return undefined;
     }
 
-    const fetchedData = await response.json() as UtlApiResponse;
+    const fetchedData = (await response.json()) as UtlApiResponse;
     return fetchedData.content[0];
 }
 
@@ -141,9 +142,9 @@ export async function getFullTokenInfo(
     if (!sdkTokenInfo) {
         return legacyCdnTokenInfo
             ? {
-                ...legacyCdnTokenInfo,
-                verified: true,
-            }
+                  ...legacyCdnTokenInfo,
+                  verified: true,
+              }
             : undefined;
     }
 

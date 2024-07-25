@@ -10,7 +10,7 @@ import { useFetchAccountHistory } from '@providers/accounts/history';
 import { FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { ParsedInstruction, ParsedTransactionWithMeta, PartiallyDecodedInstruction, PublicKey } from '@solana/web3.js';
-import { Cluster } from '@utils/cluster';
+import { Cluster, SolanaCluster } from '@utils/cluster';
 import { normalizeTokenAmount } from '@utils/index';
 import { InstructionContainer } from '@utils/instruction';
 import React, { useMemo } from 'react';
@@ -30,7 +30,7 @@ type IndexedTransfer = {
 };
 
 async function fetchTokenInfo([_, address, cluster, url]: ['get-token-info', string, Cluster, string]) {
-    return await getTokenInfo(new PublicKey(address), cluster, url)
+    return await getTokenInfo(new PublicKey(address), cluster, url);
 }
 
 export function TokenTransfersCard({ address }: { address: string }) {
@@ -229,7 +229,7 @@ function getTransfer(
                 return create(instruction.parsed.info, Transfer);
             }
         } catch (error) {
-            if (cluster === Cluster.MainnetBeta) {
+            if (cluster.cluster === SolanaCluster.MainnetBeta) {
                 console.error(error, {
                     signature,
                 });

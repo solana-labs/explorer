@@ -23,7 +23,7 @@ import {
 } from '@providers/transactions';
 import { useFetchTransactionDetails } from '@providers/transactions/parsed';
 import { ParsedTransaction, SystemInstruction, SystemProgram, TransactionSignature } from '@solana/web3.js';
-import { Cluster, ClusterStatus } from '@utils/cluster';
+import { ClusterStatus, SolanaCluster } from '@utils/cluster';
 import { displayTimestamp } from '@utils/date';
 import { SignatureProps } from '@utils/index';
 import { getTransactionInstructionError } from '@utils/program-err';
@@ -212,11 +212,12 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
         const err = getTransactionErrorReason(info, transaction);
         errorReason = err.errorReason;
         if (err.errorLink !== undefined) {
-            if (cluster === Cluster.MainnetBeta) {
+            if (cluster.cluster === SolanaCluster.MainnetBeta) {
                 errorLink = err.errorLink;
             } else {
-                errorLink = `${err.errorLink}?cluster=${clusterName.toLowerCase()}${cluster === Cluster.Custom ? `&customUrl=${clusterUrl}` : ''
-                    }`;
+                errorLink = `${err.errorLink}?cluster=${clusterName.toLowerCase()}${
+                    cluster.cluster === SolanaCluster.Custom ? `&customUrl=${clusterUrl}` : ''
+                }`;
             }
         }
     }
@@ -320,7 +321,7 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
 
                 {fee && (
                     <tr>
-                        <td>Fee (SOL)</td>
+                        <td>Fee (ZUMA)</td>
                         <td className="text-lg-end">
                             <SolBalance lamports={fee} />
                         </td>
@@ -442,8 +443,8 @@ function AccountsCard({ signature }: SignatureProps) {
                         <tr>
                             <th className="text-muted">#</th>
                             <th className="text-muted">Address</th>
-                            <th className="text-muted">Change (SOL)</th>
-                            <th className="text-muted">Post Balance (SOL)</th>
+                            <th className="text-muted">Change (ZUMA)</th>
+                            <th className="text-muted">Post Balance (ZUMA)</th>
                             <th className="text-muted">Details</th>
                         </tr>
                     </thead>

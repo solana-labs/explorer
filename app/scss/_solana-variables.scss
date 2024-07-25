@@ -7,6 +7,11 @@
 // Remove the "//" to comment it in and see it in action!
 $body-bg: #f9fdfc !default;
 
+
+$font-size-base: 1.125rem !default; // 18px
+$font-size-sm: 1rem !default; // 16px
+$font-size-lg: 1.25rem !default; // 20px
+
 // Colors
 
 $white: #ffffff !default;
@@ -21,21 +26,21 @@ $gray-800: #387462;
 $gray-900: #1b4e3f;
 $black: #232323;
 
-$rainbow-1: #fa62fc;
-$rainbow-2: #be84e8;
-$rainbow-3: #79abd2;
-$rainbow-4: #38d0bd;
-$rainbow-5: #1dd79b;
+$rainbow-1: #3DA8F5 !default;
+$rainbow-2: #56D9FE !default;
+$rainbow-3: #34B2C9 !default;
+$rainbow-4: #1A6B85 !default;
+$rainbow-5: #102A3E !default;
 
-$primary: #42ba96 !default;
-$primary-dark: #33a382 !default;
-$success: #19be56 !default;
-$secondary: $gray-700;
-$danger: #b45be1;
-$warning: #d83aeb !default;
-$info: #43b5c5 !default;
-$light: $gray-100;
-$dark: $gray-900;
+$primary: #3DA8F5 !default;
+$primary-dark: #34B2C9 !default;
+$success: #2BC4A0 !default;
+$secondary: #34B2C9 !default;
+$danger: #E63946 !default;
+$warning: #B565C5 !default;
+$info: #1A6B85 !default;
+$light: #f9fbfd !default;
+$dark: #102A3E !default;
 
 $theme-colors: (
     'black': $black,
@@ -50,48 +55,48 @@ $link-color: $primary-dark;
 // Global
 
 .display-2 {
-    font-family: Saira, Helvetica, sans-serif;
+    font-family: 'Nunito', sans-serif;
 }
 
 .text-rainbow {
-    background: linear-gradient(0.3turn, #e400ff, #00ffbd);
+    background: linear-gradient(0.3turn, $rainbow-1, $rainbow-2);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
 .bg-rainbow {
-    background: linear-gradient(0.3turn, #e400ff, #00ffbd);
+    background: linear-gradient(0.3turn, $rainbow-1, $rainbow-2);
 }
 
 .bg-rainbow-1 {
-    background: #fa62fc;
+    background: $rainbow-1;
 }
 .bg-rainbow-2 {
-    background: #be84e8;
+    background: $rainbow-2;
 }
 .bg-rainbow-3 {
-    background: #79abd2;
+    background: $rainbow-3;
 }
 .bg-rainbow-4 {
-    background: #38d0bd;
+    background: $rainbow-4;
 }
 .bg-rainbow-5 {
-    background: #1dd79b;
+    background: $rainbow-5;
 }
 
 .text-rainbow-1 {
-    color: #fa62fc;
+    color: $rainbow-1;
 }
 .text-rainbow-2 {
-    color: #be84e8;
+    color: $rainbow-2;
 }
 .text-rainbow-3 {
-    color: #79abd2;
+    color: $rainbow-3;
 }
 .text-rainbow-4 {
-    color: #38d0bd;
+    color: $rainbow-4;
 }
 .text-rainbow-5 {
-    color: #1dd79b;
+    color: $rainbow-5;
 }

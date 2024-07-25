@@ -197,7 +197,6 @@ async function fetchMultipleAccounts({
     dispatch,
     pubkeys,
     dataMode,
-    cluster,
     url,
 }: {
     dispatch: Dispatch;
@@ -292,9 +291,7 @@ async function fetchMultipleAccounts({
                 });
             }
         } catch (error) {
-            if (cluster !== Cluster.Custom) {
-                console.error(error, { url });
-            }
+            console.error(error, { url });
 
             for (const pubkey of batch) {
                 dispatch({

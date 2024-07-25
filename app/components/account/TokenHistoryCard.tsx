@@ -19,7 +19,7 @@ import { CacheEntry, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { Details, useFetchTransactionDetails, useTransactionDetailsCache } from '@providers/transactions/parsed';
 import { ConfirmedSignatureInfo, ParsedInstruction, PartiallyDecodedInstruction, PublicKey } from '@solana/web3.js';
-import { Cluster } from '@utils/cluster';
+import { Cluster, SolanaCluster } from '@utils/cluster';
 import { INNER_INSTRUCTIONS_START_SLOT } from '@utils/index';
 import { getTokenProgramInstructionName } from '@utils/instruction';
 import { displayAddress, intoTransactionInstruction } from '@utils/tx';
@@ -298,9 +298,7 @@ const FilterDropdown = ({ filter, toggle, show, tokens }: FilterProps) => {
                             className={`dropdown-item${filterOption === filter ? ' active' : ''}`}
                             onClick={toggle}
                         >
-                            {filterOption === ALL_TOKENS
-                                ? 'All Tokens'
-                                : nameLookup.get(filterOption) || filterOption}
+                            {filterOption === ALL_TOKENS ? 'All Tokens' : nameLookup.get(filterOption) || filterOption}
                         </Link>
                     );
                 })}
@@ -375,7 +373,8 @@ const TokenTransactionRow = React.memo(function TokenTransactionRow({
 
                 if (
                     transactionWithMeta.meta?.innerInstructions &&
-                    (cluster !== Cluster.MainnetBeta || transactionWithMeta.slot >= INNER_INSTRUCTIONS_START_SLOT)
+                    (cluster.cluster !== SolanaCluster.MainnetBeta ||
+                        transactionWithMeta.slot >= INNER_INSTRUCTIONS_START_SLOT)
                 ) {
                     transactionWithMeta.meta.innerInstructions.forEach(ix => {
                         if (ix.index === index) {
