@@ -27,7 +27,7 @@
         "@solana/web3.js": "^1.66.6",
         "@solflare-wallet/utl-sdk": "^1.4.0",
         "@types/bn.js": "5.1.0",
-        "axios": "^0.27.2",
+        "axios": "^0.28.0",
         "bignumber.js": "^9.0.2",
         "bn.js": "5.2.1",
         "bs58": "^4.0.1",
