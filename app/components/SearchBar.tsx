@@ -72,7 +72,7 @@ export function SearchBar() {
                         loadOptions={performSearch}
                         autoFocus
                         inputId={useId()}
-                        ref={ref => (selectRef.current = ref)}
+                        ref={selectRef}
                         noOptionsMessage={() => 'No Results'}
                         loadingMessage={() => 'loading...'}
                         placeholder="Search for blocks, accounts, transactions, programs, and tokens"
