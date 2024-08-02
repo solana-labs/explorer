@@ -4,7 +4,7 @@ import { Cluster, clusterName, ClusterStatus, clusterUrl, DEFAULT_CLUSTER } from
 import { localStorageIsAvailable } from '@utils/local-storage';
 import { ReadonlyURLSearchParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { createContext, useContext, useEffect, useReducer, useState } from 'react';
-import { createDefaultRpcTransport, createSolanaRpc } from 'web3js-experimental';
+import { createSolanaRpc } from 'web3js-experimental';
 
 import { EpochSchedule } from '../utils/epoch-schedule';
 
@@ -125,8 +125,7 @@ async function updateCluster(dispatch: Dispatch, cluster: Cluster, customUrl: st
         new URL(customUrl);
 
         const transportUrl = clusterUrl(cluster, customUrl);
-        const transport = createDefaultRpcTransport({ url: transportUrl });
-        const rpc = createSolanaRpc({ transport });
+        const rpc = createSolanaRpc(transportUrl);
 
         const [firstAvailableBlock, epochSchedule, epochInfo] = await Promise.all([
             rpc.getFirstAvailableBlock().send(),

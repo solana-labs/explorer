@@ -4,7 +4,7 @@ import { useCluster } from '@providers/cluster';
 import { Cluster } from '@utils/cluster';
 import React from 'react';
 import useTabVisibility from 'use-tab-visibility';
-import { createDefaultRpcTransport, createSolanaRpc } from 'web3js-experimental';
+import { createSolanaRpc } from 'web3js-experimental';
 
 import { DashboardInfo, DashboardInfoActionType, dashboardInfoReducer, EpochInfo } from './solanaDashboardInfo';
 import { PerformanceInfo, PerformanceInfoActionType, performanceInfoReducer, PerformanceSample } from './solanaPerformanceInfo';
@@ -76,8 +76,7 @@ export function SolanaClusterStatsProvider({ children }: Props) {
     React.useEffect(() => {
         if (!active || !isTabVisible || !url) return;
 
-        const transport = createDefaultRpcTransport({ url });
-        const rpc = createSolanaRpc({ transport });
+        const rpc = createSolanaRpc(url);
 
         let lastSlot: bigint | null = null;
         let stale = false;
