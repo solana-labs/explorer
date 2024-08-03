@@ -5,6 +5,9 @@
 export function percentage(numerator: bigint, denominator: bigint, decimals: number): number {
     // since bigint is integer, we need to multiply first to get decimals
     // see https://stackoverflow.com/a/63095380/1375972
+    if (denominator === 0n) {
+        return 0
+    }
     const pow = 10 ** decimals;
     return Number((numerator * BigInt(100 * pow)) / denominator) / pow;
 }
