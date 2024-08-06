@@ -2,7 +2,13 @@ import { HexData } from '@components/common/HexData';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { useCluster } from '@providers/cluster';
 import { useScrollAnchor } from '@providers/scroll-anchor';
-import { AccountMeta, MessageCompiledInstruction, PublicKey, TransactionInstruction, VersionedMessage } from '@solana/web3.js';
+import {
+    AccountMeta,
+    MessageCompiledInstruction,
+    PublicKey,
+    TransactionInstruction,
+    VersionedMessage,
+} from '@solana/web3.js';
 import getInstructionCardScrollAnchorId from '@utils/get-instruction-card-scroll-anchor-id';
 import { getProgramName } from '@utils/tx';
 import React from 'react';
@@ -52,7 +58,7 @@ function InstructionCard({
     ];
     const anchorProgram = useAnchorProgram(programId.toString(), url);
 
-    if (anchorProgram) {
+    if (anchorProgram.program) {
         const accountMetas = ix.accountKeyIndexes.map((accountIndex, _index) => {
             let lookup: PublicKey;
             if (accountIndex >= message.staticAccountKeys.length) {
@@ -79,7 +85,7 @@ function InstructionCard({
         });
 
         return AnchorDetailsCard({
-            anchorProgram: anchorProgram,
+            anchorProgram: anchorProgram.program,
             childIndex: undefined,
             index: index,
             // Inner cards and child are not used since we do not know what CPIs
@@ -91,7 +97,7 @@ function InstructionCard({
             // based on the simulation and pass that result here. Could be added
             // later if desired, possibly similar to innerCards from parsing tx
             // sim logs.
-            result: { err: null},
+            result: { err: null },
             // Signature is not needed.
             signature: '',
         });
