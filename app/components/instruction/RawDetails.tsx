@@ -10,7 +10,7 @@ export function RawDetails({ ix }: { ix: TransactionInstruction }) {
                 <tr key={keyIndex}>
                     <td>
                         <div className="me-2 d-md-inline">Account #{keyIndex + 1}</div>
-                        {isWritable && <span className="badge bg-info-soft me-1">Writable</span>}
+                        {isWritable && <span className="badge bg-danger-soft me-1">Writable</span>}
                         {isSigner && <span className="badge bg-info-soft me-1">Signer</span>}
                     </td>
                     <td className="text-lg-end">

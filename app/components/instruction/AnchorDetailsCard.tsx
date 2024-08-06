@@ -102,7 +102,7 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
                                         : `Remaining Account #${keyIndex + 1 - ixAccounts.length}`
                                     : `Account #${keyIndex + 1}`}
                             </div>
-                            {isWritable && <span className="badge bg-info-soft me-1">Writable</span>}
+                            {isWritable && <span className="badge bg-danger-soft me-1">Writable</span>}
                             {isSigner && <span className="badge bg-info-soft me-1">Signer</span>}
                         </td>
                         <td className="text-lg-end" colSpan={2}>
