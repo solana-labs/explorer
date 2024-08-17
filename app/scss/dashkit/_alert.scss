@@ -19,11 +19,11 @@
 
 @each $color, $value in $theme-colors {
     .alert-#{$color} {
-        @include alert-variant(
-            shift-color($value, $alert-bg-scale),
-            shift-color($value, $alert-border-scale),
-            color-contrast(shift-color($value, $alert-bg-scale))
-        );
+        // @include alert-variant(
+        //     shift-color($value, $alert-bg-scale),
+        //     shift-color($value, $alert-border-scale),
+        //     color-contrast(shift-color($value, $alert-bg-scale))
+        // );
 
         // Divider
         hr {
