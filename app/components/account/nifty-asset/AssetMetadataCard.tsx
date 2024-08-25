@@ -8,7 +8,7 @@ export function NiftyAssetMetadataCard({ asset }: { asset: Asset }) {
     const [json, setJson] = useState(null);
     const metadata = getExtension(asset, ExtensionType.Metadata);
 
-    async function fetchMetadataImage(uri: string) {
+    async function fetchMetadataFile(uri: string) {
         try {
             const response = await fetch(uri);
             const metadata = await response.json();
@@ -18,11 +18,11 @@ export function NiftyAssetMetadataCard({ asset }: { asset: Asset }) {
         }
     }
 
-    if (metadata?.uri) {
-        React.useEffect(() => {
-            fetchMetadataImage(metadata.uri);
-        }, []); // eslint-disable-line react-hooks/exhaustive-deps
-    }
+    React.useEffect(() => {
+        if (metadata?.uri) {
+            fetchMetadataFile(metadata.uri);
+        }
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps    
 
     return (
         <>

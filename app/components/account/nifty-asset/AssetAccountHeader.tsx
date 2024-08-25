@@ -5,23 +5,24 @@ import {
     Blob,
     Creator,
     ExtensionType,
-    Standard,
-    getAssetAccountDataSerializer,
     getExtension,
+    getInternalAssetAccountDataSerializer,
+    Standard,
 } from '@nifty-oss/asset';
 import { Account } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
-import React, { Suspense, createRef, useState } from 'react';
+import React, { createRef, Suspense, useState } from 'react';
 import { AlertOctagon, Check, ChevronDown } from 'react-feather';
 import useAsyncEffect from 'use-async-effect';
+
 import { LoadingArtPlaceholder } from '../../common/LoadingArtPlaceholder';
 import { KNOWN_IMAGE_EXTENSIONS } from './types';
 
 export function NiftyAssetAccountHeader({ account }: { account: Account }) {
     const data = account.data.raw;
-    const asset = data && getAssetAccountDataSerializer().deserialize(data);
+    const asset = data && getInternalAssetAccountDataSerializer().deserialize(data);
 
     if (asset) {
         return (
@@ -65,24 +66,22 @@ export function NiftyAssetHeader({ address, asset }: { address: PublicKey; asset
         }
     }
 
-    if (metadata?.uri && metadata.uri.length > 0) {
-        React.useEffect(() => {
+    React.useEffect(() => {
+        if (metadata?.uri && metadata.uri.length > 0) {
             fetchMetadataImage(metadata.uri);
-        }, []); // eslint-disable-line react-hooks/exhaustive-deps
-    } else {
-        React.useEffect(() => {
+        } else {
             setOnChainImage(hasOnChainImage);
-        }, []); // eslint-disable-line react-hooks/exhaustive-deps
-    }
+        }
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     // check for creators
 
     const creators = getExtension(asset, ExtensionType.Creators);
     const dropdownRef = createRef<HTMLButtonElement>();
 
-    if (creators) {
-        useAsyncEffect(
-            async isMounted => {
+    useAsyncEffect(
+        async isMounted => {
+            if (creators) {
                 if (!dropdownRef.current) {
                     return;
                 }
@@ -91,15 +90,15 @@ export function NiftyAssetHeader({ address, asset }: { address: PublicKey; asset
                     return;
                 }
                 return new Dropdown(dropdownRef.current);
-            },
-            dropdown => {
-                if (dropdown) {
-                    dropdown.dispose();
-                }
-            },
-            [dropdownRef]
-        );
-    }
+            }
+        },
+        dropdown => {
+            if (creators && dropdown) {
+                dropdown.dispose();
+            }
+        },
+        [dropdownRef]
+    );
 
     // check for grouping
 
@@ -240,7 +239,6 @@ function getGroupPill() {
 
 export const OnChainImageContent = ({ extension }: { extension: { type: ExtensionType.Blob } & Blob }) => {
     const base64String = Buffer.from(extension.data).toString('base64');
-    const onchainGroupToolTip = 'This image is stored on the asset account.';
 
     return (
         <div className="justify-content-center" style={{ maxHeight: 200, width: 150 }}>

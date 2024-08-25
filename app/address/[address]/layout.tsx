@@ -1,9 +1,14 @@
 'use client';
 
-import { NiftyAssetAccountHeader } from '@/app/components/account/nifty-asset/AssetAccountHeader';
+import { AddressLookupTableAccountSection } from '@components/account/address-lookup-table/AddressLookupTableAccountSection';
+import { isAddressLookupTableAccount } from '@components/account/address-lookup-table/types';
 import { ConfigAccountSection } from '@components/account/ConfigAccountSection';
 import { FeatureAccountSection } from '@components/account/FeatureAccountSection';
 import { MetaplexNFTHeader } from '@components/account/MetaplexNFTHeader';
+import { isNFTokenAccount, parseNFTokenCollectionAccount } from '@components/account/nftoken/isNFTokenAccount';
+import { NFTOKEN_ADDRESS } from '@components/account/nftoken/nftoken';
+import { NFTokenAccountHeader } from '@components/account/nftoken/NFTokenAccountHeader';
+import { NFTokenAccountSection } from '@components/account/nftoken/NFTokenAccountSection';
 import { NonceAccountSection } from '@components/account/NonceAccountSection';
 import { StakeAccountSection } from '@components/account/StakeAccountSection';
 import { SysvarAccountSection } from '@components/account/SysvarAccountSection';
@@ -11,20 +16,15 @@ import { TokenAccountSection } from '@components/account/TokenAccountSection';
 import { UnknownAccountCard } from '@components/account/UnknownAccountCard';
 import { UpgradeableLoaderAccountSection } from '@components/account/UpgradeableLoaderAccountSection';
 import { VoteAccountSection } from '@components/account/VoteAccountSection';
-import { AddressLookupTableAccountSection } from '@components/account/address-lookup-table/AddressLookupTableAccountSection';
-import { isAddressLookupTableAccount } from '@components/account/address-lookup-table/types';
-import { NFTokenAccountHeader } from '@components/account/nftoken/NFTokenAccountHeader';
-import { NFTokenAccountSection } from '@components/account/nftoken/NFTokenAccountSection';
-import { isNFTokenAccount, parseNFTokenCollectionAccount } from '@components/account/nftoken/isNFTokenAccount';
-import { NFTOKEN_ADDRESS } from '@components/account/nftoken/nftoken';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { Identicon } from '@components/common/Identicon';
 import { LoadingCard } from '@components/common/LoadingCard';
+import { Asset, ASSET_PROGRAM_ID, ExtensionType, getExtension, getInternalAssetAccountDataSerializer } from '@nifty-oss/asset';
 import {
     Account,
     AccountsProvider,
-    TokenProgramData,
     isTokenProgramData,
+    TokenProgramData,
     useAccountInfo,
     useFetchAccountInfo,
     useMintAccountInfo,
@@ -46,9 +46,9 @@ import useSWRImmutable from 'swr/immutable';
 import { Base58EncodedAddress } from 'web3js-experimental';
 
 import { NiftyAssetAccountCard } from '@/app/components/account/nifty-asset/AssetAccountCard';
+import { NiftyAssetAccountHeader } from '@/app/components/account/nifty-asset/AssetAccountHeader';
 import { isNiftyAssetAccount } from '@/app/components/account/nifty-asset/types';
 import { FullTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
-import { ASSET_PROGRAM_ID, Asset, ExtensionType, getAssetAccountDataSerializer, getExtension } from '@nifty-oss/asset';
 
 const IDENTICON_WIDTH = 64;
 
@@ -532,7 +532,7 @@ function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
 
     const isNiftyAsset = account && isNiftyAssetAccount(account.owner, account.data.raw);
     if (isNiftyAsset && account.data.raw) {
-        const asset = account && (getAssetAccountDataSerializer().deserialize(account.data.raw)[0] as Asset);
+        const asset = account && (getInternalAssetAccountDataSerializer().deserialize(account.data.raw)[0] as Asset);
 
         if (asset.extensions.length > 0) {
             const metadata = getExtension(asset, ExtensionType.Metadata);

@@ -1,9 +1,10 @@
 'use client';
 
-import { NiftyAssetMetadataCard } from '@/app/components/account/nifty-asset/AssetMetadataCard';
 import { ParsedAccountRenderer } from '@components/account/ParsedAccountRenderer';
-import { Asset, ExtensionType, getAssetAccountDataSerializer, getExtension } from '@nifty-oss/asset';
+import { Asset, ExtensionType, getExtension, getInternalAssetAccountDataSerializer } from '@nifty-oss/asset';
 import React from 'react';
+
+import { NiftyAssetMetadataCard } from '@/app/components/account/nifty-asset/AssetMetadataCard';
 
 type Props = Readonly<{
     params: {
@@ -16,7 +17,7 @@ function NiftyAssetMetadataCardRenderer({
     onNotFound,
 }: React.ComponentProps<React.ComponentProps<typeof ParsedAccountRenderer>['renderComponent']>) {
     const data = account?.data.raw;
-    const asset = data && getAssetAccountDataSerializer().deserialize(data);
+    const asset = data && getInternalAssetAccountDataSerializer().deserialize(data);
 
     if (asset) {
         const metadata = asset && getExtension(asset[0] as Asset, ExtensionType.Metadata);

@@ -1,11 +1,13 @@
 'use client';
 
-import { useClusterPath } from '@/app/utils/url';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { toWeb3JsPublicKey } from '@metaplex-foundation/umi-web3js-adapters';
 import { Asset, ExtensionType, getExtension } from '@nifty-oss/asset';
 import Link from 'next/link';
 import { AlertOctagon, Check, ExternalLink } from 'react-feather';
+
+import { useClusterPath } from '@/app/utils/url';
+
 import { Address } from '../../common/Address';
 import { Copyable } from '../../common/Copyable';
 import { HexData } from '../../common/HexData';
@@ -19,17 +21,17 @@ export function NiftyAssetExtensionsCard({ asset }: { asset: Asset }) {
             <div className="card-header align-items-center">
                 <h3 className="card-header-title">Extensions</h3>
             </div>
-            {getAttributes(asset)}
-            {getBlob(asset)}
-            {getBucket(asset)}
-            {getCreators(asset)}
-            {getGrouping(asset)}
-            {getLinks(asset)}
-            {getManager(asset)}
-            {getMetadata(asset)}
-            {getProperties(asset)}
-            {getProxy(asset)}
-            {getRoyalties(asset)}
+            <AttributesPanel asset={asset} />
+            <BlobPanel asset={asset} />
+            <BucketPanel asset={asset} />
+            <CreatorsPanel asset={asset} />
+            <GroupingPanel asset={asset} />
+            <LinksPanel asset={asset} />
+            <ManagerPanel asset={asset} />
+            <MetadataPanel asset={asset} />
+            <PropertiesPanel asset={asset} />
+            <ProxyPanel asset={asset} />
+            <RoyaltiesPanel asset={asset} />
         </div>
     );
 }
@@ -37,7 +39,7 @@ export function NiftyAssetExtensionsCard({ asset }: { asset: Asset }) {
 /**
  * Attributes extension.
  */
-function getAttributes(asset: Asset) {
+function AttributesPanel({asset} : {asset: Asset;}) {
     const attributes = getExtension(asset, ExtensionType.Attributes);
 
     if (!attributes) {
@@ -72,7 +74,7 @@ function getAttributes(asset: Asset) {
 /**
  * Blob extension.
  */
-function getBlob(asset: Asset) {
+function BlobPanel({asset} : {asset: Asset;}) {
     const blob = getExtension(asset, ExtensionType.Blob);
 
     if (!blob) {
@@ -120,7 +122,7 @@ function getBlob(asset: Asset) {
 /**
  * Bucket extension.
  */
-function getBucket(asset: Asset) {
+function BucketPanel({asset} : {asset: Asset;}) {
     const bucket = getExtension(asset, ExtensionType.Bucket);
 
     if (!bucket) {
@@ -145,7 +147,7 @@ function getBucket(asset: Asset) {
 /**
  * Creators extension.
  */
-function getCreators(asset: Asset) {
+function CreatorsPanel({asset} : {asset: Asset;}) {
     const creators = getExtension(asset, ExtensionType.Creators);
 
     if (!creators) {
@@ -164,7 +166,6 @@ function getCreators(asset: Asset) {
         );
 
         creators.values.forEach(({ address, verified, share }) => {
-            const creatorPath = useClusterPath({ pathname: `/address/${address}` });
             creatorRows.push(
                 <tr>
                     <td>
@@ -197,7 +198,7 @@ function getCreators(asset: Asset) {
 /**
  * Grouping extension.
  */
-function getGrouping(asset: Asset) {
+function GroupingPanel({asset} : {asset: Asset;}) {
     const grouping = getExtension(asset, ExtensionType.Grouping);
 
     if (!grouping) {
@@ -245,7 +246,7 @@ function getGrouping(asset: Asset) {
 /**
  * Links extension.
  */
-function getLinks(asset: Asset) {
+function LinksPanel({asset} : {asset: Asset;}) {
     const links = getExtension(asset, ExtensionType.Links);
 
     if (!links) {
@@ -285,7 +286,7 @@ function getLinks(asset: Asset) {
 /**
  * Manager extension.
  */
-function getManager(asset: Asset) {
+function ManagerPanel({asset} : {asset: Asset;}) {
     const manager = getExtension(asset, ExtensionType.Manager);
 
     if (!manager) {
@@ -321,7 +322,7 @@ function getManager(asset: Asset) {
 /**
  * Metadata extension.
  */
-function getMetadata(asset: Asset) {
+function MetadataPanel({asset} : {asset: Asset;}) {
     const metadata = getExtension(asset, ExtensionType.Metadata);
 
     if (!metadata) {
@@ -376,7 +377,7 @@ function getMetadata(asset: Asset) {
 /**
  * Properties extension.
  */
-function getProperties(asset: Asset) {
+function PropertiesPanel({asset} : {asset: Asset;}) {
     const properties = getExtension(asset, ExtensionType.Properties);
 
     if (!properties) {
@@ -411,7 +412,7 @@ function getProperties(asset: Asset) {
 /**
  * Proxy extension.
  */
-function getProxy(asset: Asset) {
+function ProxyPanel({asset} : {asset: Asset;}) {
     const proxy = getExtension(asset, ExtensionType.Proxy);
 
     if (!proxy) {
@@ -459,14 +460,13 @@ function getProxy(asset: Asset) {
 /**
  * Royalties extension.
  */
-function getRoyalties(asset: Asset) {
+function RoyaltiesPanel({asset} : {asset: Asset;}) {
+    const addressPath = useClusterPath({ pathname: `/address/${asset.publicKey.toString()}/nifty-asset-ruleset` });
     const royalties = getExtension(asset, ExtensionType.Royalties);
 
     if (!royalties) {
         return null;
     }
-
-    const addressPath = useClusterPath({ pathname: `/address/${asset.publicKey.toString()}/nifty-asset-ruleset` });
 
     return (
         <div className="inner-cards">

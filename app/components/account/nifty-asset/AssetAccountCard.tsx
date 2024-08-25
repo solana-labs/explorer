@@ -2,7 +2,7 @@ import { Address } from '@components/common/Address';
 import { SolBalance } from '@components/common/SolBalance';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { toWeb3JsPublicKey } from '@metaplex-foundation/umi-web3js-adapters';
-import { Asset, Delegate, DelegateRole, State, getAssetAccountDataSerializer } from '@nifty-oss/asset';
+import { Asset, Delegate, DelegateRole, getInternalAssetAccountDataSerializer,State } from '@nifty-oss/asset';
 import { Account } from '@providers/accounts';
 import { useCluster } from '@providers/cluster';
 import { addressLabel } from '@utils/tx';
@@ -12,7 +12,7 @@ export function NiftyAssetAccountCard({ account }: { account: Account }) {
 
     const label = addressLabel(account.pubkey.toBase58(), cluster);
     const data = account.data.raw;
-    const asset = data && (getAssetAccountDataSerializer().deserialize(data)[0] as Asset);
+    const asset = data && (getInternalAssetAccountDataSerializer().deserialize(data)[0] as Asset);
 
     return (
         <div className="card">
