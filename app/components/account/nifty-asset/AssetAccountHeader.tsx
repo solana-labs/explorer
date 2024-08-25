@@ -53,7 +53,7 @@ export function NiftyAssetHeader({ address, asset }: { address: PublicKey; asset
     // check for metadata
 
     const metadata = getExtension(asset, ExtensionType.Metadata);
-    const [image, setImage] = useState(null);
+    const [image, setImage] = useState<string | null>(null);
     const [onChainImage, setOnChainImage] = useState(false);
 
     async function fetchMetadataImage(uri: string) {
@@ -67,7 +67,9 @@ export function NiftyAssetHeader({ address, asset }: { address: PublicKey; asset
     }
 
     React.useEffect(() => {
-        if (metadata?.uri && metadata.uri.length > 0) {
+        if (metadata?.imageUri && metadata.imageUri.length > 0) {
+            setImage(metadata.imageUri);
+        } else if (metadata?.uri && metadata.uri.length > 0) {
             fetchMetadataImage(metadata.uri);
         } else {
             setOnChainImage(hasOnChainImage);
