@@ -83,6 +83,9 @@ export enum PROGRAM_NAMES {
     SOLANART_GO = 'Solanart - Global offers',
     STEPN_DEX = 'STEPN Dex',
     OPENBOOK_DEX = 'OpenBook Dex',
+    // Finternet
+    FINTERNET_USER_MANAGER = 'Finternet - User manager',
+    FINTERNET_TOKEN_MANAGER = 'Finternet - Token manager',
 }
 
 const ALL_CLUSTERS = [Cluster.Custom, Cluster.Devnet, Cluster.Testnet, Cluster.MainnetBeta];
@@ -420,6 +423,14 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: [Cluster.MainnetBeta],
         name: PROGRAM_NAMES.WORMHOLE_TOKEN,
     },
+    CmFuqQTLs2nQof5uaktJn1a6k2VdbGmZPfrJufB2Vm3F : {
+    		deployments:[Cluster.Devnet],
+      	name: PROGRAM_NAMES.FINTERNET_USER_MANAGER
+    },
+    A5JxZVHgXe7fn5TqJXm6Hj2zKh1ptDapae2YjtXbZJoy : {
+    		deployments:[Cluster.Devnet],
+      	name: PROGRAM_NAMES.FINTERNET_TOKEN_MANAGER
+    }
 };
 
 export const SPECIAL_IDS: { [key: string]: string } = {
