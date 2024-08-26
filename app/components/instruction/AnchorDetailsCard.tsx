@@ -1,11 +1,12 @@
 import { Address } from '@components/common/Address';
-import { BorshInstructionCoder, Idl, Instruction, Program } from '@project-serum/anchor';
-import { IdlInstruction } from '@project-serum/anchor/dist/cjs/idl';
+import { BorshEventCoder, BorshInstructionCoder, Idl, Instruction, Program } from '@project-serum/anchor';
+import { IdlEvent, IdlInstruction } from '@project-serum/anchor/dist/cjs/idl';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import {
     getAnchorAccountsFromInstruction,
     getAnchorNameForInstruction,
     getAnchorProgramName,
+    instructionIsSelfCPI,
     mapIxArgsToRows,
 } from '@utils/anchor';
 import { camelToTitleCase } from '@utils/index';
@@ -48,12 +49,29 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
         let decodedIxData: Instruction | null = null;
         let ixDef: IdlInstruction | undefined;
         if (anchorProgram) {
-            const coder = new BorshInstructionCoder(anchorProgram.idl);
-            decodedIxData = coder.decode(ix.data);
-            if (decodedIxData) {
-                ixDef = anchorProgram.idl.instructions.find(ixDef => ixDef.name === decodedIxData?.name);
-                if (ixDef) {
-                    ixAccounts = getAnchorAccountsFromInstruction(decodedIxData, anchorProgram);
+            let coder: BorshInstructionCoder | BorshEventCoder;
+            if (instructionIsSelfCPI(ix.data)) {
+                coder = new BorshEventCoder(anchorProgram.idl);
+                decodedIxData = coder.decode(ix.data.slice(8).toString('base64'));
+                const ixEventDef = anchorProgram.idl.events?.find(
+                    ixDef => ixDef.name === decodedIxData?.name
+                ) as IdlEvent;
+
+                // Remap the event definition to an instruction definition
+                ixDef = { ...ixEventDef, accounts: [], args: ixEventDef.fields };
+
+                // Self-CPI instructions have 1 account called the eventAuthority
+                // https://github.com/coral-xyz/anchor/blob/04985802587c693091f836e0083e4412148c0ca6/lang/attribute/event/src/lib.rs#L165
+                ixAccounts = [{ isMut: false, isSigner: true, name: 'eventAuthority' }];
+            } else {
+                coder = new BorshInstructionCoder(anchorProgram.idl);
+                decodedIxData = coder.decode(ix.data);
+
+                if (decodedIxData) {
+                    ixDef = anchorProgram.idl.instructions.find(ixDef => ixDef.name === decodedIxData?.name);
+                    if (ixDef) {
+                        ixAccounts = getAnchorAccountsFromInstruction(decodedIxData, anchorProgram);
+                    }
                 }
             }
         }
