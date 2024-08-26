@@ -83,6 +83,8 @@ export enum PROGRAM_NAMES {
     SOLANART_GO = 'Solanart - Global offers',
     STEPN_DEX = 'STEPN Dex',
     OPENBOOK_DEX = 'OpenBook Dex',
+    FINTERNET_USER_MANAGER = 'Finternet - User manager',
+    FINTERNET_TOKEN_MANAGER = 'Finternet - Token manager',
 }
 
 const ALL_CLUSTERS = [Cluster.Custom, Cluster.Devnet, Cluster.Testnet, Cluster.MainnetBeta];
@@ -165,6 +167,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: [Cluster.MainnetBeta],
         name: PROGRAM_NAMES.SERUM_3,
     },
+    A5JxZVHgXe7fn5TqJXm6Hj2zKh1ptDapae2YjtXbZJoy: {
+        deployments: [Cluster.Devnet],
+        name: PROGRAM_NAMES.FINTERNET_TOKEN_MANAGER,
+    },
     // spl
     ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL: {
         deployments: ALL_CLUSTERS,
@@ -195,6 +201,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     CLoCKyJ6DXBJqqu2VWx9RLbgnwwR6BMHHuyasVmfMzBh: {
         deployments: [Cluster.MainnetBeta, Cluster.Devnet],
         name: PROGRAM_NAMES.CLOCKWORK_2,
+    },
+    CmFuqQTLs2nQof5uaktJn1a6k2VdbGmZPfrJufB2Vm3F: {
+        deployments: [Cluster.Devnet],
+        name: PROGRAM_NAMES.FINTERNET_USER_MANAGER,
     },
     ComputeBudget111111111111111111111111111111: {
         deployments: ALL_CLUSTERS,
