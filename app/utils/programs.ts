@@ -168,7 +168,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: PROGRAM_NAMES.SERUM_3,
     },
     A5JxZVHgXe7fn5TqJXm6Hj2zKh1ptDapae2YjtXbZJoy: {
-        deployments: [Cluster.Devnet],
+        deployments: [Cluster.Devnet, Cluster.MainnetBeta],
         name: PROGRAM_NAMES.FINTERNET_TOKEN_MANAGER,
     },
     // spl
@@ -203,7 +203,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: PROGRAM_NAMES.CLOCKWORK_2,
     },
     CmFuqQTLs2nQof5uaktJn1a6k2VdbGmZPfrJufB2Vm3F: {
-        deployments: [Cluster.Devnet],
+        deployments: [Cluster.Devnet,Cluster.MainnetBeta],
         name: PROGRAM_NAMES.FINTERNET_USER_MANAGER,
     },
     ComputeBudget111111111111111111111111111111: {
