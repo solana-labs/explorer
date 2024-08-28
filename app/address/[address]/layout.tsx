@@ -41,15 +41,16 @@ import { useClusterPath } from '@utils/url';
 import { MetadataPointer, TokenMetadata } from '@validators/accounts/token-extension';
 import Link from 'next/link';
 import { redirect, useSelectedLayoutSegment } from 'next/navigation';
-import React, { PropsWithChildren, Suspense } from 'react';
+import React, { PropsWithChildren, Suspense, useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { create } from 'superstruct';
 import useSWRImmutable from 'swr/immutable';
 import { Base58EncodedAddress } from 'web3js-experimental';
 
 import { CompressedNftAccountHeader, CompressedNftCard } from '@/app/components/account/CompressedNftCard';
-import { useCompressedNft } from '@/app/providers/compressed-nft';
+import { useCompressedNft, useMetadataJsonLink } from '@/app/providers/compressed-nft';
 import { FullTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
+import { MintAccountInfo } from '@/app/validators/accounts/token';
 
 const IDENTICON_WIDTH = 64;
 
@@ -257,11 +258,6 @@ function AccountHeader({
     tokenInfo?: FullTokenInfo;
     isTokenInfoLoading: boolean;
 }) {
-    interface State {
-        name: string;
-        image: string;
-    }
-    const [tokenData, setTokenData] = React.useState<State>({ image: '', name: '' });
     const mintInfo = useMintAccountInfo(address);
 
     const parsedData = account?.data.parsed;
@@ -277,89 +273,7 @@ function AccountHeader({
     }
 
     if (isToken && !isTokenInfoLoading) {
-        let token: { logoURI?: string; name?: string } = {};
-        let unverified = false;
-
-        const metadataExtension = mintInfo?.extensions?.find(
-            ({ extension }: { extension: string }) => extension === 'tokenMetadata'
-        );
-        const metadataPointerExtension = mintInfo?.extensions?.find(
-            ({ extension }: { extension: string }) => extension === 'metadataPointer'
-        );
-
-        if (metadataPointerExtension && metadataExtension) {
-            const tokenMetadata = create(metadataExtension.state, TokenMetadata);
-            const { metadataAddress } = create(metadataPointerExtension.state, MetadataPointer);
-
-            (async () => {
-                try {
-                    // Avoid re-renders once tokenData has been set
-                    if (!tokenData.name && !tokenData.image) {
-                        const response = await fetch(tokenMetadata.uri);
-                        setTokenData(await response.json());
-                    }
-                } catch (err) {
-                    console.error(err);
-                }
-            })();
-
-            // Handles the basic case where MetadataPointer is reference the Token Metadata extension directly
-            // Does not handle the case where MetadataPointer is pointing at a separate account.
-            if (metadataAddress?.toString() === address) {
-                token.name = tokenData?.name;
-                token.logoURI = tokenData?.image;
-            }
-        }
-        // Fall back to legacy token list when there is stub metadata (blank uri), updatable by default by the mint authority
-        else if (!parsedData?.nftData?.metadata.data.uri && tokenInfo) {
-            token = tokenInfo;
-        } else if (parsedData?.nftData) {
-            token = {
-                logoURI: parsedData?.nftData?.json?.image,
-                name: parsedData?.nftData?.json?.name ?? parsedData?.nftData.metadata.data.name,
-            };
-            if (!tokenInfo?.verified) {
-                unverified = true;
-            }
-        } else if (tokenInfo) {
-            token = tokenInfo;
-        }
-
-        return (
-            <div className="row align-items-end">
-                {unverified && (
-                    <div className="alert alert-warning alert-scam" role="alert">
-                        Warning! Token names and logos are not unique. This token may have spoofed its name and logo to
-                        look like another token. Verify the token&apos;s mint address to ensure it is correct.
-                    </div>
-                )}
-                <div className="col-auto">
-                    <div className="avatar avatar-lg header-avatar-top">
-                        {token?.logoURI ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                                alt="token logo"
-                                className="avatar-img rounded-circle border border-4 border-body"
-                                height={16}
-                                src={token.logoURI}
-                                width={16}
-                            />
-                        ) : (
-                            <Identicon
-                                address={address}
-                                className="avatar-img rounded-circle border border-body identicon-wrapper"
-                                style={{ width: IDENTICON_WIDTH }}
-                            />
-                        )}
-                    </div>
-                </div>
-
-                <div className="col mb-3 ms-n3 ms-md-n2">
-                    <h6 className="header-pretitle">Token</h6>
-                    <h2 className="header-title">{token?.name || 'Unknown Token'}</h2>
-                </div>
-            </div>
-        );
+        return <TokenMintHeader address={address} mintInfo={mintInfo} parsedData={parsedData} tokenInfo={tokenInfo} />;
     }
 
     const fallback = (
@@ -378,6 +292,142 @@ function AccountHeader({
         );
     }
     return fallback;
+}
+
+function TokenMintHeader({
+    address,
+    tokenInfo,
+    mintInfo,
+    parsedData,
+}: {
+    address: string;
+    tokenInfo?: FullTokenInfo;
+    mintInfo?: MintAccountInfo;
+    parsedData?: TokenProgramData;
+}): JSX.Element {
+    const metadataExtension = mintInfo?.extensions?.find(
+        ({ extension }: { extension: string }) => extension === 'tokenMetadata'
+    );
+    const metadataPointerExtension = mintInfo?.extensions?.find(
+        ({ extension }: { extension: string }) => extension === 'metadataPointer'
+    );
+
+    const defaultCard = useMemo(
+        () => (
+            <TokenMintHeaderCard
+                token={tokenInfo ? tokenInfo : { logoURI: undefined, name: undefined }}
+                address={address}
+                unverified={tokenInfo ? !tokenInfo.verified : false}
+            />
+        ),
+        [address, tokenInfo]
+    );
+
+    if (metadataPointerExtension && metadataExtension) {
+        return (
+            <>
+                <ErrorBoundary fallback={defaultCard}>
+                    <Suspense fallback={defaultCard}>
+                        <Token22MintHeader
+                            address={address}
+                            metadataExtension={metadataExtension as any}
+                            metadataPointerExtension={metadataPointerExtension as any}
+                        />
+                    </Suspense>
+                </ErrorBoundary>
+            </>
+        );
+    }
+    // Fall back to legacy token list when there is stub metadata (blank uri), updatable by default by the mint authority
+    else if (!parsedData?.nftData?.metadata.data.uri && tokenInfo) {
+        return defaultCard;
+    } else if (parsedData?.nftData) {
+        const token = {
+            logoURI: parsedData?.nftData?.json?.image,
+            name: parsedData?.nftData?.json?.name ?? parsedData?.nftData.metadata.data.name,
+        };
+        return <TokenMintHeaderCard token={token} address={address} unverified={!tokenInfo?.verified} />;
+    } else if (tokenInfo) {
+        return defaultCard;
+    }
+    return defaultCard;
+}
+
+function Token22MintHeader({
+    address,
+    metadataExtension,
+    metadataPointerExtension,
+}: {
+    address: string;
+    metadataExtension: { extension: 'tokenMetadata'; state?: any };
+    metadataPointerExtension: { extension: 'metadataPointer'; state?: any };
+}) {
+    const tokenMetadata = create(metadataExtension.state, TokenMetadata);
+    const { metadataAddress } = create(metadataPointerExtension.state, MetadataPointer);
+    const metadata = useMetadataJsonLink(tokenMetadata.uri);
+
+    if (!metadata) {
+        throw new Error('Could not load metadata from given URI');
+    }
+
+    // Handles the basic case where MetadataPointer is referencing the Token Metadata extension directly
+    // Does not handle the case where MetadataPointer is pointing at a separate account.
+    if (metadataAddress?.toString() === address) {
+        return (
+            <TokenMintHeaderCard
+                address={address}
+                token={{ logoURI: metadata.image, name: metadata.name }}
+                unverified={false}
+            />
+        );
+    }
+    throw new Error('Metadata loading for non-token 2022 programs is not yet supported');
+}
+
+function TokenMintHeaderCard({
+    address,
+    token,
+    unverified,
+}: {
+    address: string;
+    token: { name?: string | undefined; logoURI?: string | undefined };
+    unverified: boolean;
+}) {
+    return (
+        <div className="row align-items-end">
+            {unverified && (
+                <div className="alert alert-warning alert-scam" role="alert">
+                    Warning! Token names and logos are not unique. This token may have spoofed its name and logo to look
+                    like another token. Verify the token&apos;s mint address to ensure it is correct.
+                </div>
+            )}
+            <div className="col-auto">
+                <div className="avatar avatar-lg header-avatar-top">
+                    {token?.logoURI ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                            alt="token logo"
+                            className="avatar-img rounded-circle border border-4 border-body"
+                            height={16}
+                            src={token.logoURI}
+                            width={16}
+                        />
+                    ) : (
+                        <Identicon
+                            address={address}
+                            className="avatar-img rounded-circle border border-body identicon-wrapper"
+                            style={{ width: IDENTICON_WIDTH }}
+                        />
+                    )}
+                </div>
+            </div>
+
+            <div className="col mb-3 ms-n3 ms-md-n2">
+                <h6 className="header-pretitle">Token</h6>
+                <h2 className="header-title">{token?.name || 'Unknown Token'}</h2>
+            </div>
+        </div>
+    );
 }
 
 function DetailsSections({
