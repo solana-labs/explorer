@@ -1,9 +1,13 @@
 import useSWRImmutable from 'swr/immutable';
 
-export function useMetadataJsonLink(url: string) {
-    const { data, error } = useSWRImmutable(url, async (url: string) => {
-        return fetch(url).then(response => response.json());
-    });
+export function useMetadataJsonLink(url: string, options?: { suspense?: boolean }) {
+    const { data, error } = useSWRImmutable(
+        url,
+        async (url: string) => {
+            return fetch(url).then(response => response.json());
+        },
+        { suspense: options?.suspense }
+    );
     return error ? null : data;
 }
 

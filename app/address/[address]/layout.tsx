@@ -34,7 +34,7 @@ import { useAnchorProgram } from '@providers/anchor';
 import { CacheEntry, FetchStatus } from '@providers/cache';
 import { useCluster } from '@providers/cluster';
 import { PROGRAM_ID as ACCOUNT_COMPRESSION_ID } from '@solana/spl-account-compression';
-import { PublicKey } from '@solana/web3.js';
+import { Ed25519Program, PublicKey } from '@solana/web3.js';
 import { Cluster, ClusterStatus } from '@utils/cluster';
 import { FEATURE_PROGRAM_ID } from '@utils/parseFeatureAccount';
 import { useClusterPath } from '@utils/url';
@@ -364,10 +364,10 @@ function Token22MintHeader({
 }) {
     const tokenMetadata = create(metadataExtension.state, TokenMetadata);
     const { metadataAddress } = create(metadataPointerExtension.state, MetadataPointer);
-    const metadata = useMetadataJsonLink(tokenMetadata.uri);
+    const metadata = useMetadataJsonLink(tokenMetadata.uri, { suspense: true });
 
     if (!metadata) {
-        throw new Error('Could not load metadata from given URI');
+        throw new Error(`Could not load metadata from given URI: ${tokenMetadata.uri}`);
     }
 
     // Handles the basic case where MetadataPointer is referencing the Token Metadata extension directly
