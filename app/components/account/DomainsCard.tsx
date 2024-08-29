@@ -15,8 +15,8 @@ export function DomainsCard({ address }: { address: string }) {
     const [domainsANS, domainsANSLoading] = useUserANSDomains(address);
 
     if (
-      (domainsLoading && (!domains || domains.length === 0)) ||
-      (domainsANSLoading && (!domainsANS || domainsANS.length === 0))
+        (domainsLoading && (!domains || domains.length === 0)) ||
+        (domainsANSLoading && (!domainsANS || domainsANS.length === 0))
     ) {
         return <LoadingCard message="Loading domains" />;
     } else if (!domains || !domainsANS) {
@@ -30,7 +30,7 @@ export function DomainsCard({ address }: { address: string }) {
     let allDomains = domains;
 
     if (domainsANS) {
-      allDomains = [...allDomains, ...domainsANS];
+        allDomains = [...allDomains, ...domainsANS];
     }
 
     allDomains.sort((a, b) => a.name.localeCompare(b.name));
@@ -49,7 +49,7 @@ export function DomainsCard({ address }: { address: string }) {
                         </tr>
                     </thead>
                     <tbody className="list">
-                        {allDomains.map((domain) => (
+                        {allDomains.map(domain => (
                             <RenderDomainRow key={domain.address.toBase58()} domainInfo={domain} />
                         ))}
                     </tbody>
