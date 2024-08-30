@@ -36,6 +36,7 @@ import { create } from 'superstruct';
 import { HistoryProvider } from './history';
 import { RewardsProvider } from './rewards';
 import { TokensProvider } from './tokens';
+import { getStakeActivation } from './utils/stake';
 export { useAccountHistory } from './history';
 
 const Metadata = programs.metadata.Metadata;
@@ -338,10 +339,17 @@ async function handleParsedAccountData(
         case 'stake': {
             const parsed = create(info, StakeAccount);
             const isDelegated = parsed.type === 'delegated';
-            const activation = isDelegated ? await connection.getStakeActivation(accountKey) : undefined;
 
+            // TODO(ngundotra): replace with web3.js fix when live
+            const activation = isDelegated ? await getStakeActivation(connection, accountKey) : undefined;
             return {
-                activation,
+                activation: activation
+                    ? {
+                          active: Number(activation.active),
+                          inactive: Number(activation.inactive),
+                          state: activation.status as any,
+                      }
+                    : undefined,
                 parsed,
                 program: accountData.program,
             };

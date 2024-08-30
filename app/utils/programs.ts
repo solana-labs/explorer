@@ -173,8 +173,8 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: PROGRAM_NAMES.ORE
     },
     A5JxZVHgXe7fn5TqJXm6Hj2zKh1ptDapae2YjtXbZJoy: {
-        deployments: [Cluster.Devnet],
-        name: PROGRAM_NAMES.FINTERNET_TOKEN_MANAGER
+        deployments: [Cluster.Devnet, Cluster.MainnetBeta],
+        name: PROGRAM_NAMES.FINTERNET_TOKEN_MANAGER,
     },
     // spl
     ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL: {
@@ -208,7 +208,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: PROGRAM_NAMES.CLOCKWORK_2,
     },
     CmFuqQTLs2nQof5uaktJn1a6k2VdbGmZPfrJufB2Vm3F: {
-        deployments: [Cluster.Devnet],
+        deployments: [Cluster.Devnet,Cluster.MainnetBeta],
         name: PROGRAM_NAMES.FINTERNET_USER_MANAGER,
     },
     ComputeBudget111111111111111111111111111111: {
