@@ -168,10 +168,6 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: [Cluster.MainnetBeta],
         name: PROGRAM_NAMES.SERUM_3,
     },
-    'oreV2ZymfyeXgNgBdqMkumTqqAprVqgBWQfoYkrtKWQ': {
-        deployments: [Cluster.MainnetBeta],
-        name: PROGRAM_NAMES.ORE
-    },
     A5JxZVHgXe7fn5TqJXm6Hj2zKh1ptDapae2YjtXbZJoy: {
         deployments: [Cluster.Devnet, Cluster.MainnetBeta],
         name: PROGRAM_NAMES.FINTERNET_TOKEN_MANAGER,
@@ -414,6 +410,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     namesLPneVptA9Z5rqUDD9tMTWEJwofgaYwp8cawRkX: {
         deployments: LIVE_CLUSTERS,
         name: PROGRAM_NAMES.NAME,
+    },
+    oreV2ZymfyeXgNgBdqMkumTqqAprVqgBWQfoYkrtKWQ: {
+        deployments: [Cluster.MainnetBeta],
+        name: PROGRAM_NAMES.ORE
     },
     p1exdMJcjVao65QdewkaZRUnU6VPSXhus9n2GzWfh98: {
         deployments: LIVE_CLUSTERS,
