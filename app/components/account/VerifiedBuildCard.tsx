@@ -102,11 +102,7 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
                 </td>
             );
         case DisplayType.String:
-            return (
-                <td className="text-lg-end font-monospace">
-                    <pre className="font-monospace">{value}</pre>
-                </td>
-            );
+            return <td className="text-lg-end font-monospace">{value}</td>;
         case DisplayType.URL:
             if (isValidLink(value as string)) {
                 return (
