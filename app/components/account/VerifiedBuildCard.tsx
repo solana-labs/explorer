@@ -91,9 +91,6 @@ const ROWS: TableRow[] = [
 ];
 
 function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegistryInfo]; type: DisplayType }) {
-    if (!value) {
-        return <></>;
-    }
     switch (type) {
         case DisplayType.Boolean:
             return (
