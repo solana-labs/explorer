@@ -19,6 +19,8 @@ import Link from 'next/link';
 import React from 'react';
 import { ExternalLink, RefreshCw } from 'react-feather';
 
+import { VerifiedProgramBadge } from '../common/VerifiedProgramBadge';
+
 export function UpgradeableLoaderAccountSection({
     account,
     parsedData,
@@ -110,26 +112,12 @@ export function UpgradeableProgramSection({
                             <td className="text-lg-end">{programData.authority !== null ? 'Yes' : 'No'}</td>
                         </tr>
                         <tr>
-                            {/* Anchor Program Registry is no longer maintained, so the verified label has been removed */}
-                            {/* 
-              <td>
-                <LastVerifiedBuildLabel />
-              </td>
-              <td className="text-lg-end">
-                {loading ? (
-                  <CheckingBadge />
-                ) : (
-                  <>
-                    {verifiableBuilds.map((b, i) => (
-                      <VerifiedBadge
-                        key={i}
-                        verifiableBuild={b}
-                        deploySlot={programData.slot}
-                      />
-                    ))}
-                  </>
-                )}
-              </td> */}
+                            <td>
+                                <VerifiedLabel />
+                            </td>
+                            <td className="text-lg-end">
+                                <VerifiedProgramBadge programData={programData} pubkey={account.pubkey} />
+                            </td>
                         </tr>
                         <tr>
                             <td>
@@ -165,6 +153,21 @@ function SecurityLabel() {
         <InfoTooltip text="Security.txt helps security researchers to contact developers if they find security bugs.">
             <Link rel="noopener noreferrer" target="_blank" href="https://github.com/neodyme-labs/solana-security-txt">
                 <span className="security-txt-link-color-hack-reee">Security.txt</span>
+                <ExternalLink className="align-text-top ms-2" size={13} />
+            </Link>
+        </InfoTooltip>
+    );
+}
+
+function VerifiedLabel() {
+    return (
+        <InfoTooltip text="Verified builds allow users can ensure that the hash of the on-chain program matches the hash of the program of the given codebase (registry hosted by osec.io).">
+            <Link
+                rel="noopener noreferrer"
+                target="_blank"
+                href="https://github.com/Ellipsis-Labs/solana-verifiable-build"
+            >
+                <span className="security-txt-link-color-hack-reee">Verified Build</span>
                 <ExternalLink className="align-text-top ms-2" size={13} />
             </Link>
         </InfoTooltip>
