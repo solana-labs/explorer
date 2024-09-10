@@ -14,6 +14,7 @@ export type OsecRegistryInfo = {
     last_verified_at: string | null;
     repo_url: string;
 };
+
 export type CheckedOsecRegistryInfo = {
     explorer_hash: string;
 };

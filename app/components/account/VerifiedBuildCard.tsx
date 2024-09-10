@@ -51,6 +51,7 @@ enum DisplayType {
     URL,
     Date,
 }
+
 type TableRow = {
     display: string;
     key: keyof OsecRegistryInfo;
@@ -99,7 +100,7 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
                 </td>
             );
         case DisplayType.String:
-            return <td className="text-lg-end font-monospace">{value}</td>;
+            return <td className="text-lg-end font-monospace" style={{whiteSpace: 'pre'}}>{value && (value as string).length > 1 ? value : '-'}</td>;
         case DisplayType.URL:
             if (isValidLink(value as string)) {
                 return (
@@ -114,12 +115,12 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
                 );
             }
             return (
-                <td className="text-lg-end">
-                    <pre>{(value as string).trim()}</pre>
+                <td className="text-lg-end font-monospace">
+                    {value && (value as string).length > 1 ? (value as string).trim() : '-'}
                 </td>
             );
         case DisplayType.Date:
-            return <td className="text-lg-end font-monospace">{new Date(value as string).toUTCString()}</td>;
+            return <td className="text-lg-end font-monospace">{value && (value as string).length > 1 ? new Date(value as string).toUTCString() : '-'}</td>;
         default:
             break;
     }
