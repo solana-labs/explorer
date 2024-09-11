@@ -1,6 +1,6 @@
 import { Address } from '@components/common/Address';
-import { BorshEventCoder, BorshInstructionCoder, Idl, Instruction, Program } from '@project-serum/anchor';
-import { IdlEvent, IdlInstruction } from '@project-serum/anchor/dist/cjs/idl';
+import { BorshEventCoder, BorshInstructionCoder, Idl, Instruction, Program } from '@coral-xyz/anchor';
+import { IdlEvent, IdlField, IdlInstruction, IdlTypeDefTyStruct } from '@coral-xyz/anchor/dist/cjs/idl';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import {
     getAnchorAccountsFromInstruction,
@@ -57,8 +57,14 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
                     ixDef => ixDef.name === decodedIxData?.name
                 ) as IdlEvent;
 
-                // Remap the event definition to an instruction definition
-                ixDef = { ...ixEventDef, accounts: [], args: ixEventDef.fields };
+                const ixEventFields = anchorProgram.idl.types?.find((type: any) => type.name === ixEventDef.name);
+
+                // Remap the event definition to an instruction definition by force casting to struct fields
+                ixDef = {
+                    ...ixEventDef,
+                    accounts: [],
+                    args: ((ixEventFields?.type as IdlTypeDefTyStruct).fields as IdlField[]) ?? [],
+                };
 
                 // Self-CPI instructions have 1 account called the eventAuthority
                 // https://github.com/coral-xyz/anchor/blob/04985802587c693091f836e0083e4412148c0ca6/lang/attribute/event/src/lib.rs#L165

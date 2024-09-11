@@ -1,6 +1,7 @@
 import { Address } from '@components/common/Address';
-import { BorshInstructionCoder, Idl, Program } from '@project-serum/anchor';
-import { IdlField, IdlInstruction, IdlType, IdlTypeDef } from '@project-serum/anchor/dist/cjs/idl';
+import { BorshInstructionCoder, Idl, Program } from '@coral-xyz/anchor';
+import { IdlDefinedFields } from '@coral-xyz/anchor/dist/cjs/idl';
+import { IdlField, IdlInstruction, IdlType, IdlTypeDef } from '@coral-xyz/anchor/dist/cjs/idl';
 import { useAnchorProgram } from '@providers/anchor';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
@@ -18,7 +19,7 @@ export function instructionIsSelfCPI(ixData: Buffer): boolean {
 }
 
 export function getAnchorProgramName(program: Program | null): string | undefined {
-    return program && 'name' in program.idl ? snakeToTitleCase(program.idl.name) : undefined;
+    return program && 'name' in program.idl.metadata ? snakeToTitleCase(program.idl.metadata.name) : undefined;
 }
 
 export function AnchorProgramName({
@@ -112,17 +113,29 @@ export function mapIxArgsToRows(ixArgs: any, ixType: IdlInstruction, idl: Idl) {
     });
 }
 
+function getFieldDef(fields: IdlDefinedFields | undefined, key: string, index: number): IdlType | undefined {
+    if (!fields || fields.length === 0) {
+        return undefined;
+    }
+    if (typeof fields[0] === 'string') {
+        return (fields as IdlType[]).find((ixDefArg, argIndex) => argIndex === index);
+    } else {
+        return (fields as IdlField[]).find(ixDefArg => ixDefArg.name === key)?.type;
+    }
+}
+
 export function mapAccountToRows(accountData: any, accountType: IdlTypeDef, idl: Idl) {
-    return Object.entries(accountData).map(([key, value]) => {
+    return Object.entries(accountData).map(([key, value], index) => {
         try {
             if (accountType.type.kind !== 'struct') {
                 throw Error(`Account ${accountType.name} is of type ${accountType.type.kind} (expected: 'struct')`);
             }
-            const fieldDef = accountType.type.fields.find(ixDefArg => ixDefArg.name === key);
+
+            const fieldDef: IdlType | undefined = getFieldDef(accountType.type.fields, key, index);
             if (!fieldDef) {
                 throw Error(`Could not find expected ${key} field on account type definition for ${accountType.name}`);
             }
-            return mapField(key, value as any, fieldDef.type, idl);
+            return mapField(key, value as any, fieldDef, idl);
         } catch (error: any) {
             console.log('Error while displaying IDL-based account data', error);
             return (
@@ -172,7 +185,9 @@ function mapField(key: string, value: any, type: IdlType, idl: Idl, keySuffix?: 
         type === 'i64' ||
         type === 'f64' ||
         type === 'u128' ||
-        type === 'i128'
+        type === 'i128' ||
+        type === 'u256' ||
+        type === 'i256'
     ) {
         return (
             <SimpleRow
@@ -197,7 +212,7 @@ function mapField(key: string, value: any, type: IdlType, idl: Idl, keySuffix?: 
                 <div>{value.toString()}</div>
             </SimpleRow>
         );
-    } else if (type === 'publicKey') {
+    } else if (type === 'pubkey') {
         return (
             <SimpleRow
                 key={keySuffix ? `${key}-${keySuffix}` : key}
@@ -210,7 +225,7 @@ function mapField(key: string, value: any, type: IdlType, idl: Idl, keySuffix?: 
             </SimpleRow>
         );
     } else if ('defined' in type) {
-        const fieldType = idl.types?.find(t => t.name === type.defined);
+        const fieldType = idl.types?.find(t => t.name === type.defined.name);
         if (!fieldType) {
             throw Error(`Could not type definition for ${type.defined} field in IDL`);
         }
@@ -225,18 +240,18 @@ function mapField(key: string, value: any, type: IdlType, idl: Idl, keySuffix?: 
                 >
                     <Fragment key={keySuffix ? `${key}-${keySuffix}` : key}>
                         {Object.entries(value).map(([innerKey, innerValue]: [string, any]) => {
-                            const innerFieldType = structFields.find(t => t.name === innerKey);
+                            const innerFieldType = getFieldDef(structFields, innerKey, 0);
                             if (!innerFieldType) {
                                 throw Error(
                                     `Could not type definition for ${innerKey} field in user-defined struct ${fieldType.name}`
                                 );
                             }
-                            return mapField(innerKey, innerValue, innerFieldType?.type, idl, key, nestingLevel + 1);
+                            return mapField(innerKey, innerValue, innerFieldType, idl, key, nestingLevel + 1);
                         })}
                     </Fragment>
                 </ExpandableRow>
             );
-        } else {
+        } else if (fieldType.type.kind === 'enum') {
             const enumVariantName = Object.keys(value)[0];
             const variant = fieldType.type.variants.find(
                 val => val.name.toLocaleLowerCase() === enumVariantName.toLocaleLowerCase()
@@ -274,13 +289,15 @@ function mapField(key: string, value: any, type: IdlType, idl: Idl, keySuffix?: 
                 <SimpleRow
                     key={keySuffix ? `${key}-${keySuffix}` : key}
                     rawKey={key}
-                    type={{ enum: type.defined }}
+                    type={{ enum: type.defined.name }}
                     keySuffix={keySuffix}
                     nestingLevel={nestingLevel}
                 >
                     {camelToTitleCase(enumVariantName)}
                 </SimpleRow>
             );
+        } else {
+            throw Error('Unsupported type kind: ' + fieldType.type.kind);
         }
     } else if ('option' in type) {
         if (value === null) {
@@ -445,14 +462,16 @@ function typeDisplayName(
         case 'f64':
         case 'u128':
         case 'i128':
+        case 'i256':
+        case 'u256':
         case 'bytes':
         case 'string':
             return type.toString();
-        case 'publicKey':
+        case 'pubkey':
             return 'PublicKey';
         default:
             if ('enum' in type) return `${type.enum} (enum)`;
-            if ('defined' in type) return type.defined;
+            if ('defined' in type) return type.defined.name;
             if ('option' in type) return `${typeDisplayName(type.option)} (optional)`;
             if ('vec' in type) return `${typeDisplayName(type.vec)}[]`;
             if ('array' in type) return `${typeDisplayName(type.array[0])}[${type.array[1]}]`;

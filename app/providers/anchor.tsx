@@ -1,10 +1,11 @@
-import { NodeWallet } from '@metaplex/js';
-import { Idl, Program, Provider } from '@project-serum/anchor';
+import { AnchorProvider, Idl, Program } from '@coral-xyz/anchor';
+import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
 import { Connection, Keypair, PublicKey } from '@solana/web3.js';
 import * as elfy from 'elfy';
 import pako from 'pako';
 import { useEffect, useMemo } from 'react';
 
+import { formatIdl } from '../utils/convertLegacyIdl';
 import { useAccountInfo, useFetchAccountInfo } from './accounts';
 
 const cachedAnchorProgramPromises: Record<
@@ -76,7 +77,7 @@ function parseIdlFromElf(elfBuffer: any) {
 }
 
 function getProvider(url: string) {
-    return new Provider(new Connection(url), new NodeWallet(Keypair.generate()), {});
+    return new AnchorProvider(new Connection(url), new NodeWallet(Keypair.generate()), {});
 }
 
 function useIdlFromAnchorProgramSeed(programAddress: string, url: string): Idl | null {
@@ -117,8 +118,10 @@ export function useAnchorProgram(programAddress: string, url: string): { program
     const program: Program<Idl> | null = useMemo(() => {
         if (!idl) return null;
         try {
-            return new Program(idl, new PublicKey(programAddress), getProvider(url));
+            const program = new Program(formatIdl(idl, programAddress), getProvider(url));
+            return program;
         } catch (e) {
+            console.error('Error creating anchor program', e, { idl });
             return null;
         }
     }, [idl, programAddress, url]);
