@@ -2,9 +2,22 @@
  * This is a port of the anchor command `anchor idl convert` to TypeScript.
  */
 import { Idl } from '@coral-xyz/anchor';
-import { IdlInstruction, IdlType, IdlMetadata, IdlTypeDef, IdlAccount, IdlEvent, IdlErrorCode, IdlField, IdlConst, IdlInstructionAccountItem, IdlInstructionAccounts, IdlTypeGeneric, IdlTypeDefined, IdlTypeDefTyType } from '@coral-xyz/anchor/dist/cjs/idl';
-import { snakeCase } from 'change-case';
+import {
+    IdlAccount,
+    IdlConst,
+    IdlErrorCode,
+    IdlEvent,
+    IdlField,
+    IdlInstruction,
+    IdlInstructionAccountItem,
+    IdlInstructionAccounts,
+    IdlMetadata,
+    IdlType,
+    IdlTypeDef,
+    IdlTypeDefined,
+} from '@coral-xyz/anchor/dist/cjs/idl';
 import { sha256 } from '@noble/hashes/sha256';
+import { snakeCase } from 'change-case';
 
 // Legacy types based on the Rust structs
 // Should be included in next minor release of anchor
@@ -105,9 +118,21 @@ type LegacyIdlSeed =
 
 type LegacyIdlType =
     | 'bool'
-    | 'u8' | 'i8' | 'u16' | 'i16' | 'u32' | 'i32' | 'u64' | 'i64' | 'u128' | 'i128'
-    | 'f32' | 'f64'
-    | 'bytes' | 'string' | 'publicKey'
+    | 'u8'
+    | 'i8'
+    | 'u16'
+    | 'i16'
+    | 'u32'
+    | 'i32'
+    | 'u64'
+    | 'i64'
+    | 'u128'
+    | 'i128'
+    | 'f32'
+    | 'f64'
+    | 'bytes'
+    | 'string'
+    | 'publicKey'
     | { vec: LegacyIdlType }
     | { option: LegacyIdlType }
     | { defined: string }
@@ -115,32 +140,29 @@ type LegacyIdlType =
     | { generic: string }
     | { definedWithTypeArgs: { name: string; args: LegacyIdlDefinedTypeArg[] } };
 
-type LegacyIdlDefinedTypeArg =
-    | { generic: string }
-    | { value: string }
-    | { type: LegacyIdlType };
+type LegacyIdlDefinedTypeArg = { generic: string } | { value: string } | { type: LegacyIdlType };
 
 function convertLegacyIdl(legacyIdl: LegacyIdl, programAddress?: string): Idl {
     const address: string | undefined = programAddress ?? legacyIdl.metadata?.address;
     if (!address) {
-        throw new Error("Program id missing in `idl.metadata.address` field");
+        throw new Error('Program id missing in `idl.metadata.address` field');
     }
     return {
-        address: address,
-        instructions: legacyIdl.instructions.map(convertInstruction),
         accounts: (legacyIdl.accounts || []).map(convertAccount),
+        address: address,
+        constants: (legacyIdl.constants || []).map(convertConst),
+        errors: legacyIdl.errors?.map(convertErrorCode) || [],
+        events: legacyIdl.events?.map(convertEvent) || [],
+        instructions: legacyIdl.instructions.map(convertInstruction),
+        metadata: {
+            name: legacyIdl.name,
+            version: legacyIdl.version,
+        } as IdlMetadata,
         types: [
             ...(legacyIdl.types || []).map(convertTypeDef),
             ...(legacyIdl.accounts || []).map(convertTypeDef),
             ...(legacyIdl.events || []).map(convertEventToTypeDef),
         ],
-        events: legacyIdl.events?.map(convertEvent) || [],
-        errors: legacyIdl.errors?.map(convertErrorCode) || [],
-        constants: (legacyIdl.constants || []).map(convertConst),
-        metadata: {
-            version: legacyIdl.version,
-            name: legacyIdl.name,
-        } as IdlMetadata,
     };
 }
 
@@ -152,18 +174,18 @@ function getDisc(prefix: string, name: string): number[] {
 function convertInstruction(instruction: LegacyIdlInstruction): IdlInstruction {
     const name = snakeCase(instruction.name);
     return {
-        name,
         accounts: instruction.accounts.map(convertInstructionAccount),
         args: instruction.args.map(convertField),
         discriminator: getDisc('global', name),
+        name,
         returns: instruction.returns ? convertType(instruction.returns) : undefined,
     };
 }
 
 function convertAccount(account: LegacyIdlTypeDefinition): IdlAccount {
     return {
-        name: account.name,
         discriminator: getDisc('account', account.name),
+        name: account.name,
     };
 }
 
@@ -178,8 +200,8 @@ function convertTypeDefTy(type: LegacyIdlTypeDefinitionTy): IdlTypeDef['type'] {
     switch (type.kind) {
         case 'struct':
             return {
-                kind: 'struct',
                 fields: type.fields.map(convertField),
+                kind: 'struct',
             };
         case 'enum':
             return {
@@ -188,8 +210,8 @@ function convertTypeDefTy(type: LegacyIdlTypeDefinitionTy): IdlTypeDef['type'] {
             };
         case 'alias':
             return {
-                kind: 'type',
                 alias: convertType(type.value),
+                kind: 'type',
             };
     }
 }
@@ -203,8 +225,8 @@ function convertField(field: LegacyIdlField): IdlField {
 
 function convertEnumVariant(variant: LegacyIdlEnumVariant): { name: string; fields?: IdlField[] } {
     return {
-        name: variant.name,
         fields: variant.fields ? convertEnumFields(variant.fields) : undefined,
+        name: variant.name,
     };
 }
 
@@ -218,16 +240,16 @@ function convertEnumFields(fields: LegacyEnumFields): IdlField[] {
 
 function convertEvent(event: LegacyIdlEvent): IdlEvent {
     return {
-        name: event.name,
         discriminator: getDisc('event', event.name),
+        name: event.name,
     };
 }
 
 function convertErrorCode(error: LegacyIdlErrorCode): IdlErrorCode {
     return {
         code: error.code,
-        name: error.name,
         msg: error.msg,
+        name: error.name,
     };
 }
 
@@ -244,28 +266,28 @@ function convertInstructionAccount(account: LegacyIdlAccountItem): IdlInstructio
         return convertInstructionAccounts(account);
     } else {
         return {
-            name: snakeCase(account.name),
             docs: account.docs || [],
-            writable: account.isMut || false,
-            signer: account.isSigner || false,
+            name: snakeCase(account.name),
             optional: account.isOptional || false,
             pda: account.pda ? convertPda(account.pda) : undefined,
             relations: account.relations || [],
+            signer: account.isSigner || false,
+            writable: account.isMut || false,
         };
     }
 }
 
 function convertInstructionAccounts(accounts: LegacyIdlAccounts): IdlInstructionAccounts {
     return {
-        name: snakeCase(accounts.name),
         accounts: accounts.accounts.map(convertInstructionAccount),
+        name: snakeCase(accounts.name),
     };
 }
 
 function convertPda(pda: LegacyIdlPda): { seeds: any[]; programId?: any } {
     return {
-        seeds: pda.seeds.map(convertSeed),
         programId: pda.programId ? convertSeed(pda.programId) : undefined,
+        seeds: pda.seeds.map(convertSeed),
     };
 }
 
@@ -274,13 +296,13 @@ function convertSeed(seed: LegacyIdlSeed): any {
         case 'const':
             return { kind: 'const', type: convertType(seed.type), value: seed.value };
         case 'arg':
-            return { kind: 'arg', type: convertType(seed.type), path: seed.path };
+            return { kind: 'arg', path: seed.path, type: convertType(seed.type) };
         case 'account':
             return {
-                kind: 'account',
-                type: convertType(seed.type),
                 account: seed.account,
+                kind: 'account',
                 path: seed.path,
+                type: convertType(seed.type),
             };
     }
 }
@@ -289,11 +311,11 @@ function convertEventToTypeDef(event: LegacyIdlEvent): IdlTypeDef {
     return {
         name: event.name,
         type: {
-            kind: 'struct',
             fields: event.fields.map(field => ({
                 name: snakeCase(field.name),
                 type: convertType(field.type),
             })),
+            kind: 'struct',
         },
     };
 }
@@ -306,14 +328,17 @@ function convertType(type: LegacyIdlType): IdlType {
     } else if ('option' in type) {
         return { option: convertType(type.option) };
     } else if ('defined' in type) {
-        return { defined: { name: type.defined, generics: [] } } as IdlTypeDefined;
+        return { defined: { generics: [], name: type.defined } } as IdlTypeDefined;
     } else if ('array' in type) {
         return { array: [convertType(type.array[0]), type.array[1]] };
     } else if ('generic' in type) {
         return type;
     } else if ('definedWithTypeArgs' in type) {
         return {
-            defined: { name: type.definedWithTypeArgs.name, generics: type.definedWithTypeArgs.args.map(convertDefinedTypeArg) },
+            defined: {
+                generics: type.definedWithTypeArgs.args.map(convertDefinedTypeArg),
+                name: type.definedWithTypeArgs.name,
+            },
         } as IdlTypeDefined;
     }
     throw new Error(`Unsupported type: ${JSON.stringify(type)}`);

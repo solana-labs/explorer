@@ -40,11 +40,11 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
     const { ixAccounts, decodedIxData, ixDef } = useMemo(() => {
         let ixAccounts:
             | {
-                name: string;
-                isMut: boolean;
-                isSigner: boolean;
-                pda?: object;
-            }[]
+                  name: string;
+                  isMut: boolean;
+                  isSigner: boolean;
+                  pda?: object;
+              }[]
             | null = null;
         let decodedIxData: Instruction | null = null;
         let ixDef: IdlInstruction | undefined;
@@ -60,7 +60,11 @@ function AnchorDetails({ ix, anchorProgram }: { ix: TransactionInstruction; anch
                 const ixEventFields = anchorProgram.idl.types?.find((type: any) => type.name === ixEventDef.name);
 
                 // Remap the event definition to an instruction definition by force casting to struct fields
-                ixDef = { ...ixEventDef, accounts: [], args: (ixEventFields?.type as IdlTypeDefTyStruct).fields as IdlField[] ?? [] };
+                ixDef = {
+                    ...ixEventDef,
+                    accounts: [],
+                    args: ((ixEventFields?.type as IdlTypeDefTyStruct).fields as IdlField[]) ?? [],
+                };
 
                 // Self-CPI instructions have 1 account called the eventAuthority
                 // https://github.com/coral-xyz/anchor/blob/04985802587c693091f836e0083e4412148c0ca6/lang/attribute/event/src/lib.rs#L165

@@ -1,12 +1,12 @@
-import { Idl, Program, AnchorProvider } from '@coral-xyz/anchor';
+import { AnchorProvider, Idl, Program } from '@coral-xyz/anchor';
+import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
 import { Connection, Keypair, PublicKey } from '@solana/web3.js';
 import * as elfy from 'elfy';
 import pako from 'pako';
 import { useEffect, useMemo } from 'react';
 
-import { useAccountInfo, useFetchAccountInfo } from './accounts';
-import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
 import { formatIdl } from '../utils/convertLegacyIdl';
+import { useAccountInfo, useFetchAccountInfo } from './accounts';
 
 const cachedAnchorProgramPromises: Record<
     string,

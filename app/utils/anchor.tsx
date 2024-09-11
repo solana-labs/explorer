@@ -66,11 +66,11 @@ export function getAnchorAccountsFromInstruction(
     program: Program
 ):
     | {
-        name: string;
-        isMut: boolean;
-        isSigner: boolean;
-        pda?: object;
-    }[]
+          name: string;
+          isMut: boolean;
+          isSigner: boolean;
+          pda?: object;
+      }[]
     | null {
     if (decodedIx) {
         // get ix accounts
@@ -117,7 +117,7 @@ function getFieldDef(fields: IdlDefinedFields | undefined, key: string, index: n
     if (!fields || fields.length === 0) {
         return undefined;
     }
-    if (typeof (fields[0]) === 'string') {
+    if (typeof fields[0] === 'string') {
         return (fields as IdlType[]).find((ixDefArg, argIndex) => argIndex === index);
     } else {
         return (fields as IdlField[]).find(ixDefArg => ixDefArg.name === key)?.type;
@@ -131,7 +131,7 @@ export function mapAccountToRows(accountData: any, accountType: IdlTypeDef, idl:
                 throw Error(`Account ${accountType.name} is of type ${accountType.type.kind} (expected: 'struct')`);
             }
 
-            let fieldDef: IdlType | undefined = getFieldDef(accountType.type.fields, key, index);
+            const fieldDef: IdlType | undefined = getFieldDef(accountType.type.fields, key, index);
             if (!fieldDef) {
                 throw Error(`Could not find expected ${key} field on account type definition for ${accountType.name}`);
             }
@@ -445,8 +445,8 @@ function typeDisplayName(
     type:
         | IdlType
         | {
-            enum: string;
-        }
+              enum: string;
+          }
 ): string {
     switch (type) {
         case 'bool':

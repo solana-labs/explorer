@@ -23,7 +23,7 @@ export function AnchorAccountCard({ account }: { account: Account }) {
                 (rawData as Buffer).slice(0, 8).equals(coder.accountDiscriminator(accountType.name))
             );
             if (account) {
-                accountDef = anchorProgram.idl.types?.find((type: any) => type.name === account.name);  
+                accountDef = anchorProgram.idl.types?.find((type: any) => type.name === account.name);
                 try {
                     decodedAccountData = coder.decode(account.name, rawData);
                 } catch (err) {
