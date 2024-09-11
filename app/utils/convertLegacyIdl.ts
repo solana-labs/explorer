@@ -5,6 +5,8 @@ import { Idl } from '@coral-xyz/anchor';
 import {
     IdlAccount,
     IdlConst,
+    IdlDefinedFields,
+    IdlEnumVariant,
     IdlErrorCode,
     IdlEvent,
     IdlField,
@@ -223,18 +225,18 @@ function convertField(field: LegacyIdlField): IdlField {
     };
 }
 
-function convertEnumVariant(variant: LegacyIdlEnumVariant): { name: string; fields?: IdlField[] } {
+function convertEnumVariant(variant: LegacyIdlEnumVariant): IdlEnumVariant {
     return {
         fields: variant.fields ? convertEnumFields(variant.fields) : undefined,
         name: variant.name,
     };
 }
 
-function convertEnumFields(fields: LegacyEnumFields): IdlField[] {
+function convertEnumFields(fields: LegacyEnumFields): IdlDefinedFields {
     if (Array.isArray(fields) && fields.length > 0 && typeof fields[0] === 'object' && 'type' in fields[0]) {
-        return (fields as LegacyIdlField[]).map(convertField);
+        return (fields as LegacyIdlField[]).map(convertField) as IdlField[];
     } else {
-        return (fields as LegacyIdlType[]).map(type => ({ name: '', type: convertType(type) }));
+        return (fields as LegacyIdlType[]).map(type => (convertType(type))) as IdlType[];
     }
 }
 
@@ -366,6 +368,7 @@ export function formatIdl(idl: any, programAddress?: string): Idl {
                 throw new Error(`IDL spec not supported: ${spec}`);
         }
     } else {
-        return convertLegacyIdl(idl as LegacyIdl, programAddress);
+        const formattedIdl = convertLegacyIdl(idl as LegacyIdl, programAddress);
+        return formattedIdl;
     }
 }
