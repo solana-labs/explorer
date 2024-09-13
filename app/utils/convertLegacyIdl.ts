@@ -17,6 +17,7 @@ import {
     IdlType,
     IdlTypeDef,
     IdlTypeDefined,
+    IdlTypeDefTy,
 } from '@coral-xyz/anchor/dist/cjs/idl';
 import { sha256 } from '@noble/hashes/sha256';
 import { snakeCase } from 'change-case';
@@ -168,6 +169,78 @@ function convertLegacyIdl(legacyIdl: LegacyIdl, programAddress?: string): Idl {
     };
 }
 
+function traverseType(type: IdlType, refs: Set<string>) {
+    if (typeof type === 'string') {
+        // skip
+    } else if ('vec' in type) {
+        traverseType(type.vec, refs);
+    } else if ('option' in type) {
+        traverseType(type.option, refs);
+    } else if ('defined' in type) {
+        refs.add(type.defined.name);
+    } else if ('array' in type) {
+        traverseType(type.array[0], refs);
+    } else if ('generic' in type) {
+        refs.add(type.generic);
+    } else if ('coption' in type) {
+        traverseType(type.coption, refs);
+    }
+}
+
+function traverseIdlFields(fields: IdlDefinedFields, refs: Set<string>) {
+    fields.forEach(field =>
+        typeof field === 'string'
+            ? traverseType(field, refs)
+            : typeof field === 'object' && 'type' in field
+            ? traverseType(field.type, refs)
+            : traverseType(field, refs)
+    );
+}
+
+function traverseTypeDef(type: IdlTypeDefTy, refs: Set<string>) {
+    switch (type.kind) {
+        case 'struct':
+            traverseIdlFields(type.fields ?? [], refs);
+            return;
+        case 'enum':
+            type.variants.forEach(variant => traverseIdlFields(variant.fields ?? [], refs));
+            return;
+        case 'type':
+            traverseType(type.alias, refs);
+            return;
+    }
+}
+
+function getTypeReferences(idl: Idl): Set<string> {
+    const refs = new Set<string>();
+    idl.constants?.forEach(constant => traverseType(constant.type, refs));
+    idl.accounts?.forEach(account => refs.add(account.name));
+    idl.instructions?.forEach(instruction => instruction.args.forEach(arg => traverseType(arg.type, refs)));
+    idl.events?.forEach(event => refs.add(event.name));
+
+    // Build up recursive type references in breadth-first manner.
+    // Very inefficient since we traverse same types multiple times.
+    // But it works. Open to contributions that do proper graph traversal
+    let prevSize = refs.size;
+    let sizeDiff = 1;
+    while (sizeDiff > 0) {
+        for (const idlType of idl.types ?? []) {
+            if (refs.has(idlType.name)) {
+                traverseTypeDef(idlType.type, refs);
+            }
+        }
+        sizeDiff = refs.size - prevSize;
+        prevSize = refs.size;
+    }
+    return refs;
+}
+
+// Remove types that are not used in definition of instructions, accounts, events, or constants
+function removeUnusedTypes(idl: Idl): Idl {
+    const usedElsewhere = getTypeReferences(idl);
+    return { ...idl, types: (idl.types ?? []).filter(type => usedElsewhere.has(type.name)) };
+}
+
 function getDisc(prefix: string, name: string): number[] {
     const hash = sha256(`${prefix}:${name}`);
     return Array.from(hash.slice(0, 8));
@@ -236,7 +309,7 @@ function convertEnumFields(fields: LegacyEnumFields): IdlDefinedFields {
     if (Array.isArray(fields) && fields.length > 0 && typeof fields[0] === 'object' && 'type' in fields[0]) {
         return (fields as LegacyIdlField[]).map(convertField) as IdlField[];
     } else {
-        return (fields as LegacyIdlType[]).map(type => (convertType(type))) as IdlType[];
+        return (fields as LegacyIdlType[]).map(type => convertType(type)) as IdlType[];
     }
 }
 
@@ -368,7 +441,6 @@ export function formatIdl(idl: any, programAddress?: string): Idl {
                 throw new Error(`IDL spec not supported: ${spec}`);
         }
     } else {
-        const formattedIdl = convertLegacyIdl(idl as LegacyIdl, programAddress);
-        return formattedIdl;
+        return removeUnusedTypes(convertLegacyIdl(idl as LegacyIdl, programAddress));
     }
 }
