@@ -121,7 +121,7 @@ export function useAnchorProgram(programAddress: string, url: string): { program
             const program = new Program(formatIdl(idl, programAddress), getProvider(url));
             return program;
         } catch (e) {
-            console.error('Error creating anchor program', e, { idl });
+            console.error('Error creating anchor program for', programAddress, e, { idl });
             return null;
         }
     }, [idl, programAddress, url]);
