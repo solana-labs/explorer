@@ -6,6 +6,12 @@
 
 ## Development
 
+-   Copy `.env.example` into `.env` & fill out the fields with custom RPC urls \
+    from a Solana RPC provider. You should not use `https://api.mainnet-beta.solana.com` \
+    or `https://api.devnet.solana.com` or else you will get rate-limited. These are public \
+    endpoints not suitable for application development. You must set these URLs with \
+    endpoints from your own provider.
+
 -   `pnpm dev` \
     Runs the app in the development mode. \
     Open [http://localhost:3000](http://localhost:3000) to view it in the browser. \
