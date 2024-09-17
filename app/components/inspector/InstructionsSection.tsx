@@ -2,11 +2,20 @@ import { HexData } from '@components/common/HexData';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { useCluster } from '@providers/cluster';
 import { useScrollAnchor } from '@providers/scroll-anchor';
-import { MessageCompiledInstruction, VersionedMessage } from '@solana/web3.js';
+import {
+    AccountMeta,
+    MessageCompiledInstruction,
+    PublicKey,
+    TransactionInstruction,
+    VersionedMessage,
+} from '@solana/web3.js';
 import getInstructionCardScrollAnchorId from '@utils/get-instruction-card-scroll-anchor-id';
 import { getProgramName } from '@utils/tx';
 import React from 'react';
 
+import { useAnchorProgram } from '@/app/providers/anchor';
+
+import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
 import { AddressFromLookupTableWithContext, AddressWithContext, programValidator } from './AddressWithContext';
 
 export function InstructionsSection({ message }: { message: VersionedMessage }) {
@@ -29,7 +38,7 @@ function InstructionCard({
     index: number;
 }) {
     const [expanded, setExpanded] = React.useState(false);
-    const { cluster } = useCluster();
+    const { cluster, url } = useCluster();
     const programId = message.staticAccountKeys[ix.programIdIndex];
     const programName = getProgramName(programId.toBase58(), cluster);
     const scrollAnchorRef = useScrollAnchor(getInstructionCardScrollAnchorId([index + 1]));
@@ -47,6 +56,53 @@ function InstructionCard({
             }))
         ),
     ];
+    const anchorProgram = useAnchorProgram(programId.toString(), url);
+
+    if (anchorProgram.program) {
+        const accountMetas = ix.accountKeyIndexes.map((accountIndex, _index) => {
+            let lookup: PublicKey;
+            if (accountIndex >= message.staticAccountKeys.length) {
+                const lookupIndex = accountIndex - message.staticAccountKeys.length;
+                lookup = lookupsForAccountKeyIndex[lookupIndex].lookupTableKey;
+            } else {
+                lookup = message.staticAccountKeys[accountIndex];
+            }
+
+            const isSigner = accountIndex < message.header.numRequiredSignatures;
+            const isWritable = message.isAccountWritable(accountIndex);
+            const accountMeta: AccountMeta = {
+                isSigner,
+                isWritable,
+                pubkey: lookup,
+            };
+            return accountMeta;
+        });
+
+        const transactionInstruction: TransactionInstruction = new TransactionInstruction({
+            data: Buffer.from(message.compiledInstructions[index].data),
+            keys: accountMetas,
+            programId: programId,
+        });
+
+        return AnchorDetailsCard({
+            anchorProgram: anchorProgram.program,
+            childIndex: undefined,
+            index: index,
+            // Inner cards and child are not used since we do not know what CPIs
+            // will be called until simulation happens, and even then, all we
+            // get is logs, not the TransactionInstructions
+            innerCards: undefined,
+            ix: transactionInstruction,
+            // Always display success since it is too complicated to determine
+            // based on the simulation and pass that result here. Could be added
+            // later if desired, possibly similar to innerCards from parsing tx
+            // sim logs.
+            result: { err: null },
+            // Signature is not needed.
+            signature: '',
+        });
+    }
+
     return (
         <div className="card" key={index} ref={scrollAnchorRef}>
             <div className={`card-header${!expanded ? ' border-bottom-none' : ''}`}>

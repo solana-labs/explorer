@@ -6,12 +6,12 @@
  * So to avoid pulling in extra dependencies we just use the public API directly for search
  */
 
-import { Base58EncodedAddress } from 'web3js-experimental';
+import { Address } from 'web3js-experimental';
 
 import { Cluster } from './cluster';
 
 type TokenSearchApiResponseToken = {
-    address: Base58EncodedAddress;
+    address: Address;
     chainId: number;
     name: string;
     symbol: string;

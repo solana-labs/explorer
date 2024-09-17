@@ -110,7 +110,7 @@ function LookupRow({
             </td>
             <td className="text-lg-end">{lookupTableIndex}</td>
             <td className="text-lg-end">{resolvedKeyComponent}</td>
-            <td>{!readOnly && <span className="badge bg-info-soft me-1">Writable</span>}</td>
+            <td>{!readOnly && <span className="badge bg-danger-soft me-1">Writable</span>}</td>
         </tr>
     );
 }

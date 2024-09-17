@@ -1,20 +1,37 @@
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
-import { NFTData } from '@providers/accounts';
+import { Account, isTokenProgramData } from '@providers/accounts';
 import React from 'react';
+
+import { useCluster } from '@/app/providers/cluster';
+import { useCompressedNft } from '@/app/providers/compressed-nft';
 
 interface Attribute {
     trait_type: string;
     value: string;
 }
 
-export function MetaplexNFTAttributesCard({ nftData }: { nftData: NFTData }) {
+export function MetaplexNFTAttributesCard({ account, onNotFound }: { account?: Account; onNotFound: () => never }) {
+    const { url } = useCluster();
+    const compressedNft = useCompressedNft({ address: account?.pubkey.toString() ?? '', url });
+
+    const parsedData = account?.data?.parsed;
+    if (!parsedData || !isTokenProgramData(parsedData) || parsedData.parsed.type !== 'mint' || !parsedData.nftData) {
+        if (compressedNft && compressedNft.compression.compressed) {
+            return <NormalMetaplexNFTAttributesCard metadataUri={compressedNft.content.json_uri} />;
+        }
+        return onNotFound();
+    }
+    return <NormalMetaplexNFTAttributesCard metadataUri={parsedData.nftData.metadata.data.uri} />;
+}
+
+function NormalMetaplexNFTAttributesCard({ metadataUri }: { metadataUri: string }) {
     const [attributes, setAttributes] = React.useState<Attribute[]>([]);
     const [status, setStatus] = React.useState<'loading' | 'success' | 'error'>('loading');
 
     async function fetchMetadataAttributes() {
         try {
-            const response = await fetch(nftData.metadata.data.uri);
+            const response = await fetch(metadataUri);
             const metadata = await response.json();
 
             // Verify if the attributes value is an array

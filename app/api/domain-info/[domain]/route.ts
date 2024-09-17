@@ -2,7 +2,7 @@ import { Connection } from "@solana/web3.js"
 import { NextResponse } from "next/server"
 
 import { MAINNET_BETA_URL } from "@/app/utils/cluster"
-import { getDomainInfo } from "@/app/utils/domain-info"
+import { getANSDomainInfo,getDomainInfo } from "@/app/utils/domain-info"
 
 type Params = {
     params: {
@@ -20,12 +20,12 @@ export async function GET(
     // This is an API route so won't affect client bundle
     // We only fetch domains on mainnet
     const connection = new Connection(MAINNET_BETA_URL);
-    const domainInfo = await getDomainInfo(domain, connection);
+    const domainInfo = await (domain.substring(domain.length - 4) === '.sol' ? getDomainInfo(domain, connection) : getANSDomainInfo(domain, connection));
 
     return NextResponse.json(domainInfo, {
         headers: {
             // 24 hours
-            "Cache-Control": "max-age=86400"
+            "Cache-Control": "max-age=86400",
         }
     });
 }

@@ -49,6 +49,7 @@ export enum PROGRAM_NAMES {
     ORCA_SWAP_1 = 'Orca Swap Program v1',
     ORCA_SWAP_2 = 'Orca Swap Program v2',
     ORCA_AQUAFARM = 'Orca Aquafarm Program',
+    ORE = 'ORE Program',
     PORT = 'Port Finance Program',
     PYTH_DEVNET = 'Pyth Oracle Program',
     PYTH_TESTNET = 'Pyth Oracle Program',
@@ -83,6 +84,8 @@ export enum PROGRAM_NAMES {
     SOLANART_GO = 'Solanart - Global offers',
     STEPN_DEX = 'STEPN Dex',
     OPENBOOK_DEX = 'OpenBook Dex',
+    FINTERNET_USER_MANAGER = 'Finternet - User manager',
+    FINTERNET_TOKEN_MANAGER = 'Finternet - Token manager',
 }
 
 const ALL_CLUSTERS = [Cluster.Custom, Cluster.Devnet, Cluster.Testnet, Cluster.MainnetBeta];
@@ -165,6 +168,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: [Cluster.MainnetBeta],
         name: PROGRAM_NAMES.SERUM_3,
     },
+    A5JxZVHgXe7fn5TqJXm6Hj2zKh1ptDapae2YjtXbZJoy: {
+        deployments: [Cluster.Devnet, Cluster.MainnetBeta],
+        name: PROGRAM_NAMES.FINTERNET_TOKEN_MANAGER,
+    },
     // spl
     ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL: {
         deployments: ALL_CLUSTERS,
@@ -195,6 +202,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     CLoCKyJ6DXBJqqu2VWx9RLbgnwwR6BMHHuyasVmfMzBh: {
         deployments: [Cluster.MainnetBeta, Cluster.Devnet],
         name: PROGRAM_NAMES.CLOCKWORK_2,
+    },
+    CmFuqQTLs2nQof5uaktJn1a6k2VdbGmZPfrJufB2Vm3F: {
+        deployments: [Cluster.Devnet,Cluster.MainnetBeta],
+        name: PROGRAM_NAMES.FINTERNET_USER_MANAGER,
     },
     ComputeBudget111111111111111111111111111111: {
         deployments: ALL_CLUSTERS,
@@ -399,6 +410,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     namesLPneVptA9Z5rqUDD9tMTWEJwofgaYwp8cawRkX: {
         deployments: LIVE_CLUSTERS,
         name: PROGRAM_NAMES.NAME,
+    },
+    oreV2ZymfyeXgNgBdqMkumTqqAprVqgBWQfoYkrtKWQ: {
+        deployments: [Cluster.MainnetBeta],
+        name: PROGRAM_NAMES.ORE
     },
     p1exdMJcjVao65QdewkaZRUnU6VPSXhus9n2GzWfh98: {
         deployments: LIVE_CLUSTERS,
