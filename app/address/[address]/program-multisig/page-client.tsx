@@ -3,7 +3,7 @@
 import { ParsedAccountRenderer } from '@components/account/ParsedAccountRenderer';
 import React from 'react';
 
-import { VerifiedBuildCard } from '@/app/components/account/VerifiedBuildCard';
+import { ProgramMultisigCard } from '@/app/components/account/ProgramMultisigCard';
 
 type Props = Readonly<{
     params: {
@@ -11,7 +11,8 @@ type Props = Readonly<{
     };
 }>;
 
-function VerifiedBuildCardRenderer({
+
+function ProgramMultisigCardRenderer({
     account,
     onNotFound,
 }: React.ComponentProps<React.ComponentProps<typeof ParsedAccountRenderer>['renderComponent']>) {
@@ -19,9 +20,9 @@ function VerifiedBuildCardRenderer({
     if (!parsedData || parsedData?.program !== 'bpf-upgradeable-loader') {
         return onNotFound();
     }
-    return <VerifiedBuildCard data={parsedData} pubkey={account.pubkey} />;
+    return <ProgramMultisigCard data={parsedData} />;
 }
 
-export default function VerifiedBuildPageClient({ params: { address } }: Props) {
-    return <ParsedAccountRenderer address={address} renderComponent={VerifiedBuildCardRenderer} />;
+export default function ProgramMultisigPageClient({ params: { address } }: Props) {
+    return <ParsedAccountRenderer address={address} renderComponent={ProgramMultisigCardRenderer} />;
 }
