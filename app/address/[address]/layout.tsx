@@ -24,6 +24,7 @@ import {
     AccountsProvider,
     isTokenProgramData,
     TokenProgramData,
+    UpgradeableLoaderAccountData,
     useAccountInfo,
     useFetchAccountInfo,
     useMintAccountInfo,
@@ -49,6 +50,7 @@ import { Address } from 'web3js-experimental';
 
 import { CompressedNftAccountHeader, CompressedNftCard } from '@/app/components/account/CompressedNftCard';
 import { useCompressedNft, useMetadataJsonLink } from '@/app/providers/compressed-nft';
+import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 import { FullTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
 import { MintAccountInfo } from '@/app/validators/accounts/token';
 
@@ -460,7 +462,7 @@ function DetailsSections({
     }
 
     const account = info.data;
-    const tabComponents = getTabs(pubkey, account).concat(getAnchorTabs(pubkey, account));
+    const tabComponents = getTabs(pubkey, account).concat(getCustomLinkedTabs(pubkey, account));
 
     if (tab && tabComponents.filter(tabComponent => tabComponent.tab.slug === tab).length === 0) {
         redirect(`/address/${address}`);
@@ -561,7 +563,8 @@ export type MoreTabs =
     | 'entries'
     | 'concurrent-merkle-tree'
     | 'compression'
-    | 'verified-build';
+    | 'verified-build'
+    | 'program-multisig';
 
 function MoreSection({ children, tabs }: { children: React.ReactNode; tabs: (JSX.Element | null)[] }) {
     return (
@@ -694,8 +697,26 @@ function Tab({ address, path, title }: { address: string; path: string; title: s
     );
 }
 
-function getAnchorTabs(pubkey: PublicKey, account: Account) {
+function getCustomLinkedTabs(pubkey: PublicKey, account: Account) {
     const tabComponents = [];
+    const programMultisigTab: Tab = {
+        path: 'program-multisig',
+        slug: 'program-multisig',
+        title: 'Program Multisig',
+    };
+    tabComponents.push({
+        component: (
+            <React.Suspense key={programMultisigTab.slug} fallback={<></>}>
+                <ProgramMultisigLink
+                    tab={programMultisigTab}
+                    address={pubkey.toString()}
+                    authority={(account.data.parsed as UpgradeableLoaderAccountData | undefined)?.programData?.authority}
+                />
+            </React.Suspense>
+        ),
+        tab: programMultisigTab,
+    });
+
     const anchorProgramTab: Tab = {
         path: 'anchor-program',
         slug: 'anchor-program',
@@ -775,6 +796,34 @@ function CompressedNftLink({ tab, address, pubkey }: { tab: Tab; address: string
     const isActive = selectedLayoutSegment === tab.path;
 
     if (!compressedNft || !compressedNft.compression.compressed) {
+        return null;
+    }
+
+    return (
+        <li key={tab.slug} className="nav-item">
+            <Link className={`${isActive ? 'active ' : ''}nav-link`} href={tabPath}>
+                {tab.title}
+            </Link>
+        </li>
+    );
+}
+
+// Checks that a program multisig exists at the given address and returns a link to the tab
+function ProgramMultisigLink({
+    tab,
+    address,
+    authority,
+}: {
+    tab: Tab;
+    address: string;
+    authority: PublicKey | null | undefined;
+}) {
+    const { cluster } = useCluster();
+    const { data: squadMapInfo, error } = useSquadsMultisigLookup(authority, cluster);
+    const tabPath = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
+    const selectedLayoutSegment = useSelectedLayoutSegment();
+    const isActive = selectedLayoutSegment === tab.path;
+    if (!squadMapInfo || error || !squadMapInfo.isSquad) {
         return null;
     }
 

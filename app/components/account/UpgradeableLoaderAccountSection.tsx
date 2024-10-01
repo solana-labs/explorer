@@ -8,6 +8,7 @@ import { SolBalance } from '@components/common/SolBalance';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { Account, useFetchAccountInfo } from '@providers/accounts';
 import { useCluster } from '@providers/cluster';
+import { PublicKey } from '@solana/web3.js';
 import { addressLabel } from '@utils/tx';
 import {
     ProgramAccountInfo,
@@ -18,6 +19,10 @@ import {
 import Link from 'next/link';
 import React from 'react';
 import { ExternalLink, RefreshCw } from 'react-feather';
+
+import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
+import { Cluster } from '@/app/utils/cluster';
+import { useClusterPath } from '@/app/utils/url';
 
 import { VerifiedProgramBadge } from '../common/VerifiedProgramBadge';
 
@@ -63,7 +68,10 @@ export function UpgradeableProgramSection({
 }) {
     const refresh = useFetchAccountInfo();
     const { cluster } = useCluster();
+    const { data: squadMapInfo } = useSquadsMultisigLookup(programData?.authority, cluster);
+
     const label = addressLabel(account.pubkey.toBase58(), cluster);
+
     return (
         <div className="card">
             <div className="card-header">
@@ -134,17 +142,33 @@ export function UpgradeableProgramSection({
                             </td>
                         </tr>
                         {programData.authority !== null && (
-                            <tr>
-                                <td>Upgrade Authority</td>
-                                <td className="text-lg-end">
-                                    <Address pubkey={programData.authority} alignRight link />
-                                </td>
-                            </tr>
+                            <>
+                                <tr>
+                                    <td>Upgrade Authority</td>
+                                    <td className="text-lg-end">
+                                        {cluster == Cluster.MainnetBeta && squadMapInfo?.isSquad ? (
+                                            <MultisigBadge pubkey={account.pubkey} />
+                                        ) : null}
+                                        <Address pubkey={programData.authority} alignRight link />
+                                    </td>
+                                </tr>
+                            </>
                         )}
                     </>
                 )}
             </TableCardBody>
         </div>
+    );
+}
+
+function MultisigBadge({ pubkey }: { pubkey: PublicKey }) {
+    const programMultisigTabPath = useClusterPath({ pathname: `/address/${pubkey.toBase58()}/program-multisig` });
+    return (
+        <h3 className="mb-0">
+            <Link className="badge bg-success-soft rank" href={programMultisigTabPath}>
+                Program Multisig
+            </Link>
+        </h3>
     );
 }
 
