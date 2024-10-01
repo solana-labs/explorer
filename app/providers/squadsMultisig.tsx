@@ -1,7 +1,7 @@
-import { Program } from "@coral-xyz/anchor";
-import { PublicKey } from "@solana/web3.js";
-import { Cluster } from "@utils/cluster";
-import useSWRImmutable from "swr/immutable";
+import { Program } from '@coral-xyz/anchor';
+import { PublicKey } from '@solana/web3.js';
+import { Cluster } from '@utils/cluster';
+import useSWRImmutable from 'swr/immutable';
 
 export const SQUADS_V3_ADDRESS = 'SMPLecH534NA9acpos4G6x7uf3LWbCAwZQE9e8ZekMu';
 export const SQUADS_V4_ADDRESS = 'SQDS4ep65T869zMMBKyuUq6aD6EgTu8psMjkvj52pCf';
@@ -18,6 +18,7 @@ export type MinimalMultisigInfo =
 
 const SQUADS_MAP_URL = 'https://4fnetmviidiqkjzenwxe66vgoa0soerr.lambda-url.us-east-1.on.aws/isSquadV2';
 
+// Squads Multisig reverse map info is only available on mainnet
 export function useSquadsMultisigLookup(programAuthority: PublicKey | null | undefined, cluster: Cluster) {
     return useSWRImmutable<SquadsMultisigMapInfo | null>(
         ['squadsReverseMap', programAuthority?.toString(), cluster],

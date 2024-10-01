@@ -148,12 +148,10 @@ export function UpgradeableProgramSection({
                                     <td className="text-lg-end">
                                         {cluster == Cluster.MainnetBeta && squadMapInfo?.isSquad ? (
                                             <MultisigBadge pubkey={account.pubkey} />
-                                        ): null}
+                                        ) : null}
                                         <Address pubkey={programData.authority} alignRight link />
                                     </td>
                                 </tr>
-                                {/* Squads Multisig reverse map info is only available on mainnet */}
-                                {/*<UpgradeAuthorityInfo squadMapInfo={squadMapInfo} version={squadMapInfo?.version} /> : <></>*/}
                             </>
                         )}
                     </>
@@ -173,7 +171,6 @@ function MultisigBadge({ pubkey }: { pubkey: PublicKey }) {
         </h3>
     );
 }
-
 
 function SecurityLabel() {
     return (

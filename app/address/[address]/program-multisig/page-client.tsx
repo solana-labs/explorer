@@ -11,7 +11,6 @@ type Props = Readonly<{
     };
 }>;
 
-
 function ProgramMultisigCardRenderer({
     account,
     onNotFound,
