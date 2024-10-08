@@ -200,7 +200,7 @@ function mapField(key: string, value: any, type: IdlType, idl: Idl, keySuffix?: 
                 <div>{numberWithSeparator(value.toString())}</div>
             </SimpleRow>
         );
-    } else if (type === 'bool' || type === 'bytes' || type === 'string') {
+    } else if (type === 'bool' || type === 'string') {
         return (
             <SimpleRow
                 key={keySuffix ? `${key}-${keySuffix}` : key}
@@ -212,7 +212,19 @@ function mapField(key: string, value: any, type: IdlType, idl: Idl, keySuffix?: 
                 <div>{value.toString()}</div>
             </SimpleRow>
         );
-    } else if (type === 'pubkey') {
+    } else if (type === 'bytes') {
+        return (
+            <SimpleRow
+                key={keySuffix ? `${key}-${keySuffix}` : key}
+                rawKey={key}
+                type={type}
+                keySuffix={keySuffix}
+                nestingLevel={nestingLevel}
+            >
+                <div className="text-lg-start" style={{ fontSize: '0.85rem', lineHeight: '1.2', maxWidth: '100%', overflowWrap: 'break-word', whiteSpace: 'normal', wordBreak: 'break-all'}}>{(value as Buffer).toString('base64')}</div>
+        </SimpleRow>
+        );
+    }else if (type === 'pubkey') {
         return (
             <SimpleRow
                 key={keySuffix ? `${key}-${keySuffix}` : key}
@@ -465,6 +477,7 @@ function typeDisplayName(
         case 'i256':
         case 'u256':
         case 'bytes':
+            return 'bytes (Base64)'
         case 'string':
             return type.toString();
         case 'pubkey':
