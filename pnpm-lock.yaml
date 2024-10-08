@@ -59,6 +59,9 @@ importers:
       '@solana/spl-token':
         specifier: ^0.1.8
         version: 0.1.8(bufferutil@4.0.7)(utf-8-validate@5.0.10)
+      '@solana/wallet-adapter-base':
+        specifier: ^0.9.23
+        version: 0.9.23(@solana/web3.js@1.95.3(bufferutil@4.0.7)(utf-8-validate@5.0.10))
       '@solana/wallet-adapter-react':
         specifier: ^0.15.35
         version: 0.15.35(@solana/web3.js@1.95.3(bufferutil@4.0.7)(utf-8-validate@5.0.10))(bs58@4.0.1)(react-native@0.75.4(@babel/core@7.21.8)(@babel/preset-env@7.25.7(@babel/core@7.21.8))(@types/react@18.3.3)(bufferutil@4.0.7)(react@18.3.1)(typescript@5.0.4)(utf-8-validate@5.0.10))(react@18.3.1)
@@ -2600,12 +2603,6 @@ packages:
       '@solana/web3.js': ^1.77.3
       react: '*'
 
-  '@solana/wallet-adapter-base@0.9.22':
-    resolution: {integrity: sha512-xbLEZPGSJFvgTeldG9D55evhl7QK/3e/F7vhvcA97mEt1eieTgeKMnGlmmjs3yivI3/gtZNZeSk1XZLnhKcQvw==}
-    engines: {node: '>=16'}
-    peerDependencies:
-      '@solana/web3.js': ^1.58.0
-
   '@solana/wallet-adapter-base@0.9.23':
     resolution: {integrity: sha512-apqMuYwFp1jFi55NxDfvXUX2x1T0Zh07MxhZ/nCCTGys5raSfYUh82zen2BLv8BSDj/JxZ2P/s7jrQZGrX8uAw==}
     engines: {node: '>=16'}
@@ -2843,10 +2840,6 @@ packages:
 
   '@solana/wallet-standard-core@1.1.1':
     resolution: {integrity: sha512-DoQ5Ryly4GAZtxRUmW2rIWrgNvTYVCWrFCFFjZI5s4zu2QNsP7sHZUax3kc1GbmFLXNL1FWRZlPOXRs6e0ZEng==}
-    engines: {node: '>=16'}
-
-  '@solana/wallet-standard-features@1.0.1':
-    resolution: {integrity: sha512-SUfx7KtBJ55XIj0qAhhVcC1I6MklAXqWFEz9hDHW+6YcJIyvfix/EilBhaBik1FJ2JT0zukpOfFv8zpuAbFRbw==}
     engines: {node: '>=16'}
 
   '@solana/wallet-standard-features@1.2.0':
@@ -9609,7 +9602,7 @@ snapshots:
 
   '@bundlr-network/client@0.7.17(bufferutil@4.0.7)(debug@4.3.4)(utf-8-validate@5.0.10)':
     dependencies:
-      '@solana/wallet-adapter-base': 0.9.22(@solana/web3.js@1.95.3(bufferutil@4.0.7)(utf-8-validate@5.0.10))
+      '@solana/wallet-adapter-base': 0.9.23(@solana/web3.js@1.95.3(bufferutil@4.0.7)(utf-8-validate@5.0.10))
       '@solana/web3.js': 1.95.3(bufferutil@4.0.7)(utf-8-validate@5.0.10)
       '@supercharge/promise-pool': 2.4.0
       algosdk: 1.24.1
@@ -12039,14 +12032,6 @@ snapshots:
       - bs58
       - react-native
 
-  '@solana/wallet-adapter-base@0.9.22(@solana/web3.js@1.95.3(bufferutil@4.0.7)(utf-8-validate@5.0.10))':
-    dependencies:
-      '@solana/wallet-standard-features': 1.0.1
-      '@solana/web3.js': 1.95.3(bufferutil@4.0.7)(utf-8-validate@5.0.10)
-      '@wallet-standard/base': 1.0.1
-      '@wallet-standard/features': 1.0.3
-      eventemitter3: 4.0.7
-
   '@solana/wallet-adapter-base@0.9.23(@solana/web3.js@1.95.3(bufferutil@4.0.7)(utf-8-validate@5.0.10))':
     dependencies:
       '@solana/wallet-standard-features': 1.2.0
@@ -12391,11 +12376,6 @@ snapshots:
       '@solana/wallet-standard-chains': 1.1.0
       '@solana/wallet-standard-features': 1.2.0
       '@solana/wallet-standard-util': 1.1.1
-
-  '@solana/wallet-standard-features@1.0.1':
-    dependencies:
-      '@wallet-standard/base': 1.0.1
-      '@wallet-standard/features': 1.0.3
 
   '@solana/wallet-standard-features@1.2.0':
     dependencies:
@@ -13614,7 +13594,7 @@ snapshots:
     dependencies:
       '@noble/ed25519': 1.7.3
       '@randlabs/myalgo-connect': 1.4.2
-      '@solana/wallet-adapter-base': 0.9.22(@solana/web3.js@1.95.3(bufferutil@4.0.7)(utf-8-validate@5.0.10))
+      '@solana/wallet-adapter-base': 0.9.23(@solana/web3.js@1.95.3(bufferutil@4.0.7)(utf-8-validate@5.0.10))
       algosdk: 1.24.1
       arweave: 1.14.0
       arweave-stream-tx: 1.2.2(arweave@1.14.0)
