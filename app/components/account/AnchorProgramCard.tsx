@@ -4,10 +4,11 @@ import { useAnchorProgram } from '@providers/anchor';
 import { useCluster } from '@providers/cluster';
 import { useState } from 'react';
 import ReactJson from 'react-json-view';
-import { IDLBadge } from '../common/IDLBadge';
+
+import { getIdlSpecType } from '@/app/utils/convertLegacyIdl';
 
 import { DownloadableButton } from '../common/Downloadable';
-import { getIdlSpecType } from '@/app/utils/convertLegacyIdl';
+import { IDLBadge } from '../common/IDLBadge';
 
 export function AnchorProgramCard({ programId }: { programId: string }) {
     const { url } = useCluster();

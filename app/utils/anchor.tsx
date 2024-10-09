@@ -221,10 +221,22 @@ function mapField(key: string, value: any, type: IdlType, idl: Idl, keySuffix?: 
                 keySuffix={keySuffix}
                 nestingLevel={nestingLevel}
             >
-                <div className="text-lg-start" style={{ fontSize: '0.85rem', lineHeight: '1.2', maxWidth: '100%', overflowWrap: 'break-word', whiteSpace: 'normal', wordBreak: 'break-all'}}>{(value as Buffer).toString('base64')}</div>
-        </SimpleRow>
+                <div
+                    className="text-lg-start"
+                    style={{
+                        fontSize: '0.85rem',
+                        lineHeight: '1.2',
+                        maxWidth: '100%',
+                        overflowWrap: 'break-word',
+                        whiteSpace: 'normal',
+                        wordBreak: 'break-all',
+                    }}
+                >
+                    {(value as Buffer).toString('base64')}
+                </div>
+            </SimpleRow>
         );
-    }else if (type === 'pubkey') {
+    } else if (type === 'pubkey') {
         return (
             <SimpleRow
                 key={keySuffix ? `${key}-${keySuffix}` : key}
@@ -477,7 +489,7 @@ function typeDisplayName(
         case 'i256':
         case 'u256':
         case 'bytes':
-            return 'bytes (Base64)'
+            return 'bytes (Base64)';
         case 'string':
             return type.toString();
         case 'pubkey':
