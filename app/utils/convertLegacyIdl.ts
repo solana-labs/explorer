@@ -430,17 +430,21 @@ function convertDefinedTypeArg(arg: LegacyIdlDefinedTypeArg): any {
     throw new Error(`Unsupported defined type arg: ${JSON.stringify(arg)}`);
 }
 
-export function formatIdl(idl: any, programAddress?: string): Idl {
-    const spec = idl.metadata?.spec;
+export function getIdlSpecType(idl: any): IdlSpec {
+    return idl.metadata?.spec ?? 'legacy';
+}
 
-    if (spec) {
-        switch (spec) {
-            case '0.1.0':
-                return idl as Idl;
-            default:
-                throw new Error(`IDL spec not supported: ${spec}`);
-        }
-    } else {
-        return removeUnusedTypes(convertLegacyIdl(idl as LegacyIdl, programAddress));
+export type IdlSpec = '0.1.0' | 'legacy';
+
+export function formatIdl(idl: any, programAddress?: string): Idl {
+    const spec = getIdlSpecType(idl);
+
+    switch (spec) {
+        case '0.1.0':
+            return idl as Idl;
+        case 'legacy':
+            return removeUnusedTypes(convertLegacyIdl(idl as LegacyIdl, programAddress));
+        default:
+            throw new Error(`IDL spec not supported: ${spec}`);
     }
 }
