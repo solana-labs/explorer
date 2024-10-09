@@ -1,6 +1,6 @@
 import { UnknownAccountCard } from '@components/account/UnknownAccountCard';
 import { Address } from '@components/common/Address';
-import { Downloadable } from '@components/common/Downloadable';
+import { DownloadableIcon } from '@components/common/Downloadable';
 import { InfoTooltip } from '@components/common/InfoTooltip';
 import { SecurityTXTBadge } from '@components/common/SecurityTXTBadge';
 import { Slot } from '@components/common/Slot';
@@ -233,9 +233,9 @@ export function UpgradeableProgramDataSection({
                     <tr>
                         <td>Data Size (Bytes)</td>
                         <td className="text-lg-end">
-                            <Downloadable data={programData.data[0]} filename={`${account.pubkey.toString()}.bin`}>
+                            <DownloadableIcon data={programData.data[0]} filename={`${account.pubkey.toString()}.bin`}>
                                 <span className="me-2">{account.space}</span>
-                            </Downloadable>
+                            </DownloadableIcon>
                         </td>
                     </tr>
                 )}
