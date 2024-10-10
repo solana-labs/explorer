@@ -37,6 +37,7 @@ import {
     TransferHookAccount,
 } from '@validators/accounts/token-extension';
 import { BigNumber } from 'bignumber.js';
+import { capitalCase } from 'change-case';
 import { useEffect, useMemo, useState } from 'react';
 import { ExternalLink, RefreshCw } from 'react-feather';
 import { create } from 'superstruct';
@@ -57,6 +58,11 @@ const getEthAddress = (link?: string) => {
     }
 
     return address;
+};
+
+const StatusBadge = ({ status }: { status: string }) => {
+    const badgeClass = status === 'initialized' ? 'bg-success-soft' : 'bg-warning-soft';
+    return <span className={`badge ${badgeClass}`}>{capitalCase(status)}</span>;
 };
 
 export function TokenAccountSection({
@@ -465,12 +471,12 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
                     <td>Token balance {typeof symbol === 'string' && `(${symbol})`}</td>
                     <td className="text-lg-end">{balance}</td>
                 </tr>
-                {info.state === 'uninitialized' && (
-                    <tr>
-                        <td>Status</td>
-                        <td className="text-lg-end">Uninitialized</td>
-                    </tr>
-                )}
+                <tr>
+                    <td>Status</td>
+                    <td className="text-lg-end">
+                        <StatusBadge status={info.state} />
+                    </td>
+                </tr>
                 {info.rentExemptReserve && (
                     <tr>
                         <td>Rent-exempt reserve (SOL)</td>
