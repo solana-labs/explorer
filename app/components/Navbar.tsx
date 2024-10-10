@@ -15,6 +15,7 @@ export function Navbar() {
     const homePath = useClusterPath({ pathname: '/' });
     const supplyPath = useClusterPath({ pathname: '/supply' });
     const inspectorPath = useClusterPath({ pathname: '/tx/inspector' });
+    const messagePath = useClusterPath({ pathname: '/message' });
     const selectedLayoutSegment = useSelectedLayoutSegment();
     const selectedLayoutSegments = useSelectedLayoutSegments();
     return (
@@ -48,14 +49,24 @@ export function Navbar() {
                         </li>
                         <li className="nav-item">
                             <Link
-                                className={`nav-link${
-                                    selectedLayoutSegments[0] === 'tx' && selectedLayoutSegments[1] === '(inspector)'
+                                className={`nav-link${selectedLayoutSegments[0] === 'tx' && selectedLayoutSegments[1] === '(inspector)'
                                         ? ' active'
                                         : ''
-                                }`}
+                                    }`}
                                 href={inspectorPath}
                             >
                                 Inspector
+                            </Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link
+                                className={`nav-link${selectedLayoutSegments[0] === 'tx' && selectedLayoutSegments[1] === '(message)'
+                                        ? ' active'
+                                        : ''
+                                    }`}
+                                href={messagePath}
+                            >
+                                Message
                             </Link>
                         </li>
                     </ul>
