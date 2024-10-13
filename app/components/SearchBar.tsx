@@ -298,10 +298,31 @@ function buildOptions(rawSearch: string, cluster: Cluster, currentEpoch?: bigint
             });
         }
     } catch (err) {
-        /* empty */
+        // If bs58 decoding fails, check if it's a valid base64 string
+        if (isValidBase64(search)) {
+            options.push({
+                label: 'Transaction Message',
+                options: [
+                    {
+                        label: 'Decoded Transaction Message',
+                        pathname: `/tx/inspector?message=${search}`,
+                        value: [search],
+                    },
+                ],
+            });
+        }
     }
 
     return options;
+}
+
+function isValidBase64(str: string): boolean {
+    try {
+        Buffer.from(str, 'base64');
+        return true;
+    } catch (err) {
+        return false;
+    }
 }
 
 function DropdownIndicator() {
