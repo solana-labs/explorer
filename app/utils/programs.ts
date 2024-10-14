@@ -86,6 +86,16 @@ export enum PROGRAM_NAMES {
     OPENBOOK_DEX = 'OpenBook Dex',
     FINTERNET_USER_MANAGER = 'Finternet - User manager',
     FINTERNET_TOKEN_MANAGER = 'Finternet - Token manager',
+
+    // ZK Compression
+    ZK_LIGHT_SYSTEM_PROGRAM = "Light System Program",
+    ZK_COMPRESSED_TOKEN_PROGRAM = "Compressed Token Program",
+    ZK_ACCOUNT_COMPRESSION_PROGRAM = "Account Compression Program",
+    ZK_SHARED_PUBLIC_STATE_TREE = "Shared Public State Tree",
+    ZK_SHARED_PUBLIC_NULLIFIER_QUEUE = "Shared Public Nullifier Queue",
+    ZK_SHARED_PUBLIC_ADDRESS_TREE = "Shared Public Address Tree",
+    ZK_SHARED_PUBLIC_ADDRESS_QUEUE = "Shared Public Address Queue",
+    ZK_COMPRESSED_TOKEN_ESCROW_OWNER_PDA = "Compressed Token Escrow Owner PDA",
 }
 
 const ALL_CLUSTERS = [Cluster.Custom, Cluster.Devnet, Cluster.Testnet, Cluster.MainnetBeta];
@@ -204,7 +214,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: PROGRAM_NAMES.CLOCKWORK_2,
     },
     CmFuqQTLs2nQof5uaktJn1a6k2VdbGmZPfrJufB2Vm3F: {
-        deployments: [Cluster.Devnet,Cluster.MainnetBeta],
+        deployments: [Cluster.Devnet, Cluster.MainnetBeta],
         name: PROGRAM_NAMES.FINTERNET_USER_MANAGER,
     },
     ComputeBudget111111111111111111111111111111: {
@@ -435,6 +445,38 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: [Cluster.MainnetBeta],
         name: PROGRAM_NAMES.WORMHOLE_TOKEN,
     },
+    SySTEM1eSU2p4BGQfQpimFEWWSC1XDFeun3Nqzz3rT7: {
+        deployments: [Cluster.MainnetBeta, Cluster.Devnet],
+        name: PROGRAM_NAMES.ZK_LIGHT_SYSTEM_PROGRAM,
+    },
+    cTokenmWW8bLPjZEBAUgYy3zKxQZW6VKi7bqNFEVv3m: {
+        deployments: [Cluster.MainnetBeta, Cluster.Devnet],
+        name: PROGRAM_NAMES.ZK_COMPRESSED_TOKEN_PROGRAM,
+    },
+    compr6CUsB5m2jS4Y3831ztGSTnDpnKJTKS95d64XVq: {
+        deployments: [Cluster.MainnetBeta, Cluster.Devnet],
+        name: PROGRAM_NAMES.ZK_ACCOUNT_COMPRESSION_PROGRAM,
+    },
+    smt1NamzXdq4AMqS2fS2F1i5KTYPZRhoHgWx38d8WsT: {
+        deployments: [Cluster.MainnetBeta, Cluster.Devnet],
+        name: PROGRAM_NAMES.ZK_SHARED_PUBLIC_STATE_TREE,
+    },
+    nfq1NvQDJ2GEgnS8zt9prAe8rjjpAW1zFkrvZoBR148: {
+        deployments: [Cluster.MainnetBeta, Cluster.Devnet],
+        name: PROGRAM_NAMES.ZK_SHARED_PUBLIC_NULLIFIER_QUEUE,
+    },
+    amt1Ayt45jfbdw5YSo7iz6WZxUmnZsQTYXy82hVwyC2: {
+        deployments: [Cluster.MainnetBeta, Cluster.Devnet],
+        name: PROGRAM_NAMES.ZK_SHARED_PUBLIC_ADDRESS_TREE,
+    },
+    aq1S9z4reTSQAdgWHGD2zDaS39sjGrAxbR31vxJ2F4F: {
+        deployments: [Cluster.MainnetBeta, Cluster.Devnet],
+        name: PROGRAM_NAMES.ZK_SHARED_PUBLIC_ADDRESS_QUEUE,
+    },
+    GXtd2izAiMJPwMEjfgTRH3d7k9mjn4Jq3JrWFv9gySYy: {
+        deployments: [Cluster.MainnetBeta, Cluster.Devnet],
+        name: PROGRAM_NAMES.ZK_COMPRESSED_TOKEN_ESCROW_OWNER_PDA,
+    },
 };
 
 export const SPECIAL_IDS: { [key: string]: string } = {
@@ -456,8 +498,8 @@ export const SYSVAR_IDS: { [key: string]: string } = {
 };
 
 export const TOKEN_IDS: { [key: string]: string } = {
-  TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA: 'Token Program',
-  TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb: 'Token-2022 Program',
+    TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA: 'Token Program',
+    TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb: 'Token-2022 Program',
 } as const;
 
 export type TokenProgram = 'spl-token' | 'spl-token-2022';
@@ -468,7 +510,7 @@ export function isTokenProgram(program: string): program is TokenProgram {
     try {
         assertIsTokenProgram(program);
         return true;
-    } catch(e) {
+    } catch (e) {
         return false;
     }
 }
