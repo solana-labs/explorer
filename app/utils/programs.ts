@@ -89,13 +89,8 @@ export enum PROGRAM_NAMES {
 
     // ZK Compression
     ZK_LIGHT_SYSTEM_PROGRAM = "Light System Program",
-    ZK_COMPRESSED_TOKEN_PROGRAM = "Compressed Token Program",
-    ZK_ACCOUNT_COMPRESSION_PROGRAM = "Account Compression Program",
-    ZK_SHARED_PUBLIC_STATE_TREE = "Shared Public State Tree",
-    ZK_SHARED_PUBLIC_NULLIFIER_QUEUE = "Shared Public Nullifier Queue",
-    ZK_SHARED_PUBLIC_ADDRESS_TREE = "Shared Public Address Tree",
-    ZK_SHARED_PUBLIC_ADDRESS_QUEUE = "Shared Public Address Queue",
-    ZK_COMPRESSED_TOKEN_ESCROW_OWNER_PDA = "Compressed Token Escrow Owner PDA",
+    ZK_COMPRESSED_TOKEN_PROGRAM = "ZK Compressed Token Program",
+    ZK_ACCOUNT_COMPRESSION_PROGRAM = "ZK Account Compression Program"
 }
 
 const ALL_CLUSTERS = [Cluster.Custom, Cluster.Devnet, Cluster.Testnet, Cluster.MainnetBeta];
@@ -456,26 +451,6 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     compr6CUsB5m2jS4Y3831ztGSTnDpnKJTKS95d64XVq: {
         deployments: [Cluster.MainnetBeta, Cluster.Devnet],
         name: PROGRAM_NAMES.ZK_ACCOUNT_COMPRESSION_PROGRAM,
-    },
-    smt1NamzXdq4AMqS2fS2F1i5KTYPZRhoHgWx38d8WsT: {
-        deployments: [Cluster.MainnetBeta, Cluster.Devnet],
-        name: PROGRAM_NAMES.ZK_SHARED_PUBLIC_STATE_TREE,
-    },
-    nfq1NvQDJ2GEgnS8zt9prAe8rjjpAW1zFkrvZoBR148: {
-        deployments: [Cluster.MainnetBeta, Cluster.Devnet],
-        name: PROGRAM_NAMES.ZK_SHARED_PUBLIC_NULLIFIER_QUEUE,
-    },
-    amt1Ayt45jfbdw5YSo7iz6WZxUmnZsQTYXy82hVwyC2: {
-        deployments: [Cluster.MainnetBeta, Cluster.Devnet],
-        name: PROGRAM_NAMES.ZK_SHARED_PUBLIC_ADDRESS_TREE,
-    },
-    aq1S9z4reTSQAdgWHGD2zDaS39sjGrAxbR31vxJ2F4F: {
-        deployments: [Cluster.MainnetBeta, Cluster.Devnet],
-        name: PROGRAM_NAMES.ZK_SHARED_PUBLIC_ADDRESS_QUEUE,
-    },
-    GXtd2izAiMJPwMEjfgTRH3d7k9mjn4Jq3JrWFv9gySYy: {
-        deployments: [Cluster.MainnetBeta, Cluster.Devnet],
-        name: PROGRAM_NAMES.ZK_COMPRESSED_TOKEN_ESCROW_OWNER_PDA,
     },
 };
 
