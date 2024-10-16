@@ -13,6 +13,7 @@ const cachedAnchorProgramPromises: Record<
     void | { __type: 'promise'; promise: Promise<void> } | { __type: 'result'; result: Idl | null }
 > = {};
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function useIdlFromSolanaProgramBinary(programAddress: string): Idl | null {
     const fetchAccountInfo = useFetchAccountInfo();
     const programInfo = useAccountInfo(programAddress);
