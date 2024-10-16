@@ -112,9 +112,10 @@ function useIdlFromAnchorProgramSeed(programAddress: string, url: string): Idl |
 }
 
 export function useAnchorProgram(programAddress: string, url: string): { program: Program | null; idl: Idl | null } {
-    const idlFromBinary = useIdlFromSolanaProgramBinary(programAddress);
+    // TODO(ngundotra): Rewrite this to be more efficient
+    // const idlFromBinary = useIdlFromSolanaProgramBinary(programAddress);
     const idlFromAnchorProgram = useIdlFromAnchorProgramSeed(programAddress, url);
-    const idl = idlFromBinary ?? idlFromAnchorProgram;
+    const idl = idlFromAnchorProgram;
     const program: Program<Idl> | null = useMemo(() => {
         if (!idl) return null;
         try {
