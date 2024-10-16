@@ -13,6 +13,7 @@ const cachedAnchorProgramPromises: Record<
     void | { __type: 'promise'; promise: Promise<void> } | { __type: 'result'; result: Idl | null }
 > = {};
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function useIdlFromSolanaProgramBinary(programAddress: string): Idl | null {
     const fetchAccountInfo = useFetchAccountInfo();
     const programInfo = useAccountInfo(programAddress);
@@ -112,9 +113,10 @@ function useIdlFromAnchorProgramSeed(programAddress: string, url: string): Idl |
 }
 
 export function useAnchorProgram(programAddress: string, url: string): { program: Program | null; idl: Idl | null } {
-    const idlFromBinary = useIdlFromSolanaProgramBinary(programAddress);
+    // TODO(ngundotra): Rewrite this to be more efficient
+    // const idlFromBinary = useIdlFromSolanaProgramBinary(programAddress);
     const idlFromAnchorProgram = useIdlFromAnchorProgramSeed(programAddress, url);
-    const idl = idlFromBinary ?? idlFromAnchorProgram;
+    const idl = idlFromAnchorProgram;
     const program: Program<Idl> | null = useMemo(() => {
         if (!idl) return null;
         try {
