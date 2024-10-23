@@ -1,5 +1,6 @@
 import { ed25519 } from '@noble/curves/ed25519';
 import { useWallet } from '@solana/wallet-adapter-react';
+import { Message, Transaction } from '@solana/web3.js';
 import bs58 from 'bs58';
 import React, { useCallback } from 'react';
 
@@ -17,6 +18,17 @@ type Props = React.ButtonHTMLAttributes<HTMLButtonElement> & {
     signingcontext: SigningContext;
 };
 
+function shouldSign(input: string): boolean {
+    try {
+        const decodedMessage = bs58.decode(input);
+        const isTransaction = (() => { try { Transaction.from(decodedMessage); return true; } catch { return false; } })();
+        const isMessage = (() => { try { Message.from(decodedMessage); return true; } catch { return false; } })();
+        return !isTransaction && !isMessage;
+    } catch (error: unknown) {
+        return true;
+    }
+}
+
 export const SignMessageBox = (props: Props) => {
     const { publicKey, signMessage } = useWallet();
 
@@ -26,6 +38,9 @@ export const SignMessageBox = (props: Props) => {
             if (!signMessage) throw new Error('Wallet does not support message signing!');
 
             const formattedMessage = `${props.signingcontext.input}`;
+            if (!shouldSign(formattedMessage)) {
+                throw new Error('Message may be used in a transaction! Refusing to sign.');
+            }
             const signature = await signMessage(new TextEncoder().encode(formattedMessage));
             if (!ed25519.verify(signature, new TextEncoder().encode(formattedMessage), publicKey.toBytes())) {
                 throw new Error('Message signature invalid!');
