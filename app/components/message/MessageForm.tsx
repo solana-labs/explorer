@@ -156,6 +156,7 @@ export const MessageForm = (props: { reportVerification: ReportMessageVerificati
                 <h3 className="card-header-title">Message</h3>
             </div>
             <div className="card-body">
+                <p className="text-muted small">Make sure you understand what you're signing. Transaction signing is not allowed. Message signing is free.</p>
                 <MeteredMessageBox
                     value={message}
                     onChange={handleInputChange}
