@@ -1,10 +1,13 @@
 import { sha256 } from '@noble/hashes/sha256';
-import { PublicKey } from '@solana/web3.js';
+import { Connection, PublicKey } from '@solana/web3.js';
 import useSWRImmutable from 'swr/immutable';
 
+import { useAnchorProgram } from '../providers/anchor';
+import { useCluster } from '../providers/cluster';
 import { ProgramDataAccountInfo } from '../validators/accounts/upgradeable-program';
 
 const OSEC_REGISTRY_URL = 'https://verify.osec.io';
+const VERIFY_PROGRAM_ID = 'verifycLy8mB96wd9wqq3WDXQwM4oU6r42Th37Db9fC';
 
 export type OsecRegistryInfo = {
     is_verified: boolean;
@@ -13,29 +16,84 @@ export type OsecRegistryInfo = {
     executable_hash: string;
     last_verified_at: string | null;
     repo_url: string;
-};
-
-export type CheckedOsecRegistryInfo = {
-    explorer_hash: string;
+    verify_command: string;
 };
 
 export function useVerifiedProgramRegistry({
     programId,
+    programAuthority,
     options,
 }: {
     programId: PublicKey;
+    programAuthority: PublicKey | null;
     options?: { suspense: boolean };
 }) {
-    const { data, error, isLoading } = useSWRImmutable(
+    const { url: clusterUrl } = useCluster();
+    const connection = new Connection(clusterUrl);
+
+    const {
+        data: registryData,
+        error: registryError,
+        isLoading: isRegistryLoading,
+    } = useSWRImmutable(
         `${programId.toBase58()}`,
         async (programId: string) => {
-            return fetch(`${OSEC_REGISTRY_URL}/status/${programId}`).then(response => response.json());
+            const response = await fetch(`${OSEC_REGISTRY_URL}/status/${programId}`);
+            return response.json();
         },
         { suspense: options?.suspense }
     );
-    return { data: error ? null : (data as OsecRegistryInfo), isLoading };
+
+    const { program: accountAnchorProgram } = useAnchorProgram(VERIFY_PROGRAM_ID, connection.rpcEndpoint);
+
+    // Fetch the PDA derived from the program upgrade authority
+    // TODO: Add getting verifier pubkey from the security.txt as second option once implemented
+    const {
+        data: pdaData,
+        error: pdaError,
+        isLoading: isPdaLoading,
+    } = useSWRImmutable(
+        programAuthority && accountAnchorProgram ? `pda-${programId.toBase58()}` : null,
+        async () => {
+            const [pda] = PublicKey.findProgramAddressSync(
+                [Buffer.from('otter_verify'), programAuthority!.toBuffer(), programId.toBuffer()],
+                new PublicKey(VERIFY_PROGRAM_ID)
+            );
+            const pdaAccountInfo = await connection.getAccountInfo(pda);
+            if (!pdaAccountInfo || !pdaAccountInfo.data) {
+                throw new Error('PDA account info not found');
+            }
+            return accountAnchorProgram.coder.accounts.decode('buildParams', pdaAccountInfo.data);
+        },
+        { suspense: options?.suspense }
+    );
+
+    const isLoading = isRegistryLoading || isPdaLoading;
+
+    if (registryError || pdaError) {
+        return { data: null, error: registryError || pdaError, isLoading };
+    }
+
+    // Create command from the args of the verify PDA
+    if (registryData && pdaData && !isLoading) {
+        const verifiedData = registryData as OsecRegistryInfo;
+        verifiedData.verify_command = `solana-verify verify-from-repo -um --program-id ${programId.toBase58()} ${
+            pdaData.gitUrl
+        } --commit-hash ${pdaData.commit}`;
+
+        // Add additional args if available, for example mount-path and --library-name
+        if (pdaData.args && pdaData.args.length > 0) {
+            const argsString = pdaData.args.join(' ');
+            verifiedData.verify_command += ` ${argsString}`;
+        }
+
+        return { data: verifiedData, isLoading };
+    }
+
+    return { data: null, isLoading };
 }
 
+// Helper function to hash program data
 export function hashProgramData(programData: ProgramDataAccountInfo): string {
     const buffer = Buffer.from(programData.data[0], 'base64');
     // Truncate null bytes at the end of the buffer
