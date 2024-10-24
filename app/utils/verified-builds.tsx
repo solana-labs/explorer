@@ -61,7 +61,8 @@ export function useVerifiedProgramRegistry({
             );
             const pdaAccountInfo = await connection.getAccountInfo(pda);
             if (!pdaAccountInfo || !pdaAccountInfo.data) {
-                throw new Error('PDA account info not found');
+                console.log('PDA account info not found');
+                return null;
             }
             return accountAnchorProgram.coder.accounts.decode('buildParams', pdaAccountInfo.data);
         },
@@ -87,6 +88,11 @@ export function useVerifiedProgramRegistry({
             verifiedData.verify_command += ` ${argsString}`;
         }
 
+        return { data: verifiedData, isLoading };
+    }
+    if (registryData && pdaData == null && !isLoading) {
+        const verifiedData = registryData as OsecRegistryInfo;
+        verifiedData.verify_command = 'Program does not have a verify PDA uploaded.';
         return { data: verifiedData, isLoading };
     }
 
