@@ -4,6 +4,8 @@ import { Message, Transaction } from '@solana/web3.js';
 import bs58 from 'bs58';
 import React, { useCallback } from 'react';
 
+export const SIGNING_DOMAIN = "_sign offchain_\n"
+
 export interface SigningContext {
     input: string;
     address: string;
@@ -41,10 +43,13 @@ export const SignMessageBox = (props: Props) => {
             if (!shouldSign(formattedMessage)) {
                 throw new Error('Message may be used in a transaction! Refusing to sign.');
             }
-            const signature = await signMessage(new TextEncoder().encode(formattedMessage));
-            if (!ed25519.verify(signature, new TextEncoder().encode(formattedMessage), publicKey.toBytes())) {
+            const messageBytes = new TextEncoder().encode(SIGNING_DOMAIN + formattedMessage);
+            console.log(`Signing message: ${formattedMessage}`);
+            const signature = await signMessage(messageBytes);
+            if (!ed25519.verify(signature, messageBytes, publicKey.toBytes())) {
                 throw new Error('Message signature invalid!');
             }
+            console.log(`Finished signing`);
 
             // update the UI fields to reflect the signed message
             props.signingcontext.setInput({ target: { value: formattedMessage } });

@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import { SetStateAction, useCallback, useEffect, useMemo, useState } from "react";
 
 import { MeteredMessageBox } from "./MeteredMessageBox";
-import { SigningContext, SignMessageBox } from "./SignMessageButton";
+import { SigningContext, SignMessageBox, SIGNING_DOMAIN } from "./SignMessageButton";
 
 const ConnectButton = dynamic(async () => ((await import('@solana/wallet-adapter-react-ui')).WalletMultiButton), { ssr: false });
 
@@ -72,7 +72,8 @@ export const MessageForm = (props: { reportVerification: ReportMessageVerificati
 
     const handleVerifyClick = useCallback(() => {
         try {
-            const verified = ed25519.verify(bs58.decode(signature), new TextEncoder().encode(message), bs58.decode(address));
+            const messageBytes = new TextEncoder().encode(SIGNING_DOMAIN + message);
+            const verified = ed25519.verify(bs58.decode(signature), messageBytes, bs58.decode(address));
             if (!verified) throw new Error("Message verification failed!");
             setVerified(true)
         } catch (error) {
