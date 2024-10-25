@@ -5,6 +5,7 @@ import useSWRImmutable from 'swr/immutable';
 import { useAnchorProgram } from '../providers/anchor';
 import { useCluster } from '../providers/cluster';
 import { ProgramDataAccountInfo } from '../validators/accounts/upgradeable-program';
+import { Cluster } from './cluster';
 
 const OSEC_REGISTRY_URL = 'https://verify.osec.io';
 const VERIFY_PROGRAM_ID = 'verifycLy8mB96wd9wqq3WDXQwM4oU6r42Th37Db9fC';
@@ -28,7 +29,7 @@ export function useVerifiedProgramRegistry({
     programAuthority: PublicKey | null;
     options?: { suspense: boolean };
 }) {
-    const { url: clusterUrl } = useCluster();
+    const { url: clusterUrl, cluster: cluster } = useCluster();
     const connection = new Connection(clusterUrl);
 
     const {
@@ -92,11 +93,18 @@ export function useVerifiedProgramRegistry({
     }
     if (registryData && pdaData == null && !isLoading) {
         const verifiedData = registryData as OsecRegistryInfo;
-        verifiedData.verify_command = 'Program does not have a verify PDA uploaded.';
+
+        verifiedData.verify_command = isMainnet(cluster)
+            ? 'Program does not have a verify PDA uploaded.'
+            : 'Verify command only available on mainnet.';
         return { data: verifiedData, isLoading };
     }
 
     return { data: null, isLoading };
+}
+
+function isMainnet(currentCluster: Cluster): boolean {
+    return currentCluster == Cluster.MainnetBeta;
 }
 
 // Helper function to hash program data
