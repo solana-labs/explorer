@@ -1,6 +1,6 @@
 import { ErrorCard } from '@components/common/ErrorCard';
-import { BorshAccountsCoder } from '@project-serum/anchor';
-import { IdlTypeDef } from '@project-serum/anchor/dist/cjs/idl';
+import { BorshAccountsCoder } from '@coral-xyz/anchor';
+import { IdlTypeDef } from '@coral-xyz/anchor/dist/cjs/idl';
 import { Account } from '@providers/accounts';
 import { useAnchorProgram } from '@providers/anchor';
 import { useCluster } from '@providers/cluster';
@@ -19,13 +19,13 @@ export function AnchorAccountCard({ account }: { account: Account }) {
         let accountDef: IdlTypeDef | undefined = undefined;
         if (anchorProgram && rawData) {
             const coder = new BorshAccountsCoder(anchorProgram.idl);
-            const accountDefTmp = anchorProgram.idl.accounts?.find((accountType: any) =>
-                (rawData as Buffer).slice(0, 8).equals(BorshAccountsCoder.accountDiscriminator(accountType.name))
+            const account = anchorProgram.idl.accounts?.find((accountType: any) =>
+                (rawData as Buffer).slice(0, 8).equals(coder.accountDiscriminator(accountType.name))
             );
-            if (accountDefTmp) {
-                accountDef = accountDefTmp;
+            if (account) {
+                accountDef = anchorProgram.idl.types?.find((type: any) => type.name === account.name);
                 try {
-                    decodedAccountData = coder.decode(accountDef.name, rawData);
+                    decodedAccountData = coder.decode(account.name, rawData);
                 } catch (err) {
                     console.log(err);
                 }
@@ -51,7 +51,7 @@ export function AnchorAccountCard({ account }: { account: Account }) {
                     <div className="row align-items-center">
                         <div className="col">
                             <h3 className="card-header-title">
-                                {programName}: {accountDef.name}
+                                {programName}: {accountDef.name.charAt(0).toUpperCase() + accountDef.name.slice(1)}
                             </h3>
                         </div>
                     </div>

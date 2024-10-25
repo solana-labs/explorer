@@ -5,7 +5,8 @@ const SUPPLY_ALIASES = ['accounts', 'accounts/top'];
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    appDir: true,
+    // FIXME: https://nextjs.org/docs/messages/missing-suspense-with-csr-bailout
+    missingSuspenseWithCSRBailout: false,
   },
   images: {
     remotePatterns: [

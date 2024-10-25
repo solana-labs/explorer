@@ -49,6 +49,7 @@ export enum PROGRAM_NAMES {
     ORCA_SWAP_1 = 'Orca Swap Program v1',
     ORCA_SWAP_2 = 'Orca Swap Program v2',
     ORCA_AQUAFARM = 'Orca Aquafarm Program',
+    ORE = 'ORE Program',
     PORT = 'Port Finance Program',
     PYTH_DEVNET = 'Pyth Oracle Program',
     PYTH_TESTNET = 'Pyth Oracle Program',
@@ -83,6 +84,13 @@ export enum PROGRAM_NAMES {
     SOLANART_GO = 'Solanart - Global offers',
     STEPN_DEX = 'STEPN Dex',
     OPENBOOK_DEX = 'OpenBook Dex',
+    FINTERNET_USER_MANAGER = 'Finternet - User manager',
+    FINTERNET_TOKEN_MANAGER = 'Finternet - Token manager',
+
+    // ZK Compression
+    ZK_LIGHT_SYSTEM_PROGRAM = 'Light System Program',
+    ZK_COMPRESSED_TOKEN_PROGRAM = 'ZK Compressed Token Program',
+    ZK_ACCOUNT_COMPRESSION_PROGRAM = 'ZK Account Compression Program',
 }
 
 const ALL_CLUSTERS = [Cluster.Custom, Cluster.Devnet, Cluster.Testnet, Cluster.MainnetBeta];
@@ -165,6 +173,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: [Cluster.MainnetBeta],
         name: PROGRAM_NAMES.SERUM_3,
     },
+    A5JxZVHgXe7fn5TqJXm6Hj2zKh1ptDapae2YjtXbZJoy: {
+        deployments: [Cluster.Devnet, Cluster.MainnetBeta],
+        name: PROGRAM_NAMES.FINTERNET_TOKEN_MANAGER,
+    },
     // spl
     ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL: {
         deployments: ALL_CLUSTERS,
@@ -195,6 +207,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     CLoCKyJ6DXBJqqu2VWx9RLbgnwwR6BMHHuyasVmfMzBh: {
         deployments: [Cluster.MainnetBeta, Cluster.Devnet],
         name: PROGRAM_NAMES.CLOCKWORK_2,
+    },
+    CmFuqQTLs2nQof5uaktJn1a6k2VdbGmZPfrJufB2Vm3F: {
+        deployments: [Cluster.Devnet, Cluster.MainnetBeta],
+        name: PROGRAM_NAMES.FINTERNET_USER_MANAGER,
     },
     ComputeBudget111111111111111111111111111111: {
         deployments: ALL_CLUSTERS,
@@ -340,6 +356,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: LIVE_CLUSTERS,
         name: PROGRAM_NAMES.SWAP,
     },
+    SySTEM1eSU2p4BGQfQpimFEWWSC1XDFeun3Nqzz3rT7: {
+        deployments: [Cluster.MainnetBeta, Cluster.Devnet],
+        name: PROGRAM_NAMES.ZK_LIGHT_SYSTEM_PROGRAM,
+    },
     TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA: {
         deployments: ALL_CLUSTERS,
         name: PROGRAM_NAMES.TOKEN,
@@ -368,6 +388,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: LIVE_CLUSTERS,
         name: PROGRAM_NAMES.NFT_AUCTION,
     },
+    cTokenmWW8bLPjZEBAUgYy3zKxQZW6VKi7bqNFEVv3m: {
+        deployments: [Cluster.MainnetBeta, Cluster.Devnet],
+        name: PROGRAM_NAMES.ZK_COMPRESSED_TOKEN_PROGRAM,
+    },
     cjg3oHmg9uuPsP8D6g29NWvhySJkdYdAo9D25PRbKXJ: {
         deployments: [Cluster.Devnet, Cluster.MainnetBeta],
         name: PROGRAM_NAMES.CHAINLINK_ORACLE,
@@ -384,6 +408,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: LIVE_CLUSTERS,
         name: PROGRAM_NAMES.NFT_CANDY_MACHINE,
     },
+    compr6CUsB5m2jS4Y3831ztGSTnDpnKJTKS95d64XVq: {
+        deployments: [Cluster.MainnetBeta, Cluster.Devnet],
+        name: PROGRAM_NAMES.ZK_ACCOUNT_COMPRESSION_PROGRAM,
+    },
     gSbePebfvPy7tRqimPoVecS2UsBvYv46ynrzWocc92s: {
         deployments: [Cluster.Devnet],
         name: PROGRAM_NAMES.PYTH_DEVNET,
@@ -399,6 +427,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     namesLPneVptA9Z5rqUDD9tMTWEJwofgaYwp8cawRkX: {
         deployments: LIVE_CLUSTERS,
         name: PROGRAM_NAMES.NAME,
+    },
+    oreV2ZymfyeXgNgBdqMkumTqqAprVqgBWQfoYkrtKWQ: {
+        deployments: [Cluster.MainnetBeta],
+        name: PROGRAM_NAMES.ORE,
     },
     p1exdMJcjVao65QdewkaZRUnU6VPSXhus9n2GzWfh98: {
         deployments: LIVE_CLUSTERS,
@@ -441,19 +473,20 @@ export const SYSVAR_IDS: { [key: string]: string } = {
 };
 
 export const TOKEN_IDS: { [key: string]: string } = {
-  TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA: 'Token Program',
-  TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb: 'Token-2022 Program',
+    TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA: 'Token Program',
+    TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb: 'Token-2022 Program',
 } as const;
 
 export type TokenProgram = 'spl-token' | 'spl-token-2022';
 export function assertIsTokenProgram(program: string): asserts program is TokenProgram {
-    if (program !== 'spl-token' && program !== 'spl-token-2022') throw new Error("Expected token program name of `spl-token` or `spl-token-2022`");
+    if (program !== 'spl-token' && program !== 'spl-token-2022')
+        throw new Error('Expected token program name of `spl-token` or `spl-token-2022`');
 }
 export function isTokenProgram(program: string): program is TokenProgram {
     try {
         assertIsTokenProgram(program);
         return true;
-    } catch(e) {
+    } catch (e) {
         return false;
     }
 }

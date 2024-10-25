@@ -1,15 +1,15 @@
 import { useCluster } from '@providers/cluster';
 import { Cluster } from '@utils/cluster';
 import React from 'react';
-import { createDefaultRpcTransport, createSolanaRpc } from 'web3js-experimental';
+import { createSolanaRpc } from 'web3js-experimental';
 
 type VoteAccountInfo = Readonly<{
-    activatedStake: bigint,
+    activatedStake: bigint;
 }>;
 
 type VoteAccounts = Readonly<{
-    current: VoteAccountInfo[],
-    delinquent: VoteAccountInfo[],
+    current: VoteAccountInfo[];
+    delinquent: VoteAccountInfo[];
 }>;
 
 async function fetchVoteAccounts(
@@ -18,14 +18,13 @@ async function fetchVoteAccounts(
     setVoteAccounts: React.Dispatch<React.SetStateAction<VoteAccounts | undefined>>
 ) {
     try {
-        const transport = createDefaultRpcTransport({ url });
-        const rpc = createSolanaRpc({ transport });
+        const rpc = createSolanaRpc(url);
 
         const voteAccountsResponse = await rpc.getVoteAccounts({ commitment: 'confirmed' }).send();
         const voteAccounts: VoteAccounts = {
             current: voteAccountsResponse.current.map(c => ({ activatedStake: c.activatedStake })),
             delinquent: voteAccountsResponse.delinquent.map(d => ({ activatedStake: d.activatedStake })),
-        }
+        };
 
         setVoteAccounts(voteAccounts);
     } catch (error) {

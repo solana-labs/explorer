@@ -132,7 +132,7 @@ async function fetchAccountHistory(
     let history;
     try {
         const connection = new Connection(url);
-        const fetched = await connection.getConfirmedSignaturesForAddress2(pubkey, options);
+        const fetched = await connection.getSignaturesForAddress(pubkey, options);
         history = {
             fetched,
             foundOldest: fetched.length < options.limit,

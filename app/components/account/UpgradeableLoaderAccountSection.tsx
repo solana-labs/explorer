@@ -1,6 +1,6 @@
 import { UnknownAccountCard } from '@components/account/UnknownAccountCard';
 import { Address } from '@components/common/Address';
-import { Downloadable } from '@components/common/Downloadable';
+import { DownloadableIcon } from '@components/common/Downloadable';
 import { InfoTooltip } from '@components/common/InfoTooltip';
 import { SecurityTXTBadge } from '@components/common/SecurityTXTBadge';
 import { Slot } from '@components/common/Slot';
@@ -8,6 +8,7 @@ import { SolBalance } from '@components/common/SolBalance';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { Account, useFetchAccountInfo } from '@providers/accounts';
 import { useCluster } from '@providers/cluster';
+import { PublicKey } from '@solana/web3.js';
 import { addressLabel } from '@utils/tx';
 import {
     ProgramAccountInfo,
@@ -18,6 +19,12 @@ import {
 import Link from 'next/link';
 import React from 'react';
 import { ExternalLink, RefreshCw } from 'react-feather';
+
+import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
+import { Cluster } from '@/app/utils/cluster';
+import { useClusterPath } from '@/app/utils/url';
+
+import { VerifiedProgramBadge } from '../common/VerifiedProgramBadge';
 
 export function UpgradeableLoaderAccountSection({
     account,
@@ -61,7 +68,10 @@ export function UpgradeableProgramSection({
 }) {
     const refresh = useFetchAccountInfo();
     const { cluster } = useCluster();
+    const { data: squadMapInfo } = useSquadsMultisigLookup(programData?.authority, cluster);
+
     const label = addressLabel(account.pubkey.toBase58(), cluster);
+
     return (
         <div className="card">
             <div className="card-header">
@@ -110,26 +120,12 @@ export function UpgradeableProgramSection({
                             <td className="text-lg-end">{programData.authority !== null ? 'Yes' : 'No'}</td>
                         </tr>
                         <tr>
-                            {/* Anchor Program Registry is no longer maintained, so the verified label has been removed */}
-                            {/* 
-              <td>
-                <LastVerifiedBuildLabel />
-              </td>
-              <td className="text-lg-end">
-                {loading ? (
-                  <CheckingBadge />
-                ) : (
-                  <>
-                    {verifiableBuilds.map((b, i) => (
-                      <VerifiedBadge
-                        key={i}
-                        verifiableBuild={b}
-                        deploySlot={programData.slot}
-                      />
-                    ))}
-                  </>
-                )}
-              </td> */}
+                            <td>
+                                <VerifiedLabel />
+                            </td>
+                            <td className="text-lg-end">
+                                <VerifiedProgramBadge programData={programData} pubkey={account.pubkey} />
+                            </td>
                         </tr>
                         <tr>
                             <td>
@@ -146,12 +142,17 @@ export function UpgradeableProgramSection({
                             </td>
                         </tr>
                         {programData.authority !== null && (
-                            <tr>
-                                <td>Upgrade Authority</td>
-                                <td className="text-lg-end">
-                                    <Address pubkey={programData.authority} alignRight link />
-                                </td>
-                            </tr>
+                            <>
+                                <tr>
+                                    <td>Upgrade Authority</td>
+                                    <td className="text-lg-end">
+                                        {cluster == Cluster.MainnetBeta && squadMapInfo?.isSquad ? (
+                                            <MultisigBadge pubkey={account.pubkey} />
+                                        ) : null}
+                                        <Address pubkey={programData.authority} alignRight link />
+                                    </td>
+                                </tr>
+                            </>
                         )}
                     </>
                 )}
@@ -160,11 +161,37 @@ export function UpgradeableProgramSection({
     );
 }
 
+function MultisigBadge({ pubkey }: { pubkey: PublicKey }) {
+    const programMultisigTabPath = useClusterPath({ pathname: `/address/${pubkey.toBase58()}/program-multisig` });
+    return (
+        <h3 className="mb-0">
+            <Link className="badge bg-success-soft rank" href={programMultisigTabPath}>
+                Program Multisig
+            </Link>
+        </h3>
+    );
+}
+
 function SecurityLabel() {
     return (
         <InfoTooltip text="Security.txt helps security researchers to contact developers if they find security bugs.">
             <Link rel="noopener noreferrer" target="_blank" href="https://github.com/neodyme-labs/solana-security-txt">
                 <span className="security-txt-link-color-hack-reee">Security.txt</span>
+                <ExternalLink className="align-text-top ms-2" size={13} />
+            </Link>
+        </InfoTooltip>
+    );
+}
+
+function VerifiedLabel() {
+    return (
+        <InfoTooltip text="Verified builds allow users can ensure that the hash of the on-chain program matches the hash of the program of the given codebase (registry hosted by osec.io).">
+            <Link
+                rel="noopener noreferrer"
+                target="_blank"
+                href="https://github.com/Ellipsis-Labs/solana-verifiable-build"
+            >
+                <span className="security-txt-link-color-hack-reee">Verified Build</span>
                 <ExternalLink className="align-text-top ms-2" size={13} />
             </Link>
         </InfoTooltip>
@@ -206,9 +233,9 @@ export function UpgradeableProgramDataSection({
                     <tr>
                         <td>Data Size (Bytes)</td>
                         <td className="text-lg-end">
-                            <Downloadable data={programData.data[0]} filename={`${account.pubkey.toString()}.bin`}>
+                            <DownloadableIcon data={programData.data[0]} filename={`${account.pubkey.toString()}.bin`}>
                                 <span className="me-2">{account.space}</span>
-                            </Downloadable>
+                            </DownloadableIcon>
                         </td>
                     </tr>
                 )}
