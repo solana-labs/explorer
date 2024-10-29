@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import { SetStateAction, useCallback, useEffect, useMemo, useState } from "react";
 
 import { MeteredMessageBox } from "./MeteredMessageBox";
-import { SigningContext, SignMessageBox, SIGNING_DOMAIN } from "./SignMessageButton";
+import { SIGNING_DOMAIN, SigningContext, SignMessageBox } from "./SignMessageButton";
 
 const ConnectButton = dynamic(async () => ((await import('@solana/wallet-adapter-react-ui')).WalletMultiButton), { ssr: false });
 
@@ -157,7 +157,7 @@ export const MessageForm = (props: { reportVerification: ReportMessageVerificati
                 <h3 className="card-header-title">Message</h3>
             </div>
             <div className="card-body">
-                <p className="text-muted small">Make sure you understand what you're signing. Transaction signing is not allowed. Message signing is free.</p>
+                <p className="text-muted small">Make sure you understand what you&apos;re signing. Transaction signing is not allowed. Message signing is free.</p>
                 <MeteredMessageBox
                     value={message}
                     onChange={handleInputChange}

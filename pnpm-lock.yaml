@@ -35,6 +35,9 @@ importers:
       '@metaplex/js':
         specifier: ^4.12.0
         version: 4.12.0(@metaplex-foundation/mpl-auction@0.0.2(bufferutil@4.0.7)(utf-8-validate@5.0.10))(@metaplex-foundation/mpl-core@0.6.1(bufferutil@4.0.7)(utf-8-validate@5.0.10))(@metaplex-foundation/mpl-metaplex@0.0.5(bufferutil@4.0.7)(utf-8-validate@5.0.10))(@metaplex-foundation/mpl-token-metadata@1.1.0(bufferutil@4.0.7)(utf-8-validate@5.0.10))(@metaplex-foundation/mpl-token-vault@0.0.2(bufferutil@4.0.7)(utf-8-validate@5.0.10))(@solana/spl-token@0.1.8(bufferutil@4.0.7)(utf-8-validate@5.0.10))(@solana/web3.js@1.95.3(bufferutil@4.0.7)(utf-8-validate@5.0.10))
+      '@noble/curves':
+        specifier: ^1.6.0
+        version: 1.6.0
       '@noble/hashes':
         specifier: ^1.5.0
         version: 1.5.0
@@ -104,6 +107,9 @@ importers:
       cross-fetch:
         specifier: ^3.1.5
         version: 3.1.5
+      ed25519:
+        specifier: link:@noble/curves/ed25519
+        version: link:@noble/curves/ed25519
       elfy:
         specifier: ^1.0.0
         version: 1.0.0
@@ -1787,8 +1793,9 @@ packages:
   '@noble/curves@1.4.2':
     resolution: {integrity: sha512-TavHr8qycMChk8UwMld0ZDRvatedkzWfH8IiaeGCfymOP5i0hSCozz9vHOL0nkwk7HRMlFnAiKpS2jrUmSybcw==}
 
-  '@noble/curves@1.5.0':
-    resolution: {integrity: sha512-J5EKamIHnKPyClwVrzmaf5wSdQXgdHcPZIZLu3bwnbeCx8/7NPK5q2ZBWF+5FvYGByjiQQsJYX6jfgB2wDPn3A==}
+  '@noble/curves@1.6.0':
+    resolution: {integrity: sha512-TlaHRXDehJuRNR9TfZDNQ45mMEd5dwUwmicsafcIX4SsNiqnCHKjE/1alYPd/lDRVhxdhUAlv8uEhMCI5zjIJQ==}
+    engines: {node: ^14.21.3 || >=16}
 
   '@noble/ed25519@1.7.3':
     resolution: {integrity: sha512-iR8GBkDt0Q3GyaVcIu7mSsVIqnFbkbRzGLWlvhwunacoLwt4J3swfKhfaM6rN6WY+TBGoYT1GtT1mIh2/jGbRQ==}
@@ -10729,9 +10736,9 @@ snapshots:
     dependencies:
       '@noble/hashes': 1.4.0
 
-  '@noble/curves@1.5.0':
+  '@noble/curves@1.6.0':
     dependencies:
-      '@noble/hashes': 1.4.0
+      '@noble/hashes': 1.5.0
 
   '@noble/ed25519@1.7.3': {}
 
@@ -12266,7 +12273,7 @@ snapshots:
 
   '@solana/wallet-adapter-unsafe-burner@0.1.7(@solana/web3.js@1.95.3(bufferutil@4.0.7)(utf-8-validate@5.0.10))':
     dependencies:
-      '@noble/curves': 1.5.0
+      '@noble/curves': 1.6.0
       '@solana/wallet-adapter-base': 0.9.23(@solana/web3.js@1.95.3(bufferutil@4.0.7)(utf-8-validate@5.0.10))
       '@solana/wallet-standard-features': 1.2.0
       '@solana/wallet-standard-util': 1.1.1
@@ -12384,7 +12391,7 @@ snapshots:
 
   '@solana/wallet-standard-util@1.1.1':
     dependencies:
-      '@noble/curves': 1.5.0
+      '@noble/curves': 1.6.0
       '@solana/wallet-standard-chains': 1.1.0
       '@solana/wallet-standard-features': 1.2.0
 
@@ -12459,7 +12466,7 @@ snapshots:
   '@solana/web3.js@1.95.3(bufferutil@4.0.7)(utf-8-validate@5.0.10)':
     dependencies:
       '@babel/runtime': 7.25.6
-      '@noble/curves': 1.5.0
+      '@noble/curves': 1.6.0
       '@noble/hashes': 1.5.0
       '@solana/buffer-layout': 4.0.1
       agentkeepalive: 4.5.0
