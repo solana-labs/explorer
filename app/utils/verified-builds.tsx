@@ -65,7 +65,7 @@ export function useVerifiedProgramRegistry({
                 console.log('PDA account info not found');
                 return null;
             }
-            return accountAnchorProgram.coder.accounts.decode('buildParams', pdaAccountInfo.data);
+            return accountAnchorProgram?.coder.accounts.decode('buildParams', pdaAccountInfo.data);
         },
         { suspense: options?.suspense }
     );
