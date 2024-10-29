@@ -33,6 +33,26 @@ export function VerifiedBuildCard({ data, pubkey }: { data: UpgradeableLoaderAcc
                 <h3 className="card-header-title mb-0 d-flex align-items-center">Verified Build</h3>
                 <small>Information provided by osec.io</small>
             </div>
+            <div
+                className="alert mt-2"
+                style={{
+                    backgroundColor: '#2a3b3c',
+                    borderRadius: '5px',
+                    color: '#c9e2e1',
+                    padding: '10px',
+                }}
+            >
+                <strong>Note:</strong> Verified builds indicate that the onchain build was built from the source code
+                that is publicly available, but this does not imply a security audit. For more details, refer to the{' '}
+                <a
+                    href="https://solana.com/developers/guides/advanced/verified-builds"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    Verified Builds Docs <ExternalLink className="align-text-top ms-1" size={13} />
+                </a>
+                .
+            </div>
             <TableCardBody>
                 {ROWS.filter(x => x.key in registryInfo).map((x, idx) => {
                     return (

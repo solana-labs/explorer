@@ -85,8 +85,22 @@ export function useVerifiedProgramRegistry({
 
         // Add additional args if available, for example mount-path and --library-name
         if (pdaData.args && pdaData.args.length > 0) {
-            const argsString = pdaData.args.join(' ');
-            verifiedData.verify_command += ` ${argsString}`;
+            const filteredArgs = [];
+
+            for (let i = 0; i < pdaData.args.length; i++) {
+                const arg = pdaData.args[i];
+
+                if (arg === '-b' || arg === '--base-image') {
+                    i++; // Also skip the parameter
+                    continue;
+                }
+                filteredArgs.push(arg);
+            }
+
+            if (filteredArgs.length > 0) {
+                const argsString = filteredArgs.join(' ');
+                verifiedData.verify_command += ` ${argsString}`;
+            }
         }
 
         return { data: verifiedData, isLoading };
