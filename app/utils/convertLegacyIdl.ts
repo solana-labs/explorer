@@ -361,7 +361,7 @@ function convertInstructionAccounts(accounts: LegacyIdlAccounts): IdlInstruction
 
 function convertPda(pda: LegacyIdlPda): { seeds: any[]; programId?: any } {
     return {
-        programId: pda.programId ? convertSeed(pda.programId) : undefined,
+        ...(pda.programId ? { programId: convertSeed(pda.programId) } : {}),
         seeds: pda.seeds.map(convertSeed),
     };
 }
@@ -374,7 +374,7 @@ function convertSeed(seed: LegacyIdlSeed): any {
             return { kind: 'arg', path: seed.path, type: convertType(seed.type) };
         case 'account':
             return {
-                account: seed.account,
+                ...(seed.account ? { account: seed.account } : {}),
                 kind: 'account',
                 path: seed.path,
                 type: convertType(seed.type),
