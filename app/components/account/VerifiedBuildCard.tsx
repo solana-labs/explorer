@@ -6,11 +6,13 @@ import { ExternalLink } from 'react-feather';
 
 import { OsecRegistryInfo, useVerifiedProgramRegistry } from '@/app/utils/verified-builds';
 
+import { Copyable } from '../common/Copyable';
 import { LoadingCard } from '../common/LoadingCard';
 
 export function VerifiedBuildCard({ data, pubkey }: { data: UpgradeableLoaderAccountData; pubkey: PublicKey }) {
     const { data: registryInfo, isLoading } = useVerifiedProgramRegistry({
         options: { suspense: true },
+        programAuthority: data.programData?.authority ? new PublicKey(data.programData.authority) : null,
         programId: pubkey,
     });
     if (!data.programData) {
@@ -31,6 +33,18 @@ export function VerifiedBuildCard({ data, pubkey }: { data: UpgradeableLoaderAcc
                 <h3 className="card-header-title mb-0 d-flex align-items-center">Verified Build</h3>
                 <small>Information provided by osec.io</small>
             </div>
+            <div className="alert mt-2 mb-2">
+                Verified builds indicate that the onchain build was built from the source code that is publicly
+                available, but this does not imply a security audit. For more details, refer to the{' '}
+                <a
+                    href="https://solana.com/developers/guides/advanced/verified-builds"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    Verified Builds Docs <ExternalLink className="align-text-top ms-1" size={13} />
+                </a>
+                .
+            </div>
             <TableCardBody>
                 {ROWS.filter(x => x.key in registryInfo).map((x, idx) => {
                     return (
@@ -50,6 +64,7 @@ enum DisplayType {
     String,
     URL,
     Date,
+    LongString,
 }
 
 type TableRow = {
@@ -85,6 +100,11 @@ const ROWS: TableRow[] = [
         type: DisplayType.Date,
     },
     {
+        display: 'Verify Command',
+        key: 'verify_command',
+        type: DisplayType.LongString,
+    },
+    {
         display: 'Repository URL',
         key: 'repo_url',
         type: DisplayType.URL,
@@ -100,7 +120,32 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
                 </td>
             );
         case DisplayType.String:
-            return <td className="text-lg-end font-monospace" style={{whiteSpace: 'pre'}}>{value && (value as string).length > 1 ? value : '-'}</td>;
+            return (
+                <td className="text-lg-end font-monospace" style={{ whiteSpace: 'pre' }}>
+                    {value && (value as string).length > 1 ? value : '-'}
+                </td>
+            );
+        case DisplayType.LongString:
+            return (
+                <td
+                    className="text-lg-end font-monospace"
+                    style={{
+                        overflowWrap: 'break-word',
+                        position: 'relative',
+                        whiteSpace: 'pre-wrap',
+                        wordWrap: 'break-word',
+                    }}
+                >
+                    {value && (value as string).length > 1 ? (
+                        <>
+                            <Copyable text={value as string}> </Copyable>
+                            <span>{value}</span>
+                        </>
+                    ) : (
+                        '-'
+                    )}
+                </td>
+            );
         case DisplayType.URL:
             if (isValidLink(value as string)) {
                 return (
@@ -120,7 +165,11 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
                 </td>
             );
         case DisplayType.Date:
-            return <td className="text-lg-end font-monospace">{value && (value as string).length > 1 ? new Date(value as string).toUTCString() : '-'}</td>;
+            return (
+                <td className="text-lg-end font-monospace">
+                    {value && (value as string).length > 1 ? new Date(value as string).toUTCString() : '-'}
+                </td>
+            );
         default:
             break;
     }

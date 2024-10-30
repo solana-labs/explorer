@@ -12,7 +12,7 @@ export function VerifiedProgramBadge({
     programData: ProgramDataAccountInfo;
     pubkey: PublicKey;
 }) {
-    const { isLoading, data: registryInfo } = useVerifiedProgramRegistry({ programId: pubkey });
+    const { isLoading, data: registryInfo } = useVerifiedProgramRegistry({ programAuthority: programData.authority ? new PublicKey(programData.authority) : null, programId: pubkey });
     const verifiedBuildTabPath = useClusterPath({ pathname: `/address/${pubkey.toBase58()}/verified-build` });
 
     const hash = hashProgramData(programData);
