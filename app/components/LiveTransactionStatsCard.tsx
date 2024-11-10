@@ -273,7 +273,14 @@ function PingStatsCardBody({ series, setSeries }: { series: Series; setSeries: S
         return <PingStatsNotReady error={pingInfo.status === PingStatus.Error} retry={pingInfo.retry} />;
     }
 
-    return <PingBarChart pingInfo={pingInfo} series={series} setSeries={setSeries} />;
+    return (
+        <>
+            <div className="alert alert-warning m-2" role="alert">
+                Note: We are aware of an issue with ping statistic reporting. They may not reflect actual network performance. Please see https://validators.app
+            </div>
+            <PingBarChart pingInfo={pingInfo} series={series} setSeries={setSeries} />
+        </>
+    );
 }
 
 type StatsNotReadyProps = { error: boolean; retry?: () => void };
