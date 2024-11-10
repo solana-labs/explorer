@@ -28,17 +28,6 @@ export default function Page() {
         <StatsProvider>
             <SupplyProvider>
                 <div className="container mt-4">
-                    <div className="alert alert-warning m-2" role="alert">
-                        Note: We are aware of an issue with ping statistic reporting. Ping statistics may not reflect
-                        actual network performance. Please see{' '}
-                        <a
-                            href="https://www.validators.app/ping-thing?locale=en&network=mainnet"
-                            className="text-white text-decoration-underline"
-                        >
-                            validators.app
-                        </a>{' '}
-                        for more information.
-                    </div>
                     <StakingComponent />
                     <div className="card">
                         <div className="card-header">
