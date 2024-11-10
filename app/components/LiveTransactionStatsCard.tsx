@@ -39,6 +39,7 @@ export function LiveTransactionStatsCard() {
             <div className="card-header">
                 <h4 className="card-header-title">Live Transaction Stats</h4>
             </div>
+
             <TpsCardBody series={series} setSeries={setSeries} />
             <PingStatsCardBody series={series} setSeries={setSeries} />
         </div>
@@ -275,9 +276,6 @@ function PingStatsCardBody({ series, setSeries }: { series: Series; setSeries: S
 
     return (
         <>
-            <div className="alert alert-warning m-2" role="alert">
-                Note: We are aware of an issue with ping statistic reporting. They may not reflect actual network performance. Please see https://validators.app
-            </div>
             <PingBarChart pingInfo={pingInfo} series={series} setSeries={setSeries} />
         </>
     );
