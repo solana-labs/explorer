@@ -42,15 +42,8 @@ export function LiveTransactionStatsCard() {
 
             <TpsCardBody series={series} setSeries={setSeries} />
             <div className="alert alert-warning m-2" role="alert">
-                Note: We are aware of an issue with ping statistic reporting. Ping statistics may not reflect actual
-                network performance. Please see{' '}
-                <a
-                    href="https://www.validators.app/ping-thing?locale=en&network=mainnet"
-                    className="text-white text-decoration-underline"
-                >
-                    validators.app
-                </a>{' '}
-                for more information.
+                Note: Ping stastics are best effort in monitoring network performance. The data is not guaranteed to be
+                accurate and is not a reliable indicator of cluster health.
             </div>
             <PingStatsCardBody series={series} setSeries={setSeries} />
         </div>
