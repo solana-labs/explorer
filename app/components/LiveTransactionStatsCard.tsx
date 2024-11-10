@@ -278,6 +278,7 @@ function AnimatedTransactionCount({ info }: { info: PerformanceInfo }) {
     );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function PingStatsCardBody({ series, setSeries }: { series: Series; setSeries: SetSeries }) {
     const pingInfo = useSolanaPingInfo();
 
