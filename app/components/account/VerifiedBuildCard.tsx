@@ -4,7 +4,7 @@ import { UpgradeableLoaderAccountData } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
 import { ExternalLink } from 'react-feather';
 
-import { OsecRegistryInfo, useVerifiedProgramRegistry } from '@/app/utils/verified-builds';
+import { OsecRegistryInfo, useVerifiedProgramRegistry, VerificationStatus } from '@/app/utils/verified-builds';
 
 import { Copyable } from '../common/Copyable';
 import { LoadingCard } from '../common/LoadingCard';
@@ -27,11 +27,21 @@ export function VerifiedBuildCard({ data, pubkey }: { data: UpgradeableLoaderAcc
         return <ErrorCard text="No verified build found" />;
     }
 
+    // Define the message based on the verification status
+    let verificationMessage = 'Information provided by osec.io';
+    if (registryInfo.verification_status === VerificationStatus.OsecVerified) {
+        verificationMessage = 'This build is verified and provided by osec.io';
+    } else if (registryInfo.verification_status === VerificationStatus.SelfVerified) {
+        verificationMessage = 'Info read from a self deployed on chain PDA build info';
+    } else if (registryInfo.verification_status === VerificationStatus.NotVerified) {
+        verificationMessage = 'No verified build found';
+    }
+
     return (
         <div className="card security-txt">
             <div className="card-header">
                 <h3 className="card-header-title mb-0 d-flex align-items-center">Verified Build</h3>
-                <small>Information provided by osec.io</small>
+                <small>{verificationMessage}</small>
             </div>
             <div className="alert mt-2 mb-2">
                 Verified builds indicate that the onchain build was built from the source code that is publicly
@@ -76,8 +86,8 @@ type TableRow = {
 const ROWS: TableRow[] = [
     {
         display: 'Verified',
-        key: 'is_verified',
-        type: DisplayType.Boolean,
+        key: 'verification_status',
+        type: DisplayType.String,
     },
     {
         display: 'Message',
