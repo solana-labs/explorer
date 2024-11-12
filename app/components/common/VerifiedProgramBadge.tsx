@@ -32,7 +32,7 @@ export function VerifiedProgramBadge({
         switch (registryInfo.verification_status) {
             case VerificationStatus.Verified:
                 badgeClass = 'bg-success-soft';
-                badgeText = 'Verified Build';
+                badgeText = 'Program Source Verified';
                 break;
             case VerificationStatus.PdaUploaded:
                 badgeClass = 'bg-warning-soft';
