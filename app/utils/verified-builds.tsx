@@ -11,9 +11,9 @@ const OSEC_REGISTRY_URL = 'https://verify.osec.io';
 const VERIFY_PROGRAM_ID = 'verifycLy8mB96wd9wqq3WDXQwM4oU6r42Th37Db9fC';
 
 export enum VerificationStatus {
-    OsecVerified = 'Osec Verified',
+    Verified = 'Verified Build',
+    PdaUploaded = 'Pad uploaded',
     NotVerified = 'Not Verified',
-    SelfVerified = 'Self Verified',
 }
 
 export type OsecRegistryInfo = {
@@ -57,7 +57,7 @@ export function useVerifiedProgramRegistry({
     if (programData && registryData) {
         const hash = hashProgramData(programData);
         registryData.verification_status =
-            hash === registryData['on_chain_hash'] ? VerificationStatus.OsecVerified : VerificationStatus.NotVerified;
+            hash === registryData['on_chain_hash'] ? VerificationStatus.Verified : VerificationStatus.NotVerified;
     }
 
     const { program: accountAnchorProgram } = useAnchorProgram(VERIFY_PROGRAM_ID, connection.rpcEndpoint);
@@ -129,9 +129,8 @@ export function useVerifiedProgramRegistry({
         }
         verifiedData.repo_url = pdaData.gitUrl;
         if (registryData.verification_status === VerificationStatus.NotVerified) {
-            verifiedData.message =
-                'Program was only self verified by the program deployer. You can run the verify command to verify it yourself.';
-            verifiedData.verification_status = VerificationStatus.SelfVerified;
+            verifiedData.message = 'Verify command was provided by the program authority.';
+            verifiedData.verification_status = VerificationStatus.PdaUploaded;
         }
         return { data: verifiedData, isLoading };
     }

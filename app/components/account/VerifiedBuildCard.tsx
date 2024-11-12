@@ -29,10 +29,10 @@ export function VerifiedBuildCard({ data, pubkey }: { data: UpgradeableLoaderAcc
 
     // Define the message based on the verification status
     let verificationMessage = 'Information provided by osec.io';
-    if (registryInfo.verification_status === VerificationStatus.OsecVerified) {
-        verificationMessage = 'This build is verified and provided by osec.io';
-    } else if (registryInfo.verification_status === VerificationStatus.SelfVerified) {
-        verificationMessage = 'Info read from a self deployed on chain PDA build info';
+    if (registryInfo.verification_status === VerificationStatus.Verified) {
+        verificationMessage = 'Information provided by osec.io';
+    } else if (registryInfo.verification_status === VerificationStatus.PdaUploaded) {
+        verificationMessage = 'Information provided by the program deployer.';
     } else if (registryInfo.verification_status === VerificationStatus.NotVerified) {
         verificationMessage = 'No verified build found';
     }

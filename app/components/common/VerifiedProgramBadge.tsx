@@ -30,17 +30,17 @@ export function VerifiedProgramBadge({
         let badgeText = '';
 
         switch (registryInfo.verification_status) {
-            case VerificationStatus.OsecVerified:
+            case VerificationStatus.Verified:
                 badgeClass = 'bg-success-soft';
-                badgeText = VerificationStatus.OsecVerified;
+                badgeText = 'Verified Build';
                 break;
-            case VerificationStatus.SelfVerified:
-                badgeClass = 'bg-danger-soft';
-                badgeText = VerificationStatus.SelfVerified;
+            case VerificationStatus.PdaUploaded:
+                badgeClass = 'bg-warning-soft';
+                badgeText = 'Not verified';
                 break;
             case VerificationStatus.NotVerified:
                 badgeClass = 'bg-warning-soft';
-                badgeText = VerificationStatus.NotVerified;
+                badgeText = 'Not verified';
                 break;
         }
 
