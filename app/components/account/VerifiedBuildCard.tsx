@@ -130,6 +130,15 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
                 </td>
             );
         case DisplayType.String:
+            if (Object.values(VerificationStatus).includes(value as VerificationStatus)) {
+                const badgeClass = value === VerificationStatus.Verified ? 'bg-success-soft' : 'bg-warning-soft';
+                const badgeValue = value === VerificationStatus.Verified ? 'true' : 'false';
+                return (
+                    <td className="text-lg-end font-monospace">
+                        <span className={`badge ${badgeClass}`}>{badgeValue}</span>
+                    </td>
+                );
+            }
             return (
                 <td className="text-lg-end font-monospace" style={{ whiteSpace: 'pre' }}>
                     {value && (value as string).length > 1 ? value : '-'}
