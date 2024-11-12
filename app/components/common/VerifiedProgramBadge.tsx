@@ -1,5 +1,7 @@
 import { PublicKey } from '@solana/web3.js';
+import Link from 'next/link';
 
+import { useClusterPath } from '@/app/utils/url';
 import { useVerifiedProgramRegistry, VerificationStatus } from '@/app/utils/verified-builds';
 import { ProgramDataAccountInfo } from '@/app/validators/accounts/upgradeable-program';
 
@@ -15,6 +17,7 @@ export function VerifiedProgramBadge({
         programData: programData,
         programId: pubkey,
     });
+    const verifiedBuildTabPath = useClusterPath({ pathname: `/address/${pubkey.toBase58()}/verified-build` });
 
     if (isLoading) {
         return (
@@ -32,18 +35,20 @@ export function VerifiedProgramBadge({
                 badgeText = VerificationStatus.OsecVerified;
                 break;
             case VerificationStatus.SelfVerified:
-                badgeClass = 'bg-warning-soft';
+                badgeClass = 'bg-danger-soft';
                 badgeText = VerificationStatus.SelfVerified;
                 break;
             case VerificationStatus.NotVerified:
-                badgeClass = 'bg-danger-soft';
+                badgeClass = 'bg-warning-soft';
                 badgeText = VerificationStatus.NotVerified;
                 break;
         }
 
         return (
             <h3 className="mb-0">
-                <span className={`badge ${badgeClass}`}>{badgeText}</span>
+                <Link className={`c-pointer badge ${badgeClass} rank`} href={verifiedBuildTabPath}>
+                    {badgeText}
+                </Link>
             </h3>
         );
     } else {
