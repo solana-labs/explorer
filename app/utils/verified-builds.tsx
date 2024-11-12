@@ -12,7 +12,7 @@ const VERIFY_PROGRAM_ID = 'verifycLy8mB96wd9wqq3WDXQwM4oU6r42Th37Db9fC';
 
 export enum VerificationStatus {
     Verified = 'Verified Build',
-    PdaUploaded = 'Pad uploaded',
+    PdaUploaded = 'Not verified Build',
     NotVerified = 'Not Verified',
 }
 
@@ -105,8 +105,6 @@ export function useVerifiedProgramRegistry({
         if (pdaData.commit) {
             verifiedData.verify_command += ` --commit-hash ${pdaData.commit}`;
         }
-
-        console.log('PDA data', JSON.stringify(pdaData));
 
         // Add additional args if available, for example mount-path and --library-name
         if (pdaData.args && pdaData.args.length > 0) {
