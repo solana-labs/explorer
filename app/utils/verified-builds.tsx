@@ -10,8 +10,14 @@ import { Cluster } from './cluster';
 const OSEC_REGISTRY_URL = 'https://verify.osec.io';
 const VERIFY_PROGRAM_ID = 'verifycLy8mB96wd9wqq3WDXQwM4oU6r42Th37Db9fC';
 
+export enum VerificationStatus {
+    Verified = 'Verified Build',
+    PdaUploaded = 'Not verified Build',
+    NotVerified = 'Not Verified',
+}
+
 export type OsecRegistryInfo = {
-    is_verified: boolean;
+    verification_status: VerificationStatus;
     message: string;
     on_chain_hash: string;
     executable_hash: string;
@@ -24,10 +30,12 @@ export function useVerifiedProgramRegistry({
     programId,
     programAuthority,
     options,
+    programData,
 }: {
     programId: PublicKey;
     programAuthority: PublicKey | null;
     options?: { suspense: boolean };
+    programData?: ProgramDataAccountInfo;
 }) {
     const { url: clusterUrl, cluster: cluster } = useCluster();
     const connection = new Connection(clusterUrl);
@@ -40,10 +48,17 @@ export function useVerifiedProgramRegistry({
         `${programId.toBase58()}`,
         async (programId: string) => {
             const response = await fetch(`${OSEC_REGISTRY_URL}/status/${programId}`);
+
             return response.json();
         },
         { suspense: options?.suspense }
     );
+
+    if (programData && registryData) {
+        const hash = hashProgramData(programData);
+        registryData.verification_status =
+            hash === registryData['on_chain_hash'] ? VerificationStatus.Verified : VerificationStatus.NotVerified;
+    }
 
     const { program: accountAnchorProgram } = useAnchorProgram(VERIFY_PROGRAM_ID, connection.rpcEndpoint);
 
@@ -56,8 +71,12 @@ export function useVerifiedProgramRegistry({
     } = useSWRImmutable(
         programAuthority && accountAnchorProgram ? `pda-${programId.toBase58()}` : null,
         async () => {
+            if (!programAuthority) {
+                console.log('Program authority not defined');
+                return null;
+            }
             const [pda] = PublicKey.findProgramAddressSync(
-                [Buffer.from('otter_verify'), programAuthority!.toBuffer(), programId.toBuffer()],
+                [Buffer.from('otter_verify'), programAuthority.toBuffer(), programId.toBuffer()],
                 new PublicKey(VERIFY_PROGRAM_ID)
             );
             const pdaAccountInfo = await connection.getAccountInfo(pda);
@@ -81,7 +100,11 @@ export function useVerifiedProgramRegistry({
         const verifiedData = registryData as OsecRegistryInfo;
         verifiedData.verify_command = `solana-verify verify-from-repo -um --program-id ${programId.toBase58()} ${
             pdaData.gitUrl
-        } --commit-hash ${pdaData.commit}`;
+        }`;
+
+        if (pdaData.commit) {
+            verifiedData.verify_command += ` --commit-hash ${pdaData.commit}`;
+        }
 
         // Add additional args if available, for example mount-path and --library-name
         if (pdaData.args && pdaData.args.length > 0) {
@@ -102,7 +125,11 @@ export function useVerifiedProgramRegistry({
                 verifiedData.verify_command += ` ${argsString}`;
             }
         }
-
+        verifiedData.repo_url = pdaData.gitUrl;
+        if (registryData.verification_status === VerificationStatus.NotVerified) {
+            verifiedData.message = 'Verify command was provided by the program authority.';
+            verifiedData.verification_status = VerificationStatus.PdaUploaded;
+        }
         return { data: verifiedData, isLoading };
     }
     if (registryData && pdaData == null && !isLoading) {

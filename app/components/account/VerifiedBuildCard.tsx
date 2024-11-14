@@ -4,7 +4,7 @@ import { UpgradeableLoaderAccountData } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
 import { ExternalLink } from 'react-feather';
 
-import { OsecRegistryInfo, useVerifiedProgramRegistry } from '@/app/utils/verified-builds';
+import { OsecRegistryInfo, useVerifiedProgramRegistry, VerificationStatus } from '@/app/utils/verified-builds';
 
 import { Copyable } from '../common/Copyable';
 import { LoadingCard } from '../common/LoadingCard';
@@ -27,11 +27,21 @@ export function VerifiedBuildCard({ data, pubkey }: { data: UpgradeableLoaderAcc
         return <ErrorCard text="No verified build found" />;
     }
 
+    // Define the message based on the verification status
+    let verificationMessage = 'Information provided by osec.io';
+    if (registryInfo.verification_status === VerificationStatus.Verified) {
+        verificationMessage = 'Information provided by osec.io';
+    } else if (registryInfo.verification_status === VerificationStatus.PdaUploaded) {
+        verificationMessage = 'Information provided by the program deployer.';
+    } else if (registryInfo.verification_status === VerificationStatus.NotVerified) {
+        verificationMessage = 'No verified build found';
+    }
+
     return (
         <div className="card security-txt">
             <div className="card-header">
                 <h3 className="card-header-title mb-0 d-flex align-items-center">Verified Build</h3>
-                <small>Information provided by osec.io</small>
+                <small>{verificationMessage}</small>
             </div>
             <div className="alert mt-2 mb-2">
                 Verified builds indicate that the onchain build was built from the source code that is publicly
@@ -76,8 +86,8 @@ type TableRow = {
 const ROWS: TableRow[] = [
     {
         display: 'Verified',
-        key: 'is_verified',
-        type: DisplayType.Boolean,
+        key: 'verification_status',
+        type: DisplayType.String,
     },
     {
         display: 'Message',
@@ -120,6 +130,15 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
                 </td>
             );
         case DisplayType.String:
+            if (Object.values(VerificationStatus).includes(value as VerificationStatus)) {
+                const badgeClass = value === VerificationStatus.Verified ? 'bg-success-soft' : 'bg-warning-soft';
+                const badgeValue = value === VerificationStatus.Verified ? 'true' : 'false';
+                return (
+                    <td className="text-lg-end font-monospace">
+                        <span className={`badge ${badgeClass}`}>{badgeValue}</span>
+                    </td>
+                );
+            }
             return (
                 <td className="text-lg-end font-monospace" style={{ whiteSpace: 'pre' }}>
                     {value && (value as string).length > 1 ? value : '-'}
