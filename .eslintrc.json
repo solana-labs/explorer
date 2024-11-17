@@ -1,6 +1,6 @@
 {
     "extends": ["next/core-web-vitals", "@solana/eslint-config-solana"],
-    "plugins": ["testing-library"],
+    "plugins": ["testing-library", "simple-import-sort"],
     "overrides": [
         // Only uses Testing Library lint rules in test files
         {

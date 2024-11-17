@@ -1,4 +1,5 @@
 import { Address } from '@components/common/Address';
+import { SolBalance } from '@components/common/SolBalance';
 import { useCluster } from '@providers/cluster';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import {
@@ -15,7 +16,6 @@ import React from 'react';
 import { address } from 'web3js-experimental';
 
 import { InstructionCard } from './InstructionCard';
-import { SolBalance } from '../common/SolBalance';
 
 export function ComputeBudgetDetailsCard({
     ix,
