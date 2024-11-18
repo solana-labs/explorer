@@ -7,7 +7,12 @@ import useTabVisibility from 'use-tab-visibility';
 import { createSolanaRpc } from 'web3js-experimental';
 
 import { DashboardInfo, DashboardInfoActionType, dashboardInfoReducer, EpochInfo } from './solanaDashboardInfo';
-import { PerformanceInfo, PerformanceInfoActionType, performanceInfoReducer, PerformanceSample } from './solanaPerformanceInfo';
+import {
+    PerformanceInfo,
+    PerformanceInfoActionType,
+    performanceInfoReducer,
+    PerformanceSample,
+} from './solanaPerformanceInfo';
 
 export const PERF_UPDATE_SEC = 5;
 export const SAMPLE_HISTORY_HOURS = 6;
@@ -51,11 +56,11 @@ const initialDashboardInfo: DashboardInfo = {
 type SetActive = React.Dispatch<React.SetStateAction<boolean>>;
 const StatsProviderContext = React.createContext<
     | {
-        setActive: SetActive;
-        setTimedOut: () => void;
-        retry: () => void;
-        active: boolean;
-    }
+          setActive: SetActive;
+          setTimedOut: () => void;
+          retry: () => void;
+          active: boolean;
+      }
     | undefined
 >(undefined);
 
@@ -159,7 +164,7 @@ export function SolanaClusterStatsProvider({ children }: Props) {
                     epoch: epochInfoResponse.epoch,
                     slotIndex: epochInfoResponse.slotIndex,
                     slotsInEpoch: epochInfoResponse.slotsInEpoch,
-                }
+                };
 
                 if (stale) {
                     return;
@@ -193,7 +198,7 @@ export function SolanaClusterStatsProvider({ children }: Props) {
                     }
                     dispatchDashboardInfo({
                         data: {
-                            blockTime: blockTime * 1000,
+                            blockTime: Number(blockTime) * 1000,
                             slot: lastSlot,
                         },
                         type: DashboardInfoActionType.SetLastBlockTime,
