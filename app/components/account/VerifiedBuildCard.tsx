@@ -86,8 +86,8 @@ type TableRow = {
 const ROWS: TableRow[] = [
     {
         display: 'Verified',
-        key: 'verification_status',
-        type: DisplayType.String,
+        key: 'is_verified',
+        type: DisplayType.Boolean,
     },
     {
         display: 'Message',

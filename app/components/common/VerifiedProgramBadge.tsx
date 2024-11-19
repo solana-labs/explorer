@@ -2,7 +2,7 @@ import { PublicKey } from '@solana/web3.js';
 import Link from 'next/link';
 
 import { useClusterPath } from '@/app/utils/url';
-import { useVerifiedProgramRegistry, VerificationStatus } from '@/app/utils/verified-builds';
+import { useVerifiedProgramRegistry } from '@/app/utils/verified-builds';
 import { ProgramDataAccountInfo } from '@/app/validators/accounts/upgradeable-program';
 
 export function VerifiedProgramBadge({
@@ -29,19 +29,12 @@ export function VerifiedProgramBadge({
         let badgeClass = '';
         let badgeText = '';
 
-        switch (registryInfo.verification_status) {
-            case VerificationStatus.Verified:
-                badgeClass = 'bg-success-soft';
-                badgeText = 'Program Source Verified';
-                break;
-            case VerificationStatus.PdaUploaded:
-                badgeClass = 'bg-warning-soft';
-                badgeText = 'Not verified';
-                break;
-            case VerificationStatus.NotVerified:
-                badgeClass = 'bg-warning-soft';
-                badgeText = 'Not verified';
-                break;
+        if (registryInfo.is_verified) {
+            badgeClass = 'bg-success-soft';
+            badgeText = 'Program Source Verified';
+        } else {
+            badgeClass = 'bg-warning-soft';
+            badgeText = 'Not verified';
         }
 
         return (

@@ -18,6 +18,7 @@ export enum VerificationStatus {
 
 export type OsecRegistryInfo = {
     verification_status: VerificationStatus;
+    is_verified: boolean;
     message: string;
     on_chain_hash: string;
     executable_hash: string;
