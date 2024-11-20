@@ -49,7 +49,7 @@ export function LiveTransactionStatsCard() {
                 <h4 className="card-header-title">Live Transaction Stats</h4>
             </div>
             <TpsCardBody series={series} setSeries={setSeries} />
-            {cluster === Cluster.MainnetBeta || cluster === Cluster.Devnet ? (
+            {cluster === Cluster.MainnetBeta ? (
                 <ValidatorsAppPingStatsCardBody series={series} setSeries={setSeries} />
             ) : (
                 <PingStatsCardBody series={series} setSeries={setSeries} />

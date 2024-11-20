@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 type Params = {
     params: {
-        network: 'mainnet' | 'devnet';
+        network: 'mainnet';
     };
 };
 
