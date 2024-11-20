@@ -12,6 +12,14 @@ import { Bar } from 'react-chartjs-2';
 import CountUp from 'react-countup';
 import { RefreshCw } from 'react-feather';
 
+import { useCluster } from '../providers/cluster';
+import {
+    useValidatorsAppPingStats,
+    ValidatorsAppPingStatsInfo,
+    ValidatorsAppPingStatsRecord,
+} from '../providers/stats/ValidatorsAppStatsProvider';
+import { Cluster } from '../utils/cluster';
+
 Chart.register(BarElement, CategoryScale, LinearScale, Tooltip);
 
 type Series = 'short' | 'medium' | 'long';
@@ -34,24 +42,18 @@ const SERIES_INFO = {
 
 export function LiveTransactionStatsCard() {
     const [series, setSeries] = React.useState<Series>('short');
+    const { cluster } = useCluster();
     return (
         <div className="card">
             <div className="card-header">
                 <h4 className="card-header-title">Live Transaction Stats</h4>
             </div>
             <TpsCardBody series={series} setSeries={setSeries} />
-            <div className="alert alert-warning m-2" role="alert">
-                Note: We are aware of an issue with ping statistic reporting. Ping statistics may not reflect actual
-                network performance. Please see{' '}
-                <a
-                    href="https://www.validators.app/ping-thing?locale=en&network=mainnet"
-                    className="text-white text-decoration-underline"
-                >
-                    validators.app
-                </a>{' '}
-                for more information.
-            </div>
-            <PingStatsCardBody series={series} setSeries={setSeries} />
+            {cluster === Cluster.MainnetBeta ? (
+                <ValidatorsAppPingStatsCardBody series={series} setSeries={setSeries} />
+            ) : (
+                <PingStatsCardBody series={series} setSeries={setSeries} />
+            )}
         </div>
     );
 }
@@ -64,6 +66,29 @@ function TpsCardBody({ series, setSeries }: { series: Series; setSeries: SetSeri
     }
 
     return <TpsBarChart performanceInfo={performanceInfo} series={series} setSeries={setSeries} />;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function ValidatorsAppTpsCardBody({ series, setSeries }: { series: Series; setSeries: SetSeries }) {
+    const performanceInfo = usePerformanceInfo();
+    const statsInfo = useValidatorsAppPingStats();
+
+    if (performanceInfo.status !== ClusterStatsStatus.Ready || statsInfo.status !== PingStatus.Ready) {
+        return (
+            <StatsNotReady
+                error={performanceInfo.status === ClusterStatsStatus.Error || statsInfo.status === PingStatus.Error}
+            />
+        );
+    }
+
+    return (
+        <ValidatorsAppTpsBarChart
+            statsInfo={statsInfo}
+            performanceInfo={performanceInfo}
+            series={series}
+            setSeries={setSeries}
+        />
+    );
 }
 
 const TPS_CHART_OPTIONS = (historyMaxTps: number): ChartOptions<'bar'> => {
@@ -156,6 +181,84 @@ const TPS_CHART_OPTIONS = (historyMaxTps: number): ChartOptions<'bar'> => {
         },
     };
 };
+
+type ValidatorsAppTpsBarChartProps = {
+    performanceInfo: PerformanceInfo;
+    statsInfo: ValidatorsAppPingStatsInfo;
+    series: Series;
+    setSeries: SetSeries;
+};
+function ValidatorsAppTpsBarChart({ statsInfo, performanceInfo, series, setSeries }: ValidatorsAppTpsBarChartProps) {
+    const seriesData = statsInfo[series] || [];
+    const avgTps = Math.round(
+        (statsInfo[SERIES[2]] || [])?.map(val => val.tps).reduce((a, b) => a + b, 0) / seriesData.length
+    );
+    const historyMaxTps = (statsInfo[SERIES[2]] || [])?.map(val => val.tps).reduce((a, b) => Math.max(a, b), 0);
+    const averageTps = Math.round(avgTps).toLocaleString('en-US');
+    const transactionCount = <AnimatedTransactionCount info={performanceInfo} />;
+    const chartOptions = React.useMemo<ChartOptions<'bar'>>(() => TPS_CHART_OPTIONS(historyMaxTps), [historyMaxTps]);
+
+    const now = new Date();
+    const chartData: ChartData<'bar'> = {
+        datasets: [
+            {
+                backgroundColor: '#00D192',
+                borderWidth: 0,
+                data: seriesData.map(val => (val.tps >= historyMaxTps ? avgTps : val.tps || 0)),
+                hoverBackgroundColor: '#00D192',
+            },
+        ],
+        labels: seriesData.map(val => {
+            const minAgo = Math.round((now.getTime() - val.timestamp.getTime()) / 60000);
+            return `${minAgo}min ago`;
+        }),
+    };
+
+    return (
+        <>
+            <TableCardBody>
+                <tr>
+                    <td className="w-100">Transaction count</td>
+                    <td className="text-lg-end font-monospace">{transactionCount} </td>
+                </tr>
+                <tr>
+                    <td className="w-100">Transactions per second (TPS)</td>
+                    <td className="text-lg-end font-monospace">{averageTps} </td>
+                </tr>
+            </TableCardBody>
+
+            <hr className="my-0" />
+
+            <div className="card-body py-3">
+                <div className="align-box-row align-items-start justify-content-between">
+                    <div className="d-flex justify-content-between w-100">
+                        <span className="mb-0 font-size-sm">TPS history</span>
+
+                        <div className="font-size-sm">
+                            {SERIES.map(key => (
+                                <button
+                                    key={key}
+                                    onClick={() => setSeries(key)}
+                                    className={classNames('btn btn-sm btn-white ms-2', {
+                                        active: series === key,
+                                    })}
+                                >
+                                    {SERIES_INFO[key].interval}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div id="perf-history" className="mt-3 d-flex justify-content-end flex-row w-100">
+                        <div className="w-100">
+                            <Bar data={chartData} options={chartOptions} height={80} />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </>
+    );
+}
 
 type TpsBarChartProps = {
     performanceInfo: PerformanceInfo;
@@ -285,6 +388,16 @@ function PingStatsCardBody({ series, setSeries }: { series: Series; setSeries: S
     }
 
     return <PingBarChart pingInfo={pingInfo} series={series} setSeries={setSeries} />;
+}
+
+function ValidatorsAppPingStatsCardBody({ series, setSeries }: { series: Series; setSeries: SetSeries }) {
+    const pingInfo = useValidatorsAppPingStats();
+
+    if (pingInfo.status !== PingStatus.Ready) {
+        return <PingStatsNotReady error={pingInfo.status === PingStatus.Error} retry={pingInfo.retry} />;
+    }
+
+    return <ValidatorsAppPingBarChart pingInfo={pingInfo} series={series} setSeries={setSeries} />;
 }
 
 type StatsNotReadyProps = { error: boolean; retry?: () => void };
@@ -463,6 +576,95 @@ function PingBarChart({
                     : ''
             }
             ${SERIES_INFO[series].label(seriesLength - i)}min ago
+            </div>
+          `;
+        }),
+    };
+
+    return (
+        <div className="card-body py-3">
+            <div className="align-box-row align-items-start justify-content-between">
+                <div className="d-flex justify-content-between w-100">
+                    <span className="mb-0 font-size-sm">Average Ping Time</span>
+
+                    <div className="font-size-sm">
+                        {SERIES.map(key => (
+                            <button
+                                key={key}
+                                onClick={() => setSeries(key)}
+                                className={classNames('btn btn-sm btn-white ms-2', {
+                                    active: series === key,
+                                })}
+                            >
+                                {SERIES_INFO[key].interval}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <div id="perf-history" className="mt-3 d-flex justify-content-end flex-row w-100">
+                    <div className="w-100">
+                        <Bar data={chartData} options={PING_CHART_OPTIONS} height={80} />
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function ValidatorsAppPingBarChart({
+    pingInfo,
+    series,
+    setSeries,
+}: {
+    pingInfo: ValidatorsAppPingStatsInfo;
+    series: Series;
+    setSeries: SetSeries;
+}) {
+    const seriesData = pingInfo[series] || [];
+    const maxMedian = seriesData.reduce((a, b) => {
+        return Math.max(a, b.median);
+    }, 0);
+    const backgroundColor = (val: ValidatorsAppPingStatsRecord) => {
+        if (val.submitted === 0) {
+            return '#08a274';
+        }
+
+        return '#00D192';
+    };
+    const now = new Date();
+    const chartData: ChartData<'bar'> = {
+        datasets: [
+            {
+                backgroundColor: seriesData.map(backgroundColor),
+                borderWidth: 0,
+                data: seriesData.map(val => {
+                    if (val.submitted === 0) {
+                        return maxMedian * 0.5;
+                    }
+                    return val.median || 0;
+                }),
+                hoverBackgroundColor: seriesData.map(backgroundColor),
+                minBarLength: 2,
+            },
+        ],
+        labels: seriesData.map(val => {
+            const minutesAgo = Math.round((now.getTime() - val.timestamp.getTime()) / (60 * 1000));
+            if (val.submitted === 0) {
+                return `
+            <div class="label">
+              <p class="mb-0">Ping statistics unavailable</p>
+              ${minutesAgo} min ago
+            </div>
+            `;
+            }
+
+            return `
+            <div class="value">${val.median} ms</div>
+            <div class="label">
+              <p class="mb-0">${val.submitted} confirmed</p>
+            ${`<p class="mb-0">${val.average_slot_latency.toLocaleString(undefined)} Average Slot Latency</p>`}
+            ${minutesAgo}min ago
             </div>
           `;
         }),
