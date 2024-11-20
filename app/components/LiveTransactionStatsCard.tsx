@@ -48,16 +48,11 @@ export function LiveTransactionStatsCard() {
             <div className="card-header">
                 <h4 className="card-header-title">Live Transaction Stats</h4>
             </div>
+            <TpsCardBody series={series} setSeries={setSeries} />
             {cluster === Cluster.MainnetBeta || cluster === Cluster.Devnet ? (
-                <>
-                    <ValidatorsAppTpsCardBody series={series} setSeries={setSeries} />
-                    <ValidatorsAppPingStatsCardBody series={series} setSeries={setSeries} />
-                </>
+                <ValidatorsAppPingStatsCardBody series={series} setSeries={setSeries} />
             ) : (
-                <>
-                    <TpsCardBody series={series} setSeries={setSeries} />
-                    <PingStatsCardBody series={series} setSeries={setSeries} />
-                </>
+                <PingStatsCardBody series={series} setSeries={setSeries} />
             )}
         </div>
     );
@@ -73,6 +68,7 @@ function TpsCardBody({ series, setSeries }: { series: Series; setSeries: SetSeri
     return <TpsBarChart performanceInfo={performanceInfo} series={series} setSeries={setSeries} />;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function ValidatorsAppTpsCardBody({ series, setSeries }: { series: Series; setSeries: SetSeries }) {
     const performanceInfo = usePerformanceInfo();
     const statsInfo = useValidatorsAppPingStats();

@@ -82,12 +82,7 @@ export function ValidatorsAppStatsProvider({ children }: Props) {
         let stale = false;
         const fetchPingMetrics = async () => {
             try {
-                const response = await fetch(url, {
-                    cache: 'no-store',
-                    headers: {
-                        'Cache-Control': 'no-store, max-age=0',
-                    },
-                });
+                const response = await fetch(url);
                 if (stale) {
                     return;
                 }

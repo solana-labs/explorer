@@ -43,7 +43,7 @@ export async function GET(_request: Request, { params: { network } }: Params) {
 
     return NextResponse.json(data, {
         headers: {
-            'Cache-Control': 'no-store, max-age=0',
+            'Cache-Control': 'public, max-age=30',
         },
     });
 }
