@@ -12,13 +12,11 @@ import { Bar } from 'react-chartjs-2';
 import CountUp from 'react-countup';
 import { RefreshCw } from 'react-feather';
 
-import { useCluster } from '../providers/cluster';
 import {
     useValidatorsAppPingStats,
     ValidatorsAppPingStatsInfo,
     ValidatorsAppPingStatsRecord,
 } from '../providers/stats/ValidatorsAppStatsProvider';
-import { Cluster } from '../utils/cluster';
 
 Chart.register(BarElement, CategoryScale, LinearScale, Tooltip);
 
@@ -42,18 +40,18 @@ const SERIES_INFO = {
 
 export function LiveTransactionStatsCard() {
     const [series, setSeries] = React.useState<Series>('short');
-    const { cluster } = useCluster();
+    // const { cluster } = useCluster();
     return (
         <div className="card">
             <div className="card-header">
                 <h4 className="card-header-title">Live Transaction Stats</h4>
             </div>
             <TpsCardBody series={series} setSeries={setSeries} />
-            {cluster === Cluster.MainnetBeta ? (
+            {/* {cluster === Cluster.MainnetBeta ? (
                 <ValidatorsAppPingStatsCardBody series={series} setSeries={setSeries} />
             ) : (
                 <PingStatsCardBody series={series} setSeries={setSeries} />
-            )}
+            )} */}
         </div>
     );
 }
@@ -380,6 +378,7 @@ function AnimatedTransactionCount({ info }: { info: PerformanceInfo }) {
     );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function PingStatsCardBody({ series, setSeries }: { series: Series; setSeries: SetSeries }) {
     const pingInfo = useSolanaPingInfo();
 
@@ -390,6 +389,7 @@ function PingStatsCardBody({ series, setSeries }: { series: Series; setSeries: S
     return <PingBarChart pingInfo={pingInfo} series={series} setSeries={setSeries} />;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function ValidatorsAppPingStatsCardBody({ series, setSeries }: { series: Series; setSeries: SetSeries }) {
     const pingInfo = useValidatorsAppPingStats();
 
