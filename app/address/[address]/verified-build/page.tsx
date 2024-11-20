@@ -1,7 +1,8 @@
 import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/get-readable-title-from-address';
+import { redirect } from 'next/navigation';
 import { Metadata } from 'next/types';
 
-import VerifiedBuildClient from './page-client';
+// import VerifiedBuildClient from './page-client';
 
 export async function generateMetadata(props: AddressPageMetadataProps): Promise<Metadata> {
     return {
@@ -17,5 +18,6 @@ type Props = Readonly<{
 }>;
 
 export default function VerifiedBuildPage(props: Props) {
-    return <VerifiedBuildClient {...props} />;
+    // return <VerifiedBuildClient {...props} />;
+    throw redirect(`/address/${props.params.address}`);
 }
