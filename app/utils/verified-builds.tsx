@@ -10,6 +10,7 @@ import { Cluster } from './cluster';
 const OSEC_REGISTRY_URL = 'https://verify.osec.io';
 const VERIFY_PROGRAM_ID = 'verifycLy8mB96wd9wqq3WDXQwM4oU6r42Th37Db9fC';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export enum VerificationStatus {
     Verified = 'Verified Build',
     PdaUploaded = 'Not verified Build',

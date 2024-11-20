@@ -24,7 +24,7 @@ import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 import { Cluster } from '@/app/utils/cluster';
 import { useClusterPath } from '@/app/utils/url';
 
-import { VerifiedProgramBadge } from '../common/VerifiedProgramBadge';
+// import { VerifiedProgramBadge } from '../common/VerifiedProgramBadge';
 
 export function UpgradeableLoaderAccountSection({
     account,
@@ -119,14 +119,14 @@ export function UpgradeableProgramSection({
                             <td>Upgradeable</td>
                             <td className="text-lg-end">{programData.authority !== null ? 'Yes' : 'No'}</td>
                         </tr>
-                        <tr>
+                        {/* <tr>
                             <td>
                                 <VerifiedLabel />
                             </td>
                             <td className="text-lg-end">
                                 <VerifiedProgramBadge programData={programData} pubkey={account.pubkey} />
                             </td>
-                        </tr>
+                        </tr> */}
                         <tr>
                             <td>
                                 <SecurityLabel />
@@ -183,6 +183,7 @@ function SecurityLabel() {
     );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function VerifiedLabel() {
     return (
         <InfoTooltip text="Verified builds allow users can ensure that the hash of the on-chain program matches the hash of the program of the given codebase (registry hosted by osec.io).">
