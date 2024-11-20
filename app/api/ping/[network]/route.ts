@@ -1,4 +1,3 @@
-import { fetch } from 'cross-fetch';
 import { NextResponse } from 'next/server';
 
 type Params = {
@@ -25,10 +24,11 @@ export async function GET(_request: Request, { params: { network } }: Params) {
     const responses = await Promise.all(
         PING_INTERVALS.map(interval =>
             fetch(`https://www.validators.app/api/v1/ping-thing-stats/${network}.json?interval=${interval}`, {
-                cache: 'no-store',
                 headers: {
-                    'Cache-Control': 'no-store, max-age=0',
                     Token: process.env.PING_API_KEY || '',
+                },
+                next: {
+                    revalidate: 60,
                 },
             })
         )
@@ -43,7 +43,7 @@ export async function GET(_request: Request, { params: { network } }: Params) {
 
     return NextResponse.json(data, {
         headers: {
-            'Cache-Control': 'public, max-age=30',
+            'Cache-Control': 'no-store, max-age=0',
         },
     });
 }
