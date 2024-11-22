@@ -4,21 +4,11 @@ import { TableCardBody } from '@components/common/TableCardBody';
 import { StatsNotReady } from '@components/StatsNotReady';
 import { ClusterStatsStatus, PERF_UPDATE_SEC, usePerformanceInfo } from '@providers/stats/solanaClusterStats';
 import { PerformanceInfo } from '@providers/stats/solanaPerformanceInfo';
-import { PingInfo, PingRollupInfo, PingStatus, useSolanaPingInfo } from '@providers/stats/SolanaPingProvider';
 import { BarElement, CategoryScale, Chart, ChartData, ChartOptions, LinearScale, Tooltip } from 'chart.js';
 import classNames from 'classnames';
 import React from 'react';
 import { Bar } from 'react-chartjs-2';
 import CountUp from 'react-countup';
-import { RefreshCw } from 'react-feather';
-
-import { useCluster } from '../providers/cluster';
-import {
-    useValidatorsAppPingStats,
-    ValidatorsAppPingStatsInfo,
-    ValidatorsAppPingStatsRecord,
-} from '../providers/stats/ValidatorsAppStatsProvider';
-import { Cluster } from '../utils/cluster';
 
 Chart.register(BarElement, CategoryScale, LinearScale, Tooltip);
 
@@ -42,18 +32,24 @@ const SERIES_INFO = {
 
 export function LiveTransactionStatsCard() {
     const [series, setSeries] = React.useState<Series>('short');
-    const { cluster } = useCluster();
     return (
         <div className="card">
             <div className="card-header">
                 <h4 className="card-header-title">Live Transaction Stats</h4>
             </div>
             <TpsCardBody series={series} setSeries={setSeries} />
-            {cluster === Cluster.MainnetBeta ? (
-                <ValidatorsAppPingStatsCardBody series={series} setSeries={setSeries} />
-            ) : (
-                <PingStatsCardBody series={series} setSeries={setSeries} />
-            )}
+            <div className="card-body text-center">
+                <p className="mb-0">
+                    For transaction confirmation time statistics, please visit{' '}
+                    <a href="https://www.validators.app" target="_blank" rel="noopener noreferrer">
+                        validators.app
+                    </a>{' '}
+                    or{' '}
+                    <a href="https://solscan.io" target="_blank" rel="noopener noreferrer">
+                        solscan.io
+                    </a>
+                </p>
+            </div>
         </div>
     );
 }
@@ -66,29 +62,6 @@ function TpsCardBody({ series, setSeries }: { series: Series; setSeries: SetSeri
     }
 
     return <TpsBarChart performanceInfo={performanceInfo} series={series} setSeries={setSeries} />;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function ValidatorsAppTpsCardBody({ series, setSeries }: { series: Series; setSeries: SetSeries }) {
-    const performanceInfo = usePerformanceInfo();
-    const statsInfo = useValidatorsAppPingStats();
-
-    if (performanceInfo.status !== ClusterStatsStatus.Ready || statsInfo.status !== PingStatus.Ready) {
-        return (
-            <StatsNotReady
-                error={performanceInfo.status === ClusterStatsStatus.Error || statsInfo.status === PingStatus.Error}
-            />
-        );
-    }
-
-    return (
-        <ValidatorsAppTpsBarChart
-            statsInfo={statsInfo}
-            performanceInfo={performanceInfo}
-            series={series}
-            setSeries={setSeries}
-        />
-    );
 }
 
 const TPS_CHART_OPTIONS = (historyMaxTps: number): ChartOptions<'bar'> => {
@@ -181,84 +154,6 @@ const TPS_CHART_OPTIONS = (historyMaxTps: number): ChartOptions<'bar'> => {
         },
     };
 };
-
-type ValidatorsAppTpsBarChartProps = {
-    performanceInfo: PerformanceInfo;
-    statsInfo: ValidatorsAppPingStatsInfo;
-    series: Series;
-    setSeries: SetSeries;
-};
-function ValidatorsAppTpsBarChart({ statsInfo, performanceInfo, series, setSeries }: ValidatorsAppTpsBarChartProps) {
-    const seriesData = statsInfo[series] || [];
-    const avgTps = Math.round(
-        (statsInfo[SERIES[2]] || [])?.map(val => val.tps).reduce((a, b) => a + b, 0) / seriesData.length
-    );
-    const historyMaxTps = (statsInfo[SERIES[2]] || [])?.map(val => val.tps).reduce((a, b) => Math.max(a, b), 0);
-    const averageTps = Math.round(avgTps).toLocaleString('en-US');
-    const transactionCount = <AnimatedTransactionCount info={performanceInfo} />;
-    const chartOptions = React.useMemo<ChartOptions<'bar'>>(() => TPS_CHART_OPTIONS(historyMaxTps), [historyMaxTps]);
-
-    const now = new Date();
-    const chartData: ChartData<'bar'> = {
-        datasets: [
-            {
-                backgroundColor: '#00D192',
-                borderWidth: 0,
-                data: seriesData.map(val => (val.tps >= historyMaxTps ? avgTps : val.tps || 0)),
-                hoverBackgroundColor: '#00D192',
-            },
-        ],
-        labels: seriesData.map(val => {
-            const minAgo = Math.round((now.getTime() - val.timestamp.getTime()) / 60000);
-            return `${minAgo}min ago`;
-        }),
-    };
-
-    return (
-        <>
-            <TableCardBody>
-                <tr>
-                    <td className="w-100">Transaction count</td>
-                    <td className="text-lg-end font-monospace">{transactionCount} </td>
-                </tr>
-                <tr>
-                    <td className="w-100">Transactions per second (TPS)</td>
-                    <td className="text-lg-end font-monospace">{averageTps} </td>
-                </tr>
-            </TableCardBody>
-
-            <hr className="my-0" />
-
-            <div className="card-body py-3">
-                <div className="align-box-row align-items-start justify-content-between">
-                    <div className="d-flex justify-content-between w-100">
-                        <span className="mb-0 font-size-sm">TPS history</span>
-
-                        <div className="font-size-sm">
-                            {SERIES.map(key => (
-                                <button
-                                    key={key}
-                                    onClick={() => setSeries(key)}
-                                    className={classNames('btn btn-sm btn-white ms-2', {
-                                        active: series === key,
-                                    })}
-                                >
-                                    {SERIES_INFO[key].interval}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div id="perf-history" className="mt-3 d-flex justify-content-end flex-row w-100">
-                        <div className="w-100">
-                            <Bar data={chartData} options={chartOptions} height={80} />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </>
-    );
-}
 
 type TpsBarChartProps = {
     performanceInfo: PerformanceInfo;
@@ -377,326 +272,5 @@ function AnimatedTransactionCount({ info }: { info: PerformanceInfo }) {
             preserveValue={true}
             separator=","
         />
-    );
-}
-
-function PingStatsCardBody({ series, setSeries }: { series: Series; setSeries: SetSeries }) {
-    const pingInfo = useSolanaPingInfo();
-
-    if (pingInfo.status !== PingStatus.Ready) {
-        return <PingStatsNotReady error={pingInfo.status === PingStatus.Error} retry={pingInfo.retry} />;
-    }
-
-    return <PingBarChart pingInfo={pingInfo} series={series} setSeries={setSeries} />;
-}
-
-function ValidatorsAppPingStatsCardBody({ series, setSeries }: { series: Series; setSeries: SetSeries }) {
-    const pingInfo = useValidatorsAppPingStats();
-
-    if (pingInfo.status !== PingStatus.Ready) {
-        return <PingStatsNotReady error={pingInfo.status === PingStatus.Error} retry={pingInfo.retry} />;
-    }
-
-    return <ValidatorsAppPingBarChart pingInfo={pingInfo} series={series} setSeries={setSeries} />;
-}
-
-type StatsNotReadyProps = { error: boolean; retry?: () => void };
-function PingStatsNotReady({ error, retry }: StatsNotReadyProps) {
-    if (error) {
-        return (
-            <div className="card-body text-center">
-                There was a problem loading solana ping stats.{' '}
-                {retry && (
-                    <button
-                        className="btn btn-white btn-sm"
-                        onClick={() => {
-                            retry();
-                        }}
-                    >
-                        <RefreshCw className="align-text-top me-2" size={13} />
-                        Try Again
-                    </button>
-                )}
-            </div>
-        );
-    }
-
-    return (
-        <div className="card-body text-center">
-            <span className="align-text-top spinner-grow spinner-grow-sm me-2"></span>
-            Loading
-        </div>
-    );
-}
-
-const PING_CHART_OPTIONS: ChartOptions<'bar'> = {
-    animation: false,
-    interaction: {
-        intersect: false,
-        mode: 'index',
-    },
-    plugins: {
-        tooltip: {
-            enabled: false, // Disable the on-canvas tooltip
-            external(context) {
-                // Tooltip Element
-                let tooltipEl = document.getElementById('chartjs-tooltip');
-
-                // Create element on first render
-                if (!tooltipEl) {
-                    tooltipEl = document.createElement('div');
-                    tooltipEl.id = 'chartjs-tooltip';
-                    tooltipEl.innerHTML = '<div class="content"></div>';
-                    document.body.appendChild(tooltipEl);
-                }
-
-                // Hide if no tooltip
-                const tooltipModel = context.tooltip;
-                if (tooltipModel.opacity === 0) {
-                    tooltipEl.style.opacity = '0';
-                    return;
-                }
-
-                // Set caret Position
-                tooltipEl.classList.remove('above', 'below', 'no-transform');
-                if (tooltipModel.yAlign) {
-                    tooltipEl.classList.add(tooltipModel.yAlign);
-                } else {
-                    tooltipEl.classList.add('no-transform');
-                }
-
-                // Set Text
-                if (tooltipModel.body) {
-                    const { label } = tooltipModel.dataPoints[0];
-                    const tooltipContent = tooltipEl.querySelector('div');
-                    if (tooltipContent) {
-                        tooltipContent.innerHTML = `${label}`;
-                    }
-                }
-
-                const position = context.chart.canvas.getBoundingClientRect();
-
-                // Display, position, and set styles for font
-                tooltipEl.style.opacity = '1';
-                tooltipEl.style.position = 'absolute';
-                tooltipEl.style.left = position.left + window.pageXOffset + tooltipModel.caretX + 'px';
-                tooltipEl.style.top = position.top + window.pageYOffset + tooltipModel.caretY + 'px';
-                tooltipEl.style.pointerEvents = 'none';
-            },
-            intersect: false,
-        },
-    },
-    resizeDelay: 0,
-    scales: {
-        x: {
-            grid: {
-                display: false,
-            },
-            ticks: {
-                display: false,
-            },
-        },
-        y: {
-            grid: {
-                display: false,
-            },
-            min: 0,
-            ticks: {
-                display: true,
-                font: {
-                    size: 10,
-                },
-                stepSize: 100,
-                textStrokeColor: '#EEE',
-            },
-        },
-    },
-};
-
-function PingBarChart({
-    pingInfo,
-    series,
-    setSeries,
-}: {
-    pingInfo: PingRollupInfo;
-    series: Series;
-    setSeries: SetSeries;
-}) {
-    const seriesData = pingInfo[series] || [];
-    const maxMean = seriesData.reduce((a, b) => {
-        return Math.max(a, b.mean);
-    }, 0);
-    const seriesLength = seriesData.length;
-    const backgroundColor = (val: PingInfo) => {
-        if (val.submitted === 0) {
-            return '#08a274';
-        }
-
-        if (val.loss >= 0.25 && val.loss <= 0.5) {
-            return '#FFA500';
-        }
-
-        return val.loss > 0.5 ? '#f00' : '#00D192';
-    };
-    const chartData: ChartData<'bar'> = {
-        datasets: [
-            {
-                backgroundColor: seriesData.map(backgroundColor),
-                borderWidth: 0,
-                data: seriesData.map(val => {
-                    if (val.submitted === 0) {
-                        return maxMean * 0.5;
-                    }
-                    return val.mean || 0;
-                }),
-                hoverBackgroundColor: seriesData.map(backgroundColor),
-                minBarLength: 2,
-            },
-        ],
-        labels: seriesData.map((val, i) => {
-            if (val.submitted === 0) {
-                return `
-            <div class="label">
-              <p class="mb-0">Ping statistics unavailable</p>
-              ${SERIES_INFO[series].label(seriesLength - i)}min ago
-            </div>
-            `;
-            }
-
-            return `
-            <div class="value">${val.mean} ms</div>
-            <div class="label">
-              <p class="mb-0">${val.confirmed} of ${val.submitted} confirmed</p>
-            ${
-                val.loss
-                    ? `<p class="mb-0">${val.loss.toLocaleString(undefined, {
-                          minimumFractionDigits: 2,
-                          style: 'percent',
-                      })} loss</p>`
-                    : ''
-            }
-            ${SERIES_INFO[series].label(seriesLength - i)}min ago
-            </div>
-          `;
-        }),
-    };
-
-    return (
-        <div className="card-body py-3">
-            <div className="align-box-row align-items-start justify-content-between">
-                <div className="d-flex justify-content-between w-100">
-                    <span className="mb-0 font-size-sm">Average Ping Time</span>
-
-                    <div className="font-size-sm">
-                        {SERIES.map(key => (
-                            <button
-                                key={key}
-                                onClick={() => setSeries(key)}
-                                className={classNames('btn btn-sm btn-white ms-2', {
-                                    active: series === key,
-                                })}
-                            >
-                                {SERIES_INFO[key].interval}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                <div id="perf-history" className="mt-3 d-flex justify-content-end flex-row w-100">
-                    <div className="w-100">
-                        <Bar data={chartData} options={PING_CHART_OPTIONS} height={80} />
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-function ValidatorsAppPingBarChart({
-    pingInfo,
-    series,
-    setSeries,
-}: {
-    pingInfo: ValidatorsAppPingStatsInfo;
-    series: Series;
-    setSeries: SetSeries;
-}) {
-    const seriesData = pingInfo[series] || [];
-    const maxMedian = seriesData.reduce((a, b) => {
-        return Math.max(a, b.median);
-    }, 0);
-    const backgroundColor = (val: ValidatorsAppPingStatsRecord) => {
-        if (val.submitted === 0) {
-            return '#08a274';
-        }
-
-        return '#00D192';
-    };
-    const now = new Date();
-    const chartData: ChartData<'bar'> = {
-        datasets: [
-            {
-                backgroundColor: seriesData.map(backgroundColor),
-                borderWidth: 0,
-                data: seriesData.map(val => {
-                    if (val.submitted === 0) {
-                        return maxMedian * 0.5;
-                    }
-                    return val.median || 0;
-                }),
-                hoverBackgroundColor: seriesData.map(backgroundColor),
-                minBarLength: 2,
-            },
-        ],
-        labels: seriesData.map(val => {
-            const minutesAgo = Math.round((now.getTime() - val.timestamp.getTime()) / (60 * 1000));
-            if (val.submitted === 0) {
-                return `
-            <div class="label">
-              <p class="mb-0">Ping statistics unavailable</p>
-              ${minutesAgo} min ago
-            </div>
-            `;
-            }
-
-            return `
-            <div class="value">${val.median} ms</div>
-            <div class="label">
-              <p class="mb-0">${val.submitted} confirmed</p>
-            ${`<p class="mb-0">${val.average_slot_latency.toLocaleString(undefined)} Average Slot Latency</p>`}
-            ${minutesAgo}min ago
-            </div>
-          `;
-        }),
-    };
-
-    return (
-        <div className="card-body py-3">
-            <div className="align-box-row align-items-start justify-content-between">
-                <div className="d-flex justify-content-between w-100">
-                    <span className="mb-0 font-size-sm">Average Ping Time</span>
-
-                    <div className="font-size-sm">
-                        {SERIES.map(key => (
-                            <button
-                                key={key}
-                                onClick={() => setSeries(key)}
-                                className={classNames('btn btn-sm btn-white ms-2', {
-                                    active: series === key,
-                                })}
-                            >
-                                {SERIES_INFO[key].interval}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                <div id="perf-history" className="mt-3 d-flex justify-content-end flex-row w-100">
-                    <div className="w-100">
-                        <Bar data={chartData} options={PING_CHART_OPTIONS} height={80} />
-                    </div>
-                </div>
-            </div>
-        </div>
     );
 }
