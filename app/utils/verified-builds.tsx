@@ -127,7 +127,14 @@ export function useVerifiedProgramRegistry({
                 verifiedData.verify_command += ` ${argsString}`;
             }
         }
-        verifiedData.repo_url = pdaData.gitUrl;
+
+        if (!verifiedData.repo_url) {
+            verifiedData.repo_url = pdaData.gitUrl;
+            if (pdaData.commit) {
+                verifiedData.repo_url = addCommitHashToUrl(verifiedData.repo_url, pdaData.commit);
+            }
+        }
+
         if (registryData.verification_status === VerificationStatus.NotVerified) {
             verifiedData.message = 'Verify command was provided by the program authority.';
             verifiedData.verification_status = VerificationStatus.PdaUploaded;
@@ -144,6 +151,15 @@ export function useVerifiedProgramRegistry({
     }
 
     return { data: null, isLoading };
+}
+
+function addCommitHashToUrl(repoUrl: string, commitHash: string): string {
+    // Ensure the URL doesn't already include a branch or tree reference
+    const cleanUrl = repoUrl.replace(/\/tree\/[^/]+$/, '').replace(/\/$/, '');
+
+    // Append the commit hash with the "tree" path
+    const urlWithCommit = `${cleanUrl}/tree/${commitHash}`;
+    return urlWithCommit;
 }
 
 function isMainnet(currentCluster: Cluster): boolean {
