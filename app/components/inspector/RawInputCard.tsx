@@ -1,9 +1,8 @@
 import { VersionedMessage } from '@solana/web3.js';
+import { MIN_MESSAGE_LENGTH, TransactionData } from '@utils/tx';
 import base58 from 'bs58';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
-
-import type { TransactionData } from './InspectorPage';
 
 function getMessageDataFromBytes(bytes: Uint8Array): {
     message: VersionedMessage;
@@ -62,13 +61,6 @@ function getTransactionDataFromUserSuppliedBytes(bytes: Uint8Array): {
         return getMessageDataFromBytes(bytes);
     }
 }
-
-export const MIN_MESSAGE_LENGTH =
-    3 + // header
-    1 + // accounts length
-    32 + // accounts, must have at least one address for fees
-    32 + // recent blockhash
-    1; // instructions length
 
 export function RawInput({
     value,
