@@ -46,6 +46,7 @@ export enum PROGRAM_NAMES {
     NFT_AUCTION = 'NFT Auction Program',
     NFT_CANDY_MACHINE = 'NFT Candy Machine Program',
     NFT_CANDY_MACHINE_V2 = 'NFT Candy Machine Program V2',
+    ORAO_VRF_2 = 'ORAO VRF v2',
     ORCA_SWAP_1 = 'Orca Swap Program v1',
     ORCA_SWAP_2 = 'Orca Swap Program v2',
     ORCA_AQUAFARM = 'Orca Aquafarm Program',
@@ -231,6 +232,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     DZnkkTmCiFWfYTfT41X3Rd1kDgozqzxWaHqsw6W4x2oe: {
         deployments: [Cluster.Devnet],
         name: PROGRAM_NAMES.WORMHOLE_TOKEN,
+    },
+    VRFzZoJdhFWL8rkvu87LpKM3RbcVezpMEc6X5GVDr7y: {
+        deployments: [Cluster.Devnet, Cluster.MainnetBeta],
+        name: PROGRAM_NAMES.ORAO_VRF_2,
     },
     DjVE6JNiYqPL2QXyCUUh8rNjHrbz9hXHNYt99MQ59qw1: {
         deployments: [Cluster.MainnetBeta],
