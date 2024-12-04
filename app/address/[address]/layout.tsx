@@ -54,6 +54,7 @@ import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 import { FullTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
 import { MintAccountInfo } from '@/app/validators/accounts/token';
 import { useProgramMetadata } from '@/app/providers/program-metadata';
+import { useIdlFromProgramMetadataProgram } from '@/app/providers/idl';
 
 const IDENTICON_WIDTH = 64;
 
@@ -783,13 +784,13 @@ function getCustomLinkedTabs(pubkey: PublicKey, account: Account) {
 
 function ProgramMetaDataLink({ tab, address, pubkey }: { tab: Tab; address: string; pubkey: PublicKey }) {
     const { url } = useCluster();
-    const { ProgramMetaData } = useProgramMetadata(pubkey.toString(), url);
+    const programMetadata = useProgramMetadata(pubkey.toString(), url);
     const path = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
     const selectedLayoutSegment = useSelectedLayoutSegment();
     const isActive = selectedLayoutSegment === tab.path;
 
     // Don't show the tab if there's no metadata
-    if (!programMetaData) {
+    if (!programMetadata) {
         return null;
     }
 
