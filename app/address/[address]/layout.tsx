@@ -828,7 +828,7 @@ function IdlDataLink({ tab, address, pubkey }: { tab: Tab; address: string; pubk
     const path = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
     const selectedLayoutSegment = useSelectedLayoutSegment();
     const isActive = selectedLayoutSegment === tab.path;
-    if (!idl || program) {
+    if (!idl) {
         return null;
     }
 
