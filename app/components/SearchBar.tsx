@@ -12,6 +12,9 @@ import AsyncSelect from 'react-select/async';
 import { FetchedDomainInfo } from '../api/domain-info/[domain]/route';
 import { LOADER_IDS, LoaderName, PROGRAM_INFO_BY_ID, SPECIAL_IDS, SYSVAR_IDS } from '../utils/programs';
 import { searchTokens } from '../utils/token-search';
+import { MIN_MESSAGE_LENGTH } from './inspector/RawInputCard';
+import { VersionedMessage } from '@solana/web3.js';
+import base58 from 'bs58';
 
 interface SearchOptions {
     label: string;
@@ -34,8 +37,14 @@ export function SearchBar() {
     const searchParams = useSearchParams();
     const onChange = ({ pathname }: ValueType<any, false>, meta: ActionMeta<any>) => {
         if (meta.action === 'select-option') {
-            const nextQueryString = searchParams?.toString();
-            router.push(`${pathname}${nextQueryString ? `?${nextQueryString}` : ''}`);
+            // Always use the pathname directly if it contains query params
+            if (pathname.includes('?')) {
+                router.push(pathname);
+            } else {
+                // Only preserve existing query params for paths without their own params
+                const nextQueryString = searchParams?.toString();
+                router.push(`${pathname}${nextQueryString ? `?${nextQueryString}` : ''}`);
+            }
             setSearch('');
         }
     };
@@ -298,10 +307,93 @@ function buildOptions(rawSearch: string, cluster: Cluster, currentEpoch?: bigint
             });
         }
     } catch (err) {
-        /* empty */
+        // If bs58 decoding fails, check if it's a valid base64 string
+        if (isValidBase64(search)) {
+            const decodedTx = decodeTransactionFromBase64(search);
+            if (decodedTx) {
+                const pathname = '/tx/inspector';
+                const searchParams = new URLSearchParams();
+
+                searchParams.set('message', encodeURIComponent(decodedTx.message));
+
+                if (decodedTx.signatures) {
+                    searchParams.set('signatures', encodeURIComponent(JSON.stringify(decodedTx.signatures)));
+                }
+
+                options.push({
+                    label: 'Transaction Inspector',
+                    options: [
+                        {
+                            label: 'Inspect Decoded Transaction',
+                            pathname: `${pathname}?${searchParams.toString()}`,
+                            value: [search],
+                        },
+                    ],
+                });
+            }
+        }
     }
 
     return options;
+}
+
+function decodeTransactionFromBase64(base64String: string): {
+    message: string;
+    signatures?: string[];
+} | null {
+    try {
+        const buffer = Uint8Array.from(atob(base64String), c => c.charCodeAt(0));
+
+        if (buffer.length < MIN_MESSAGE_LENGTH) {
+            return null;
+        }
+
+        // Try to parse as full transaction first
+        let offset = 0;
+        const numSignatures = buffer[offset++];
+
+        // Check if message version matches signatures
+        const requiredSignaturesByteOffset = 1 + numSignatures * 64;
+        const versionOffset =
+            VersionedMessage.deserializeMessageVersion(buffer.slice(requiredSignaturesByteOffset)) !== 'legacy' ? 1 : 0;
+
+        const numRequiredSignaturesFromMessage = buffer[requiredSignaturesByteOffset + versionOffset];
+
+        const signatures: string[] = [];
+
+        // If signatures match message requirements, parse as full transaction
+        if (numRequiredSignaturesFromMessage === numSignatures) {
+            for (let i = 0; i < numSignatures; i++) {
+                const sigBytes = buffer.subarray(offset, offset + 64);
+                if (sigBytes.length !== 64) return null;
+                signatures.push(base58.encode(sigBytes));
+                offset += 64;
+            }
+
+            // Encode remaining buffer as base64 message
+            const messageBase64 = btoa(String.fromCharCode.apply(null, Array.from(buffer.slice(offset))));
+            return {
+                message: messageBase64,
+                signatures,
+            };
+        }
+
+        // If no valid signatures found, treat entire buffer as message
+        return {
+            message: base64String,
+        };
+    } catch (err) {
+        return null;
+    }
+}
+
+function isValidBase64(str: string): boolean {
+    try {
+        Buffer.from(str, 'base64');
+        return true;
+    } catch (err) {
+        return false;
+    }
 }
 
 function DropdownIndicator() {
