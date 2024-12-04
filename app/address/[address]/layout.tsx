@@ -53,6 +53,7 @@ import { useCompressedNft, useMetadataJsonLink } from '@/app/providers/compresse
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 import { FullTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
 import { MintAccountInfo } from '@/app/validators/accounts/token';
+import { useProgramMetadata } from '@/app/providers/program-metadata';
 
 const IDENTICON_WIDTH = 64;
 
@@ -559,6 +560,8 @@ export type MoreTabs =
     | 'domains'
     | 'security'
     | 'anchor-program'
+    | 'program-metadata'
+    | 'idl'
     | 'anchor-account'
     | 'entries'
     | 'concurrent-merkle-tree'
@@ -733,6 +736,34 @@ function getCustomLinkedTabs(pubkey: PublicKey, account: Account) {
         tab: anchorProgramTab,
     });
 
+    const idlTab: Tab = {
+        path: 'idl',
+        slug: 'idl',
+        title: 'IDL',
+    };
+    tabComponents.push({
+        component: (
+            <React.Suspense key={idlTab.slug} fallback={<></>}>
+                <IdlDataLink tab={idlTab} address={pubkey.toString()} pubkey={pubkey} />
+            </React.Suspense>
+        ),
+        tab: idlTab,
+    });
+
+    const programMetadataTab: Tab = {
+        path: 'program-metadata',
+        slug: 'program-metadata',
+        title: 'Program Metadata',
+    };
+    tabComponents.push({
+        component: (
+            <React.Suspense key={programMetadataTab.slug} fallback={<></>}>
+                <ProgramMetaDataLink tab={programMetadataTab} address={pubkey.toString()} pubkey={pubkey} />
+            </React.Suspense>
+        ),
+        tab: programMetadataTab,
+    });
+
     const accountDataTab: Tab = {
         path: 'anchor-account',
         slug: 'anchor-account',
@@ -750,6 +781,27 @@ function getCustomLinkedTabs(pubkey: PublicKey, account: Account) {
     return tabComponents;
 }
 
+function ProgramMetaDataLink({ tab, address, pubkey }: { tab: Tab; address: string; pubkey: PublicKey }) {
+    const { url } = useCluster();
+    const { ProgramMetaData } = useProgramMetadata(pubkey.toString(), url);
+    const path = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
+    const selectedLayoutSegment = useSelectedLayoutSegment();
+    const isActive = selectedLayoutSegment === tab.path;
+
+    // Don't show the tab if there's no metadata
+    if (!programMetaData) {
+        return null;
+    }
+
+    return (
+        <li key={tab.slug} className="nav-item">
+            <Link className={`${isActive ? 'active ' : ''}nav-link`} href={path}>
+                {tab.title}
+            </Link>
+        </li>
+    );
+}
+
 function AnchorProgramIdlLink({ tab, address, pubkey }: { tab: Tab; address: string; pubkey: PublicKey }) {
     const { url } = useCluster();
     const { idl } = useAnchorProgram(pubkey.toString(), url);
@@ -763,6 +815,25 @@ function AnchorProgramIdlLink({ tab, address, pubkey }: { tab: Tab; address: str
     return (
         <li key={tab.slug} className="nav-item">
             <Link className={`${isActive ? 'active ' : ''}nav-link`} href={anchorProgramPath}>
+                {tab.title}
+            </Link>
+        </li>
+    );
+}
+
+function IdlDataLink({ tab, address, pubkey }: { tab: Tab; address: string; pubkey: PublicKey }) {
+    const { url } = useCluster();
+    const { idl, program } = useIdlFromProgramMetadataProgram(pubkey.toString(), url);
+    const path = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
+    const selectedLayoutSegment = useSelectedLayoutSegment();
+    const isActive = selectedLayoutSegment === tab.path;
+    if (!idl || program) {
+        return null;
+    }
+
+    return (
+        <li key={tab.slug} className="nav-item">
+            <Link className={`${isActive ? 'active ' : ''}nav-link`} href={path}>
                 {tab.title}
             </Link>
         </li>
