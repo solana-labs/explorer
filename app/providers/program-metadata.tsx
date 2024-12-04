@@ -51,7 +51,8 @@ async function fetchProgramMetaData(programAddress: string, connection: Connecti
         // First try parsing as metadata object directly
         try {
             const metadata = JSON.parse(decompressedString) as ProgramMetaData;
-            if (metadata.name) { // Basic validation that it's a metadata object
+            if (metadata.name) {
+                // Basic validation that it's a metadata object
                 return metadata;
             }
         } catch (parseErr) {
@@ -66,7 +67,8 @@ async function fetchProgramMetaData(programAddress: string, connection: Connecti
                 throw new Error(`Failed to fetch metadata from URL: ${response.statusText}`);
             }
             const fetchedMetadata = await response.json();
-            if (fetchedMetadata.name) { // Basic validation
+            if (fetchedMetadata.name) {
+                // Basic validation
                 return fetchedMetadata;
             }
             throw new Error('Fetched data is not a valid metadata object');
@@ -77,7 +79,6 @@ async function fetchProgramMetaData(programAddress: string, connection: Connecti
         // If we get here, neither approach worked
         console.error('Could not parse metadata from decompressed data');
         return null;
-
     } catch (err) {
         console.error('Failed to decompress or process metadata:', err);
         return null;
@@ -99,7 +100,7 @@ function useProgramMetaData(programAddress: string, url: string): ProgramMetaDat
                 };
             })
             .catch(err => {
-                console.error('Error fetching IDL:', err);
+                console.error('Error fetching Program Metadata:', err);
                 cachedLogoProgramPromises[key] = { __type: 'result', result: null };
             });
         cachedLogoProgramPromises[key] = {
