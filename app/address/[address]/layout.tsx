@@ -824,7 +824,7 @@ function AnchorProgramIdlLink({ tab, address, pubkey }: { tab: Tab; address: str
 
 function IdlDataLink({ tab, address, pubkey }: { tab: Tab; address: string; pubkey: PublicKey }) {
     const { url } = useCluster();
-    const { idl, program } = useIdlFromProgramMetadataProgram(pubkey.toString(), url);
+    const { idl } = useIdlFromProgramMetadataProgram(pubkey.toString(), url);
     const path = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
     const selectedLayoutSegment = useSelectedLayoutSegment();
     const isActive = selectedLayoutSegment === tab.path;
