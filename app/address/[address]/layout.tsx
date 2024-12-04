@@ -50,11 +50,11 @@ import { Address } from 'web3js-experimental';
 
 import { CompressedNftAccountHeader, CompressedNftCard } from '@/app/components/account/CompressedNftCard';
 import { useCompressedNft, useMetadataJsonLink } from '@/app/providers/compressed-nft';
+import { useIdlFromProgramMetadataProgram } from '@/app/providers/idl';
+import { useProgramMetadata } from '@/app/providers/program-metadata';
 import { useSquadsMultisigLookup } from '@/app/providers/squadsMultisig';
 import { FullTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
 import { MintAccountInfo } from '@/app/validators/accounts/token';
-import { useProgramMetadata } from '@/app/providers/program-metadata';
-import { useIdlFromProgramMetadataProgram } from '@/app/providers/idl';
 
 const IDENTICON_WIDTH = 64;
 
