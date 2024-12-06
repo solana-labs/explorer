@@ -1,3 +1,5 @@
+import { ReadonlyURLSearchParams } from "next/navigation";
+
 export enum ClusterStatus {
     Connected,
     Connecting,
@@ -26,6 +28,21 @@ export function clusterSlug(cluster: Cluster): string {
     }
 }
 
+export function parseQuery(searchParams: ReadonlyURLSearchParams | null): Cluster {
+    const clusterParam = searchParams?.get('cluster');
+    switch (clusterParam) {
+        case 'custom':
+            return Cluster.Custom;
+        case 'devnet':
+            return Cluster.Devnet;
+        case 'testnet':
+            return Cluster.Testnet;
+        case 'mainnet-beta':
+        default:
+            return Cluster.MainnetBeta;
+    }
+}
+
 export function clusterName(cluster: Cluster): string {
     switch (cluster) {
         case Cluster.MainnetBeta:
@@ -44,14 +61,6 @@ export const TESTNET_URL = 'https://api.testnet.solana.com';
 export const DEVNET_URL = 'https://api.devnet.solana.com';
 
 export function clusterUrl(cluster: Cluster, customUrl: string): string {
-    const modifyUrl = (url: string): string => {
-        if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-            return url;
-        } else {
-            return url.replace('api', 'explorer-api');
-        }
-    };
-
     switch (cluster) {
         case Cluster.Devnet:
             return process.env.NEXT_PUBLIC_DEVNET_RPC_URL ?? modifyUrl(DEVNET_URL);
@@ -61,6 +70,14 @@ export function clusterUrl(cluster: Cluster, customUrl: string): string {
             return process.env.NEXT_PUBLIC_TESTNET_RPC_URL ?? modifyUrl(TESTNET_URL);
         case Cluster.Custom:
             return customUrl;
+    }
+}
+
+function modifyUrl(url: string): string {
+    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+        return url;
+    } else {
+        return url.replace('api', 'explorer-api');
     }
 }
 

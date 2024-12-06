@@ -5,22 +5,11 @@ import { IdlField, IdlInstruction, IdlType, IdlTypeDef } from '@coral-xyz/anchor
 import { useAnchorProgram } from '@providers/anchor';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
-import { camelToTitleCase, numberWithSeparator, snakeToTitleCase } from '@utils/index';
-import { getProgramName } from '@utils/tx';
+import { camelToTitleCase, numberWithSeparator } from '@utils/index';
+import { ANCHOR_SELF_CPI_NAME, getAnchorProgramName,getProgramName, instructionIsSelfCPI } from '@utils/tx';
 import React, { Fragment, ReactNode, useState } from 'react';
 import { ChevronDown, ChevronUp, CornerDownRight } from 'react-feather';
 import ReactJson from 'react-json-view';
-
-const ANCHOR_SELF_CPI_TAG = Buffer.from('1d9acb512ea545e4', 'hex').reverse();
-const ANCHOR_SELF_CPI_NAME = 'Anchor Self Invocation';
-
-export function instructionIsSelfCPI(ixData: Buffer): boolean {
-    return ixData.slice(0, 8).equals(ANCHOR_SELF_CPI_TAG);
-}
-
-export function getAnchorProgramName(program: Program | null): string | undefined {
-    return program && 'name' in program.idl.metadata ? snakeToTitleCase(program.idl.metadata.name) : undefined;
-}
 
 export function AnchorProgramName({
     programId,
@@ -59,34 +48,6 @@ export function getAnchorNameForInstruction(ix: TransactionInstruction, program:
 
     const _ixTitle = decodedIx.name;
     return _ixTitle.charAt(0).toUpperCase() + _ixTitle.slice(1);
-}
-
-export function getAnchorAccountsFromInstruction(
-    decodedIx: { name: string } | null,
-    program: Program
-):
-    | {
-          name: string;
-          isMut: boolean;
-          isSigner: boolean;
-          pda?: object;
-      }[]
-    | null {
-    if (decodedIx) {
-        // get ix accounts
-        const idlInstructions = program.idl.instructions.filter(ix => ix.name === decodedIx.name);
-        if (idlInstructions.length === 0) {
-            return null;
-        }
-        return idlInstructions[0].accounts as {
-            // type coercing since anchor doesn't export the underlying type
-            name: string;
-            isMut: boolean;
-            isSigner: boolean;
-            pda?: object;
-        }[];
-    }
-    return null;
 }
 
 export function mapIxArgsToRows(ixArgs: any, ixType: IdlInstruction, idl: Idl) {
