@@ -1,5 +1,6 @@
 import { Connection, PublicKey } from '@solana/web3.js';
 import pako from 'pako';
+import { fetchProgramMetadata } from 'solana-program-metadata';
 
 const cachedLogoProgramPromises: Record<
     string,
@@ -27,58 +28,9 @@ interface ProgramMetaData {
 }
 
 async function fetchProgramMetaData(programAddress: string, connection: Connection): Promise<ProgramMetaData | null> {
-    const [idlAccount] = await PublicKey.findProgramAddress(
-        [Buffer.from('metadata', 'utf8'), new PublicKey(programAddress).toBuffer()],
-        new PublicKey('pmetaypqG6SiB47xMigYVMAkuHDWeSDXcv3zzDrJJvA')
-    );
-    console.log(`IDl account ${programAddress} idlAccount: ${idlAccount.toBase58()}`);
-
-    const accountInfo = await connection.getAccountInfo(idlAccount);
-    if (!accountInfo) {
-        console.error('IDL account not found!');
-        return null;
-    }
-
-    // Extract data length and compressed data
-    const dataLenBytes = accountInfo.data.slice(40, 44); // `data_len` starts at offset 40
-    const dataLength = new DataView(dataLenBytes.buffer).getUint32(0, true); // Little-endian
-    const compressedData = accountInfo.data.slice(44, 44 + dataLength); // Skip metadata (44 bytes)
-
-    // Decompress and parse the metadata
     try {
-        const decompressedString = new TextDecoder('utf-8').decode(pako.inflate(compressedData));
-
-        // First try parsing as metadata object directly
-        try {
-            const metadata = JSON.parse(decompressedString) as ProgramMetaData;
-            if (metadata.name) {
-                // Basic validation that it's a metadata object
-                return metadata;
-            }
-        } catch (parseErr) {
-            console.log('Not a direct metadata object, checking if URL...');
-        }
-
-        // Then try handling as URL
-        try {
-            const url = new URL(decompressedString.trim());
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`Failed to fetch metadata from URL: ${response.statusText}`);
-            }
-            const fetchedMetadata = await response.json();
-            if (fetchedMetadata.name) {
-                // Basic validation
-                return fetchedMetadata;
-            }
-            throw new Error('Fetched data is not a valid metadata object');
-        } catch (urlErr) {
-            console.log('Not a valid metadata URL');
-        }
-
-        // If we get here, neither approach worked
-        console.error('Could not parse metadata from decompressed data');
-        return null;
+        const programMetadata = await fetchProgramMetadata(new PublicKey(programAddress), connection.rpcEndpoint);
+        return programMetadata;
     } catch (err) {
         console.error('Failed to decompress or process metadata:', err);
         return null;
