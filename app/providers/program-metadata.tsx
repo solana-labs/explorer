@@ -1,5 +1,4 @@
 import { Connection, PublicKey } from '@solana/web3.js';
-import pako from 'pako';
 import { fetchProgramMetadata } from 'solana-program-metadata';
 
 const cachedLogoProgramPromises: Record<
