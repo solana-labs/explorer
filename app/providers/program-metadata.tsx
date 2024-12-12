@@ -1,30 +1,10 @@
 import { Connection, PublicKey } from '@solana/web3.js';
-import { fetchProgramMetadata } from 'solana-program-metadata';
+import { fetchProgramMetadata, ProgramMetaData } from 'solana-program-metadata';
 
 const cachedLogoProgramPromises: Record<
     string,
     void | { __type: 'promise'; promise: Promise<void> } | { __type: 'result'; result: ProgramMetaData | null }
 > = {};
-
-interface ProgramMetaData {
-    name: string;
-    logo?: string;
-    description?: string;
-    notification?: string;
-    sdk?: string;
-    version?: string;
-    project_url?: string;
-    contacts?: string[];
-    policy?: string;
-    preferred_languages?: string[];
-    encryption?: string;
-    source_code?: string;
-    source_release?: string;
-    source_revision?: string;
-    auditors?: string[] | string;
-    acknowledgements?: string;
-    expiry?: string;
-}
 
 async function fetchProgramMetaData(programAddress: string, connection: Connection): Promise<ProgramMetaData | null> {
     try {
@@ -40,14 +20,14 @@ function useProgramMetaData(programAddress: string, url: string): ProgramMetaDat
     const key = `${programAddress}-${url}-logo`;
     const cacheEntry = cachedLogoProgramPromises[key];
 
-    // If there's no cached entry, start fetching the IDL
+    // If there's no cached entry, start fetching the program metadata
     if (cacheEntry === undefined) {
         const connection = new Connection(url);
         const promise = fetchProgramMetaData(programAddress, connection)
-            .then(idl => {
+            .then(programMetadata => {
                 cachedLogoProgramPromises[key] = {
                     __type: 'result',
-                    result: idl,
+                    result: programMetadata,
                 };
             })
             .catch(err => {
