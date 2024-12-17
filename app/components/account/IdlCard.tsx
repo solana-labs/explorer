@@ -1,6 +1,6 @@
 'use client';
 
-import { useCluster } from '@providers/cluster';
+import { Idl } from '@coral-xyz/anchor';
 import { useState } from 'react';
 import ReactJson from 'react-json-view';
 
