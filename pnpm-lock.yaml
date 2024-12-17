@@ -152,8 +152,8 @@ importers:
         specifier: ^4.3.1
         version: 4.3.1(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       solana-program-metadata:
-        specifier: 1.0.0
-        version: 1.0.0(bufferutil@4.0.7)(utf-8-validate@5.0.10)
+        specifier: ^1.0.3
+        version: 1.0.3(bufferutil@4.0.7)(utf-8-validate@5.0.10)
       superstruct:
         specifier: ^0.15.3
         version: 0.15.3
@@ -4386,8 +4386,8 @@ packages:
   snake-case@3.0.4:
     resolution: {integrity: sha512-LAOh4z89bGQvl9pFfNF8V146i7o7/CqFPbqzYgP+yYzDIDeS9HaNFtXABamRW+AQzEVODcvE79ljJ+8a9YSdMg==}
 
-  solana-program-metadata@1.0.0:
-    resolution: {integrity: sha512-5YLcqGS9HpVpOudnNk2o6UPkrUIqddxhWWqqjTyZt5tAZPqgH4zq1pQ8ZNr1HOykeqOhqz7sbcVJisTkvknd4w==}
+  solana-program-metadata@1.0.3:
+    resolution: {integrity: sha512-MC2Mf9vmKbaYtxblVgOPiwyN5bxJHZe/QPGGdZtnd1ZZ1KjQdo1GFeLQPkcFiVixs0hFWQIKt8tpEpNvI8p/kA==}
     hasBin: true
 
   source-map-js@1.0.2:
@@ -10933,7 +10933,7 @@ snapshots:
       dot-case: 3.0.4
       tslib: 2.5.0
 
-  solana-program-metadata@1.0.0(bufferutil@4.0.7)(utf-8-validate@5.0.10):
+  solana-program-metadata@1.0.3(bufferutil@4.0.7)(utf-8-validate@5.0.10):
     dependencies:
       '@coral-xyz/anchor': 0.30.1(bufferutil@4.0.7)(utf-8-validate@5.0.10)
       '@solana/web3.js': 1.95.8(bufferutil@4.0.7)(utf-8-validate@5.0.10)
