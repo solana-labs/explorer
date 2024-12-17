@@ -560,7 +560,6 @@ export type MoreTabs =
     | 'attributes'
     | 'domains'
     | 'security'
-    | 'anchor-program'
     | 'program-metadata'
     | 'idl'
     | 'anchor-account'
@@ -723,20 +722,6 @@ function getCustomLinkedTabs(pubkey: PublicKey, account: Account) {
         tab: programMultisigTab,
     });
 
-    const anchorProgramTab: Tab = {
-        path: 'anchor-program',
-        slug: 'anchor-program',
-        title: 'Anchor Program IDL',
-    };
-    tabComponents.push({
-        component: (
-            <React.Suspense key={anchorProgramTab.slug} fallback={<></>}>
-                <AnchorProgramIdlLink tab={anchorProgramTab} address={pubkey.toString()} pubkey={pubkey} />
-            </React.Suspense>
-        ),
-        tab: anchorProgramTab,
-    });
-
     const idlTab: Tab = {
         path: 'idl',
         slug: 'idl',
@@ -803,32 +788,15 @@ function ProgramMetaDataLink({ tab, address, pubkey }: { tab: Tab; address: stri
     );
 }
 
-function AnchorProgramIdlLink({ tab, address, pubkey }: { tab: Tab; address: string; pubkey: PublicKey }) {
-    const { url } = useCluster();
-    const { idl } = useAnchorProgram(pubkey.toString(), url);
-    const anchorProgramPath = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
-    const selectedLayoutSegment = useSelectedLayoutSegment();
-    const isActive = selectedLayoutSegment === tab.path;
-    if (!idl) {
-        return null;
-    }
-
-    return (
-        <li key={tab.slug} className="nav-item">
-            <Link className={`${isActive ? 'active ' : ''}nav-link`} href={anchorProgramPath}>
-                {tab.title}
-            </Link>
-        </li>
-    );
-}
-
 function IdlDataLink({ tab, address, pubkey }: { tab: Tab; address: string; pubkey: PublicKey }) {
     const { url } = useCluster();
-    const { idl } = useIdlFromProgramMetadataProgram(pubkey.toString(), url);
+    const { idl: anchorIdl } = useAnchorProgram(pubkey.toString(), url);
+    const { idl: metadataIdl } = useIdlFromProgramMetadataProgram(pubkey.toString(), url);
     const path = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
     const selectedLayoutSegment = useSelectedLayoutSegment();
     const isActive = selectedLayoutSegment === tab.path;
-    if (!idl) {
+
+    if (!anchorIdl && !metadataIdl) {
         return null;
     }
 

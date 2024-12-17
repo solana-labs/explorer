@@ -1,27 +1,51 @@
-import { LoadingCard } from '@components/common/LoadingCard';
-import getReadableTitleFromAddress, { AddressPageMetadataProps } from '@utils/get-readable-title-from-address';
-import { Metadata } from 'next/types';
-import { Suspense } from 'react';
+'use client';
 
-import { IdlCard } from '@/app/components/account/IdlCard';
+import { IdlCard } from '@components/account/IdlCard';
+import { useAnchorProgram } from '@providers/anchor';
+import { useCluster } from '@providers/cluster';
+import { useIdlFromProgramMetadataProgram } from '@providers/idl';
+import { useState } from 'react';
 
-type Props = Readonly<{
-    params: {
-        address: string;
-    };
-}>;
+export default function IdlPage({ params: { address } }: { params: { address: string } }) {
+    const { url } = useCluster();
+    const [activeTab, setActiveTab] = useState<'anchor' | 'metadata'>('anchor');
+    const { idl: anchorIdl } = useAnchorProgram(address, url);
+    const { idl: metadataIdl } = useIdlFromProgramMetadataProgram(address, url);
 
-export async function generateMetadata(props: AddressPageMetadataProps): Promise<Metadata> {
-    return {
-        description: `The Interface Definition Language (IDL) file for the program at address ${props.params.address} on Solana`,
-        title: `Program IDL | ${await getReadableTitleFromAddress(props)} | Solana`,
-    };
-}
-
-export default function AnchorProgramIDLPage({ params: { address } }: Props) {
     return (
-        <Suspense fallback={<LoadingCard message="Loading program IDL" />}>
-            <IdlCard programId={address} />
-        </Suspense>
+        <div className="card">
+            <div className="card-header">
+                <ul className="nav nav-tabs card-header-tabs">
+                    {anchorIdl && (
+                        <li className="nav-item">
+                            <button
+                                className={`nav-link ${activeTab === 'anchor' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('anchor')}
+                            >
+                                Anchor IDL
+                            </button>
+                        </li>
+                    )}
+                    {metadataIdl && (
+                        <li className="nav-item">
+                            <button
+                                className={`nav-link ${activeTab === 'metadata' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('metadata')}
+                            >
+                                Program Metadata IDL
+                            </button>
+                        </li>
+                    )}
+                </ul>
+            </div>
+            <div className="card-body">
+                {activeTab === 'anchor' && anchorIdl && (
+                    <IdlCard idl={anchorIdl} programId={address} title="Anchor IDL" />
+                )}
+                {activeTab === 'metadata' && metadataIdl && (
+                    <IdlCard idl={metadataIdl} programId={address} title="Anchor IDL (Program metadata)" />
+                )}
+            </div>
+        </div>
     );
 }

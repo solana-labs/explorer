@@ -22,6 +22,9 @@
 -   `pnpm test` \
     Launches the test runner in the interactive watch mode.<br />
 
+-   `npm run lint -- --fix` \
+    Lints the code and fixes any linting errors.
+
 # Disclaimer
 
 All claims, content, designs, algorithms, estimates, roadmaps,

@@ -4,15 +4,18 @@ import { useCluster } from '@providers/cluster';
 import { useState } from 'react';
 import ReactJson from 'react-json-view';
 
-import { useIdlFromProgramMetadataProgram } from '@/app/providers/idl';
 import { getIdlSpecType } from '@/app/utils/convertLegacyIdl';
 
 import { DownloadableButton } from '../common/Downloadable';
 import { IDLBadge } from '../common/IDLBadge';
 
-export function IdlCard({ programId }: { programId: string }) {
-    const { url } = useCluster();
-    const { idl } = useIdlFromProgramMetadataProgram(programId, url);
+interface Props {
+    idl: Idl;
+    programId: string;
+    title?: string;
+}
+
+export function IdlCard({ idl, programId, title = "Program IDL" }: Props) {
     const [collapsedValue, setCollapsedValue] = useState<boolean | number>(1);
 
     if (!idl) {
@@ -26,7 +29,7 @@ export function IdlCard({ programId }: { programId: string }) {
             <div className="card-header">
                 <div className="row align-items-center">
                     <div className="col">
-                        <h3 className="card-header-title">Program IDL (from Program Metadata PDA)</h3>
+                        <h3 className="card-header-title">{title}</h3>
                     </div>
                     <div className="col-auto btn btn-sm btn-primary d-flex align-items-center">
                         <DownloadableButton
