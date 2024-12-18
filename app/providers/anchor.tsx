@@ -7,6 +7,7 @@ import { useEffect, useMemo } from 'react';
 
 import { formatIdl } from '../utils/convertLegacyIdl';
 import { useAccountInfo, useFetchAccountInfo } from './accounts';
+import { useIdlFromProgramMetadataProgram } from './idl';
 
 const cachedAnchorProgramPromises: Record<
     string,
@@ -112,21 +113,26 @@ function useIdlFromAnchorProgramSeed(programAddress: string, url: string): Idl |
     return cacheEntry.result;
 }
 
-export function useAnchorProgram(programAddress: string, url: string): { program: Program | null; idl: Idl | null } {
-    // TODO(ngundotra): Rewrite this to be more efficient
-    // const idlFromBinary = useIdlFromSolanaProgramBinary(programAddress);
+export function useAnchorProgram(
+    programAddress: string,
+    url: string
+): { program: Program<Idl> | null; idl: Idl | null } {
+    const idlFromMetadataProgram = useIdlFromProgramMetadataProgram(programAddress, url);
     const idlFromAnchorProgram = useIdlFromAnchorProgramSeed(programAddress, url);
-    const idl = idlFromAnchorProgram;
-    const program: Program<Idl> | null = useMemo(() => {
+
+    // First try anchor program IDL, then fall back to metadata program IDL
+    const idl = idlFromAnchorProgram || idlFromMetadataProgram?.idl;
+
+    const program = useMemo(() => {
         if (!idl) return null;
         try {
-            const program = new Program(formatIdl(idl, programAddress), getProvider(url));
-            return program;
+            return new Program(formatIdl(idl, programAddress), getProvider(url));
         } catch (e) {
             console.error('Error creating anchor program for', programAddress, e, { idl });
             return null;
         }
     }, [idl, programAddress, url]);
+
     return { idl, program };
 }
 
