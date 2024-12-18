@@ -3,14 +3,13 @@ import { BorshEventCoder, BorshInstructionCoder, Idl, Instruction, Program } fro
 import { IdlEvent, IdlField, IdlInstruction, IdlTypeDefTyStruct } from '@coral-xyz/anchor/dist/cjs/idl';
 import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import {
-    getAnchorAccountsFromInstruction,
     getAnchorNameForInstruction,
-    getAnchorProgramName,
-    instructionIsSelfCPI,
     mapIxArgsToRows,
 } from '@utils/anchor';
 import { camelToTitleCase } from '@utils/index';
 import { useMemo } from 'react';
+
+import { getAnchorAccountsFromInstruction, getAnchorProgramName, instructionIsSelfCPI } from '@/app/utils/tx';
 
 import { InstructionCard } from './InstructionCard';
 
