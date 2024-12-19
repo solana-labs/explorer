@@ -1,6 +1,46 @@
 import { TransactionInstruction } from '@solana/web3.js';
+import { PublicKeyFromString } from '@validators/pubkey';
+import { array, Infer, number, type } from 'superstruct';
 
 const PROGRAM_ID = 'AddressLookupTab1e1111111111111111111111111';
+
+export type CreateLookupTableInfo = Infer<typeof CreateLookupTableInfo>;
+export const CreateLookupTableInfo = type({
+    bumpSeed: number(),
+    lookupTableAccount: PublicKeyFromString,
+    lookupTableAuthority: PublicKeyFromString,
+    payerAccount: PublicKeyFromString,
+    recentSlot: number(),
+    systemProgram: PublicKeyFromString,
+});
+
+export type ExtendLookupTableInfo = Infer<typeof ExtendLookupTableInfo>;
+export const ExtendLookupTableInfo = type({
+    lookupTableAccount: PublicKeyFromString,
+    lookupTableAuthority: PublicKeyFromString,
+    newAddresses: array(PublicKeyFromString),
+    payerAccount: PublicKeyFromString,
+    systemProgram: PublicKeyFromString,
+});
+
+export type FreezeLookupTableInfo = Infer<typeof FreezeLookupTableInfo>;
+export const FreezeLookupTableInfo = type({
+    lookupTableAccount: PublicKeyFromString,
+    lookupTableAuthority: PublicKeyFromString,
+});
+
+export type DeactivateLookupTableInfo = Infer<typeof DeactivateLookupTableInfo>;
+export const DeactivateLookupTableInfo = type({
+    lookupTableAccount: PublicKeyFromString,
+    lookupTableAuthority: PublicKeyFromString,
+});
+
+export type CloseLookupTableInfo = Infer<typeof CloseLookupTableInfo>;
+export const CloseLookupTableInfo = type({
+    lookupTableAccount: PublicKeyFromString,
+    lookupTableAuthority: PublicKeyFromString,
+    recipient: PublicKeyFromString,
+});
 
 const INSTRUCTION_LOOKUP: { [key: number]: string } = {
     0: 'Create Lookup Table',
