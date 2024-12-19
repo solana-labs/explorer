@@ -4,15 +4,17 @@ import { UpgradeableLoaderAccountData } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
 import { ExternalLink } from 'react-feather';
 
-import { OsecRegistryInfo, useVerifiedProgramRegistry, VerificationStatus } from '@/app/utils/verified-builds';
+import { OsecRegistryInfo, useVerifiedProgram, VerificationStatus } from '@/app/utils/verified-builds';
 
+import { Address } from '../common/Address';
 import { Copyable } from '../common/Copyable';
 import { LoadingCard } from '../common/LoadingCard';
 
 export function VerifiedBuildCard({ data, pubkey }: { data: UpgradeableLoaderAccountData; pubkey: PublicKey }) {
-    const { data: registryInfo, isLoading } = useVerifiedProgramRegistry({
+    const { data: registryInfo, isLoading } = useVerifiedProgram({
         options: { suspense: true },
         programAuthority: data.programData?.authority ? new PublicKey(data.programData.authority) : null,
+        programData: data.programData,
         programId: pubkey,
     });
     if (!data.programData) {
@@ -24,15 +26,16 @@ export function VerifiedBuildCard({ data, pubkey }: { data: UpgradeableLoaderAcc
     }
 
     if (!registryInfo) {
-        return <ErrorCard text="No verified build found" />;
+        return <ErrorCard text="Verified build information not yet uploaded by program authority" />;
     }
 
     // Define the message based on the verification status
-    let verificationMessage = 'Information provided by osec.io';
-    if (registryInfo.verification_status === VerificationStatus.Verified) {
+    let verificationMessage;
+    if (
+        registryInfo.verification_status === VerificationStatus.Verified ||
+        registryInfo.verification_status === VerificationStatus.PdaUploaded
+    ) {
         verificationMessage = 'Information provided by osec.io';
-    } else if (registryInfo.verification_status === VerificationStatus.PdaUploaded) {
-        verificationMessage = 'Information provided by the program deployer.';
     } else if (registryInfo.verification_status === VerificationStatus.NotVerified) {
         verificationMessage = 'No verified build found';
     }
@@ -44,8 +47,8 @@ export function VerifiedBuildCard({ data, pubkey }: { data: UpgradeableLoaderAcc
                 <small>{verificationMessage}</small>
             </div>
             <div className="alert mt-2 mb-2">
-                Verified builds indicate that the onchain build was built from the source code that is publicly
-                available, but this does not imply a security audit. For more details, refer to the{' '}
+                A verified build badge indicates that this program was built from source code that is publicly
+                available, but does not imply that this program has been audited. For more details, refer to the{' '}
                 <a
                     href="https://solana.com/developers/guides/advanced/verified-builds"
                     target="_blank"
@@ -75,6 +78,7 @@ enum DisplayType {
     URL,
     Date,
     LongString,
+    PublicKey,
 }
 
 type TableRow = {
@@ -93,6 +97,11 @@ const ROWS: TableRow[] = [
         display: 'Message',
         key: 'message',
         type: DisplayType.String,
+    },
+    {
+        display: 'Uploader',
+        key: 'signer',
+        type: DisplayType.PublicKey,
     },
     {
         display: 'On Chain Hash',
@@ -187,6 +196,12 @@ function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegist
             return (
                 <td className="text-lg-end font-monospace">
                     {value && (value as string).length > 1 ? new Date(value as string).toUTCString() : '-'}
+                </td>
+            );
+        case DisplayType.PublicKey:
+            return (
+                <td className="text-lg-end font-monospace">
+                    <Address pubkey={new PublicKey(value as string)} link alignRight />
                 </td>
             );
         default:
