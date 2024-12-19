@@ -3,7 +3,7 @@
 import { useCluster } from '@providers/cluster';
 import React from 'react';
 import useTabVisibility from 'use-tab-visibility';
-import { createDefaultRpcTransport, createSolanaRpc } from 'web3js-experimental';
+import { createSolanaRpc } from 'web3js-experimental';
 
 import { DashboardInfo, DashboardInfoActionType, dashboardInfoReducer, EpochInfo } from './solanaDashboardInfo';
 import {
@@ -80,8 +80,7 @@ export function SolanaClusterStatsProvider({ children }: Props) {
     React.useEffect(() => {
         if (!active || !isTabVisible || !url) return;
 
-        const transport = createDefaultRpcTransport({ url });
-        const rpc = createSolanaRpc({ transport });
+        const rpc = createSolanaRpc(url);
 
         let lastSlot: bigint | null = null;
         let stale = false;
@@ -189,7 +188,7 @@ export function SolanaClusterStatsProvider({ children }: Props) {
                     }
                     dispatchDashboardInfo({
                         data: {
-                            blockTime: blockTime * 1000,
+                            blockTime: Number(blockTime) * 1000,
                             slot: lastSlot,
                         },
                         type: DashboardInfoActionType.SetLastBlockTime,

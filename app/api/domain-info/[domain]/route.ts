@@ -22,7 +22,7 @@ export async function GET(_request: Request, { params: { domain } }: Params) {
     return NextResponse.json(domainInfo, {
         headers: {
             // 24 hours
-            'Cache-Control': 'max-age=86400',
-        },
+            "Cache-Control": "max-age=86400",
+        }
     });
 }

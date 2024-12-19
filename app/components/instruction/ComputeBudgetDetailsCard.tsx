@@ -1,9 +1,19 @@
 import { Address } from '@components/common/Address';
 import { SolBalance } from '@components/common/SolBalance';
 import { useCluster } from '@providers/cluster';
-import { ComputeBudgetInstruction, SignatureResult, TransactionInstruction } from '@solana/web3.js';
+import { SignatureResult, TransactionInstruction } from '@solana/web3.js';
+import {
+    ComputeBudgetInstruction,
+    identifyComputeBudgetInstruction,
+    parseRequestHeapFrameInstruction,
+    parseRequestUnitsInstruction,
+    parseSetComputeUnitLimitInstruction,
+    parseSetComputeUnitPriceInstruction,
+    parseSetLoadedAccountsDataSizeLimitInstruction,
+} from '@solana-program/compute-budget';
 import { microLamportsToLamportsString } from '@utils/index';
 import React from 'react';
+import { address } from 'web3js-experimental';
 
 import { InstructionCard } from './InstructionCard';
 
@@ -24,10 +34,15 @@ export function ComputeBudgetDetailsCard({
 }) {
     const { url } = useCluster();
     try {
-        const type = ComputeBudgetInstruction.decodeInstructionType(ix);
+        const type = identifyComputeBudgetInstruction(ix);
         switch (type) {
-            case 'RequestUnits': {
-                const { units, additionalFee } = ComputeBudgetInstruction.decodeRequestUnits(ix);
+            case ComputeBudgetInstruction.RequestUnits: {
+                const {
+                    data: { units, additionalFee },
+                } = parseRequestUnitsInstruction({
+                    ...ix,
+                    programAddress: address(ix.programId.toBase58()),
+                });
                 return (
                     <InstructionCard
                         ix={ix}
@@ -60,8 +75,10 @@ export function ComputeBudgetDetailsCard({
                     </InstructionCard>
                 );
             }
-            case 'RequestHeapFrame': {
-                const { bytes } = ComputeBudgetInstruction.decodeRequestHeapFrame(ix);
+            case ComputeBudgetInstruction.RequestHeapFrame: {
+                const {
+                    data: { bytes },
+                } = parseRequestHeapFrameInstruction({ ...ix, programAddress: address(ix.programId.toBase58()) });
                 return (
                     <InstructionCard
                         ix={ix}
@@ -87,8 +104,10 @@ export function ComputeBudgetDetailsCard({
                     </InstructionCard>
                 );
             }
-            case 'SetComputeUnitLimit': {
-                const { units } = ComputeBudgetInstruction.decodeSetComputeUnitLimit(ix);
+            case ComputeBudgetInstruction.SetComputeUnitLimit: {
+                const {
+                    data: { units },
+                } = parseSetComputeUnitLimitInstruction({ ...ix, programAddress: address(ix.programId.toBase58()) });
                 return (
                     <InstructionCard
                         ix={ix}
@@ -114,8 +133,13 @@ export function ComputeBudgetDetailsCard({
                     </InstructionCard>
                 );
             }
-            case 'SetComputeUnitPrice': {
-                const { microLamports } = ComputeBudgetInstruction.decodeSetComputeUnitPrice(ix);
+            case ComputeBudgetInstruction.SetComputeUnitPrice: {
+                const {
+                    data: { microLamports },
+                } = parseSetComputeUnitPriceInstruction({
+                    ...ix,
+                    programAddress: address(ix.programId.toBase58()),
+                });
                 return (
                     <InstructionCard
                         ix={ix}
@@ -137,6 +161,36 @@ export function ComputeBudgetDetailsCard({
                             <td className="text-lg-end font-monospace">{`${microLamportsToLamportsString(
                                 microLamports
                             )} lamports per compute unit`}</td>
+                        </tr>
+                    </InstructionCard>
+                );
+            }
+            case ComputeBudgetInstruction.SetLoadedAccountsDataSizeLimit: {
+                const {
+                    data: { accountDataSizeLimit },
+                } = parseSetLoadedAccountsDataSizeLimitInstruction({
+                    ...ix,
+                    programAddress: address(ix.programId.toBase58()),
+                });
+                return (
+                    <InstructionCard
+                        ix={ix}
+                        index={index}
+                        result={result}
+                        title="Compute Budget Program: Set Loaded Account Data Size Limit"
+                        innerCards={innerCards}
+                        childIndex={childIndex}
+                    >
+                        <tr>
+                            <td>Program</td>
+                            <td className="text-lg-end">
+                                <Address pubkey={ix.programId} alignRight link />
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>Account Data Size Limit</td>
+                            <td className="text-lg-end font-monospace">{`${accountDataSizeLimit} bytes`}</td>
                         </tr>
                     </InstructionCard>
                 );

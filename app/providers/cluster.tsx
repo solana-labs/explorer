@@ -3,7 +3,7 @@
 import { type Cluster, clusters, ClusterStatus } from '@utils/cluster';
 import { ReadonlyURLSearchParams, useSearchParams } from 'next/navigation';
 import React, { createContext, useContext, useEffect, useReducer, useState } from 'react';
-import { createDefaultRpcTransport, createSolanaRpc } from 'web3js-experimental';
+import { createSolanaRpc } from 'web3js-experimental';
 
 import { EpochSchedule } from '../utils/epoch-schedule';
 
@@ -90,9 +90,11 @@ async function updateCluster(dispatch: Dispatch, lookup: string) {
     });
 
     try {
-        const transportUrl = cluster.uri;
-        const transport = createDefaultRpcTransport({ url: transportUrl });
-        const rpc = createSolanaRpc({ transport });
+        // validate url
+        new URL(customUrl);
+
+        const transportUrl = clusterUrl(cluster, customUrl);
+        const rpc = createSolanaRpc(transportUrl);
 
         const [firstAvailableBlock, epochSchedule, epochInfo] = await Promise.all([
             rpc.getFirstAvailableBlock().send(),

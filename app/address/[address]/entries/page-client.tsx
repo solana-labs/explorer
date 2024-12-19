@@ -4,7 +4,7 @@ import { LookupTableEntriesCard } from '@components/account/address-lookup-table
 import { isAddressLookupTableAccount } from '@components/account/address-lookup-table/types';
 import { ParsedAccountRenderer } from '@components/account/ParsedAccountRenderer';
 import React from 'react';
-import { Base58EncodedAddress } from 'web3js-experimental';
+import { Address } from 'web3js-experimental';
 
 type Props = Readonly<{
     params: {
@@ -20,7 +20,7 @@ function AddressLookupTableEntriesRenderer({
     const rawData = account?.data.raw;
     if (parsedData && parsedData.program === 'address-lookup-table' && parsedData.parsed.type === 'lookupTable') {
         return <LookupTableEntriesCard parsedLookupTable={parsedData.parsed.info} />;
-    } else if (rawData && isAddressLookupTableAccount(account.owner.toBase58() as Base58EncodedAddress, rawData)) {
+    } else if (rawData && isAddressLookupTableAccount(account.owner.toBase58() as Address, rawData)) {
         return <LookupTableEntriesCard lookupTableAccountData={rawData} />;
     } else {
         return onNotFound();
