@@ -70,11 +70,11 @@ const TABS_LOOKUP: { [id: string]: Tab[] } = {
             slug: 'security',
             title: 'Security',
         },
-        // {
-        //     path: 'verified-build',
-        //     slug: 'verified-build',
-        //     title: 'Verified Build',
-        // },
+        {
+            path: 'verified-build',
+            slug: 'verified-build',
+            title: 'Verified Build',
+        },
     ],
     'nftoken:collection': [
         {
@@ -563,7 +563,7 @@ export type MoreTabs =
     | 'entries'
     | 'concurrent-merkle-tree'
     | 'compression'
-    // | 'verified-build'
+    | 'verified-build'
     | 'program-multisig';
 
 function MoreSection({ children, tabs }: { children: React.ReactNode; tabs: (JSX.Element | null)[] }) {
