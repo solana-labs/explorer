@@ -10,7 +10,6 @@ import { Cluster } from './cluster';
 const OSEC_REGISTRY_URL = 'https://verify.osec.io';
 const VERIFY_PROGRAM_ID = 'verifycLy8mB96wd9wqq3WDXQwM4oU6r42Th37Db9fC';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export enum VerificationStatus {
     Verified = 'Verified Build',
     PdaUploaded = 'Not verified Build',
@@ -184,42 +183,39 @@ function useEnrichedOsecInfo({
     const enrichedOsecInfo: OsecRegistryInfo = {
         ...osecInfo,
         message,
-        signer: osecInfo?.signer || '',
-        verification_status: VerificationStatus.Verified,
+        signer: osecInfo.signer || '',
+        verification_status: osecInfo.is_verified
+            ? VerificationStatus.Verified
+            : pdaData
+            ? VerificationStatus.PdaUploaded
+            : VerificationStatus.NotVerified,
         verify_command: '',
     };
+    enrichedOsecInfo.repo_url = pdaData.gitUrl;
     if (pdaData) {
-        // Create command from the args of the verify PDA
-        const verifiedData = coalesceCommandFromPda(enrichedOsecInfo, programId, pdaData);
-        return { data: verifiedData, isLoading: isPdaLoading };
+        // Create command from the args of the verified build PDA
+        enrichedOsecInfo.verify_command = coalesceCommandFromPda(programId, pdaData);
     } else {
         enrichedOsecInfo.verify_command = isMainnet(cluster)
             ? 'Program does not have a verify PDA uploaded.'
             : 'Verify command only available on mainnet.';
-        return { data: enrichedOsecInfo, isLoading: isPdaLoading };
     }
+    return { data: enrichedOsecInfo, isLoading: isPdaLoading };
 }
 
-function coalesceCommandFromPda(verifiedData: OsecRegistryInfo, programId: PublicKey, pdaData: any) {
-    verifiedData.verify_command = `solana-verify verify-from-repo -um --program-id ${programId.toBase58()} ${
-        pdaData.gitUrl
-    }`;
+function coalesceCommandFromPda(programId: PublicKey, pdaData: any) {
+    let verify_command = `solana-verify verify-from-repo -um --program-id ${programId.toBase58()} ${pdaData.gitUrl}`;
 
     if (pdaData.commit) {
-        verifiedData.verify_command += ` --commit-hash ${pdaData.commit}`;
+        verify_command += ` --commit-hash ${pdaData.commit}`;
     }
 
     // Add additional args if available, for example mount-path and --library-name
     if (pdaData.args && pdaData.args.length > 0) {
         const argsString = pdaData.args.join(' ');
-        verifiedData.verify_command += ` ${argsString}`;
+        verify_command += ` ${argsString}`;
     }
-    verifiedData.repo_url = pdaData.gitUrl;
-    if (verifiedData.verification_status === VerificationStatus.NotVerified) {
-        verifiedData.message = 'Verify command was provided by the program authority.';
-        verifiedData.verification_status = VerificationStatus.PdaUploaded;
-    }
-    return verifiedData;
+    return verify_command;
 }
 
 function isMainnet(currentCluster: Cluster): boolean {

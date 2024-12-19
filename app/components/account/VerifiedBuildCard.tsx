@@ -2,6 +2,7 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { TableCardBody } from '@components/common/TableCardBody';
 import { UpgradeableLoaderAccountData } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
+import Link from 'next/link';
 import { ExternalLink } from 'react-feather';
 
 import { OsecRegistryInfo, useVerifiedProgram, VerificationStatus } from '@/app/utils/verified-builds';
@@ -26,7 +27,16 @@ export function VerifiedBuildCard({ data, pubkey }: { data: UpgradeableLoaderAcc
     }
 
     if (!registryInfo) {
-        return <ErrorCard text="Verified build information not yet uploaded by program authority" />;
+        return (
+            <div className="card">
+                <div className="card-body text-center">
+                    Verified build information not yet uploaded by program authority. For more information, see the{' '}
+                    <Link href="https://solana.com/developers/guides/advanced/verified-builds" target="_blank">
+                        Verified Build Guide
+                    </Link>
+                </div>
+            </div>
+        );
     }
 
     // Define the message based on the verification status
@@ -54,7 +64,7 @@ export function VerifiedBuildCard({ data, pubkey }: { data: UpgradeableLoaderAcc
                     target="_blank"
                     rel="noopener noreferrer"
                 >
-                    Verified Builds Docs <ExternalLink className="align-text-top ms-1" size={13} />
+                    Verified Builds Guide <ExternalLink className="align-text-top ms-1" size={13} />
                 </a>
                 .
             </div>
