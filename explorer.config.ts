@@ -3,7 +3,7 @@ const explorer = {
         {
             cluster: 'zumanet',
             name: 'Zumanet',
-            uri: 'https://zumanet.abklabs.com',
+            uri: 'http://localhost:8899', // change this to point to your own cluster
         },
     ],
     features: {
