@@ -169,7 +169,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: PROGRAM_NAMES.SERUM_3,
     },
     A5JxZVHgXe7fn5TqJXm6Hj2zKh1ptDapae2YjtXbZJoy: {
-        deployments: [Cluster.Devnet, Cluster.MainnetBeta],
+        deployments: [SolanaCluster.Devnet, SolanaCluster.MainnetBeta],
         name: PROGRAM_NAMES.FINTERNET_TOKEN_MANAGER,
     },
     // spl
@@ -202,7 +202,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: PROGRAM_NAMES.CLOCKWORK_2,
     },
     CmFuqQTLs2nQof5uaktJn1a6k2VdbGmZPfrJufB2Vm3F: {
-        deployments: [Cluster.Devnet, Cluster.MainnetBeta],
+        deployments: [SolanaCluster.Devnet, SolanaCluster.MainnetBeta],
         name: PROGRAM_NAMES.FINTERNET_USER_MANAGER,
     },
     ComputeBudget111111111111111111111111111111: {
@@ -338,7 +338,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: PROGRAM_NAMES.SWAP,
     },
     SySTEM1eSU2p4BGQfQpimFEWWSC1XDFeun3Nqzz3rT7: {
-        deployments: [Cluster.MainnetBeta, Cluster.Devnet],
+        deployments: [SolanaCluster.MainnetBeta, SolanaCluster.Devnet],
         name: PROGRAM_NAMES.ZK_LIGHT_SYSTEM_PROGRAM,
     },
     TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA: {
@@ -367,7 +367,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: PROGRAM_NAMES.NFT_AUCTION,
     },
     cTokenmWW8bLPjZEBAUgYy3zKxQZW6VKi7bqNFEVv3m: {
-        deployments: [Cluster.MainnetBeta, Cluster.Devnet],
+        deployments: [SolanaCluster.MainnetBeta, SolanaCluster.Devnet],
         name: PROGRAM_NAMES.ZK_COMPRESSED_TOKEN_PROGRAM,
     },
     cjg3oHmg9uuPsP8D6g29NWvhySJkdYdAo9D25PRbKXJ: {
@@ -387,7 +387,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: PROGRAM_NAMES.NFT_CANDY_MACHINE,
     },
     compr6CUsB5m2jS4Y3831ztGSTnDpnKJTKS95d64XVq: {
-        deployments: [Cluster.MainnetBeta, Cluster.Devnet],
+        deployments: [SolanaCluster.MainnetBeta, SolanaCluster.Devnet],
         name: PROGRAM_NAMES.ZK_ACCOUNT_COMPRESSION_PROGRAM,
     },
     gSbePebfvPy7tRqimPoVecS2UsBvYv46ynrzWocc92s: {
@@ -407,7 +407,7 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         name: PROGRAM_NAMES.NAME,
     },
     oreV2ZymfyeXgNgBdqMkumTqqAprVqgBWQfoYkrtKWQ: {
-        deployments: [Cluster.MainnetBeta],
+        deployments: [SolanaCluster.MainnetBeta],
         name: PROGRAM_NAMES.ORE,
     },
     p1exdMJcjVao65QdewkaZRUnU6VPSXhus9n2GzWfh98: {
