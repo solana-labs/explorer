@@ -12,6 +12,11 @@
     endpoints not suitable for application development. You must set these URLs with \
     endpoints from your own provider.
 
+-   `pnpm i` \
+    Installs all project dependencies using pnpm package manager. This will create a \
+    `node_modules` directory and install all packages specified in `package.json`, \
+    including both dependencies and devDependencies.
+
 -   `pnpm dev` \
     Runs the app in the development mode. \
     Open [http://localhost:3000](http://localhost:3000) to view it in the browser. \
