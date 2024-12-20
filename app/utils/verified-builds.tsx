@@ -172,7 +172,7 @@ function useEnrichedOsecInfo({
     if (!osecInfo || pdaError) {
         return { data: null, error: pdaError, isLoading: isPdaLoading };
     }
-    if (isPdaLoading) {
+    if (!pdaData || isPdaLoading) {
         return { data: null, isLoading: isPdaLoading };
     }
 
