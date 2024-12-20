@@ -6,11 +6,20 @@
 
 ## Development
 
+Contributing to the Explorer requires `pnpm` version `9.10.0`. 
+Once you have this version of `pnpm`, you can continue with the following steps.
+
+
 -   Copy `.env.example` into `.env` & fill out the fields with custom RPC urls \
     from a Solana RPC provider. You should not use `https://api.mainnet-beta.solana.com` \
     or `https://api.devnet.solana.com` or else you will get rate-limited. These are public \
     endpoints not suitable for application development. You must set these URLs with \
     endpoints from your own provider.
+
+-   `pnpm i` \
+    Installs all project dependencies using pnpm package manager. This will create a \
+    `node_modules` directory and install all packages specified in `package.json`, \
+    including both dependencies and devDependencies.
 
 -   `pnpm dev` \
     Runs the app in the development mode. \
@@ -19,8 +28,16 @@
     The page will reload if you make edits. \
     You will also see any lint errors in the console.
 
--   `pnpm test` \
+-   (Optional) `pnpm test` \
     Launches the test runner in the interactive watch mode.<br />
+
+## Troubleshooting
+
+Still can't run the explorer with `pnpm dev`? 
+Seeing sass dependency errors?
+Make sure you have `pnpm` version `9.10.0`, `git stash` your changes, then blow reset to master with `rm -rf node_modules && git reset --hard HEAD`.
+Now running `pnpm i` followed by `pnpm dev` should work. If it is working, don't forget to reapply your changes with `git stash pop`.
+
 
 # Disclaimer
 
