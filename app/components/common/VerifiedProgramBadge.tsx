@@ -2,7 +2,7 @@ import { PublicKey } from '@solana/web3.js';
 import Link from 'next/link';
 
 import { useClusterPath } from '@/app/utils/url';
-import { useVerifiedProgramRegistry } from '@/app/utils/verified-builds';
+import { useVerifiedProgram } from '@/app/utils/verified-builds';
 import { ProgramDataAccountInfo } from '@/app/validators/accounts/upgradeable-program';
 
 export function VerifiedProgramBadge({
@@ -12,7 +12,7 @@ export function VerifiedProgramBadge({
     programData: ProgramDataAccountInfo;
     pubkey: PublicKey;
 }) {
-    const { isLoading, data: registryInfo } = useVerifiedProgramRegistry({
+    const { isLoading, data: registryInfo } = useVerifiedProgram({
         programAuthority: programData.authority ? new PublicKey(programData.authority) : null,
         programData: programData,
         programId: pubkey,
