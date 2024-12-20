@@ -40,15 +40,15 @@ export function TokenBalancesCard({ signature }: SignatureProps) {
         return null;
     }
 
-    return <TokenBalancesCardInner rows={rows} />
+    return <TokenBalancesCardInner rows={rows} />;
 }
 
 export type TokenBalancesCardInnerProps = {
-    rows: TokenBalanceRow[]
-}
-
+    rows: TokenBalanceRow[];
+};
 
 export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
+    const [expanded, setExpanded] = React.useState(true);
     const { cluster, url } = useCluster();
     const [tokenInfosLoading, setTokenInfosLoading] = useState(true);
     const [tokenSymbols, setTokenSymbols] = useState<Map<string, string>>(new Map());
@@ -61,7 +61,7 @@ export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
                 setTokenInfosLoading(false);
             }
         });
-    }, [])
+    }, []);
 
     const accountRows = rows.map(({ account, delta, balance, mint }) => {
         const key = account.toBase58() + mint;
@@ -89,20 +89,28 @@ export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
         <div className="card">
             <div className="card-header">
                 <h3 className="card-header-title">Token Balances</h3>
+                <button
+                    className={`btn btn-sm d-flex ${expanded ? 'btn-black active' : 'btn-white'}`}
+                    onClick={() => setExpanded(e => !e)}
+                >
+                    {expanded ? 'Collapse' : 'Expand'}
+                </button>
             </div>
-            <div className="table-responsive mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <thead>
-                        <tr>
-                            <th className="text-muted">Address</th>
-                            <th className="text-muted">Token</th>
-                            <th className="text-muted">Change</th>
-                            <th className="text-muted">Post Balance</th>
-                        </tr>
-                    </thead>
-                    <tbody className="list">{accountRows}</tbody>
-                </table>
-            </div>
+            {expanded && (
+                <div className="table-responsive mb-0">
+                    <table className="table table-sm table-nowrap card-table">
+                        <thead>
+                            <tr>
+                                <th className="text-muted">Address</th>
+                                <th className="text-muted">Token</th>
+                                <th className="text-muted">Change</th>
+                                <th className="text-muted">Post Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody className="list">{accountRows}</tbody>
+                    </table>
+                </div>
+            )}
         </div>
     );
 }

@@ -187,6 +187,7 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
     const transaction = transactionWithMeta?.transaction;
     const blockhash = transaction?.message.recentBlockhash;
     const version = transactionWithMeta?.version;
+    const feePayer = transactionWithMeta?.transaction.message.accountKeys[0]?.pubkey;
     const isNonce = (() => {
         if (!transaction || transaction.message.instructions.length < 1) {
             return false;
@@ -215,8 +216,9 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
             if (cluster === Cluster.MainnetBeta) {
                 errorLink = err.errorLink;
             } else {
-                errorLink = `${err.errorLink}?cluster=${clusterName.toLowerCase()}${cluster === Cluster.Custom ? `&customUrl=${clusterUrl}` : ''
-                    }`;
+                errorLink = `${err.errorLink}?cluster=${clusterName.toLowerCase()}${
+                    cluster === Cluster.Custom ? `&customUrl=${clusterUrl}` : ''
+                }`;
             }
         }
     }
@@ -318,6 +320,15 @@ function StatusCard({ signature, autoRefresh }: SignatureProps & AutoRefreshProp
                     </tr>
                 )}
 
+                {feePayer && (
+                    <tr>
+                        <td>Fee Payer</td>
+                        <td className="text-lg-end">
+                            <Address pubkey={feePayer} link />
+                        </td>
+                    </tr>
+                )}
+
                 {fee && (
                     <tr>
                         <td>Fee (SOL)</td>
@@ -384,6 +395,7 @@ function DetailsSection({ signature }: SignatureProps) {
 
 function AccountsCard({ signature }: SignatureProps) {
     const details = useTransactionDetails(signature);
+    const [expanded, setExpanded] = React.useState(false);
 
     const transactionWithMeta = details?.data?.transactionWithMeta;
     if (!transactionWithMeta) {
@@ -434,22 +446,31 @@ function AccountsCard({ signature }: SignatureProps) {
     return (
         <div className="card">
             <div className="card-header">
-                <h3 className="card-header-title">Account Input(s)</h3>
+                <h3 className="card-header-title">Account List ({accountRows.length})</h3>
+                <button
+                    className={`btn btn-sm d-flex ${expanded ? 'btn-black active' : 'btn-white'}`}
+                    onClick={() => setExpanded(e => !e)}
+                >
+                    {expanded ? 'Collapse' : 'Expand'}
+                </button>
             </div>
-            <div className="table-responsive mb-0">
-                <table className="table table-sm table-nowrap card-table">
-                    <thead>
-                        <tr>
-                            <th className="text-muted">#</th>
-                            <th className="text-muted">Address</th>
-                            <th className="text-muted">Change (SOL)</th>
-                            <th className="text-muted">Post Balance (SOL)</th>
-                            <th className="text-muted">Details</th>
-                        </tr>
-                    </thead>
-                    <tbody className="list">{accountRows}</tbody>
-                </table>
-            </div>
+            {expanded && (
+                <div className="table-responsive mb-0">
+                    <table className="table table-sm table-nowrap card-table">
+                        <thead>
+                            <tr>
+                                <th className="text-muted">#</th>
+                                <th className="text-muted">Address</th>
+                                <th className="text-muted">Change (SOL)</th>
+                                <th className="text-muted">Post Balance (SOL)</th>
+                                <th className="text-muted">Details</th>
+                            </tr>
+                        </thead>
+
+                        <tbody className="list">{accountRows}</tbody>
+                    </table>
+                </div>
+            )}
         </div>
     );
 }
