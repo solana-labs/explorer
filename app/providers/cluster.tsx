@@ -1,8 +1,8 @@
 'use client';
 
-import { Cluster, clusterName, ClusterStatus, clusterUrl, DEFAULT_CLUSTER } from '@utils/cluster';
+import { Cluster, clusterName, ClusterStatus, clusterUrl, DEFAULT_CLUSTER, parseQuery } from '@utils/cluster';
 import { localStorageIsAvailable } from '@utils/local-storage';
-import { ReadonlyURLSearchParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { createContext, useContext, useEffect, useReducer, useState } from 'react';
 import { createSolanaRpc } from 'web3js-experimental';
 
@@ -47,21 +47,6 @@ function clusterReducer(state: State, action: Action): State {
         case ClusterStatus.Connecting: {
             return action;
         }
-    }
-}
-
-function parseQuery(searchParams: ReadonlyURLSearchParams | null): Cluster {
-    const clusterParam = searchParams?.get('cluster');
-    switch (clusterParam) {
-        case 'custom':
-            return Cluster.Custom;
-        case 'devnet':
-            return Cluster.Devnet;
-        case 'testnet':
-            return Cluster.Testnet;
-        case 'mainnet-beta':
-        default:
-            return Cluster.MainnetBeta;
     }
 }
 
