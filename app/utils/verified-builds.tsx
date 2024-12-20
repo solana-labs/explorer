@@ -192,6 +192,7 @@ function useEnrichedOsecInfo({
         verify_command: '',
     };
     enrichedOsecInfo.repo_url = pdaData.gitUrl;
+    enrichedOsecInfo.repo_url += pdaData.commit.length ? '/tree/' + pdaData.commit : '';
     if (pdaData) {
         // Create command from the args of the verified build PDA
         enrichedOsecInfo.verify_command = coalesceCommandFromPda(programId, pdaData);
