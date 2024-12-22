@@ -4,7 +4,8 @@ import { IdlTypeDef } from '@coral-xyz/anchor/dist/cjs/idl';
 import { Account } from '@providers/accounts';
 import { useAnchorProgram } from '@providers/anchor';
 import { useCluster } from '@providers/cluster';
-import { getAnchorProgramName, mapAccountToRows } from '@utils/anchor';
+import { mapAccountToRows } from '@utils/anchor';
+import { getAnchorProgramName } from '@utils/tx';
 import React, { useMemo } from 'react';
 
 export function AnchorAccountCard({ account }: { account: Account }) {

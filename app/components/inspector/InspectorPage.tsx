@@ -14,19 +14,16 @@ import base58 from 'bs58';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 
+import { DEFAULT_FEES } from '@/app/utils/tx';
+import { MIN_MESSAGE_LENGTH, TransactionData } from '@/app/utils/tx';
+
 import { AccountsCard } from './AccountsCard';
 import { AddressTableLookupsCard } from './AddressTableLookupsCard';
 import { AddressWithContext, createFeePayerValidator } from './AddressWithContext';
 import { InstructionsSection } from './InstructionsSection';
-import { MIN_MESSAGE_LENGTH, RawInput } from './RawInputCard';
+import { RawInput } from './RawInputCard';
 import { TransactionSignatures } from './SignaturesCard';
 import { SimulatorCard } from './SimulatorCard';
-
-export type TransactionData = {
-    rawMessage: Uint8Array;
-    message: VersionedMessage;
-    signatures?: (string | null)[];
-};
 
 // Decode a url param and return the result. If decoding fails, return whether
 // the param should be deleted.
@@ -257,10 +254,6 @@ function LoadedView({ transaction, onClear, showTokenBalanceChanges }: { transac
         </>
     );
 }
-
-const DEFAULT_FEES = {
-    lamportsPerSignature: 5000,
-};
 
 function OverviewCard({ message, raw, onClear }: { message: VersionedMessage; raw: Uint8Array; onClear: () => void }) {
     const fee = message.header.numRequiredSignatures * DEFAULT_FEES.lamportsPerSignature;
