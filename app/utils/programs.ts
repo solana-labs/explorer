@@ -215,10 +215,6 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: [Cluster.Devnet, Cluster.MainnetBeta],
         name: PROGRAM_NAMES.FINTERNET_USER_MANAGER,
     },
-    L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95: {
-        deployments: [Cluster.MainnetBeta],
-        name: PROGRAM_NAMES.LIGHTHOUSE_PROGRAM,
-    },
     ComputeBudget111111111111111111111111111111: {
         deployments: ALL_CLUSTERS,
         name: PROGRAM_NAMES.COMPUTE_BUDGET,
@@ -286,6 +282,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     KeccakSecp256k11111111111111111111111111111: {
         deployments: ALL_CLUSTERS,
         name: PROGRAM_NAMES.SECP256K1,
+    },
+    L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95: {
+        deployments: [Cluster.MainnetBeta],
+        name: PROGRAM_NAMES.LIGHTHOUSE_PROGRAM,
     },
     LendZqTs7gn5CTSJU1jWKhKuVpjJGom45nnwPb2AMTi: {
         deployments: LIVE_CLUSTERS,

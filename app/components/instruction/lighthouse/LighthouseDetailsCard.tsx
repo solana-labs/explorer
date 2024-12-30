@@ -1,6 +1,8 @@
 import { PublicKey, SignatureResult, TransactionInstruction } from '@solana/web3.js';
 import {
+    EquatableOperator,
     identifyLighthouseInstruction,
+    IntegerOperator,
     LighthouseInstruction,
     parseAssertAccountDataInstruction,
     parseAssertAccountDataMultiInstruction,
@@ -20,29 +22,19 @@ import {
     parseAssertUpgradeableLoaderAccountMultiInstruction,
     parseMemoryCloseInstruction,
     parseMemoryWriteInstruction,
-    IntegerOperator,
-    EquatableOperator,
-    AccountInfoAssertion,
-    TokenAccountAssertion,
-    MintAccountAssertion,
-    StakeAccountAssertion,
-    UpgradeableLoaderStateAssertion,
-    MerkleTreeAssertion,
-    BubblegumTreeConfigAssertion,
-    DataValueAssertion,
 } from 'lighthouse-sdk';
-import { AccountRole, address, IAccountMeta, IInstruction, Address as TAddress } from 'web3js-experimental';
+import React from 'react';
+import { CornerDownRight } from 'react-feather';
+import { AccountRole, Address as TAddress, address, IAccountMeta, IInstruction } from 'web3js-experimental';
 
-import { InstructionCard } from '../InstructionCard';
-import { Address } from '../../common/Address';
-import { LIGHTHOUSE_ADDRESS } from './types';
 import { camelToTitleCase } from '@/app/utils';
 import { ExpandableRow } from '@/app/utils/anchor';
-import { AccountDataAssertion } from 'lighthouse-sdk/dist/types/hooked';
-import { CornerDownRight } from 'react-feather';
-import React from 'react';
 
-function upcastTransactionInstruction(ix: TransactionInstruction): IInstruction {
+import { Address } from '../../common/Address';
+import { InstructionCard } from '../InstructionCard';
+import { LIGHTHOUSE_ADDRESS } from './types';
+
+function upcastTransactionInstruction(ix: TransactionInstruction) {
     return {
         accounts: ix.keys.map(key => ({
             address: address(key.pubkey.toBase58()),
@@ -77,25 +69,26 @@ export function LighthouseDetailsCard({
     innerCards?: JSX.Element[];
     childIndex?: number;
 }) {
-    let _ix = upcastTransactionInstruction(ix);
+    const _ix = upcastTransactionInstruction(ix);
     const { title, info } = parseLighthouseInstruction(_ix);
 
     return (
-        <InstructionCard title={`Lighthouse: ${title}`} {...{ ix, index, childIndex, result, innerCards }}>
+        <InstructionCard title={`Lighthouse: ${title}`} {...{ childIndex, index, innerCards, ix, result }}>
             <CodamaCard ix={_ix} parsedIx={info} />
         </InstructionCard>
     );
 }
-function parseLighthouseInstruction(ix: IInstruction) {
+function parseLighthouseInstruction(ix: ReturnType<typeof upcastTransactionInstruction>) {
     let title = 'Unknown';
     let info: ParsedCodamaInstruction;
-    const subEnum = (pix: ParsedCodamaInstruction, key: string, array: boolean = false) => {
+    const subEnum = (pix: ParsedCodamaInstruction, key: string, array = false) => {
         if (array) {
-            pix.data[key].forEach((assertion: Parameters<typeof renderEnumsAsStrings>[0]) => {
-                renderEnumsAsStrings(assertion);
-            });
+            const assertions = pix.data[key].map((assertion: Parameters<typeof renderEnumsAsStrings>[0]) =>
+                renderEnumsAsStrings(assertion)
+            );
+            pix.data[key] = assertions;
         } else {
-            renderEnumsAsStrings(pix.data[key]);
+            pix.data[key] = renderEnumsAsStrings(pix.data[key]);
         }
         return pix;
     };
@@ -103,181 +96,401 @@ function parseLighthouseInstruction(ix: IInstruction) {
         case LighthouseInstruction.MemoryClose:
             title = 'Memory Close';
             info = parseMemoryCloseInstruction(ix);
-            return { title, info };
+            return { info, title };
         case LighthouseInstruction.MemoryWrite:
             title = 'Memory Write';
             info = parseMemoryWriteInstruction(ix);
-            return { title, info };
+            return { info, title };
         case LighthouseInstruction.AssertMerkleTreeAccount:
             title = 'Assert Merkle Tree Account';
             info = subEnum(parseAssertMerkleTreeAccountInstruction(ix), 'assertion');
-            return { title, info };
+            return { info, title };
         case LighthouseInstruction.AssertMintAccount:
             title = 'Assert Mint Account';
             info = subEnum(parseAssertMintAccountInstruction(ix), 'assertion');
-            return { title, info };
+            return { info, title };
         case LighthouseInstruction.AssertAccountData:
             title = 'Assert Account Data';
             info = subEnum(parseAssertAccountDataInstruction(ix), 'assertion');
-            return { title, info };
+            return { info, title };
         case LighthouseInstruction.AssertAccountDataMulti:
             title = 'Assert Account Data Multi';
             info = subEnum(parseAssertAccountDataMultiInstruction(ix), 'assertion');
-            return { title, info };
+            return { info, title };
         case LighthouseInstruction.AssertTokenAccount:
             title = 'Assert Token Account';
             info = subEnum(parseAssertTokenAccountInstruction(ix), 'assertion');
-            return { title, info };
+            return { info, title };
         case LighthouseInstruction.AssertAccountDelta:
             title = 'Assert Account Delta';
             info = subEnum(parseAssertAccountDeltaInstruction(ix), 'assertion');
-            return { title, info };
+            return { info, title };
         case LighthouseInstruction.AssertAccountInfo:
             title = 'Assert Account Info';
             info = subEnum(parseAssertAccountInfoInstruction(ix), 'assertion');
-            return { title, info };
+            return { info, title };
         case LighthouseInstruction.AssertAccountInfoMulti:
             title = 'Assert Account Info Multi';
             info = subEnum(parseAssertAccountInfoMultiInstruction(ix), 'assertions', true);
-            return { title, info };
+            return { info, title };
         case LighthouseInstruction.AssertMintAccountMulti:
             title = 'Assert Mint Account Multi';
             info = subEnum(parseAssertMintAccountMultiInstruction(ix), 'assertions', true);
-            return { title, info };
+            return { info, title };
         case LighthouseInstruction.AssertTokenAccountMulti:
             title = 'Assert Token Account Multi';
             info = subEnum(parseAssertTokenAccountMultiInstruction(ix), 'assertions', true);
-            return { title, info };
+            return { info, title };
         case LighthouseInstruction.AssertStakeAccount:
             title = 'Assert Stake Account';
             info = subEnum(parseAssertStakeAccountInstruction(ix), 'assertion');
-            return { title, info };
+            return { info, title };
         case LighthouseInstruction.AssertStakeAccountMulti:
             title = 'Assert Stake Account Multi';
             info = subEnum(parseAssertStakeAccountMultiInstruction(ix), 'assertions', true);
-            return { title, info };
+            return { info, title };
         case LighthouseInstruction.AssertUpgradeableLoaderAccount:
             title = 'Assert Upgradeable Loader Account';
             info = subEnum(parseAssertUpgradeableLoaderAccountInstruction(ix), 'assertion');
-            return { title, info };
+            return { info, title };
         case LighthouseInstruction.AssertUpgradeableLoaderAccountMulti:
             title = 'Assert Upgradeable Loader Account Multi';
             info = subEnum(parseAssertUpgradeableLoaderAccountMultiInstruction(ix), 'assertions', true);
-            return { title, info };
+            return { info, title };
         case LighthouseInstruction.AssertSysvarClock:
             title = 'Assert Sysvar Clock';
             info = subEnum(parseAssertSysvarClockInstruction(ix), 'assertion');
-            return { title, info };
+            return { info, title };
         case LighthouseInstruction.AssertBubblegumTreeConfigAccount:
             title = 'Assert Bubblegum Tree Config Account';
             info = subEnum(parseAssertBubblegumTreeConfigAccountInstruction(ix), 'assertion');
-            return { title, info };
+            return { info, title };
     }
 }
+// First define the field types
+type IntegerField = {
+    __kind:
+        | 'RentExemptReserve'
+        | 'LockupEpoch'
+        | 'LockupUnixTimestamp'
+        | 'DelegationStake'
+        | 'DelegationActivationEpoch'
+        | 'DelegationDeactivationEpoch'
+        | 'CreditsObserved'
+        | 'Slot';
+    operator: IntegerOperator;
+};
 
-function renderEnumsAsStrings(
-    assertion:
-        | AccountInfoAssertion
-        | AccountDataAssertion
-        | DataValueAssertion
-        | MintAccountAssertion
-        | TokenAccountAssertion
-        | StakeAccountAssertion
-        | UpgradeableLoaderStateAssertion
-        | MerkleTreeAssertion
-        | BubblegumTreeConfigAssertion
-) {
+type EquatableField = {
+    __kind:
+        | 'AuthorizedWithdrawer'
+        | 'LockupCustodian'
+        | 'AuthorizedStaker'
+        | 'DelegationVoterPubkey'
+        | 'Authority'
+        | 'ProgramDataAddress'
+        | 'UpgradeAuthority';
+    operator: EquatableOperator;
+};
+
+type AssertionField = IntegerField | EquatableField;
+
+type ComplexAssertion = {
+    __kind: 'MetaAssertion' | 'StakeAssertion' | 'Buffer' | 'Program' | 'ProgramData';
+    fields: AssertionField[];
+};
+
+type IntegerAssertion = {
+    __kind:
+        | 'State'
+        | 'U8'
+        | 'I8'
+        | 'U16'
+        | 'I16'
+        | 'U32'
+        | 'I32'
+        | 'U64'
+        | 'I64'
+        | 'I128'
+        | 'U128'
+        | 'Lamports'
+        | 'DataLength'
+        | 'RentEpoch'
+        | 'TotalMintCapacity'
+        | 'NumMinted'
+        | 'Supply'
+        | 'Decimals'
+        | 'Amount'
+        | 'DelegatedAmount';
+    operator: IntegerOperator;
+};
+
+type EquatableAssertion = {
+    __kind:
+        | 'StakeFlags'
+        | 'CloseAuthority'
+        | 'Delegate'
+        | 'IsNative'
+        | 'Mint'
+        | 'FreezeAuthority'
+        | 'IsInitialized'
+        | 'Pubkey'
+        | 'MintAuthority'
+        | 'TreeCreator'
+        | 'TreeDelegate'
+        | 'Bytes'
+        | 'IsPublic'
+        | 'IsDecompressible'
+        | 'KnownOwner'
+        | 'IsSigner'
+        | 'IsWritable'
+        | 'Executable'
+        | 'Bool'
+        | 'Owner';
+    operator: EquatableOperator;
+};
+
+type NoOperatorAssertion = {
+    __kind: 'VerifyDatahash' | 'VerifyLeaf' | 'TokenAccountOwnerIsDerived';
+};
+
+type OffsetAssertion = {
+    offset: number;
+    assertion: Assertion;
+};
+
+type Assertion = IntegerAssertion | EquatableAssertion | ComplexAssertion | NoOperatorAssertion;
+
+function renderEnumsAsStrings(assertion: Assertion | OffsetAssertion): any {
+    // Handle offset assertions first
     if ('offset' in assertion) {
-        renderEnumsAsStrings(assertion.assertion);
-        return;
+        return {
+            ...assertion,
+            assertion: renderEnumsAsStrings(assertion.assertion),
+        };
     }
-    switch (assertion.__kind) {
-        case 'State':
-        case 'U8':
-        case 'I8':
-        case 'U16':
-        case 'I16':
-        case 'U32':
-        case 'I32':
-        case 'U64':
-        case 'I64':
-        case 'I128':
-        case 'U128':
-        case 'Lamports':
-        case 'DataLength':
-        case 'RentEpoch':
-        case 'TotalMintCapacity':
-        case 'NumMinted':
-        case 'Supply':
-        case 'Decimals':
-        case 'Amount':
-        case 'DelegatedAmount':
-            // @ts-ignore
-            assertion.operator = renderIntegerOperator(assertion.operator);
-            break;
 
-        case 'MetaAssertion':
-        case 'StakeAssertion':
-        case 'Buffer':
-        case 'Program':
-        case 'ProgramData':
-            assertion.fields.forEach(field => {
-                switch (field.__kind) {
-                    case 'RentExemptReserve':
-                    case 'LockupEpoch':
-                    case 'LockupUnixTimestamp':
-                    case 'DelegationStake':
-                    case 'DelegationActivationEpoch':
-                    case 'DelegationDeactivationEpoch':
-                    case 'CreditsObserved':
-                    case 'Slot':
-                        // @ts-ignore
-                        field.operator = renderIntegerOperator(field.operator);
-                        break;
-                    case 'AuthorizedWithdrawer':
-                    case 'LockupCustodian':
-                    case 'AuthorizedStaker':
-                    case 'DelegationVoterPubkey':
-                    case 'Authority':
-                    case 'ProgramDataAddress':
-                    case 'UpgradeAuthority':
-                        // @ts-ignore
-                        field.operator = renderEquatableOperator(field.operator);
-                        break;
+    // Handle integer assertions
+    if (isIntegerAssertion(assertion)) {
+        return {
+            ...assertion,
+            operator: renderIntegerOperator(assertion.operator),
+        };
+    }
+
+    // Handle equatable assertions
+    if (isEquatableAssertion(assertion)) {
+        return {
+            ...assertion,
+            operator: renderEquatableOperator(assertion.operator),
+        };
+    }
+
+    // Handle complex assertions with fields
+    if (isComplexAssertion(assertion)) {
+        return {
+            ...assertion,
+            fields: assertion.fields.map(field => {
+                let operator = '';
+                if (isIntegerField(field)) {
+                    operator = renderIntegerOperator(field.operator);
+                } else if (isEquatableField(field)) {
+                    operator = renderEquatableOperator(field.operator);
                 }
-            });
-            break;
-
-        case 'StakeFlags':
-        case 'CloseAuthority':
-        case 'Delegate':
-        case 'IsNative':
-        case 'Mint':
-        case 'FreezeAuthority':
-        case 'IsInitialized':
-        case 'Pubkey':
-        case 'MintAuthority':
-        case 'TreeCreator':
-        case 'TreeDelegate':
-        case 'Bytes':
-        case 'IsPublic':
-        case 'IsDecompressible':
-        case 'KnownOwner':
-        case 'IsSigner':
-        case 'IsWritable':
-        case 'Executable':
-        case 'Bool':
-        case 'Owner':
-            // @ts-ignore
-            assertion.operator = renderEquatableOperator(assertion.operator);
-            break;
-
-        case 'VerifyDatahash':
-        case 'VerifyLeaf':
-        case 'TokenAccountOwnerIsDerived':
-            break;
+                return { ...field, operator };
+            }),
+        };
     }
+
+    return assertion;
 }
+
+// Type guards
+function isIntegerAssertion(assertion: Assertion): assertion is IntegerAssertion {
+    const integerKinds = [
+        'State',
+        'U8',
+        'I8',
+        'U16',
+        'I16',
+        'U32',
+        'I32',
+        'U64',
+        'I64',
+        'I128',
+        'U128',
+        'Lamports',
+        'DataLength',
+        'RentEpoch',
+        'TotalMintCapacity',
+        'NumMinted',
+        'Supply',
+        'Decimals',
+        'Amount',
+        'DelegatedAmount',
+    ];
+    return integerKinds.includes(assertion.__kind);
+}
+
+function isEquatableAssertion(assertion: Assertion): assertion is EquatableAssertion {
+    const equatableKinds = [
+        'StakeFlags',
+        'CloseAuthority',
+        'Delegate',
+        'IsNative',
+        'Mint',
+        'FreezeAuthority',
+        'IsInitialized',
+        'Pubkey',
+        'MintAuthority',
+        'TreeCreator',
+        'TreeDelegate',
+        'Bytes',
+        'IsPublic',
+        'IsDecompressible',
+        'KnownOwner',
+        'IsSigner',
+        'IsWritable',
+        'Executable',
+        'Bool',
+        'Owner',
+    ];
+    return equatableKinds.includes(assertion.__kind);
+}
+
+function isComplexAssertion(assertion: Assertion): assertion is ComplexAssertion {
+    return ['MetaAssertion', 'StakeAssertion', 'Buffer', 'Program', 'ProgramData'].includes(assertion.__kind);
+}
+
+function isIntegerField(field: AssertionField): field is IntegerField {
+    const integerFields = [
+        'RentExemptReserve',
+        'LockupEpoch',
+        'LockupUnixTimestamp',
+        'DelegationStake',
+        'DelegationActivationEpoch',
+        'DelegationDeactivationEpoch',
+        'CreditsObserved',
+        'Slot',
+    ];
+    return integerFields.includes(field.__kind);
+}
+
+function isEquatableField(field: AssertionField): field is EquatableField {
+    const equatableFields = [
+        'AuthorizedWithdrawer',
+        'LockupCustodian',
+        'AuthorizedStaker',
+        'DelegationVoterPubkey',
+        'Authority',
+        'ProgramDataAddress',
+        'UpgradeAuthority',
+    ];
+    return equatableFields.includes(field.__kind);
+}
+
+// function renderEnumsAsStrings(
+//     assertion:
+//         | AccountInfoAssertion
+//         | AccountDataAssertion
+//         | DataValueAssertion
+//         | MintAccountAssertion
+//         | TokenAccountAssertion
+//         | StakeAccountAssertion
+//         | UpgradeableLoaderStateAssertion
+//         | MerkleTreeAssertion
+//         | BubblegumTreeConfigAssertion
+// ) {
+//     if ('offset' in assertion) {
+//         renderEnumsAsStrings(assertion.assertion);
+//         return;
+//     }
+//     switch (assertion.__kind) {
+//         case 'State':
+//         case 'U8':
+//         case 'I8':
+//         case 'U16':
+//         case 'I16':
+//         case 'U32':
+//         case 'I32':
+//         case 'U64':
+//         case 'I64':
+//         case 'I128':
+//         case 'U128':
+//         case 'Lamports':
+//         case 'DataLength':
+//         case 'RentEpoch':
+//         case 'TotalMintCapacity':
+//         case 'NumMinted':
+//         case 'Supply':
+//         case 'Decimals':
+//         case 'Amount':
+//         case 'DelegatedAmount':
+//             assertion.operator = renderIntegerOperator(assertion.operator);
+//             break;
+
+//         case 'MetaAssertion':
+//         case 'StakeAssertion':
+//         case 'Buffer':
+//         case 'Program':
+//         case 'ProgramData':
+//             assertion.fields.forEach(field => {
+//                 switch (field.__kind) {
+//                     case 'RentExemptReserve':
+//                     case 'LockupEpoch':
+//                     case 'LockupUnixTimestamp':
+//                     case 'DelegationStake':
+//                     case 'DelegationActivationEpoch':
+//                     case 'DelegationDeactivationEpoch':
+//                     case 'CreditsObserved':
+//                     case 'Slot':
+//                         // @ts-ignore
+//                         field.operator = renderIntegerOperator(field.operator);
+//                         break;
+//                     case 'AuthorizedWithdrawer':
+//                     case 'LockupCustodian':
+//                     case 'AuthorizedStaker':
+//                     case 'DelegationVoterPubkey':
+//                     case 'Authority':
+//                     case 'ProgramDataAddress':
+//                     case 'UpgradeAuthority':
+//                         // @ts-ignore
+//                         field.operator = renderEquatableOperator(field.operator);
+//                         break;
+//                 }
+//             });
+//             break;
+
+//         case 'StakeFlags':
+//         case 'CloseAuthority':
+//         case 'Delegate':
+//         case 'IsNative':
+//         case 'Mint':
+//         case 'FreezeAuthority':
+//         case 'IsInitialized':
+//         case 'Pubkey':
+//         case 'MintAuthority':
+//         case 'TreeCreator':
+//         case 'TreeDelegate':
+//         case 'Bytes':
+//         case 'IsPublic':
+//         case 'IsDecompressible':
+//         case 'KnownOwner':
+//         case 'IsSigner':
+//         case 'IsWritable':
+//         case 'Executable':
+//         case 'Bool':
+//         case 'Owner':
+//             // @ts-ignore
+//             assertion.operator = renderEquatableOperator(assertion.operator);
+//             break;
+
+//         case 'VerifyDatahash':
+//         case 'VerifyLeaf':
+//         case 'TokenAccountOwnerIsDerived':
+//             break;
+//     }
+// }
 
 function renderIntegerOperator(operator: IntegerOperator) {
     switch (operator) {
@@ -291,6 +504,12 @@ function renderIntegerOperator(operator: IntegerOperator) {
             return '<=';
         case IntegerOperator.Equal:
             return '=';
+        case IntegerOperator.NotEqual:
+            return '!=';
+        case IntegerOperator.Contains:
+            return 'contains';
+        case IntegerOperator.DoesNotContain:
+            return 'does not contain';
     }
 }
 
@@ -366,7 +585,7 @@ function CodamaCard({ ix, parsedIx }: { ix: IInstruction; parsedIx: ParsedCodama
     );
 }
 
-function mapIxArgsToRows(data: any, nestingLevel: number = 0) {
+function mapIxArgsToRows(data: any, nestingLevel = 0) {
     return Object.entries(data).map(([key, value], index) => {
         if (key === '__kind' || key === 'discriminator') {
             return null;

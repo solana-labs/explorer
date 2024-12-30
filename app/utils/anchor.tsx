@@ -6,7 +6,7 @@ import { useAnchorProgram } from '@providers/anchor';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { camelToTitleCase, numberWithSeparator, snakeToTitleCase } from '@utils/index';
-import { getProgramName, programLabel } from '@utils/tx';
+import { programLabel } from '@utils/tx';
 import React, { Fragment, ReactNode, useState } from 'react';
 import { ChevronDown, ChevronUp, CornerDownRight } from 'react-feather';
 import ReactJson from 'react-json-view';
