@@ -91,6 +91,9 @@ export enum PROGRAM_NAMES {
     ZK_LIGHT_SYSTEM_PROGRAM = 'Light System Program',
     ZK_COMPRESSED_TOKEN_PROGRAM = 'ZK Compressed Token Program',
     ZK_ACCOUNT_COMPRESSION_PROGRAM = 'ZK Account Compression Program',
+
+    // Lighthouse
+    LIGHTHOUSE_PROGRAM = 'Lighthouse Program',
 }
 
 const ALL_CLUSTERS = [Cluster.Custom, Cluster.Devnet, Cluster.Testnet, Cluster.MainnetBeta];
@@ -211,6 +214,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     CmFuqQTLs2nQof5uaktJn1a6k2VdbGmZPfrJufB2Vm3F: {
         deployments: [Cluster.Devnet, Cluster.MainnetBeta],
         name: PROGRAM_NAMES.FINTERNET_USER_MANAGER,
+    },
+    L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95: {
+        deployments: [Cluster.MainnetBeta],
+        name: PROGRAM_NAMES.LIGHTHOUSE_PROGRAM,
     },
     ComputeBudget111111111111111111111111111111: {
         deployments: ALL_CLUSTERS,
