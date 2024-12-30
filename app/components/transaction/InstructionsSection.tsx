@@ -43,6 +43,8 @@ import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import AnchorDetailsCard from '../instruction/AnchorDetailsCard';
+import { LighthouseDetailsCard } from '../instruction/lighthouse/LighthouseDetailsCard';
+import { isLighthouseInstruction } from '../instruction/lighthouse/types';
 import { isMangoInstruction } from '../instruction/mango/types';
 
 export type InstructionDetailsProps = {
@@ -231,6 +233,8 @@ function InstructionCard({
         return <PythDetailsCard key={key} {...props} />;
     } else if (ComputeBudgetProgram.programId.equals(transactionIx.programId)) {
         return <ComputeBudgetDetailsCard key={key} {...props} />;
+    } else if (isLighthouseInstruction(transactionIx)) {
+        return <LighthouseDetailsCard key={key} {...props} />;
     } else if (anchorProgram) {
         return (
             <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
