@@ -51,6 +51,7 @@ export function InstructionCard({
 
         return setShowRaw(r => !r);
     };
+    // Need to wrap this in a useEffect to avoid hydration errors
     const scrollAnchorRef = useScrollAnchor(
         getInstructionCardScrollAnchorId(childIndex != null ? [index + 1, childIndex + 1] : [index + 1])
     );

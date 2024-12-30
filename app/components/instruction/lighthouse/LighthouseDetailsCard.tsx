@@ -22,7 +22,6 @@ import {
     parseMemoryWriteInstruction,
     IntegerOperator,
     EquatableOperator,
-    ParsedLighthouseInstruction,
     AccountInfoAssertion,
     TokenAccountAssertion,
     MintAccountAssertion,
@@ -40,7 +39,6 @@ import { LIGHTHOUSE_ADDRESS } from './types';
 import { camelToTitleCase } from '@/app/utils';
 import { ExpandableRow } from '@/app/utils/anchor';
 import { AccountDataAssertion } from 'lighthouse-sdk/dist/types/hooked';
-import { assert } from 'console';
 import { CornerDownRight } from 'react-feather';
 
 function upcastTransactionInstruction(ix: TransactionInstruction): IInstruction {
@@ -91,7 +89,6 @@ function parseLighthouseInstruction(ix: IInstruction) {
     let title = 'Unknown';
     let info: ParsedCodamaInstruction;
     const subEnum = (pix: ParsedCodamaInstruction, key: string, array: boolean = false) => {
-        console.log(pix.data, key, array);
         if (array) {
             pix.data[key].forEach((assertion: Parameters<typeof renderEnumsAsStrings>[0]) => {
                 renderEnumsAsStrings(assertion);
@@ -420,11 +417,7 @@ function mapIxArgsToRows(data: any, nestingLevel: number = 0) {
         }
 
         return (
-            <tr
-            // style={{
-            //     ...(nestingLevel === 0 ? {} : { backgroundColor: '#141816' }),
-            // }}
-            >
+            <tr>
                 <td className="d-flex flex-row">
                     {nestingLevel > 0 && (
                         <span style={{ paddingLeft: `${15 * nestingLevel}px` }}>
