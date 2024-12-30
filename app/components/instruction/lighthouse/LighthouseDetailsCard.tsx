@@ -40,6 +40,7 @@ import { camelToTitleCase } from '@/app/utils';
 import { ExpandableRow } from '@/app/utils/anchor';
 import { AccountDataAssertion } from 'lighthouse-sdk/dist/types/hooked';
 import { CornerDownRight } from 'react-feather';
+import React from 'react';
 
 function upcastTransactionInstruction(ix: TransactionInstruction): IInstruction {
     return {
@@ -366,23 +367,33 @@ function CodamaCard({ ix, parsedIx }: { ix: IInstruction; parsedIx: ParsedCodama
 }
 
 function mapIxArgsToRows(data: any, nestingLevel: number = 0) {
-    return Object.entries(data).map(([key, value]) => {
+    return Object.entries(data).map(([key, value], index) => {
         if (key === '__kind' || key === 'discriminator') {
             return null;
         }
 
         let type = 'unknown';
 
+        const baseKey = `${nestingLevel}-${index}`;
         if (Array.isArray(value)) {
             type = `Array[${value.length}]`;
             return (
-                <ExpandableRow fieldName={key} fieldType={type} nestingLevel={nestingLevel}>
+                <ExpandableRow
+                    key={`${nestingLevel}-${index}`}
+                    fieldName={key}
+                    fieldType={type}
+                    nestingLevel={nestingLevel}
+                >
                     {value.map((item, i) => {
                         if (typeof item === 'object') {
-                            return mapIxArgsToRows({ [`#${i}`]: item }, nestingLevel + 1);
+                            return (
+                                <React.Fragment key={`${baseKey}-${i}`}>
+                                    {mapIxArgsToRows({ [`#${i}`]: item }, nestingLevel + 1)}
+                                </React.Fragment>
+                            );
                         }
                         return (
-                            <tr key={i}>
+                            <tr key={`${baseKey}-${i}`}>
                                 <td>
                                     <div className="d-flex align-items-center">
                                         <div className="me-2">{`#${i}`}</div>
@@ -400,7 +411,7 @@ function mapIxArgsToRows(data: any, nestingLevel: number = 0) {
         if (typeof value === 'object' && value !== null) {
             type = (value as any).__kind || 'Object';
             return (
-                <ExpandableRow fieldName={key} fieldType={type} nestingLevel={nestingLevel}>
+                <ExpandableRow key={baseKey} fieldName={key} fieldType={type} nestingLevel={nestingLevel}>
                     {mapIxArgsToRows(value, nestingLevel + 1)}
                 </ExpandableRow>
             );
@@ -417,7 +428,7 @@ function mapIxArgsToRows(data: any, nestingLevel: number = 0) {
         }
 
         return (
-            <tr>
+            <tr key={baseKey}>
                 <td className="d-flex flex-row">
                     {nestingLevel > 0 && (
                         <span style={{ paddingLeft: `${15 * nestingLevel}px` }}>
