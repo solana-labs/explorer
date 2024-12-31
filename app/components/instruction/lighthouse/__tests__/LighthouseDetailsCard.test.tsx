@@ -345,47 +345,56 @@ describe('LighthouseDetailsCard', () => {
             expect(ixArgs0b).toHaveTextContent('assertions');
             expect(ixArgs0b).toHaveTextContent('Array[3]');
 
-            // Two of the followingrows have the same data-testid 'ix-args-1-0'
+            // Two of the following rows have the same data-testid 'ix-args-1-0'
+            // eslint-disable-next-line testing-library/no-node-access
             const ixArgs0bChildren = ixArgs0b.nextElementSibling;
 
             const ixArgs1a = ixArgs0bChildren;
             expect(ixArgs1a).toHaveTextContent('#0');
             expect(ixArgs1a).toHaveTextContent('Lamports');
 
-            const ixArgs1aChild0 = ixArgs1a.nextElementSibling;
+            // eslint-disable-next-line testing-library/no-node-access, @typescript-eslint/no-non-null-assertion
+            const ixArgs1aChild0 = ixArgs1a!.nextElementSibling;
             expect(ixArgs1aChild0).toHaveTextContent('value');
             expect(ixArgs1aChild0).toHaveTextContent('bignum');
             expect(ixArgs1aChild0).toHaveTextContent('40305008');
 
-            const ixArgs1aChild1 = ixArgs1aChild0.nextElementSibling;
+            // eslint-disable-next-line testing-library/no-node-access, @typescript-eslint/no-non-null-assertion
+            const ixArgs1aChild1 = ixArgs1aChild0!.nextElementSibling;
             expect(ixArgs1aChild1).toHaveTextContent('operator');
             expect(ixArgs1aChild1).toHaveTextContent('string');
             expect(ixArgs1aChild1).toHaveTextContent('>=');
 
-            const ixArgs1b = ixArgs1aChild1.nextElementSibling;
+            // eslint-disable-next-line testing-library/no-node-access, @typescript-eslint/no-non-null-assertion
+            const ixArgs1b = ixArgs1aChild1!.nextElementSibling;
             expect(ixArgs1b).toHaveTextContent('#1');
             expect(ixArgs1b).toHaveTextContent('Lamports');
 
-            const ixArgs1bChild0 = ixArgs1b.nextElementSibling;
+            // eslint-disable-next-line testing-library/no-node-access, @typescript-eslint/no-non-null-assertion
+            const ixArgs1bChild0 = ixArgs1b!.nextElementSibling;
             expect(ixArgs1bChild0).toHaveTextContent('value');
             expect(ixArgs1bChild0).toHaveTextContent('bignum');
             expect(ixArgs1bChild0).toHaveTextContent('67175012');
 
-            const ixArgs1bChild1 = ixArgs1bChild0.nextElementSibling;
+            // eslint-disable-next-line testing-library/no-node-access, @typescript-eslint/no-non-null-assertion
+            const ixArgs1bChild1 = ixArgs1bChild0!.nextElementSibling;
             expect(ixArgs1bChild1).toHaveTextContent('operator');
             expect(ixArgs1bChild1).toHaveTextContent('string');
             expect(ixArgs1bChild1).toHaveTextContent('<=');
 
-            const ixArgs1c = ixArgs1bChild1.nextElementSibling;
+            // eslint-disable-next-line testing-library/no-node-access, @typescript-eslint/no-non-null-assertion
+            const ixArgs1c = ixArgs1bChild1!.nextElementSibling;
             expect(ixArgs1c).toHaveTextContent('#2');
             expect(ixArgs1c).toHaveTextContent('KnownOwner');
 
-            const ixArgs1cChild0 = ixArgs1c.nextElementSibling;
+            // eslint-disable-next-line testing-library/no-node-access, @typescript-eslint/no-non-null-assertion
+            const ixArgs1cChild0 = ixArgs1c!.nextElementSibling;
             expect(ixArgs1cChild0).toHaveTextContent('value');
             expect(ixArgs1cChild0).toHaveTextContent('number');
             expect(ixArgs1cChild0).toHaveTextContent('0');
 
-            const ixArgs1cChild1 = ixArgs1cChild0.nextElementSibling;
+            // eslint-disable-next-line testing-library/no-node-access, @typescript-eslint/no-non-null-assertion
+            const ixArgs1cChild1 = ixArgs1cChild0!.nextElementSibling;
             expect(ixArgs1cChild1).toHaveTextContent('operator');
             expect(ixArgs1cChild1).toHaveTextContent('string');
             expect(ixArgs1cChild1).toHaveTextContent('=');
@@ -428,6 +437,7 @@ describe('LighthouseDetailsCard', () => {
             expect(ixArgs0b).toHaveTextContent('Array[3]');
 
             // Two of the followingrows have the same data-testid 'ix-args-1-0'
+            // eslint-disable-next-line testing-library/no-node-access
             const ixArgs0bChildren = ixArgs0b.nextElementSibling;
 
             // 1st assertion
@@ -435,66 +445,80 @@ describe('LighthouseDetailsCard', () => {
             expect(next).toHaveTextContent('#0');
             expect(next).toHaveTextContent('MetaAssertion');
 
-            next = next.nextElementSibling;
+            // eslint-disable-next-line testing-library/no-node-access, @typescript-eslint/no-non-null-assertion
+            next = next!.nextElementSibling;
             expect(next).toHaveTextContent('fields');
             expect(next).toHaveTextContent('Array[1]');
 
-            next = next.nextElementSibling;
+            // eslint-disable-next-line testing-library/no-node-access, @typescript-eslint/no-non-null-assertion
+            next = next!.nextElementSibling;
             expect(next).toHaveTextContent('#0');
             expect(next).toHaveTextContent('AuthorizedWithdrawer');
 
-            next = next.nextElementSibling;
+            // eslint-disable-next-line testing-library/no-node-access, @typescript-eslint/no-non-null-assertion
+            next = next!.nextElementSibling;
             expect(next).toHaveTextContent('value');
             expect(next).toHaveTextContent('pubkey');
             expect(next).toHaveTextContent('FZLY576gVwyD6rEosP72pRUC9TAe7LhgvoSepk3F63PY');
 
-            next = next.nextElementSibling;
+            // eslint-disable-next-line testing-library/no-node-access, @typescript-eslint/no-non-null-assertion
+            next = next!.nextElementSibling;
             expect(next).toHaveTextContent('operator');
             expect(next).toHaveTextContent('string');
             expect(next).toHaveTextContent('=');
 
             // 2nd assertion
-            next = next.nextElementSibling;
+            // eslint-disable-next-line testing-library/no-node-access, @typescript-eslint/no-non-null-assertion
+            next = next!.nextElementSibling;
             expect(next).toHaveTextContent('#1');
             expect(next).toHaveTextContent('MetaAssertion');
 
-            next = next.nextElementSibling;
+            // eslint-disable-next-line testing-library/no-node-access, @typescript-eslint/no-non-null-assertion
+            next = next!.nextElementSibling;
             expect(next).toHaveTextContent('fields');
             expect(next).toHaveTextContent('Array[1]');
 
-            next = next.nextElementSibling;
+            // eslint-disable-next-line testing-library/no-node-access, @typescript-eslint/no-non-null-assertion
+            next = next!.nextElementSibling;
             expect(next).toHaveTextContent('#0');
             expect(next).toHaveTextContent('AuthorizedStaker');
 
-            next = next.nextElementSibling;
+            // eslint-disable-next-line testing-library/no-node-access, @typescript-eslint/no-non-null-assertion
+            next = next!.nextElementSibling;
             expect(next).toHaveTextContent('value');
             expect(next).toHaveTextContent('pubkey');
             expect(next).toHaveTextContent('FZLY576gVwyD6rEosP72pRUC9TAe7LhgvoSepk3F63PY');
 
-            next = next.nextElementSibling;
+            // eslint-disable-next-line testing-library/no-node-access, @typescript-eslint/no-non-null-assertion
+            next = next!.nextElementSibling;
             expect(next).toHaveTextContent('operator');
             expect(next).toHaveTextContent('string');
             expect(next).toHaveTextContent('=');
 
             // 3rd assertion
-            next = next.nextElementSibling;
+            // eslint-disable-next-line testing-library/no-node-access, @typescript-eslint/no-non-null-assertion
+            next = next!.nextElementSibling;
             expect(next).toHaveTextContent('#2');
             expect(next).toHaveTextContent('StakeAssertion');
 
-            next = next.nextElementSibling;
+            // eslint-disable-next-line testing-library/no-node-access, @typescript-eslint/no-non-null-assertion
+            next = next!.nextElementSibling;
             expect(next).toHaveTextContent('fields');
             expect(next).toHaveTextContent('Array[1]');
 
-            next = next.nextElementSibling;
+            // eslint-disable-next-line testing-library/no-node-access, @typescript-eslint/no-non-null-assertion
+            next = next!.nextElementSibling;
             expect(next).toHaveTextContent('#0');
             expect(next).toHaveTextContent('DelegationStake');
 
-            next = next.nextElementSibling;
+            // eslint-disable-next-line testing-library/no-node-access, @typescript-eslint/no-non-null-assertion
+            next = next!.nextElementSibling;
             expect(next).toHaveTextContent('value');
             expect(next).toHaveTextContent('bignum');
             expect(next).toHaveTextContent('2200000');
 
-            next = next.nextElementSibling;
+            // eslint-disable-next-line testing-library/no-node-access, @typescript-eslint/no-non-null-assertion
+            next = next!.nextElementSibling;
             expect(next).toHaveTextContent('operator');
             expect(next).toHaveTextContent('string');
             expect(next).toHaveTextContent('>=');
