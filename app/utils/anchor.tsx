@@ -435,7 +435,7 @@ export function ExpandableRow({
         <>
             <tr
                 style={{
-                    ...(nestingLevel === 0 ? {} : { backgroundColor: '#141816' }),
+                    backgroundColor: '#141816',
                 }}
             >
                 <td className="d-flex flex-row">
