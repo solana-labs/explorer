@@ -389,109 +389,6 @@ function isEquatableField(field: AssertionField): field is EquatableField {
     return equatableFields.includes(field.__kind);
 }
 
-// function renderEnumsAsStrings(
-//     assertion:
-//         | AccountInfoAssertion
-//         | AccountDataAssertion
-//         | DataValueAssertion
-//         | MintAccountAssertion
-//         | TokenAccountAssertion
-//         | StakeAccountAssertion
-//         | UpgradeableLoaderStateAssertion
-//         | MerkleTreeAssertion
-//         | BubblegumTreeConfigAssertion
-// ) {
-//     if ('offset' in assertion) {
-//         renderEnumsAsStrings(assertion.assertion);
-//         return;
-//     }
-//     switch (assertion.__kind) {
-//         case 'State':
-//         case 'U8':
-//         case 'I8':
-//         case 'U16':
-//         case 'I16':
-//         case 'U32':
-//         case 'I32':
-//         case 'U64':
-//         case 'I64':
-//         case 'I128':
-//         case 'U128':
-//         case 'Lamports':
-//         case 'DataLength':
-//         case 'RentEpoch':
-//         case 'TotalMintCapacity':
-//         case 'NumMinted':
-//         case 'Supply':
-//         case 'Decimals':
-//         case 'Amount':
-//         case 'DelegatedAmount':
-//             assertion.operator = renderIntegerOperator(assertion.operator);
-//             break;
-
-//         case 'MetaAssertion':
-//         case 'StakeAssertion':
-//         case 'Buffer':
-//         case 'Program':
-//         case 'ProgramData':
-//             assertion.fields.forEach(field => {
-//                 switch (field.__kind) {
-//                     case 'RentExemptReserve':
-//                     case 'LockupEpoch':
-//                     case 'LockupUnixTimestamp':
-//                     case 'DelegationStake':
-//                     case 'DelegationActivationEpoch':
-//                     case 'DelegationDeactivationEpoch':
-//                     case 'CreditsObserved':
-//                     case 'Slot':
-//                         // @ts-ignore
-//                         field.operator = renderIntegerOperator(field.operator);
-//                         break;
-//                     case 'AuthorizedWithdrawer':
-//                     case 'LockupCustodian':
-//                     case 'AuthorizedStaker':
-//                     case 'DelegationVoterPubkey':
-//                     case 'Authority':
-//                     case 'ProgramDataAddress':
-//                     case 'UpgradeAuthority':
-//                         // @ts-ignore
-//                         field.operator = renderEquatableOperator(field.operator);
-//                         break;
-//                 }
-//             });
-//             break;
-
-//         case 'StakeFlags':
-//         case 'CloseAuthority':
-//         case 'Delegate':
-//         case 'IsNative':
-//         case 'Mint':
-//         case 'FreezeAuthority':
-//         case 'IsInitialized':
-//         case 'Pubkey':
-//         case 'MintAuthority':
-//         case 'TreeCreator':
-//         case 'TreeDelegate':
-//         case 'Bytes':
-//         case 'IsPublic':
-//         case 'IsDecompressible':
-//         case 'KnownOwner':
-//         case 'IsSigner':
-//         case 'IsWritable':
-//         case 'Executable':
-//         case 'Bool':
-//         case 'Owner':
-//             // @ts-ignore
-//             assertion.operator = renderEquatableOperator(assertion.operator);
-//             break;
-
-//         case 'VerifyDatahash':
-//         case 'VerifyLeaf':
-//         case 'TokenAccountOwnerIsDerived':
-//             break;
-//     }
-// }
-
 function renderIntegerOperator(operator: IntegerOperator) {
     switch (operator) {
         case IntegerOperator.GreaterThan:
@@ -546,7 +443,7 @@ function CodamaCard({ ix, parsedIx }: { ix: IInstruction; parsedIx: ParsedCodama
             </tr>
             {ix.accounts?.map(({ address, role }, keyIndex) => {
                 return (
-                    <tr key={keyIndex}>
+                    <tr key={keyIndex} data-testid={`account-row-${keyIndex}`}>
                         <td>
                             <div className="me-2 d-md-inline">
                                 {parsedIx.accounts
@@ -587,7 +484,7 @@ function CodamaCard({ ix, parsedIx }: { ix: IInstruction; parsedIx: ParsedCodama
 
 function mapIxArgsToRows(data: any, nestingLevel = 0) {
     return Object.entries(data).map(([key, value], index) => {
-        if (key === '__kind' || key === 'discriminator') {
+        if (key === '__kind' || key === 'discriminator' || key === '__option') {
             return null;
         }
 
@@ -602,6 +499,7 @@ function mapIxArgsToRows(data: any, nestingLevel = 0) {
                     fieldName={key}
                     fieldType={type}
                     nestingLevel={nestingLevel}
+                    data-testid={`ix-args-${baseKey}`}
                 >
                     {value.map((item, i) => {
                         if (typeof item === 'object') {
@@ -612,7 +510,7 @@ function mapIxArgsToRows(data: any, nestingLevel = 0) {
                             );
                         }
                         return (
-                            <tr key={`${baseKey}-${i}`}>
+                            <tr key={`${baseKey}-${i}`} data-testid={`ix-args-${baseKey}-${i}`}>
                                 <td>
                                     <div className="d-flex align-items-center">
                                         <div className="me-2">{`#${i}`}</div>
@@ -627,18 +525,22 @@ function mapIxArgsToRows(data: any, nestingLevel = 0) {
             );
         }
 
+        type = inferType(value);
+
         if (typeof value === 'object' && value !== null) {
-            type = (value as any).__kind || 'Object';
             return (
-                <ExpandableRow key={baseKey} fieldName={key} fieldType={type} nestingLevel={nestingLevel}>
+                <ExpandableRow
+                    key={baseKey}
+                    fieldName={key}
+                    fieldType={type}
+                    nestingLevel={nestingLevel}
+                    data-testid={`ix-args-${baseKey}`}
+                >
                     {mapIxArgsToRows(value, nestingLevel + 1)}
                 </ExpandableRow>
             );
         }
 
-        // Infer how to render values
-        // TODO: Fix this for enum values
-        type = inferType(value);
         let displayValue;
         if (type === 'pubkey') {
             displayValue = <Address pubkey={new PublicKey(value as string)} alignRight link />;
@@ -647,7 +549,7 @@ function mapIxArgsToRows(data: any, nestingLevel = 0) {
         }
 
         return (
-            <tr key={baseKey}>
+            <tr key={baseKey} data-testid={`ix-args-${baseKey}`}>
                 <td className="d-flex flex-row">
                     {nestingLevel > 0 && (
                         <span style={{ paddingLeft: `${15 * nestingLevel}px` }}>
@@ -664,7 +566,11 @@ function mapIxArgsToRows(data: any, nestingLevel = 0) {
 }
 
 function inferType(value: any) {
-    if (typeof value === 'string') {
+    if (value.__kind) {
+        return value.__kind;
+    } else if (value.__option) {
+        return `Option(${value.__option})`;
+    } else if (typeof value === 'string') {
         try {
             new PublicKey(value);
             return 'pubkey';

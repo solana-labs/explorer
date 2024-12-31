@@ -1,9 +1,8 @@
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import { render, screen } from '@testing-library/react';
 import * as lighthouseSdk from 'lighthouse-sdk';
 
 import { LighthouseDetailsCard } from '../LighthouseDetailsCard';
-import { LIGHTHOUSE_ADDRESS } from '../types';
 
 jest.mock('react-feather', () => ({
     CornerDownRight: () => <div data-testid="corner-down-right" />,
@@ -29,19 +28,26 @@ jest.mock('../../../common/Address', () => ({
 }));
 
 jest.mock('../../../../utils/anchor', () => ({
-    ExpandableRow: ({ children, fieldName }: { children: React.ReactNode; fieldName: string }) => (
-        <tr data-testid="expandable-row">
-            <td colSpan={3}>
-                <table className="table">
-                    <tbody>
-                        <tr>
-                            <td>{fieldName}</td>
-                        </tr>
-                        {children}
-                    </tbody>
-                </table>
-            </td>
-        </tr>
+    ExpandableRow: ({
+        fieldName,
+        fieldType,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        nestingLevel,
+        children,
+        ...props
+    }: {
+        children: React.ReactNode;
+        fieldName: string;
+        fieldType: string;
+        nestingLevel: number;
+    } & React.HTMLAttributes<HTMLTableRowElement>) => (
+        <>
+            <tr {...props}>
+                <td>{fieldName}</td>
+                <td>{fieldType}</td>
+            </tr>
+            {children}
+        </>
     ),
 }));
 
@@ -57,42 +63,12 @@ describe('LighthouseDetailsCard', () => {
         result: { err: null },
     };
 
-    const createInstruction = (data: Buffer): TransactionInstruction => ({
-        data,
-        keys: [{ isSigner: false, isWritable: true, pubkey: new PublicKey('11111111111111111111111111111111') }],
-        programId: new PublicKey(LIGHTHOUSE_ADDRESS),
-    });
-
     beforeEach(() => {
         jest.spyOn(lighthouseSdk, 'identifyLighthouseInstruction');
     });
 
     afterEach(() => {
         jest.clearAllMocks();
-    });
-
-    describe.skip('Memory Instructions', () => {
-        it('renders MemoryClose instruction', () => {
-            const mockData = Buffer.from([0]); // Replace with actual MemoryClose instruction data
-            jest.spyOn(lighthouseSdk, 'identifyLighthouseInstruction').mockReturnValue(
-                lighthouseSdk.LighthouseInstruction.MemoryClose
-            );
-
-            render(<LighthouseDetailsCard ix={createInstruction(mockData)} {...defaultProps} />);
-
-            expect(screen.getByText('Lighthouse: Memory Close')).toBeInTheDocument();
-        });
-
-        it('renders MemoryWrite instruction', () => {
-            const mockData = Buffer.from([1]); // Replace with actual MemoryWrite instruction data
-            jest.spyOn(lighthouseSdk, 'identifyLighthouseInstruction').mockReturnValue(
-                lighthouseSdk.LighthouseInstruction.MemoryWrite
-            );
-
-            render(<LighthouseDetailsCard ix={createInstruction(mockData)} {...defaultProps} />);
-
-            expect(screen.getByText('Lighthouse: Memory Write')).toBeInTheDocument();
-        });
     });
 
     describe('Assert Instructions', () => {
@@ -184,6 +160,41 @@ describe('LighthouseDetailsCard', () => {
             render(<LighthouseDetailsCard ix={ix} {...defaultProps} />);
 
             expect(screen.getByText('Lighthouse: Assert Upgradeable Loader Account')).toBeInTheDocument();
+
+            const accountRow = screen.getByTestId('account-row-0');
+            expect(accountRow).toHaveTextContent('Target Account');
+            expect(accountRow).toHaveTextContent('DatucYgNGQn1qtsAJ7LDzt3n2mZstbTuLqyXDGbEwZDP');
+
+            const ixArgs0a = screen.getByTestId('ix-args-0-1');
+            expect(ixArgs0a).toHaveTextContent('logLevel');
+            expect(ixArgs0a).toHaveTextContent('number');
+            expect(ixArgs0a).toHaveTextContent('4');
+
+            const ixArgs0b = screen.getByTestId('ix-args-0-2');
+            expect(ixArgs0b).toHaveTextContent('assertion');
+            expect(ixArgs0b).toHaveTextContent('ProgramData');
+
+            const ixArgs1 = screen.getByTestId('ix-args-1-1');
+            expect(ixArgs1).toHaveTextContent('fields');
+            expect(ixArgs1).toHaveTextContent('Array[1]');
+
+            const ixArgs2 = screen.getByTestId('ix-args-2-0');
+            expect(ixArgs2).toHaveTextContent('#0');
+            expect(ixArgs2).toHaveTextContent('UpgradeAuthority');
+
+            const ixArgs3a = screen.getByTestId('ix-args-3-1');
+            expect(ixArgs3a).toHaveTextContent('value');
+            expect(ixArgs3a).toHaveTextContent('Option(Some)');
+
+            const ixArgs4b = screen.getByTestId('ix-args-4-1');
+            expect(ixArgs4b).toHaveTextContent('value');
+            expect(ixArgs4b).toHaveTextContent('pubkey');
+            expect(ixArgs4b).toHaveTextContent('2W7rVWpiRMzex7sGBnww6sozQp94xFBzCGYUzUKZw2X4');
+
+            const ixArgs3b = screen.getByTestId('ix-args-3-2');
+            expect(ixArgs3b).toHaveTextContent('operator');
+            expect(ixArgs3b).toHaveTextContent('string');
+            expect(ixArgs3b).toHaveTextContent('=');
         });
     });
 
