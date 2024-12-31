@@ -72,7 +72,8 @@ describe('LighthouseDetailsCard', () => {
     });
 
     describe('Assert Instructions', () => {
-        it('renders AssertSysvarClock instruction', () => {
+        it('renders Assert Sysvar Clock instruction', () => {
+            // 5dakXwp5QTySbvc6P1Wp9MLZubnnG4R1Dh6cWSgNv6w1xt2JMsTp7EZvWEUxk9YLbJZHG97TT3jMVJ4yMTXKjM2L
             const ix = {
                 data: Buffer.from([15, 0, 0, 166, 238, 134, 18, 0, 0, 0, 0, 3]),
                 keys: [],
@@ -82,9 +83,29 @@ describe('LighthouseDetailsCard', () => {
             render(<LighthouseDetailsCard ix={ix} {...defaultProps} />);
 
             expect(screen.getByText('Lighthouse: Assert Sysvar Clock')).toBeInTheDocument();
+
+            const ixArgs0a = screen.getByTestId('ix-args-0-1');
+            expect(ixArgs0a).toHaveTextContent('logLevel');
+            expect(ixArgs0a).toHaveTextContent('number');
+            expect(ixArgs0a).toHaveTextContent('0');
+
+            const ixArgs0b = screen.getByTestId('ix-args-0-2');
+            expect(ixArgs0b).toHaveTextContent('assertion');
+            expect(ixArgs0b).toHaveTextContent('Slot');
+
+            const ixArgs1 = screen.getByTestId('ix-args-1-1');
+            expect(ixArgs1).toHaveTextContent('value');
+            expect(ixArgs1).toHaveTextContent('bignum');
+            expect(ixArgs1).toHaveTextContent('310832806');
+
+            const ixArgs2 = screen.getByTestId('ix-args-1-2');
+            expect(ixArgs2).toHaveTextContent('operator');
+            expect(ixArgs2).toHaveTextContent('string');
+            expect(ixArgs2).toHaveTextContent('<');
         });
 
         it('renders Assert Account Info instruction', () => {
+            // 43PnzYerXr5b4LNf8A1j8kqztt8Voa7oiL9pzDTmWwSKCeLdZbLLJRd9A2XebiJvRP6kjNW6pF4mnGYnbSsRNXoU
             const ix = {
                 data: Buffer.from([5, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
                 keys: [
@@ -100,9 +121,33 @@ describe('LighthouseDetailsCard', () => {
             render(<LighthouseDetailsCard ix={ix} {...defaultProps} />);
 
             expect(screen.getByText('Lighthouse: Assert Account Info')).toBeInTheDocument();
+
+            const accountRow = screen.getByTestId('account-row-0');
+            expect(accountRow).toHaveTextContent('Target Account');
+            expect(accountRow).toHaveTextContent('AUuYypaXez7kXWWWYecmsb89prMCnba6g2tBWm3BxKQV');
+
+            const ixArgs0a = screen.getByTestId('ix-args-0-1');
+            expect(ixArgs0a).toHaveTextContent('logLevel');
+            expect(ixArgs0a).toHaveTextContent('number');
+            expect(ixArgs0a).toHaveTextContent('4');
+
+            const ixArgs0b = screen.getByTestId('ix-args-0-2');
+            expect(ixArgs0b).toHaveTextContent('assertion');
+            expect(ixArgs0b).toHaveTextContent('Lamports');
+
+            const ixArgs1 = screen.getByTestId('ix-args-1-1');
+            expect(ixArgs1).toHaveTextContent('value');
+            expect(ixArgs1).toHaveTextContent('bignum');
+            expect(ixArgs1).toHaveTextContent('0');
+
+            const ixArgs2 = screen.getByTestId('ix-args-1-2');
+            expect(ixArgs2).toHaveTextContent('operator');
+            expect(ixArgs2).toHaveTextContent('string');
+            expect(ixArgs2).toHaveTextContent('=');
         });
 
         it('renders Assert Token Account instruction', () => {
+            // 5ZtLCLaUGDVXyCZhKLiiNTFqasqUAwahpEeFNHM86amL2awLDByWkuWAdz6C7gdt1GRmfDbjUooh8ozL6a5LUyeZ
             const ix = {
                 data: Buffer.from([9, 0, 2, 102, 198, 105, 197, 1, 0, 0, 0, 2]),
                 keys: [
@@ -118,9 +163,33 @@ describe('LighthouseDetailsCard', () => {
             render(<LighthouseDetailsCard ix={ix} {...defaultProps} />);
 
             expect(screen.getByText('Lighthouse: Assert Token Account')).toBeInTheDocument();
+
+            const accountRow = screen.getByTestId('account-row-0');
+            expect(accountRow).toHaveTextContent('Target Account');
+            expect(accountRow).toHaveTextContent('5bjPLjnXeCfVPa3khXYzdiHaUYrW6zwveZywNJydaumJ');
+
+            const ixArgs0a = screen.getByTestId('ix-args-0-1');
+            expect(ixArgs0a).toHaveTextContent('logLevel');
+            expect(ixArgs0a).toHaveTextContent('number');
+            expect(ixArgs0a).toHaveTextContent('0');
+
+            const ixArgs0b = screen.getByTestId('ix-args-0-2');
+            expect(ixArgs0b).toHaveTextContent('assertion');
+            expect(ixArgs0b).toHaveTextContent('Amount');
+
+            const ixArgs1 = screen.getByTestId('ix-args-1-1');
+            expect(ixArgs1).toHaveTextContent('value');
+            expect(ixArgs1).toHaveTextContent('bignum');
+            expect(ixArgs1).toHaveTextContent('7607010918');
+
+            const ixArgs2 = screen.getByTestId('ix-args-1-2');
+            expect(ixArgs2).toHaveTextContent('operator');
+            expect(ixArgs2).toHaveTextContent('string');
+            expect(ixArgs2).toHaveTextContent('>');
         });
 
         it('renders Assert Bubblegum Tree Config instruction', () => {
+            // 5WA6DR6vBbyk6wsyxfFAQcsyFLLFamPFKWwgYMSpWbFdUBCCP2WweVggGKtrnJmUa8yyZE5ykqeaQe97daxpPMKZ
             const ix = {
                 data: Buffer.from([
                     17, 4, 1, 2, 134, 9, 147, 82, 122, 185, 62, 253, 58, 44, 51, 49, 20, 153, 54, 6, 230, 246, 131, 112,
@@ -139,9 +208,33 @@ describe('LighthouseDetailsCard', () => {
             render(<LighthouseDetailsCard ix={ix} {...defaultProps} />);
 
             expect(screen.getByText('Lighthouse: Assert Bubblegum Tree Config Account')).toBeInTheDocument();
+
+            const accountRow = screen.getByTestId('account-row-0');
+            expect(accountRow).toHaveTextContent('Target Account');
+            expect(accountRow).toHaveTextContent('FMPNEcpSDsAskMHGtB6b6vh4CipN9NNdhWtHKTDqZ9oS');
+
+            const ixArgs0a = screen.getByTestId('ix-args-0-1');
+            expect(ixArgs0a).toHaveTextContent('logLevel');
+            expect(ixArgs0a).toHaveTextContent('number');
+            expect(ixArgs0a).toHaveTextContent('4');
+
+            const ixArgs0b = screen.getByTestId('ix-args-0-2');
+            expect(ixArgs0b).toHaveTextContent('assertion');
+            expect(ixArgs0b).toHaveTextContent('TreeDelegate');
+
+            const ixArgs1 = screen.getByTestId('ix-args-1-1');
+            expect(ixArgs1).toHaveTextContent('value');
+            expect(ixArgs1).toHaveTextContent('pubkey');
+            expect(ixArgs1).toHaveTextContent('ArMorTp7EVn3SVVo8SJ92BiJAKETEczng6fyN743W3e');
+
+            const ixArgs2 = screen.getByTestId('ix-args-1-2');
+            expect(ixArgs2).toHaveTextContent('operator');
+            expect(ixArgs2).toHaveTextContent('string');
+            expect(ixArgs2).toHaveTextContent('=');
         });
 
         it('renders Assert Upgradeable Loader Account instruction', () => {
+            // 2PmrAtG26M6g8YiokmgbqrJYT4Rhe3kRN3AY3WCcu7NPuX4Jc4aiXoNb5aZuFK48vYhm8pDmwZhVZ9sP6KMAdsKw
             const ix = {
                 data: Buffer.from([
                     13, 4, 3, 0, 1, 22, 81, 71, 137, 179, 144, 181, 85, 107, 85, 94, 131, 115, 192, 111, 181, 1, 164,
@@ -221,16 +314,15 @@ describe('LighthouseDetailsCard', () => {
             expect(screen.getByText('Lighthouse: Assert Token Account Multi')).toBeInTheDocument();
         });
 
-        it('renders AssertAccountInfoMulti instruction', () => {
+        it('renders Assert Account Info Multi instruction', () => {
+            // 6LHBhFVLwuqiH93znCkyzMBZCkye5eHSBBeNZsz7m7M4SmJny9PQkiWtzdquEQvPfHVmn6bT6AeMa4pjNCVbefA
             const ix = {
-                data: Buffer.from([
-                    6, 5, 3, 0, 139, 61, 114, 1, 0, 0, 0, 0, 4, 0, 61, 17, 105, 2, 0, 0, 0, 0, 5, 3, 0, 0,
-                ]),
+                data: Buffer.from([6, 5, 3, 0, 112, 1, 103, 2, 0, 0, 0, 0, 4, 0, 100, 2, 1, 4, 0, 0, 0, 0, 5, 3, 0, 0]),
                 keys: [
                     {
                         isSigner: false,
                         isWritable: false,
-                        pubkey: new PublicKey('H2596LHcqWoaX3MAtTCZdtJixdL8K6ZLHLkQ8QmU2rVb'),
+                        pubkey: new PublicKey('FZLY576gVwyD6rEosP72pRUC9TAe7LhgvoSepk3F63PY'),
                     },
                 ],
                 programId: new PublicKey('L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95'),
@@ -239,9 +331,68 @@ describe('LighthouseDetailsCard', () => {
             render(<LighthouseDetailsCard ix={ix} {...defaultProps} />);
 
             expect(screen.getByText('Lighthouse: Assert Account Info Multi')).toBeInTheDocument();
+
+            const accountRow = screen.getByTestId('account-row-0');
+            expect(accountRow).toHaveTextContent('Target Account');
+            expect(accountRow).toHaveTextContent('FZLY576gVwyD6rEosP72pRUC9TAe7LhgvoSepk3F63PY');
+
+            const ixArgs0a = screen.getByTestId('ix-args-0-1');
+            expect(ixArgs0a).toHaveTextContent('logLevel');
+            expect(ixArgs0a).toHaveTextContent('number');
+            expect(ixArgs0a).toHaveTextContent('5');
+
+            const ixArgs0b = screen.getByTestId('ix-args-0-2');
+            expect(ixArgs0b).toHaveTextContent('assertions');
+            expect(ixArgs0b).toHaveTextContent('Array[3]');
+
+            // Two of the followingrows have the same data-testid 'ix-args-1-0'
+            const ixArgs0bChildren = ixArgs0b.nextElementSibling;
+
+            const ixArgs1a = ixArgs0bChildren;
+            expect(ixArgs1a).toHaveTextContent('#0');
+            expect(ixArgs1a).toHaveTextContent('Lamports');
+
+            const ixArgs1aChild0 = ixArgs1a.nextElementSibling;
+            expect(ixArgs1aChild0).toHaveTextContent('value');
+            expect(ixArgs1aChild0).toHaveTextContent('bignum');
+            expect(ixArgs1aChild0).toHaveTextContent('40305008');
+
+            const ixArgs1aChild1 = ixArgs1aChild0.nextElementSibling;
+            expect(ixArgs1aChild1).toHaveTextContent('operator');
+            expect(ixArgs1aChild1).toHaveTextContent('string');
+            expect(ixArgs1aChild1).toHaveTextContent('>=');
+
+            const ixArgs1b = ixArgs1aChild1.nextElementSibling;
+            expect(ixArgs1b).toHaveTextContent('#1');
+            expect(ixArgs1b).toHaveTextContent('Lamports');
+
+            const ixArgs1bChild0 = ixArgs1b.nextElementSibling;
+            expect(ixArgs1bChild0).toHaveTextContent('value');
+            expect(ixArgs1bChild0).toHaveTextContent('bignum');
+            expect(ixArgs1bChild0).toHaveTextContent('67175012');
+
+            const ixArgs1bChild1 = ixArgs1bChild0.nextElementSibling;
+            expect(ixArgs1bChild1).toHaveTextContent('operator');
+            expect(ixArgs1bChild1).toHaveTextContent('string');
+            expect(ixArgs1bChild1).toHaveTextContent('<=');
+
+            const ixArgs1c = ixArgs1bChild1.nextElementSibling;
+            expect(ixArgs1c).toHaveTextContent('#2');
+            expect(ixArgs1c).toHaveTextContent('KnownOwner');
+
+            const ixArgs1cChild0 = ixArgs1c.nextElementSibling;
+            expect(ixArgs1cChild0).toHaveTextContent('value');
+            expect(ixArgs1cChild0).toHaveTextContent('number');
+            expect(ixArgs1cChild0).toHaveTextContent('0');
+
+            const ixArgs1cChild1 = ixArgs1cChild0.nextElementSibling;
+            expect(ixArgs1cChild1).toHaveTextContent('operator');
+            expect(ixArgs1cChild1).toHaveTextContent('string');
+            expect(ixArgs1cChild1).toHaveTextContent('=');
         });
 
-        it('renders AssertStakeAccountMulti instruction', () => {
+        it('renders Assert Stake Account Multi instruction', () => {
+            // 6LHBhFVLwuqiH93znCkyzMBZCkye5eHSBBeNZsz7m7M4SmJny9PQkiWtzdquEQvPfHVmn6bT6AeMa4pjNCVbefA
             const ix = {
                 data: Buffer.from([
                     12, 5, 3, 1, 2, 216, 76, 74, 189, 47, 32, 227, 219, 8, 122, 136, 58, 66, 174, 136, 66, 117, 115, 83,
@@ -262,6 +413,91 @@ describe('LighthouseDetailsCard', () => {
             render(<LighthouseDetailsCard ix={ix} {...defaultProps} />);
 
             expect(screen.getByText('Lighthouse: Assert Stake Account Multi')).toBeInTheDocument();
+
+            const accountRow = screen.getByTestId('account-row-0');
+            expect(accountRow).toHaveTextContent('Target Account');
+            expect(accountRow).toHaveTextContent('2mWhJDFtX2LGKggEPVhznvs8cPzy5HM8HhsVPj5YxqA8');
+
+            const ixArgs0a = screen.getByTestId('ix-args-0-1');
+            expect(ixArgs0a).toHaveTextContent('logLevel');
+            expect(ixArgs0a).toHaveTextContent('number');
+            expect(ixArgs0a).toHaveTextContent('5');
+
+            const ixArgs0b = screen.getByTestId('ix-args-0-2');
+            expect(ixArgs0b).toHaveTextContent('assertions');
+            expect(ixArgs0b).toHaveTextContent('Array[3]');
+
+            // Two of the followingrows have the same data-testid 'ix-args-1-0'
+            const ixArgs0bChildren = ixArgs0b.nextElementSibling;
+
+            // 1st assertion
+            let next = ixArgs0bChildren;
+            expect(next).toHaveTextContent('#0');
+            expect(next).toHaveTextContent('MetaAssertion');
+
+            next = next.nextElementSibling;
+            expect(next).toHaveTextContent('fields');
+            expect(next).toHaveTextContent('Array[1]');
+
+            next = next.nextElementSibling;
+            expect(next).toHaveTextContent('#0');
+            expect(next).toHaveTextContent('AuthorizedWithdrawer');
+
+            next = next.nextElementSibling;
+            expect(next).toHaveTextContent('value');
+            expect(next).toHaveTextContent('pubkey');
+            expect(next).toHaveTextContent('FZLY576gVwyD6rEosP72pRUC9TAe7LhgvoSepk3F63PY');
+
+            next = next.nextElementSibling;
+            expect(next).toHaveTextContent('operator');
+            expect(next).toHaveTextContent('string');
+            expect(next).toHaveTextContent('=');
+
+            // 2nd assertion
+            next = next.nextElementSibling;
+            expect(next).toHaveTextContent('#1');
+            expect(next).toHaveTextContent('MetaAssertion');
+
+            next = next.nextElementSibling;
+            expect(next).toHaveTextContent('fields');
+            expect(next).toHaveTextContent('Array[1]');
+
+            next = next.nextElementSibling;
+            expect(next).toHaveTextContent('#0');
+            expect(next).toHaveTextContent('AuthorizedStaker');
+
+            next = next.nextElementSibling;
+            expect(next).toHaveTextContent('value');
+            expect(next).toHaveTextContent('pubkey');
+            expect(next).toHaveTextContent('FZLY576gVwyD6rEosP72pRUC9TAe7LhgvoSepk3F63PY');
+
+            next = next.nextElementSibling;
+            expect(next).toHaveTextContent('operator');
+            expect(next).toHaveTextContent('string');
+            expect(next).toHaveTextContent('=');
+
+            // 3rd assertion
+            next = next.nextElementSibling;
+            expect(next).toHaveTextContent('#2');
+            expect(next).toHaveTextContent('StakeAssertion');
+
+            next = next.nextElementSibling;
+            expect(next).toHaveTextContent('fields');
+            expect(next).toHaveTextContent('Array[1]');
+
+            next = next.nextElementSibling;
+            expect(next).toHaveTextContent('#0');
+            expect(next).toHaveTextContent('DelegationStake');
+
+            next = next.nextElementSibling;
+            expect(next).toHaveTextContent('value');
+            expect(next).toHaveTextContent('bignum');
+            expect(next).toHaveTextContent('2200000');
+
+            next = next.nextElementSibling;
+            expect(next).toHaveTextContent('operator');
+            expect(next).toHaveTextContent('string');
+            expect(next).toHaveTextContent('>=');
         });
     });
 });

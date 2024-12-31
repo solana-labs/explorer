@@ -92,6 +92,7 @@ function parseLighthouseInstruction(ix: ReturnType<typeof upcastTransactionInstr
         }
         return pix;
     };
+
     switch (identifyLighthouseInstruction(ix)) {
         case LighthouseInstruction.MemoryClose:
             title = 'Memory Close';
@@ -167,86 +168,15 @@ function parseLighthouseInstruction(ix: ReturnType<typeof upcastTransactionInstr
             return { info, title };
     }
 }
+
 // First define the field types
-type IntegerField = {
-    __kind:
-        | 'RentExemptReserve'
-        | 'LockupEpoch'
-        | 'LockupUnixTimestamp'
-        | 'DelegationStake'
-        | 'DelegationActivationEpoch'
-        | 'DelegationDeactivationEpoch'
-        | 'CreditsObserved'
-        | 'Slot';
-    operator: IntegerOperator;
-};
-
-type EquatableField = {
-    __kind:
-        | 'AuthorizedWithdrawer'
-        | 'LockupCustodian'
-        | 'AuthorizedStaker'
-        | 'DelegationVoterPubkey'
-        | 'Authority'
-        | 'ProgramDataAddress'
-        | 'UpgradeAuthority';
-    operator: EquatableOperator;
-};
-
-type AssertionField = IntegerField | EquatableField;
-
-type ComplexAssertion = {
-    __kind: 'MetaAssertion' | 'StakeAssertion' | 'Buffer' | 'Program' | 'ProgramData';
-    fields: AssertionField[];
-};
-
 type IntegerAssertion = {
-    __kind:
-        | 'State'
-        | 'U8'
-        | 'I8'
-        | 'U16'
-        | 'I16'
-        | 'U32'
-        | 'I32'
-        | 'U64'
-        | 'I64'
-        | 'I128'
-        | 'U128'
-        | 'Lamports'
-        | 'DataLength'
-        | 'RentEpoch'
-        | 'TotalMintCapacity'
-        | 'NumMinted'
-        | 'Supply'
-        | 'Decimals'
-        | 'Amount'
-        | 'DelegatedAmount';
+    __kind: (typeof INTEGER_ASSERTION_KINDS)[number];
     operator: IntegerOperator;
 };
 
 type EquatableAssertion = {
-    __kind:
-        | 'StakeFlags'
-        | 'CloseAuthority'
-        | 'Delegate'
-        | 'IsNative'
-        | 'Mint'
-        | 'FreezeAuthority'
-        | 'IsInitialized'
-        | 'Pubkey'
-        | 'MintAuthority'
-        | 'TreeCreator'
-        | 'TreeDelegate'
-        | 'Bytes'
-        | 'IsPublic'
-        | 'IsDecompressible'
-        | 'KnownOwner'
-        | 'IsSigner'
-        | 'IsWritable'
-        | 'Executable'
-        | 'Bool'
-        | 'Owner';
+    __kind: (typeof EQUATABLE_ASSERTION_KINDS)[number];
     operator: EquatableOperator;
 };
 
@@ -260,6 +190,11 @@ type OffsetAssertion = {
 };
 
 type Assertion = IntegerAssertion | EquatableAssertion | ComplexAssertion | NoOperatorAssertion;
+
+type ComplexAssertion = {
+    __kind: 'MetaAssertion' | 'StakeAssertion' | 'Buffer' | 'Program' | 'ProgramData';
+    fields: Assertion[];
+};
 
 function renderEnumsAsStrings(assertion: Assertion | OffsetAssertion): any {
     // Handle offset assertions first
@@ -292,9 +227,9 @@ function renderEnumsAsStrings(assertion: Assertion | OffsetAssertion): any {
             ...assertion,
             fields: assertion.fields.map(field => {
                 let operator = '';
-                if (isIntegerField(field)) {
+                if (isIntegerAssertion(field)) {
                     operator = renderIntegerOperator(field.operator);
-                } else if (isEquatableField(field)) {
+                } else if (isEquatableAssertion(field)) {
                     operator = renderEquatableOperator(field.operator);
                 }
                 return { ...field, operator };
@@ -305,92 +240,88 @@ function renderEnumsAsStrings(assertion: Assertion | OffsetAssertion): any {
     return assertion;
 }
 
-// Type guards
+const INTEGER_ASSERTION_KINDS = [
+    'State',
+    'U8',
+    'I8',
+    'U16',
+    'I16',
+    'U32',
+    'I32',
+    'U64',
+    'I64',
+    'I128',
+    'U128',
+    'Lamports',
+    'DataLength',
+    'RentEpoch',
+    'TotalMintCapacity',
+    'NumMinted',
+    'Supply',
+    'Decimals',
+    'Amount',
+    'DelegatedAmount',
+    'RentExemptReserve',
+    'LockupEpoch',
+    'LockupUnixTimestamp',
+    'DelegationStake',
+    'DelegationActivationEpoch',
+    'DelegationDeactivationEpoch',
+    'CreditsObserved',
+    'Slot',
+    'RentExemptReserve',
+    'LockupEpoch',
+    'LockupUnixTimestamp',
+];
+
+const EQUATABLE_ASSERTION_KINDS = [
+    'StakeFlags',
+    'CloseAuthority',
+    'Delegate',
+    'IsNative',
+    'Mint',
+    'FreezeAuthority',
+    'IsInitialized',
+    'Pubkey',
+    'MintAuthority',
+    'TreeCreator',
+    'TreeDelegate',
+    'Bytes',
+    'IsPublic',
+    'IsDecompressible',
+    'UpgradeAuthority',
+    'AuthorizedWithdrawer',
+    'LockupCustodian',
+    'AuthorizedStaker',
+    'DelegationVoterPubkey',
+    'Authority',
+    'ProgramDataAddress',
+    'KnownOwner',
+    'IsSigner',
+    'IsWritable',
+    'Executable',
+    'Bool',
+    'Owner',
+];
+
 function isIntegerAssertion(assertion: Assertion): assertion is IntegerAssertion {
-    const integerKinds = [
-        'State',
-        'U8',
-        'I8',
-        'U16',
-        'I16',
-        'U32',
-        'I32',
-        'U64',
-        'I64',
-        'I128',
-        'U128',
-        'Lamports',
-        'DataLength',
-        'RentEpoch',
-        'TotalMintCapacity',
-        'NumMinted',
-        'Supply',
-        'Decimals',
-        'Amount',
-        'DelegatedAmount',
-    ];
-    return integerKinds.includes(assertion.__kind);
+    return INTEGER_ASSERTION_KINDS.includes(assertion.__kind);
 }
 
 function isEquatableAssertion(assertion: Assertion): assertion is EquatableAssertion {
-    const equatableKinds = [
-        'StakeFlags',
-        'CloseAuthority',
-        'Delegate',
-        'IsNative',
-        'Mint',
-        'FreezeAuthority',
-        'IsInitialized',
-        'Pubkey',
-        'MintAuthority',
-        'TreeCreator',
-        'TreeDelegate',
-        'Bytes',
-        'IsPublic',
-        'IsDecompressible',
-        'KnownOwner',
-        'IsSigner',
-        'IsWritable',
-        'Executable',
-        'Bool',
-        'Owner',
-    ];
-    return equatableKinds.includes(assertion.__kind);
+    return EQUATABLE_ASSERTION_KINDS.includes(assertion.__kind);
 }
 
 function isComplexAssertion(assertion: Assertion): assertion is ComplexAssertion {
     return ['MetaAssertion', 'StakeAssertion', 'Buffer', 'Program', 'ProgramData'].includes(assertion.__kind);
 }
 
-function isIntegerField(field: AssertionField): field is IntegerField {
-    const integerFields = [
-        'RentExemptReserve',
-        'LockupEpoch',
-        'LockupUnixTimestamp',
-        'DelegationStake',
-        'DelegationActivationEpoch',
-        'DelegationDeactivationEpoch',
-        'CreditsObserved',
-        'Slot',
-    ];
-    return integerFields.includes(field.__kind);
-}
-
-function isEquatableField(field: AssertionField): field is EquatableField {
-    const equatableFields = [
-        'AuthorizedWithdrawer',
-        'LockupCustodian',
-        'AuthorizedStaker',
-        'DelegationVoterPubkey',
-        'Authority',
-        'ProgramDataAddress',
-        'UpgradeAuthority',
-    ];
-    return equatableFields.includes(field.__kind);
-}
-
 function renderIntegerOperator(operator: IntegerOperator) {
     switch (operator) {
+        case IntegerOperator.Equal:
+            return '=';
+        case IntegerOperator.NotEqual:
+            return '!=';
         case IntegerOperator.GreaterThan:
             return '>';
         case IntegerOperator.LessThan:
@@ -399,10 +330,6 @@ function renderIntegerOperator(operator: IntegerOperator) {
             return '>=';
         case IntegerOperator.LessThanOrEqual:
             return '<=';
-        case IntegerOperator.Equal:
-            return '=';
-        case IntegerOperator.NotEqual:
-            return '!=';
         case IntegerOperator.Contains:
             return 'contains';
         case IntegerOperator.DoesNotContain:
