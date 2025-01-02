@@ -6,7 +6,7 @@ import { useAnchorProgram } from '@providers/anchor';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 import { camelToTitleCase, numberWithSeparator, snakeToTitleCase } from '@utils/index';
-import { getProgramName } from '@utils/tx';
+import { programLabel } from '@utils/tx';
 import React, { Fragment, ReactNode, useState } from 'react';
 import { ChevronDown, ChevronUp, CornerDownRight } from 'react-feather';
 import ReactJson from 'react-json-view';
@@ -37,7 +37,10 @@ export function AnchorProgramName({
 }
 
 export function ProgramName({ programId, cluster, url }: { programId: PublicKey; cluster: Cluster; url: string }) {
-    const defaultProgramName = getProgramName(programId.toBase58(), cluster);
+    const defaultProgramName = programLabel(programId.toBase58(), cluster);
+    if (defaultProgramName) {
+        return <>{defaultProgramName}</>;
+    }
     return (
         <React.Suspense fallback={<>{defaultProgramName}</>}>
             <AnchorProgramName programId={programId} url={url} defaultName={defaultProgramName} />
@@ -432,7 +435,7 @@ export function ExpandableRow({
         <>
             <tr
                 style={{
-                    ...(nestingLevel === 0 ? {} : { backgroundColor: '#141816' }),
+                    backgroundColor: '#141816',
                 }}
             >
                 <td className="d-flex flex-row">

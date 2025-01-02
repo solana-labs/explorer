@@ -10,6 +10,7 @@ console.log (`Checking for package peerDependency overrides`);
 
 const remapPeerDependencies = [
   { package: '@solana-program/compute-budget', packageVersion: '0.6.1', peerDependency: '@solana/web3.js', newVersion: '2.0.0' },
+  { package: 'lighthouse-sdk', packageVersion: '2.0.1', peerDependency: '@solana/web3.js', newVersion: '2.0.0' },
 ];
 
 function overridesPeerDependencies(pkg) {

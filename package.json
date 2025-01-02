@@ -43,6 +43,7 @@
         "eslint": "8.39.0",
         "eslint-config-next": "14.2.5",
         "humanize-duration-ts": "^2.1.1",
+        "lighthouse-sdk": "^2.0.1",
         "moment": "^2.29.4",
         "next": "14.2.5",
         "p-limit": "^3.1.0",
@@ -68,6 +69,7 @@
     "devDependencies": {
         "@solana/eslint-config-solana": "^1.0.1",
         "@solana/prettier-config-solana": "^0.0.2",
+        "@swc/jest": "^0.2.37",
         "@testing-library/jest-dom": "5.16.4",
         "@testing-library/react": "14.0.0",
         "@testing-library/user-event": "14.4.3",

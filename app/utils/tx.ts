@@ -22,7 +22,7 @@ export function getProgramName(address: string, cluster: Cluster): string {
     return `Unknown Program (${address})`;
 }
 
-function programLabel(address: string, cluster: Cluster): string | undefined {
+export function programLabel(address: string, cluster: Cluster): string | undefined {
     const programInfo = PROGRAM_INFO_BY_ID[address];
     if (programInfo && programInfo.deployments.includes(cluster)) {
         return programInfo.name;
