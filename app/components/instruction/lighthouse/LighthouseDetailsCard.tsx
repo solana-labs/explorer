@@ -50,6 +50,7 @@ function upcastTransactionInstruction(ix: TransactionInstruction) {
         programAddress: address(ix.programId.toBase58()),
     };
 }
+
 type ParsedCodamaInstruction = {
     programAddress: TAddress;
     accounts?: Record<string, IAccountMeta>;
@@ -78,6 +79,7 @@ export function LighthouseDetailsCard({
         </InstructionCard>
     );
 }
+
 function parseLighthouseInstruction(ix: ReturnType<typeof upcastTransactionInstruction>) {
     let title = 'Unknown';
     let info: ParsedCodamaInstruction;
