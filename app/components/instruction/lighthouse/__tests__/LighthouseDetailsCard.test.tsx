@@ -289,6 +289,201 @@ describe('LighthouseDetailsCard', () => {
             expect(ixArgs3b).toHaveTextContent('string');
             expect(ixArgs3b).toHaveTextContent('=');
         });
+
+        it('Renders Assert Account Delta instruction', () => {
+            // 66hhUzJEyouUj6Zge5kK8UQxKncTbmntXCPeHAL9pLEQQKeAAVKoyTwSRuF59EuMAhJcwgwEgyY6X3svHdSgHZzL
+            const ix = {
+                data: Buffer.from([
+                    4, 1, 0, 0, 0, 0, 31, 10, 250, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 4,
+                ]),
+                keys: [
+                    {
+                        isSigner: false,
+                        isWritable: false,
+                        pubkey: new PublicKey('14gyJnETr2upBHRoCVFfvqcaGGEZuJT1vYXzWCJGJ45h'),
+                    },
+                    {
+                        isSigner: false,
+                        isWritable: false,
+                        pubkey: new PublicKey('6Le7uLy8Y2JvCq5x5huvF3pSQBvP1Y6W325wNpFz4s4u'),
+                    },
+                ],
+                programId: new PublicKey('L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95'),
+            };
+
+            render(<LighthouseDetailsCard ix={ix} {...defaultProps} />);
+
+            expect(screen.getByText('Lighthouse: Assert Account Delta')).toBeInTheDocument();
+
+            const accountRowA = screen.getByTestId('account-row-0');
+            expect(accountRowA).toHaveTextContent('Account A');
+            expect(accountRowA).toHaveTextContent('14gyJnETr2upBHRoCVFfvqcaGGEZuJT1vYXzWCJGJ45h');
+
+            const accountRowB = screen.getByTestId('account-row-1');
+            expect(accountRowB).toHaveTextContent('Account B');
+            expect(accountRowB).toHaveTextContent('6Le7uLy8Y2JvCq5x5huvF3pSQBvP1Y6W325wNpFz4s4u');
+
+            const ixArgs0a = screen.getByTestId('ix-args-0-1');
+            expect(ixArgs0a).toHaveTextContent('logLevel');
+            expect(ixArgs0a).toHaveTextContent('number');
+            expect(ixArgs0a).toHaveTextContent('1');
+
+            const ixArgs0b = screen.getByTestId('ix-args-0-2');
+            expect(ixArgs0b).toHaveTextContent('assertion');
+            expect(ixArgs0b).toHaveTextContent('AccountInfo');
+
+            const ixArgs1 = screen.getByTestId('ix-args-1-1');
+            expect(ixArgs1).toHaveTextContent('aOffset');
+            expect(ixArgs1).toHaveTextContent('0');
+
+            const ixArgs2 = screen.getByTestId('ix-args-1-2');
+            expect(ixArgs2).toHaveTextContent('assertion');
+            expect(ixArgs2).toHaveTextContent('Lamports');
+
+            const ixArgs3 = screen.getByTestId('ix-args-2-1');
+            expect(ixArgs3).toHaveTextContent('value');
+            expect(ixArgs3).toHaveTextContent('bignum');
+            expect(ixArgs3).toHaveTextContent('-100000000');
+
+            const ixArgs4 = screen.getByTestId('ix-args-2-2');
+            expect(ixArgs4).toHaveTextContent('operator');
+            expect(ixArgs4).toHaveTextContent('string');
+            expect(ixArgs4).toHaveTextContent('>=');
+        });
+
+        it('Renders Memory Write instruction', () => {
+            // 66hhUzJEyouUj6Zge5kK8UQxKncTbmntXCPeHAL9pLEQQKeAAVKoyTwSRuF59EuMAhJcwgwEgyY6X3svHdSgHZzL
+            const ix = {
+                data: Buffer.from([0, 0, 254, 0, 1, 1]),
+                keys: [
+                    {
+                        isSigner: false,
+                        isWritable: false,
+                        pubkey: new PublicKey('L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95'),
+                    },
+                    { isSigner: false, isWritable: false, pubkey: new PublicKey('11111111111111111111111111111111') },
+                    {
+                        isSigner: false,
+                        isWritable: false,
+                        pubkey: new PublicKey('6Le7uLy8Y2JvCq5x5huvF3pSQBvP1Y6W325wNpFz4s4u'),
+                    },
+                    {
+                        isSigner: false,
+                        isWritable: false,
+                        pubkey: new PublicKey('14gyJnETr2upBHRoCVFfvqcaGGEZuJT1vYXzWCJGJ45h'),
+                    },
+                    {
+                        isSigner: false,
+                        isWritable: false,
+                        pubkey: new PublicKey('6Le7uLy8Y2JvCq5x5huvF3pSQBvP1Y6W325wNpFz4s4u'),
+                    },
+                ],
+                programId: new PublicKey('L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95'),
+            };
+
+            render(<LighthouseDetailsCard ix={ix} {...defaultProps} />);
+
+            expect(screen.getByText('Lighthouse: Memory Write')).toBeInTheDocument();
+
+            const accountRow = screen.getByTestId('account-row-0');
+            expect(accountRow).toHaveTextContent('Program Id');
+            expect(accountRow).toHaveTextContent('L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95');
+
+            const accountRow1 = screen.getByTestId('account-row-1');
+            expect(accountRow1).toHaveTextContent('System Program');
+            expect(accountRow1).toHaveTextContent('11111111111111111111111111111111');
+
+            const accountRow2 = screen.getByTestId('account-row-2');
+            expect(accountRow2).toHaveTextContent('Source Account');
+            expect(accountRow2).toHaveTextContent('6Le7uLy8Y2JvCq5x5huvF3pSQBvP1Y6W325wNpFz4s4u');
+
+            const accountRow3 = screen.getByTestId('account-row-3');
+            expect(accountRow3).toHaveTextContent('Memory');
+            expect(accountRow3).toHaveTextContent('14gyJnETr2upBHRoCVFfvqcaGGEZuJT1vYXzWCJGJ45h');
+
+            const accountRow4 = screen.getByTestId('account-row-4');
+            expect(accountRow4).toHaveTextContent('Source Account');
+            expect(accountRow4).toHaveTextContent('6Le7uLy8Y2JvCq5x5huvF3pSQBvP1Y6W325wNpFz4s4u');
+
+            const ixArgs0a = screen.getByTestId('ix-args-0-1');
+            expect(ixArgs0a).toHaveTextContent('memoryId');
+            expect(ixArgs0a).toHaveTextContent('number');
+            expect(ixArgs0a).toHaveTextContent('0');
+
+            const ixArgs0b = screen.getByTestId('ix-args-0-2');
+            expect(ixArgs0b).toHaveTextContent('memoryBump');
+            expect(ixArgs0b).toHaveTextContent('number');
+            expect(ixArgs0b).toHaveTextContent('254');
+
+            const ixArgs0c = screen.getByTestId('ix-args-0-3');
+            expect(ixArgs0c).toHaveTextContent('writeOffset');
+            expect(ixArgs0c).toHaveTextContent('number');
+            expect(ixArgs0c).toHaveTextContent('0');
+
+            const ixArgs0d = screen.getByTestId('ix-args-0-4');
+            expect(ixArgs0d).toHaveTextContent('writeType');
+            expect(ixArgs0d).toHaveTextContent('AccountInfoField');
+
+            const ixArgs1a = screen.getByTestId('ix-args-1-1');
+            expect(ixArgs1a).toHaveTextContent('fields');
+            expect(ixArgs1a).toHaveTextContent('Array[1]');
+
+            const ixArgs1b = screen.getByTestId('ix-args-1-1-0');
+            expect(ixArgs1b).toHaveTextContent('#0');
+            expect(ixArgs1b).toHaveTextContent('number');
+            expect(ixArgs1b).toHaveTextContent('1');
+        });
+
+        it('Renders Memory Close instruction', () => {
+            // 4L7Bfjj8P5GyChqaVmVFbxxgzrhzAkBJU6Tk3DtsL75m35GYTS35q9mQbUUcpffDj2g14xxWRARWFtMUGpeEDxnG
+            const ix = {
+                data: Buffer.from([1, 0, 254]),
+                keys: [
+                    {
+                        isSigner: false,
+                        isWritable: false,
+                        pubkey: new PublicKey('L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95'),
+                    },
+                    {
+                        isSigner: false,
+                        isWritable: false,
+                        pubkey: new PublicKey('6Le7uLy8Y2JvCq5x5huvF3pSQBvP1Y6W325wNpFz4s4u'),
+                    },
+                    {
+                        isSigner: false,
+                        isWritable: false,
+                        pubkey: new PublicKey('14gyJnETr2upBHRoCVFfvqcaGGEZuJT1vYXzWCJGJ45h'),
+                    },
+                ],
+                programId: new PublicKey('L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95'),
+            };
+
+            render(<LighthouseDetailsCard ix={ix} {...defaultProps} />);
+
+            expect(screen.getByText('Lighthouse: Memory Close')).toBeInTheDocument();
+
+            const accountRow = screen.getByTestId('account-row-0');
+            expect(accountRow).toHaveTextContent('Program Id');
+            expect(accountRow).toHaveTextContent('L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95');
+
+            const accountRow1 = screen.getByTestId('account-row-1');
+            expect(accountRow1).toHaveTextContent('Payer');
+            expect(accountRow1).toHaveTextContent('6Le7uLy8Y2JvCq5x5huvF3pSQBvP1Y6W325wNpFz4s4u');
+
+            const accountRow2 = screen.getByTestId('account-row-2');
+            expect(accountRow2).toHaveTextContent('Memory');
+            expect(accountRow2).toHaveTextContent('14gyJnETr2upBHRoCVFfvqcaGGEZuJT1vYXzWCJGJ45h');
+
+            const ixArgs0a = screen.getByTestId('ix-args-0-1');
+            expect(ixArgs0a).toHaveTextContent('memoryId');
+            expect(ixArgs0a).toHaveTextContent('number');
+            expect(ixArgs0a).toHaveTextContent('0');
+
+            const ixArgs0b = screen.getByTestId('ix-args-0-2');
+            expect(ixArgs0b).toHaveTextContent('memoryBump');
+            expect(ixArgs0b).toHaveTextContent('number');
+            expect(ixArgs0b).toHaveTextContent('254');
+        });
     });
 
     describe('Assert Multi Instructions', () => {

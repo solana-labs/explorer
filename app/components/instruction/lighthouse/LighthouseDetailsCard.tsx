@@ -197,11 +197,11 @@ type ComplexAssertion = {
 };
 
 function renderEnumsAsStrings(assertion: Assertion | OffsetAssertion): any {
-    // Handle offset assertions first
-    if ('offset' in assertion) {
+    // Handle offset assertion & AccountInfo assertion
+    if ('offset' in assertion || 'assertion' in assertion) {
         return {
             ...assertion,
-            assertion: renderEnumsAsStrings(assertion.assertion),
+            assertion: renderEnumsAsStrings((assertion as { assertion: Assertion }).assertion),
         };
     }
 
