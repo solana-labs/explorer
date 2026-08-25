@@ -124,7 +124,10 @@ function useNow(ticking: boolean, fixed: number | undefined): number | undefined
 export function Timestamp({ unixTimestamp, display = 'utc', children, referenceMs, className }: TimestampProps) {
     const pinned = usePinnedTimestampDisplay();
     const effective = pinned ?? display;
-    const now = useNow(effective === 'relative', referenceMs);
+    // Tick while the trigger shows a relative label, or while the dropdown is open — its Relative
+    // row is always rendered, so without this it would show the age frozen at page mount.
+    const [open, setOpen] = React.useState(false);
+    const now = useNow(open || effective === 'relative', referenceMs);
 
     const ms = unixTimestamp * 1000;
     const labels: Record<TimestampDisplay, string> = {
@@ -143,7 +146,7 @@ export function Timestamp({ unixTimestamp, display = 'utc', children, referenceM
     ];
 
     return (
-        <Popover>
+        <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
                 <button
                     type="button"

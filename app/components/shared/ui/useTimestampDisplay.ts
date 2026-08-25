@@ -23,8 +23,14 @@ let cacheValid = false;
 
 function readStorage(): TimestampDisplay | undefined {
     if (typeof window === 'undefined') return undefined;
-    const value = window.localStorage.getItem(STORAGE_KEY);
-    return isTimestampDisplay(value) ? value : undefined;
+    // localStorage access throws when blocked (Safari private mode, sandboxed iframes, storage
+    // policy). Treat persistence as optional: fall back to "not pinned" instead of breaking render.
+    try {
+        const value = window.localStorage.getItem(STORAGE_KEY);
+        return isTimestampDisplay(value) ? value : undefined;
+    } catch {
+        return undefined;
+    }
 }
 
 function subscribe(onChange: () => void): () => void {
@@ -57,8 +63,14 @@ function getServerSnapshot(): TimestampDisplay | undefined {
 /** Pin (or, with `undefined`, clear) the representation every Timestamp shows by default. */
 export function setPinnedTimestampDisplay(value: TimestampDisplay | undefined): void {
     if (typeof window !== 'undefined') {
-        if (value === undefined) window.localStorage.removeItem(STORAGE_KEY);
-        else window.localStorage.setItem(STORAGE_KEY, value);
+        // Persist best-effort: if storage is blocked the write throws, but the in-memory update
+        // below still takes effect so the pin works for this session.
+        try {
+            if (value === undefined) window.localStorage.removeItem(STORAGE_KEY);
+            else window.localStorage.setItem(STORAGE_KEY, value);
+        } catch {
+            // ignore — persistence is optional
+        }
     }
     cached = value;
     cacheValid = true;
