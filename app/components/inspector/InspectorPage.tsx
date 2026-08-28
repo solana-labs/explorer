@@ -26,6 +26,7 @@ import useSWR from 'swr';
 import { Badge } from '@/app/components/shared/ui/badge';
 import { Button } from '@/app/components/shared/ui/button';
 import { useSimulation } from '@/app/features/instruction-simulation/model/use-simulation';
+import { generateTokenBalanceRows, TokenBalancesCardInner } from '@/app/features/transaction';
 import { useCluster } from '@/app/providers/cluster';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
 import { toBase64 } from '@/app/shared/lib/bytes';
@@ -553,7 +554,9 @@ export function PermalinkView({
 // shown disabled until a simulation has run. `merged` tabs collapse into the single "Programs & Logs" tab
 // on the xxl two-column layout (mirrors the TX details page, which merges its Programs and Logs tabs when
 // they sit side by side). SOL Balance Changes has no tab of its own — it is merged into the Accounts table
-// as a "Change" column.
+// as a "Change" column. The `tokens` tab (`requiresTokens`) is dropped until a simulation has produced
+// token-balance changes, mirroring the TX details page which shows its Tokens tab only when the tx touched
+// SPL tokens.
 const BASE_TABS: {
     path: string;
     title: string;
@@ -561,9 +564,11 @@ const BASE_TABS: {
     merged?: boolean;
     requiresSignatures?: boolean;
     requiresLookups?: boolean;
+    requiresTokens?: boolean;
 }[] = [
     { path: 'signatures', requiresSignatures: true, title: 'Signatures' },
     { path: 'accounts', title: 'Accounts' },
+    { path: 'tokens', requiresTokens: true, title: 'Tokens' },
     { path: 'address-lookups', requiresLookups: true, title: 'Address Lookups' },
     { merged: true, path: 'programs', title: 'Programs' },
     { merged: true, path: 'simulation', title: 'Simulation' },
@@ -581,11 +586,13 @@ const BASE_TABS: {
 function LoadedView({
     transaction,
     onClear,
+    showTokenBalanceChanges,
 }: {
     transaction: TransactionData;
     onClear: () => void;
-    // Accepted for call-site compatibility; the match-to-TX layout surfaces balance changes inline in the
-    // Account List rather than a separate token-balance card, so it is not consumed here.
+    // SOL balance changes are surfaced inline in the Account List's "Change" column; token-balance changes
+    // (only available once a simulation runs) render as a separate #tokens section when this is enabled,
+    // mirroring the TX details page's Tokens card.
     showTokenBalanceChanges: boolean;
 }) {
     const { message, rawMessage, signatures, accountBalances, compiledInnerInstructions, version, transactionConfig } =
@@ -602,6 +609,16 @@ function LoadedView({
     const simulation = useSimulation(message, accountBalances);
     const simDone = simulation.status === 'done';
 
+    // Token-balance rows come from the simulation result, so they exist only after a successful run that
+    // touched SPL tokens. Gated behind showTokenBalanceChanges (off for the Squads/permalink callers).
+    const tokenBalanceRows = React.useMemo(() => {
+        if (!showTokenBalanceChanges || simulation.status !== 'done') return undefined;
+        const data = simulation.result.tokenBalanceData;
+        if (!data) return undefined;
+        return generateTokenBalanceRows(data.preTokenBalances, data.postTokenBalances, data.accountKeys);
+    }, [showTokenBalanceChanges, simulation]);
+    const hasTokens = Boolean(tokenBalanceRows?.length);
+
     const hasSignatures = Boolean(signatures);
     const hasLookups = message.addressTableLookups.length > 0;
     // Build the tab list. On xxl the Programs / Simulation / Logs / CU profiling tabs sit in the
@@ -609,7 +626,10 @@ function LoadedView({
     // the rest are dropped — exactly how the TX page merges Programs & Logs when side by side.
     const tabs = React.useMemo(() => {
         const visible = BASE_TABS.filter(
-            t => !(t.requiresSignatures && !hasSignatures) && !(t.requiresLookups && !hasLookups),
+            t =>
+                !(t.requiresSignatures && !hasSignatures) &&
+                !(t.requiresLookups && !hasLookups) &&
+                !(t.requiresTokens && !hasTokens),
         );
         const forXxl = visible
             .filter(t => !(t.merged && t.path !== 'programs'))
@@ -619,7 +639,7 @@ function LoadedView({
             path: t.path,
             title: t.title,
         }));
-    }, [hasSignatures, hasLookups, isXxl, simDone]);
+    }, [hasSignatures, hasLookups, hasTokens, isXxl, simDone]);
 
     return (
         <>
@@ -649,6 +669,10 @@ function LoadedView({
                 <div id="accounts">
                     <AccountsCard message={message} simulation={simulation} />
                 </div>
+                {/* Token balance changes from the simulation. TokenBalancesCardInner brings its own
+                    `#tokens` section anchor; it renders only once a run has produced token rows (matching
+                    the gated Tokens tab above). */}
+                {tokenBalanceRows && tokenBalanceRows.length > 0 && <TokenBalancesCardInner rows={tokenBalanceRows} />}
                 {/* Renders (with its own `#address-lookups` anchor) only when the message references lookup
                     tables — otherwise it returns null, matching the gated tab above. A v1 message carries
                     static accounts only, so there are no lookups to render. */}

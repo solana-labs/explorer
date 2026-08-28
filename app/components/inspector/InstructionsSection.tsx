@@ -110,21 +110,26 @@ export function InstructionsSection({
         <CollapsibleSection id="instructions" title="Instructions" className="">
             <InstructionSurfaceProvider surface={INSPECTOR_SURFACE}>
                 {transactionMessage.instructions.map((ix, index) => {
-                const batchInnerCards = batchByIndex[index]?.map((innerIx, childIndex) => (
-                    <ErrorBoundary key={childIndex} fallback={null}>
-                        <TokenBatchCard index={index} childIndex={childIndex} ix={innerIx} result={INSPECTOR_RESULT} />
-                    </ErrorBoundary>
-                ));
+                    const batchInnerCards = batchByIndex[index]?.map((innerIx, childIndex) => (
+                        <ErrorBoundary key={childIndex} fallback={null}>
+                            <TokenBatchCard
+                                index={index}
+                                childIndex={childIndex}
+                                ix={innerIx}
+                                result={INSPECTOR_RESULT}
+                            />
+                        </ErrorBoundary>
+                    ));
 
-                return (
-                    <InspectorInstructionCard
-                        key={index}
-                        index={index}
-                        ix={ix}
-                        message={message}
-                        innerCards={batchInnerCards}
-                    />
-                );
+                    return (
+                        <InspectorInstructionCard
+                            key={index}
+                            index={index}
+                            ix={ix}
+                            message={message}
+                            innerCards={batchInnerCards}
+                        />
+                    );
                 })}
             </InstructionSurfaceProvider>
         </CollapsibleSection>
