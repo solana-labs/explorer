@@ -21,6 +21,8 @@ export type BaseNavigationTabsProps = {
     buildHref: (path: string) => string;
     children?: React.ReactNode;
     className?: string;
+    /** Hover tooltip shown on disabled tabs (e.g. the gated simulation-derived tabs before a run). */
+    disabledHint?: React.ReactNode;
     onSelectChange?: (path: string) => void;
     onTabClick?: (path: string, e: React.MouseEvent<HTMLAnchorElement>) => void;
     /**
@@ -42,6 +44,7 @@ export function BaseNavigationTabs({
     buildHref,
     children,
     className,
+    disabledHint,
     scrollSpy,
     wrapperClassName,
 }: BaseNavigationTabsProps) {
@@ -52,6 +55,7 @@ export function BaseNavigationTabs({
     const [spyActive, setSpyActive] = useState(() => tabs[0]?.path ?? '');
 
     const staticPaths = useMemo(() => new Set(tabs.map(t => t.path)), [tabs]);
+    const disabledPaths = useMemo(() => new Set(tabs.filter(t => t.disabled).map(t => t.path)), [tabs]);
 
     const allTabs = useMemo(
         () => [...tabs, ...registeredTabs.filter(t => !staticPaths.has(t.path))],
@@ -88,24 +92,19 @@ export function BaseNavigationTabs({
         [scrollToSection],
     );
 
-    useEffect(() => {
-        if (!scrollSpy) return;
-        const el = wrapperRef.current;
-        if (!el) return;
-        const observer = new IntersectionObserver(([entry]) => setStuck(!entry.isIntersecting), {
-            rootMargin: '-1px 0px 0px 0px',
-            threshold: [1],
-        });
-        observer.observe(el);
-        return () => observer.disconnect();
-    }, [scrollSpy]);
-
     useStickyHeaderHeight(wrapperRef, !!scrollSpy);
 
     useEffect(() => {
         if (!scrollSpy) return;
         const update = () => {
-            const tabHeight = (wrapperRef.current ?? tablistRef.current)?.getBoundingClientRect().height ?? 0;
+            const rect = wrapperRef.current?.getBoundingClientRect();
+            // Stuck = the sticky bar has reached the top of the viewport (top: 0). Deriving this from the
+            // bar's vertical position — rather than an IntersectionObserver with threshold 1 — keeps the
+            // shadow correct even when the bar is full-bleed (100vw): a hairline of horizontal overflow
+            // would otherwise drop the intersection ratio below 1 and pin `stuck` on permanently.
+            if (rect) setStuck(rect.top <= 0);
+
+            const tabHeight = rect?.height ?? tablistRef.current?.getBoundingClientRect().height ?? 0;
             // Activate when section is in the upper third of the visible content area
             const threshold = window.scrollY + tabHeight + window.innerHeight * 0.3;
             let active = tabs[0]?.path ?? '';
@@ -141,7 +140,13 @@ export function BaseNavigationTabs({
                 className={cn('inline-flex w-full gap-[18px] overflow-hidden', className)}
             >
                 {visibleTabs.map(tab => (
-                    <TabLink key={tab.path} path={tab.path} title={tab.title} />
+                    <TabLink
+                        key={tab.path}
+                        path={tab.path}
+                        title={tab.title}
+                        disabled={disabledPaths.has(tab.path)}
+                        disabledHint={disabledHint}
+                    />
                 ))}
 
                 {measuring && allTabs.length > 0 && (
@@ -150,7 +155,13 @@ export function BaseNavigationTabs({
                     </div>
                 )}
 
-                {moreTabs.length > 0 && <MobileMoreDropdown tabs={moreTabs} onSelectChange={handleSelectChange} />}
+                {moreTabs.length > 0 && (
+                    <MobileMoreDropdown
+                        tabs={moreTabs}
+                        onSelectChange={handleSelectChange}
+                        disabledPaths={disabledPaths}
+                    />
+                )}
             </div>
 
             {children && (

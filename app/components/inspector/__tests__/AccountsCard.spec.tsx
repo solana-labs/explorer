@@ -26,7 +26,9 @@ describe('inspector::AccountsCard', () => {
         // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
         await waitFor(() => {
             expect(screen.getByText(/Account List/)).toBeInTheDocument();
-            expect(screen.getByText('Account #1')).toBeInTheDocument();
+            // The fee payer (account index 0) carries a Signer badge — rendered from the message header,
+            // independent of on-chain account loading. Both the mobile card and desktop row emit it.
+            expect(screen.getAllByText('Signer').length).toBeGreaterThan(0);
         });
     });
 
@@ -44,7 +46,9 @@ describe('inspector::AccountsCard', () => {
         // waitFor's act() boundary absorbs ClusterProvider's post-mount dispatch
         await waitFor(() => {
             expect(screen.getByText(/Account List/)).toBeInTheDocument();
-            expect(screen.getByText('Account #1')).toBeInTheDocument();
+            // The fee payer (account index 0) carries a Signer badge — rendered from the message header,
+            // independent of on-chain account loading. Both the mobile card and desktop row emit it.
+            expect(screen.getAllByText('Signer').length).toBeGreaterThan(0);
         });
     });
 });

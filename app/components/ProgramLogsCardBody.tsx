@@ -92,11 +92,14 @@ export function ProgramLogsCardBody({
     logs,
     cluster,
     url,
+    className,
 }: {
     message: VersionedMessage | ParsedMessage;
     logs: InstructionLogs[];
     cluster: Cluster;
     url: string;
+    /** Passed through to the underlying table body — used for dense row padding in the inspector panel. */
+    className?: string;
 }) {
     let logIndex = 0;
     let instructionProgramIds: PublicKey[];
@@ -113,7 +116,7 @@ export function ProgramLogsCardBody({
     }
 
     return (
-        <TableCardBody>
+        <TableCardBody className={className}>
             {instructionProgramIds.map((programId, index) => {
                 const programAddress = programId.toBase58();
                 let programLogs: InstructionLogs | undefined = logs[logIndex];
