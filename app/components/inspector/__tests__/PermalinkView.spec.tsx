@@ -35,6 +35,11 @@ vi.mock('@providers/accounts', () => ({
 vi.mock('@features/instruction-simulation', () => ({
     SimulatorCard: () => <div data-testid="simulator-card" />,
 }));
+// LoadedView owns the simulation and builds a Connection eagerly; stub the hook so these overview-only
+// tests don't need a live cluster URL. Idle status keeps the token-balance rows and gated tabs off.
+vi.mock('@/app/features/instruction-simulation/model/use-simulation', () => ({
+    useSimulation: () => ({ simulate: vi.fn(), status: 'idle' }),
+}));
 vi.mock('../AccountsCard', () => ({
     AccountsCard: () => <div data-testid="accounts-card" />,
 }));
@@ -109,7 +114,7 @@ describe('PermalinkView', () => {
         renderView();
 
         expect(screen.queryByText('The inspector does not support v1 transactions')).not.toBeInTheDocument();
-        expect(screen.getByText('Transaction Overview')).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: 'Overview' })).toBeInTheDocument();
         expect(screen.getByText('v1')).toBeInTheDocument();
         expect(screen.getByText('Compute unit limit')).toBeInTheDocument();
         expect(screen.getByText('300,000')).toBeInTheDocument();

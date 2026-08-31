@@ -21,6 +21,12 @@ vi.mock('next/navigation', () => ({
     useSearchParams: vi.fn(),
 }));
 
+// LoadedView owns the simulation and builds a Connection eagerly; stub the hook so this overview-only
+// test doesn't need a live cluster URL. Idle status keeps the token-balance rows and gated tabs off.
+vi.mock('@/app/features/instruction-simulation/model/use-simulation', () => ({
+    useSimulation: () => ({ simulate: vi.fn(), status: 'idle' }),
+}));
+
 describe('TransactionInspectorPage with a v1 ?message= param', () => {
     beforeEach(async () => {
         const { messageBytes } = parseTransactionBytes(
@@ -64,14 +70,14 @@ describe('TransactionInspectorPage with a v1 ?message= param', () => {
             </ScrollAnchorProvider>,
         );
 
-        expect(await screen.findByText('Transaction Overview')).toBeInTheDocument();
+        expect(await screen.findByRole('heading', { name: 'Overview' })).toBeInTheDocument();
         expect(screen.queryByText('Inspector Input')).toBeNull();
         expect(screen.getByText('v1')).toBeInTheDocument();
         expect(screen.getByText('Compute unit limit')).toBeInTheDocument();
         expect(screen.getByText('300,000')).toBeInTheDocument();
         expect(screen.getByText('Priority fee (total)')).toBeInTheDocument();
-        // fee payer, recipient, program
-        expect(screen.getByText('Account List (3)')).toBeInTheDocument();
+        // fee payer, recipient, program — the Account List title no longer carries the account count.
+        expect(screen.getByText('Account List')).toBeInTheDocument();
         // v1 messages carry static accounts only, so neither the lookups card nor the
         // lookup-derived account badges appear.
         expect(screen.queryByText(ADDRESS_TABLE_LOOKUPS_CARD_TITLE)).toBeNull();

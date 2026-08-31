@@ -610,9 +610,11 @@ function LoadedView({
     const simDone = simulation.status === 'done';
 
     // Token-balance rows come from the simulation result, so they exist only after a successful run that
-    // touched SPL tokens. Gated behind showTokenBalanceChanges (off for the Squads/permalink callers).
+    // touched SPL tokens. Gated behind showTokenBalanceChanges (off for the Squads/permalink callers). A
+    // run that finished with an execution error still carries token account data, but its balance changes
+    // are unreliable, so those are dropped rather than shown.
     const tokenBalanceRows = React.useMemo(() => {
-        if (!showTokenBalanceChanges || simulation.status !== 'done') return undefined;
+        if (!showTokenBalanceChanges || simulation.status !== 'done' || simulation.result.error) return undefined;
         const data = simulation.result.tokenBalanceData;
         if (!data) return undefined;
         return generateTokenBalanceRows(data.preTokenBalances, data.postTokenBalances, data.accountKeys);
