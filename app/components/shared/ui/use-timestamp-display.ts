@@ -23,12 +23,38 @@ const baseSubscribe = jsonStorage.subscribe;
 const validatedStorage: typeof jsonStorage = {
     ...jsonStorage,
     getItem: (key, initialValue) => {
-        const value = jsonStorage.getItem(key, initialValue);
-        return isTimestampDisplay(value) ? value : undefined;
+        // Reads are best-effort: if browser policy or an embedded context blocks localStorage, fall
+        // back to "not pinned" instead of throwing out of Timestamp's render.
+        try {
+            const value = jsonStorage.getItem(key, initialValue);
+            return isTimestampDisplay(value) ? value : undefined;
+        } catch {
+            return undefined;
+        }
     },
-    // Clearing the pin (undefined) removes the key rather than persisting the literal string
-    // "undefined" (what JSON.stringify(undefined) would otherwise write to localStorage).
-    setItem: (key, value) => (value === undefined ? jsonStorage.removeItem(key) : jsonStorage.setItem(key, value)),
+    // Removes are best-effort for the same reason writes are (see setItem).
+    removeItem: key => {
+        try {
+            jsonStorage.removeItem(key);
+        } catch {
+            // ignore — the in-memory atom value is still the source of truth for this session.
+        }
+    },
+    // Writes are best-effort: when localStorage is unavailable, the pin still updates the in-memory
+    // atom for this session rather than throwing out of the pin/unpin action. Clearing the pin
+    // (undefined) removes the key rather than persisting the literal string "undefined" (what
+    // JSON.stringify(undefined) would otherwise write to localStorage).
+    setItem: (key, value) => {
+        try {
+            if (value === undefined) {
+                jsonStorage.removeItem(key);
+            } else {
+                jsonStorage.setItem(key, value);
+            }
+        } catch {
+            // ignore — the in-memory atom value is still the source of truth for this session.
+        }
+    },
     subscribe:
         baseSubscribe &&
         ((key, callback, initialValue) =>
