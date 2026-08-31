@@ -3,6 +3,7 @@
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 
+import { FeedbackTrigger } from '@/app/features/feedback';
 import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
 
 export function Footer() {
@@ -16,6 +17,10 @@ export function Footer() {
                         Solana explorer <span>(Beta)</span>
                     </span>
                     <nav className="flex items-center gap-5 text-xs tracking-[-0.24px] text-accent-700">
+                        {/* font-[inherit]: preflight is skipped, so the UA button font must be reset explicitly */}
+                        <FeedbackTrigger className="cursor-pointer border-0 bg-transparent p-0 font-[inherit] text-inherit transition-colors hover:text-accent-500">
+                            Feedback
+                        </FeedbackTrigger>
                         <Link className="transition-colors hover:text-accent-500" href={tosPath}>
                             Terms of Services
                         </Link>

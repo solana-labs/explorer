@@ -210,8 +210,9 @@ const config: Config = {
         },
 
         screens: {
-            'max-sm': getScreenDim('sm', -1),
-            'max-md': getScreenDim('md', -1),
+            // Object form: a bare string would register a min-width screen, inverting the intent
+            'max-sm': { max: getScreenDim('sm', 0) },
+            'max-md': { max: getScreenDim('md', 0) },
             xxs: getScreenDim('xxs'),
             xs: getScreenDim('xs'),
             sm: getScreenDim('sm'),

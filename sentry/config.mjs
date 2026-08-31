@@ -4,11 +4,18 @@
 
 /**
  * Creates the common Sentry configuration for all runtimes
- * @param {RuntimeContext} _context - The runtime context (client, server, or edge)
+ * @param {RuntimeContext} context - The runtime context (client, server, or edge)
  * @returns {import('@sentry/core').Options} Sentry configuration options
  */
-export function createSentryConfig(_context) {
+export function createSentryConfig(context) {
     return {
+        // Client bundles only see inlined NEXT_PUBLIC_* literals (the browser SDK has no env
+        // fallback); server/edge prefer SENTRY_DSN but accept the public DSN, so one var covers all.
+        dsn:
+            context === 'client'
+                ? process.env.NEXT_PUBLIC_SENTRY_DSN
+                : process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN,
+
         sampleRate: 1,
 
         // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.

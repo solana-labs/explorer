@@ -13,6 +13,7 @@ vi.mock('@/app/shared/lib/logger', () => ({
 // Global no-op mock for Sentry to avoid @sentry/nextjs import issues in tests.
 vi.mock('@/app/shared/lib/sentry', () => ({
     SentryErrorBoundary: ({ children }: { children: React.ReactNode }) => children,
+    captureFeedback: vi.fn(() => 'test-event-id'),
     withTraceData: vi.fn(() => ({})),
 }));
 

@@ -8,6 +8,7 @@
  */
 export {
     addBreadcrumb,
+    captureFeedback,
     startSpan,
     setTag,
     setExtra,
