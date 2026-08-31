@@ -1,58 +1,42 @@
-import { InstructionDetailsProps } from '@features/transaction';
-import { AddressLookupTableProgram, PublicKey } from '@solana/web3.js';
+import { address, custom, defineInstructionCard, useInstructionSurface } from '@entities/instruction-card';
+import type { PublicKey } from '@solana/web3.js';
 
-import { Address } from '@/app/components/common/Address';
-import { InstructionCard } from '@/app/components/instruction/InstructionCard';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import { ExtendLookupTableInfo } from './types';
 
-export function ExtendLookupTableDetailsCard(props: InstructionDetailsProps & { info: ExtendLookupTableInfo }) {
-    const { ix, index, result, innerCards, childIndex, info } = props;
+export const ExtendLookupTableDetailsCard = defineInstructionCard<ExtendLookupTableInfo>({
+    fields: info => [
+        address('Lookup Table', info.lookupTableAccount),
+        address('Lookup Table Authority', info.lookupTableAuthority),
+        custom('New Addresses', <NewAddresses addresses={info.newAddresses} />),
+    ],
+    title: 'Address Lookup Table: Extend Lookup Table',
+});
+
+/**
+ * A whole table in one cell, which no field kind describes — so it takes the
+ * `custom` door and reads the address renderer off the surface itself, the way
+ * `InstructionFields` would.
+ */
+function NewAddresses({ addresses }: { addresses: PublicKey[] }) {
+    const { Address } = useInstructionSurface();
+
     return (
-        <InstructionCard
-            ix={ix}
-            index={index}
-            result={result}
-            title="Address Lookup Table: Extend Lookup Table"
-            innerCards={innerCards}
-            childIndex={childIndex}
-        >
-            <BaseTable.Row>
-                <BaseTable.Cell>Program</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={AddressLookupTableProgram.programId} alignRight link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Lookup Table</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={info.lookupTableAccount} alignRight link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>Lookup Table Authority</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={info.lookupTableAuthority} alignRight link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row>
-                <BaseTable.Cell>New Addresses</BaseTable.Cell>
-                <BaseTable.Cell style={{ paddingRight: '1rem' }}>
-                    <table>
-                        <BaseTable.Body>
-                            {info.newAddresses.map((address, index) => (
-                                <BaseTable.Row key={address.toString()}>
-                                    <BaseTable.Cell className="w-px font-mono">{index}</BaseTable.Cell>
-                                    <BaseTable.Cell className="text-right">
-                                        <Address pubkey={new PublicKey(address)} alignRight link />
-                                    </BaseTable.Cell>
-                                </BaseTable.Row>
-                            ))}
-                        </BaseTable.Body>
-                    </table>
-                </BaseTable.Cell>
-            </BaseTable.Row>
-        </InstructionCard>
+        // The card table's edge padding reaches these nested cells and insets every
+        // entry from the rows above; only `tbody tr td` outweighs that selector.
+        <BaseTable className="[&_tbody_tr_td:first-child]:pl-0 [&_tbody_tr_td:last-child]:pr-0">
+            <BaseTable.Body>
+                {/* Keyed by position: an extend may list the same address twice, and the list never reorders. */}
+                {addresses.map((pubkey, index) => (
+                    <BaseTable.Row key={index}>
+                        <BaseTable.Cell className="w-px font-mono">{index}</BaseTable.Cell>
+                        <BaseTable.Cell className="text-right">
+                            <Address pubkey={pubkey} />
+                        </BaseTable.Cell>
+                    </BaseTable.Row>
+                ))}
+            </BaseTable.Body>
+        </BaseTable>
     );
 }
