@@ -37,6 +37,14 @@ import { LG_ONLY_CARD } from './inspector-table';
 // simply offers the Simulate affordance, which is a no-op until wired to a real run.
 const IDLE_SIMULATION: SimulationState = { simulate: () => undefined, status: 'idle' };
 
+// A simulation can complete (`status: 'done'`) yet still carry an execution error — the run reverted.
+// Its SOL balance changes come from that failed execution and are unreliable, so the Change column must
+// not present them as results. Only a run that completed *without* an error yields usable deltas; every
+// other case (including a failed run) falls back to the Simulate affordance instead.
+function hasReliableChanges(simulation: SimulationState): simulation is Extract<SimulationState, { status: 'done' }> {
+    return simulation.status === 'done' && !simulation.result.error;
+}
+
 // Shared 6-column track for the desktop (lg+) table: # / Address / Owner / Change / Post Balance / Size.
 // The header row and every body row use the same columns so they stay aligned.
 const COLS =
@@ -82,7 +90,7 @@ export function AccountsCard({
     // Index the simulated SOL balance changes by account so each row can look up its own delta.
     const changeByKey = React.useMemo(() => {
         const map = new Map<string, SolBalanceChange>();
-        if (simulation.status === 'done') {
+        if (hasReliableChanges(simulation)) {
             for (const change of simulation.result.solBalanceChanges ?? []) {
                 map.set(change.pubkey.toBase58(), change);
             }
@@ -411,7 +419,7 @@ function ChangeCell({
     pubkey?: PublicKey;
     mode?: 'table' | 'plain' | 'action';
 }) {
-    if (simulation.status === 'done') {
+    if (hasReliableChanges(simulation)) {
         const change = pubkey ? changeByKey.get(pubkey.toBase58()) : undefined;
         // Unchanged accounts render a "+0" delta badge, matching the transaction details page.
         return <BalanceDelta delta={change ? change.delta : ZERO_DELTA} isSol />;
