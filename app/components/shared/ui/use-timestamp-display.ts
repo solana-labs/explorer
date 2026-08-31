@@ -57,8 +57,19 @@ const validatedStorage: typeof jsonStorage = {
     },
     subscribe:
         baseSubscribe &&
-        ((key, callback, initialValue) =>
-            baseSubscribe(key, value => callback(isTimestampDisplay(value) ? value : undefined), initialValue)),
+        ((key, callback, initialValue) => {
+            // Subscribing is best-effort too: if localStorage is blocked, skip cross-tab sync and
+            // return a no-op unsubscribe rather than throwing when the atom mounts.
+            try {
+                return baseSubscribe(
+                    key,
+                    value => callback(isTimestampDisplay(value) ? value : undefined),
+                    initialValue,
+                );
+            } catch {
+                return () => {};
+            }
+        }),
 };
 
 /** The global, persisted preference for which representation every Timestamp shows by default. */
