@@ -19,6 +19,7 @@ export type InstructionField =
     | { kind: 'seed'; label: string; seed: string }
     | { kind: 'text'; label: string; value: string | number }
     | { kind: 'timestamp'; label: string; unixSeconds: number }
+    | { kind: 'preformatted'; label: string; value: string | ReadonlyArray<string | number> }
     | { kind: 'custom'; label: string; value: ReactElement };
 
 /**
@@ -58,6 +59,14 @@ export function text(label: string, value: string | number): InstructionField {
 /** A unix-seconds instant. The row owns the UTC formatting so cards hold the raw value. */
 export function timestamp(label: string, unixSeconds: number): InstructionField {
     return { kind: 'timestamp', label, unixSeconds };
+}
+
+/**
+ * A value whose whitespace is significant — a hash or key blob shown untruncated, or a
+ * list shown one entry per line. Takes the list unjoined so no card spells out the layout.
+ */
+export function preformatted(label: string, value: string | ReadonlyArray<string | number>): InstructionField {
+    return { kind: 'preformatted', label, value };
 }
 
 /**

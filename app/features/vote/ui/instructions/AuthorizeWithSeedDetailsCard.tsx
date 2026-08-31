@@ -1,38 +1,27 @@
-import { InstructionCard } from '@components/instruction/InstructionCard';
+import { address, defineInstructionCard, type InstructionFieldList, seed } from '@entities/instruction-card';
 
 import type { AuthorizeWithSeedInfo } from '../../lib/instruction-types';
-import { AuthorityTypeRows } from './AuthorityTypeRows';
-import { DetailRow, VoteProgramRow } from './DetailRow';
-import type { VoteCardProps } from './types';
+import { authorityTypeFields } from './authority-type-fields';
 
-export function AuthorizeWithSeedDetailsCard({
-    ix,
-    index,
-    result,
-    info,
-    title,
-    innerCards,
-    childIndex,
-}: VoteCardProps<AuthorizeWithSeedInfo> & { title: string }) {
-    return (
-        <InstructionCard
-            ix={ix}
-            index={index}
-            result={result}
-            title={title}
-            innerCards={innerCards}
-            childIndex={childIndex}
-        >
-            <VoteProgramRow />
-            <DetailRow label="Vote Account" pubkey={info.voteAccount} />
-            <DetailRow label="Clock Sysvar" pubkey={info.clockSysvar} />
-            <DetailRow label="Authority Base Key" pubkey={info.authorityBaseKey} />
-            <DetailRow label="Authority Owner" pubkey={info.authorityOwner} />
-            <DetailRow label="Authority Seed" monospace>
-                {info.authoritySeed}
-            </DetailRow>
-            <DetailRow label="New Authority" pubkey={info.newAuthority} />
-            <AuthorityTypeRows authorityType={info.authorityType} />
-        </InstructionCard>
-    );
+export const AuthorizeWithSeedDetailsCard = defineInstructionCard<AuthorizeWithSeedInfo>({
+    fields,
+    title: 'Vote: Authorize With Seed',
+});
+
+export const AuthorizeCheckedWithSeedDetailsCard = defineInstructionCard<AuthorizeWithSeedInfo>({
+    fields,
+    title: 'Vote: Authorize Checked With Seed',
+});
+
+/** Both variants carry the same payload, so one field list serves both cards. */
+function fields(info: AuthorizeWithSeedInfo): InstructionFieldList {
+    return [
+        address('Vote Account', info.voteAccount),
+        address('Clock Sysvar', info.clockSysvar),
+        address('Authority Base Key', info.authorityBaseKey),
+        address('Authority Owner', info.authorityOwner),
+        seed('Authority Seed', info.authoritySeed),
+        address('New Authority', info.newAuthority),
+        ...authorityTypeFields(info.authorityType),
+    ];
 }

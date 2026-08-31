@@ -3,6 +3,7 @@ import {
     withMockTransactions,
     withScrollAnchor,
     withTokenInfoBatch,
+    withTxInstructionSurface,
 } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 import { expect, within } from 'storybook/test';
@@ -23,7 +24,7 @@ import {
 
 const meta = {
     component: VoteDetailsCard,
-    decorators: [withMockTransactions, withScrollAnchor, withTokenInfoBatch],
+    decorators: [withMockTransactions, withScrollAnchor, withTokenInfoBatch, withTxInstructionSurface],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Features/Vote/VoteDetailsCard',

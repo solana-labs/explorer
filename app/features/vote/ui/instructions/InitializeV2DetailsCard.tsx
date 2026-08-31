@@ -1,40 +1,19 @@
-import { InstructionCard } from '@components/instruction/InstructionCard';
+import { address, defineInstructionCard, preformatted, text } from '@entities/instruction-card';
 
 import type { InitializeV2Info } from '../../lib/instruction-types';
-import { DetailHashRow, DetailRow, VoteProgramRow } from './DetailRow';
-import type { VoteCardProps } from './types';
 
-export function InitializeV2DetailsCard({
-    ix,
-    index,
-    result,
-    info,
-    innerCards,
-    childIndex,
-}: VoteCardProps<InitializeV2Info>) {
-    return (
-        <InstructionCard
-            ix={ix}
-            index={index}
-            result={result}
-            title="Vote: Initialize V2"
-            innerCards={innerCards}
-            childIndex={childIndex}
-        >
-            <VoteProgramRow />
-            <DetailRow label="Vote Account" pubkey={info.voteAccount} />
-            <DetailRow label="Node" pubkey={info.node} />
-            <DetailRow label="Inflation Rewards Collector" pubkey={info.inflationRewardsCollector} />
-            <DetailRow label="Block Revenue Collector" pubkey={info.blockRevenueCollector} />
-            <DetailRow label="Authorized Voter" pubkey={info.authorizedVoter} />
-            <DetailHashRow label="Authorized Voter BLS Pubkey" hash={info.authorizedVoterBlsPubkey} />
-            <DetailHashRow
-                label="Authorized Voter BLS Proof of Possession"
-                hash={info.authorizedVoterBlsProofOfPossession}
-            />
-            <DetailRow label="Authorized Withdrawer" pubkey={info.authorizedWithdrawer} />
-            <DetailRow label="Inflation Rewards Commission">{`${info.inflationRewardsCommissionBps / 100}%`}</DetailRow>
-            <DetailRow label="Block Revenue Commission">{`${info.blockRevenueCommissionBps / 100}%`}</DetailRow>
-        </InstructionCard>
-    );
-}
+export const InitializeV2DetailsCard = defineInstructionCard<InitializeV2Info>({
+    fields: info => [
+        address('Vote Account', info.voteAccount),
+        address('Node', info.node),
+        address('Inflation Rewards Collector', info.inflationRewardsCollector),
+        address('Block Revenue Collector', info.blockRevenueCollector),
+        address('Authorized Voter', info.authorizedVoter),
+        preformatted('Authorized Voter BLS Pubkey', info.authorizedVoterBlsPubkey),
+        preformatted('Authorized Voter BLS Proof of Possession', info.authorizedVoterBlsProofOfPossession),
+        address('Authorized Withdrawer', info.authorizedWithdrawer),
+        text('Inflation Rewards Commission', `${info.inflationRewardsCommissionBps / 100}%`),
+        text('Block Revenue Commission', `${info.blockRevenueCommissionBps / 100}%`),
+    ],
+    title: 'Vote: Initialize V2',
+});

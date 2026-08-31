@@ -1,4 +1,5 @@
 import { toConnectableUrl } from '@entities/cluster';
+import { TxInstructionSurface } from '@entities/instruction-card';
 import { DispatchContext, FetchersContext, type State, StateContext } from '@providers/accounts';
 import type { ClusterState } from '@providers/cluster';
 import { ScrollAnchorProvider } from '@providers/scroll-anchor';
@@ -83,6 +84,14 @@ export const withScrollAnchor: Decorator = Story => (
     <ScrollAnchorProvider>
         <Story />
     </ScrollAnchorProvider>
+);
+
+/** Declares the tx-page instruction surface every migrated card reads. Usage: `decorators: [withTxInstructionSurface]` */
+export const withTxInstructionSurface: Decorator = Story => (
+    // eslint-disable-next-line unicorn/no-null -- SignatureResult.err is `TransactionError | null`
+    <TxInstructionSurface result={{ err: null }}>
+        <Story />
+    </TxInstructionSurface>
 );
 
 /** Wraps stories with ClusterProvider and MockAccountsProvider. Usage: `decorators: [withClusterAndAccounts]` */

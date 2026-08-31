@@ -1,45 +1,35 @@
-import { InstructionCard } from '@components/instruction/InstructionCard';
-import { displayTimestamp } from '@utils/date';
+import {
+    address,
+    defineInstructionCard,
+    type InstructionFieldList,
+    preformatted,
+    timestamp,
+} from '@entities/instruction-card';
 
 import type { VoteInfo } from '../../lib/instruction-types';
-import { DetailHashRow, DetailRow, VoteProgramRow } from './DetailRow';
-import type { VoteCardProps } from './types';
 
 // "vote" and "voteSwitch" — the pre-TowerSync vote instructions, deprecated on chain
 // but still present in historical transactions.
-export function LegacyVoteDetailsCard({
-    ix,
-    index,
-    result,
-    info,
-    title,
-    innerCards,
-    childIndex,
-}: VoteCardProps<VoteInfo> & { title: string }) {
-    return (
-        <InstructionCard
-            ix={ix}
-            index={index}
-            result={result}
-            title={title}
-            innerCards={innerCards}
-            childIndex={childIndex}
-        >
-            <VoteProgramRow />
-            <DetailRow label="Vote Account" pubkey={info.voteAccount} />
-            <DetailRow label="Slot Hashes Sysvar" pubkey={info.slotHashesSysvar} />
-            <DetailRow label="Clock Sysvar" pubkey={info.clockSysvar} />
-            <DetailRow label="Vote Authority" pubkey={info.voteAuthority} />
-            <DetailHashRow label="Vote Hash" hash={info.vote.hash} />
-            {info.vote.timestamp ? (
-                <DetailRow label="Timestamp" monospace>
-                    {displayTimestamp(info.vote.timestamp * 1000)}
-                </DetailRow>
-            ) : undefined}
-            <DetailRow label="Slots" monospace>
-                <pre className="mb-0 inline-block text-left">{info.vote.slots.join('\n')}</pre>
-            </DetailRow>
-            {info.hash !== undefined && <DetailHashRow label="Switch Proof Hash" hash={info.hash} />}
-        </InstructionCard>
-    );
+export const LegacyVoteDetailsCard = defineInstructionCard<VoteInfo>({
+    fields,
+    title: 'Vote: Vote',
+});
+
+export const LegacyVoteSwitchDetailsCard = defineInstructionCard<VoteInfo>({
+    fields,
+    title: 'Vote: Vote Switch',
+});
+
+/** Only the switch variant carries a top-level hash, so one field list serves both cards. */
+function fields(info: VoteInfo): InstructionFieldList {
+    return [
+        address('Vote Account', info.voteAccount),
+        address('Slot Hashes Sysvar', info.slotHashesSysvar),
+        address('Clock Sysvar', info.clockSysvar),
+        address('Vote Authority', info.voteAuthority),
+        preformatted('Vote Hash', info.vote.hash),
+        info.vote.timestamp ? timestamp('Timestamp', info.vote.timestamp) : undefined,
+        preformatted('Slots', info.vote.slots),
+        info.hash !== undefined && preformatted('Switch Proof Hash', info.hash),
+    ];
 }

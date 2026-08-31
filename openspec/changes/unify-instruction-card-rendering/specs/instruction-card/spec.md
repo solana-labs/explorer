@@ -35,7 +35,7 @@ This supersedes the `InstructionCardComponent`, `AddressComponent`, and `showPro
 
 A card's rows SHALL be declared as `InstructionField` descriptors rather than as table markup. Among migrated cards, `InstructionFields` MUST be the only component that knows row markup, cell alignment, and which address renderer the current surface uses. `ProgramField` is the single sanctioned exception: it owns the markup of the leading `Program` row, because the inspector renders that row through its own validator.
 
-The union is closed: `address`, `sol`, `bytes`, `seed`, `text`, `custom`. `text` MUST accept only `string | number`, and `custom` MUST be the sole markup door. `custom` MUST take a `ReactElement` rather than a `ReactNode`, so that a labelled row with nothing in it is not representable; a field with no value to show MUST be omitted from the list instead.
+The union is closed: `address`, `sol`, `bytes`, `seed`, `text`, `timestamp`, `preformatted`, `custom`. `text` MUST accept only `string | number`, and `custom` MUST be the sole markup door. `timestamp` MUST take unix seconds and own the UTC conversion; `preformatted` MUST draw its value in a `<pre>` and MUST take a list unjoined, so that no card spells out the layout itself. `address` MUST accept both a web3.js `PublicKey` and a kit `Address`, coerced by the row rather than by the card, so kit-native slices stay kit-native. `custom` MUST take a `ReactElement` rather than a `ReactNode`, so that a labelled row with nothing in it is not representable; a field with no value to show MUST be omitted from the list instead.
 
 `InstructionFieldList` MUST admit `false` and `undefined` so optional rows read as `cond && address(...)`, and MUST NOT admit `null`, which `unicorn/no-null` forbids in card sources under `app/**` (the rule is off for tests and stories, and for a per-file legacy list that a migrated card MUST NOT join).
 
@@ -50,6 +50,12 @@ The union is closed: `address`, `sol`, `bytes`, `seed`, `text`, `custom`. `text`
 - **WHEN** the same value rendering repeats across cards
 - **THEN** it MUST be added as an `InstructionField` kind
 - **AND** those cards MUST NOT each re-implement it through `custom`
+
+#### Scenario: Kind that renders like an existing one
+
+- **WHEN** a proposed kind would produce the same markup as a kind already in the union
+- **THEN** it MUST NOT be added, and the existing kind MUST widen its value type instead
+- **AND** a kind whose name describes a typeface rather than the value MUST NOT be added at all
 
 #### Scenario: Card needing real markup
 
