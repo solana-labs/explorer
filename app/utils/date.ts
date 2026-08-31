@@ -1,4 +1,14 @@
-import { formatDistance, type Locale } from 'date-fns';
+import {
+    differenceInDays,
+    differenceInHours,
+    differenceInMinutes,
+    differenceInSeconds,
+    type Duration,
+    formatDistance,
+    formatDuration as formatDurationParts,
+    intervalToDuration,
+    type Locale,
+} from 'date-fns';
 import { enUS } from 'date-fns/locale';
 
 export function unixTimestampToMs(seconds: number): number {
@@ -75,61 +85,53 @@ export function displayTimestampAbsolute(unixTimestampMs: number, utc = false): 
     return `${dateString} at ${timeString}`;
 }
 
-function pluralUnit(value: number, name: string): string {
-    return `${value} ${name}${value === 1 ? '' : 's'}`;
-}
-
 const MINUTE_S = 60;
 const HOUR_S = 3600;
 const DAY_S = 86400;
-const YEAR_S = 365 * DAY_S;
-// A twelfth of the year, not a flat 30 days — otherwise 12×30 ≠ 365 and the remainder near a
-// year rolls over to a nonsensical "12 months" / "2 years 12 months".
-const MONTH_S = Math.floor(YEAR_S / 12);
 
 // Human "time since" with granularity that coarsens as the event recedes, per these bands:
 //   <10m  minutes + seconds   |  10m–1h  minutes         |  1h–8h   hours + minutes
 //   8h–48h hours              |  48h–12d days + hours     |  12d–30d days
 //   30d–365d months + days    |  1y–3y   years + months   |  >3y     years
-// A zero secondary unit is dropped ("3 hours 0 minutes" → "3 hours"). Both args are milliseconds.
+// Built on date-fns difference/duration helpers so months and years are calendar-accurate (not a
+// flat 30/365 days). date-fns' formatDuration drops a zero secondary unit ("3 hours 0 minutes" →
+// "3 hours") and pluralizes for us. Both args are milliseconds.
 export function displayTimestampRelative(unixTimestampMs: number, nowMs: number): string {
-    const diffSeconds = Math.round((nowMs - unixTimestampMs) / 1000);
-    const abs = Math.abs(diffSeconds);
+    // Guard against NaN/±Infinity: the date-fns helpers would otherwise yield an "Invalid Date"
+    // duration and a nonsensical string. Callers pass a valid instant; this is pure defense.
+    if (!Number.isFinite(unixTimestampMs) || !Number.isFinite(nowMs)) return '';
 
-    let parts: string[];
-    if (abs < 10 * MINUTE_S) {
-        parts = [pluralUnit(Math.floor(abs / MINUTE_S), 'minute'), pluralUnit(abs % MINUTE_S, 'second')];
-    } else if (abs < HOUR_S) {
-        parts = [pluralUnit(Math.floor(abs / MINUTE_S), 'minute')];
-    } else if (abs < 8 * HOUR_S) {
-        parts = [
-            pluralUnit(Math.floor(abs / HOUR_S), 'hour'),
-            pluralUnit(Math.floor((abs % HOUR_S) / MINUTE_S), 'minute'),
-        ];
-    } else if (abs < 48 * HOUR_S) {
-        parts = [pluralUnit(Math.floor(abs / HOUR_S), 'hour')];
-    } else if (abs < 12 * DAY_S) {
-        parts = [pluralUnit(Math.floor(abs / DAY_S), 'day'), pluralUnit(Math.floor((abs % DAY_S) / HOUR_S), 'hour')];
-    } else if (abs < 30 * DAY_S) {
-        parts = [pluralUnit(Math.floor(abs / DAY_S), 'day')];
-    } else if (abs < YEAR_S) {
-        parts = [
-            pluralUnit(Math.floor(abs / MONTH_S), 'month'),
-            pluralUnit(Math.floor((abs % MONTH_S) / DAY_S), 'day'),
-        ];
-    } else if (abs < 3 * YEAR_S) {
-        parts = [
-            pluralUnit(Math.floor(abs / YEAR_S), 'year'),
-            pluralUnit(Math.floor((abs % YEAR_S) / MONTH_S), 'month'),
-        ];
+    const past = unixTimestampMs <= nowMs;
+    const [from, to] = past ? [unixTimestampMs, nowMs] : [nowMs, unixTimestampMs];
+    const seconds = differenceInSeconds(to, from);
+
+    let duration: Duration;
+    if (seconds < 10 * MINUTE_S) {
+        duration = { minutes: differenceInMinutes(to, from), seconds: seconds % MINUTE_S };
+    } else if (seconds < HOUR_S) {
+        duration = { minutes: differenceInMinutes(to, from) };
+    } else if (seconds < 8 * HOUR_S) {
+        duration = { hours: differenceInHours(to, from), minutes: differenceInMinutes(to, from) % 60 };
+    } else if (seconds < 48 * HOUR_S) {
+        duration = { hours: differenceInHours(to, from) };
+    } else if (seconds < 12 * DAY_S) {
+        duration = { days: differenceInDays(to, from), hours: differenceInHours(to, from) % 24 };
+    } else if (seconds < 30 * DAY_S) {
+        duration = { days: differenceInDays(to, from) };
     } else {
-        parts = [pluralUnit(Math.floor(abs / YEAR_S), 'year')];
+        const calendar = intervalToDuration({ end: to, start: from });
+        if (!calendar.years) {
+            duration = { days: calendar.days, months: calendar.months };
+        } else if (calendar.years < 3) {
+            duration = { months: calendar.months, years: calendar.years };
+        } else {
+            duration = { years: calendar.years };
+        }
     }
 
-    // Drop a zero-valued unit; if everything is zero the event is right now.
-    const text = parts.filter(part => !part.startsWith('0 ')).join(' ');
+    const text = formatDurationParts(duration);
     if (text === '') return 'just now';
-    return diffSeconds >= 0 ? `${text} ago` : `in ${text}`;
+    return past ? `${text} ago` : `in ${text}`;
 }
 
 // Drops date-fns' "less than" prefixes on sub-minute buckets; everything else

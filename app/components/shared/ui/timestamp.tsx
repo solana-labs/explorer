@@ -8,7 +8,7 @@ import {
     setPinnedTimestampDisplay,
     type TimestampDisplay,
     usePinnedTimestampDisplay,
-} from '@/app/components/shared/ui/useTimestampDisplay';
+} from '@/app/components/shared/ui/use-timestamp-display';
 import { cn } from '@/app/components/shared/utils';
 import { useCopyToClipboard } from '@/app/shared/lib/useCopyToClipboard';
 import { displayTimestampAbsolute, displayTimestampRelative } from '@/app/utils/date';
@@ -58,12 +58,14 @@ function CopyButton({ text }: { text: string }) {
 function TimestampRow({
     label,
     value,
+    dateTime,
     isPinned,
     onTogglePin,
     withSeparator,
 }: {
     label: string;
     value: string;
+    dateTime: string;
     isPinned: boolean;
     onTogglePin: () => void;
     withSeparator: boolean;
@@ -78,7 +80,9 @@ function TimestampRow({
         >
             <div className="flex flex-col gap-0.5">
                 <span className="text-xs text-neutral-500">{label}</span>
-                <span className="whitespace-nowrap text-sm tabular-nums text-neutral-200">{value}</span>
+                <time dateTime={dateTime} className="whitespace-nowrap text-sm tabular-nums text-neutral-200">
+                    {value}
+                </time>
             </div>
             <div className="mt-0.5 flex items-center gap-3">
                 <button
@@ -130,6 +134,8 @@ export function Timestamp({ unixTimestamp, display = 'utc', children, referenceM
     const now = useNow(open || effective === 'relative', referenceMs);
 
     const ms = unixTimestamp * 1000;
+    // Machine-readable instant shared by every row and the trigger (all render the same moment).
+    const dateTime = new Date(ms).toISOString();
     const labels: Record<TimestampDisplay, string> = {
         local: displayTimestampAbsolute(ms, false),
         // Until `now` is set on the client, fall back to the absolute time so hydration matches.
@@ -159,7 +165,9 @@ export function Timestamp({ unixTimestamp, display = 'utc', children, referenceM
                         className,
                     )}
                 >
-                    <span className="min-w-0">{children ?? labels[effective]}</span>
+                    <time dateTime={dateTime} className="min-w-0">
+                        {children ?? labels[effective]}
+                    </time>
                     <ChevronDown size={14} className="mt-0.5 shrink-0 text-neutral-500" />
                 </button>
             </PopoverTrigger>
@@ -169,6 +177,7 @@ export function Timestamp({ unixTimestamp, display = 'utc', children, referenceM
                         key={row.key}
                         label={row.label}
                         value={labels[row.key]}
+                        dateTime={dateTime}
                         isPinned={pinned === row.key}
                         onTogglePin={() => setPinnedTimestampDisplay(pinned === row.key ? undefined : row.key)}
                         withSeparator={index < rows.length - 1}

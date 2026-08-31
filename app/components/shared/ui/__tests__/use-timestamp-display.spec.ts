@@ -1,19 +1,25 @@
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { setPinnedTimestampDisplay, usePinnedTimestampDisplay } from '../useTimestampDisplay';
+import { setPinnedTimestampDisplay, usePinnedTimestampDisplay } from '../use-timestamp-display';
 
 const STORAGE_KEY = 'explorer:timestamp-display';
 
-// Fires the cross-tab `storage` event a browser dispatches to OTHER tabs when localStorage changes
-// (jsdom never dispatches it, and never to the writing tab — so we simulate the receiving side).
-function dispatchStorageEvent(newValue: string | null) {
-    window.dispatchEvent(new StorageEvent('storage', { key: STORAGE_KEY, newValue }));
+// atomWithStorage persists via createJSONStorage, so values are JSON-encoded (e.g. `"local"`, not `local`).
+function stored(value: string | undefined): string | null {
+    return value === undefined ? null : JSON.stringify(value);
 }
 
-describe('useTimestampDisplay (localStorage persistence)', () => {
+// Fires the cross-tab `storage` event a browser dispatches to OTHER tabs when localStorage changes
+// (jsdom never dispatches it, and never to the writing tab — so we simulate the receiving side).
+// jotai only reacts when `storageArea` matches localStorage, mirroring a real browser event.
+function dispatchStorageEvent(newValue: string | null) {
+    window.dispatchEvent(new StorageEvent('storage', { key: STORAGE_KEY, newValue, storageArea: window.localStorage }));
+}
+
+describe('use-timestamp-display (localStorage persistence)', () => {
     beforeEach(() => {
-        // Reset both the backing store and the module's internal cache to a clean, unpinned baseline.
+        // Reset both the backing store and the atom to a clean, unpinned baseline.
         act(() => setPinnedTimestampDisplay(undefined));
         window.localStorage.clear();
     });
@@ -24,7 +30,7 @@ describe('useTimestampDisplay (localStorage persistence)', () => {
 
     it('should write the pinned format to localStorage and remove it when cleared', () => {
         act(() => setPinnedTimestampDisplay('local'));
-        expect(window.localStorage.getItem(STORAGE_KEY)).toBe('local');
+        expect(window.localStorage.getItem(STORAGE_KEY)).toBe(stored('local'));
 
         act(() => setPinnedTimestampDisplay(undefined));
         expect(window.localStorage.getItem(STORAGE_KEY)).toBeNull();
@@ -49,8 +55,8 @@ describe('useTimestampDisplay (localStorage persistence)', () => {
         expect(result.current).toBeUndefined();
 
         // Another tab pins "local": it writes localStorage, the browser notifies this tab.
-        window.localStorage.setItem(STORAGE_KEY, 'local');
-        act(() => dispatchStorageEvent('local'));
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify('local'));
+        act(() => dispatchStorageEvent(stored('local')));
         expect(result.current).toBe('local');
 
         // ...and clears it again.
@@ -70,10 +76,10 @@ describe('useTimestampDisplay (localStorage persistence)', () => {
     it('should read a value persisted from a previous session on a fresh mount', async () => {
         // Simulate a favorite saved on an earlier visit, then a brand-new page load (fresh module +
         // fresh component) — the value must survive and be read straight out of localStorage.
-        window.localStorage.setItem(STORAGE_KEY, 'relative');
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify('relative'));
 
         vi.resetModules();
-        const fresh = await import('../useTimestampDisplay');
+        const fresh = await import('../use-timestamp-display');
         const { result } = renderHook(() => fresh.usePinnedTimestampDisplay());
 
         expect(result.current).toBe('relative');
