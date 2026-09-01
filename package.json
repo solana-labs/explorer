@@ -52,6 +52,7 @@
         "@codama/nodes-from-anchor": "1.5.3",
         "@coral-xyz/anchor": "0.30.1",
         "@explorer/decoder-mango": "workspace:*",
+        "@explorer/decoder-pyth": "workspace:*",
         "@explorer/decoder-serum": "workspace:*",
         "@explorer/entity-inspector": "workspace:*",
         "@explorer/parsers": "workspace:*",

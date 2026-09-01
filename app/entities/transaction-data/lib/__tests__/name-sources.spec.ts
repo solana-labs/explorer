@@ -57,6 +57,13 @@ describe('resolveNamesFromLookup', () => {
             expect(names.name).toBe('New Order');
         });
 
+        it('should resolve a Pyth name without any IDL', () => {
+            // Pyth reads a u32 index after a u32 version; version 2, index 7 = Update Price.
+            const names = resolveNamesFromLookup(lookup(PYTH_PROGRAM, 2, 0, 0, 0, 7, 0, 0, 0), idlNames({}));
+
+            expect(names.name).toBe('Update Price');
+        });
+
         // The generated `@solana-program/*` clients are the only thing that names a simulated System or
         // Token instruction, which is half of what the CU chart needs. Covered here and not just in
         // program-client-name.spec, so removing the source from the chain fails a test.
@@ -261,6 +268,7 @@ const SERUM_PROGRAM = 'srmqPvymJeFKQ4zGQed1GFppgkRHL9kaELCbyksJtPX';
 const TOKEN_PROGRAM = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 const SYSTEM_PROGRAM = '11111111111111111111111111111111';
 const MANGO_PROGRAM = 'mv3ekLzLbnVPNxjSKvqBpU3ZeZXPQdEC3bp5MDEBG68';
+const PYTH_PROGRAM = 'FsJ3A3u2vn5cTVofAjvy6y5kwABJAqYWpe4975bi2epH';
 
 function lookup(programId: string, ...data: number[]): InstructionNameLookup {
     return { data: Uint8Array.from(data), programId };

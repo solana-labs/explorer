@@ -118,10 +118,12 @@ on-chain account and can appear the day after this was checked. Re-check with
 | `program-client-name` → System / Token / Stake / ATA | ✅ pmp |
 | `program-client-name` → **Token-2022** | ❌ none |
 | **ZK ElGamal**, **Lighthouse**, **Mango**, **Serum** | ❌ none |
+| **Pyth** | ❌ none on mainnet, devnet or testnet (checked 2026-09-01) |
 
-Two could not use an IDL even if one existed, because neither program has a discriminator to match on.
-Serum reads a u32 instruction code after a 1-byte version prefix. `memo-name` reads nothing at all — a
-memo's entire instruction data is its UTF-8 text, so the program id is the whole lookup.
+Three could not use an IDL even if one existed, because none of them has a discriminator to match on.
+Serum reads a u32 instruction code after a 1-byte version prefix, and Pyth a u32 instruction index after
+a u32 version. `memo-name` reads nothing at all — a memo's entire instruction data is its UTF-8 text, so
+the program id is the whole lookup.
 
 **2. The IDL wording would split one instruction across two surfaces.** The System IDL names its transfer
 `transferSol`; the RPC's `parsed.type` calls it `transfer`. A fetched transaction is named from

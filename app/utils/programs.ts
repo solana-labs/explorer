@@ -1,4 +1,5 @@
 import { MANGO_PROGRAM_IDS, MANGO_V3_PROGRAM_LABEL } from '@explorer/decoder-mango';
+import { PYTH_ORACLE_PROGRAM_IDS, PYTH_ORACLE_PROGRAM_LABEL } from '@explorer/decoder-pyth/detection';
 import {
     OPEN_BOOK_PROGRAM_IDS,
     OPENBOOK_DEX_PROGRAM_LABEL,
@@ -59,9 +60,6 @@ export enum PROGRAM_NAMES {
     ORCA_SWAP_1 = 'Orca Swap Program v1',
     ORCA_SWAP_2 = 'Orca Swap Program v2',
     ORE = 'ORE Program',
-    PYTH_DEVNET = 'Pyth Oracle Program',
-    PYTH_TESTNET = 'Pyth Oracle Program', // eslint-disable-line @typescript-eslint/no-duplicate-enum-values -- allow to use same name for different enums
-    PYTH_MAINNET = 'Pyth Oracle Program', // eslint-disable-line @typescript-eslint/no-duplicate-enum-values -- allow to use same name for different enums
     RAYDIUM_AMM = 'Raydium AMM Program',
     RAYDIUM_LP_1 = 'Raydium Liquidity Pool Program v1',
     RAYDIUM_LP_2 = 'Raydium Liquidity Pool Program v2',
@@ -141,9 +139,9 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: [Cluster.MainnetBeta],
         name: PROGRAM_NAMES.RAYDIUM_AMM,
     },
-    '8tfDNiaEyrV6Q1U4DEXrEigs9DoDtkugzFbybENEbCDz': {
+    [PYTH_ORACLE_PROGRAM_IDS.testnet]: {
         deployments: [Cluster.Testnet],
-        name: PROGRAM_NAMES.PYTH_TESTNET,
+        name: PYTH_ORACLE_PROGRAM_LABEL,
     },
     '9W959DqEETiGZocYWCQPaJ6sBmUzgfxXfqGeTEdp3aQP': {
         deployments: [Cluster.MainnetBeta],
@@ -217,9 +215,9 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: ALL_CLUSTERS,
         name: PROGRAM_NAMES.FEATURE_GATE,
     },
-    FsJ3A3u2vn5cTVofAjvy6y5kwABJAqYWpe4975bi2epH: {
+    [PYTH_ORACLE_PROGRAM_IDS.mainnet]: {
         deployments: [Cluster.MainnetBeta],
-        name: PROGRAM_NAMES.PYTH_MAINNET,
+        name: PYTH_ORACLE_PROGRAM_LABEL,
     },
     Gt9S41PtjR58CbG9JhJ3J6vxesqrNAswbWYbLNTMZA3c: {
         deployments: [Cluster.Devnet, Cluster.MainnetBeta],
@@ -329,9 +327,9 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: [Cluster.MainnetBeta, Cluster.Devnet],
         name: PROGRAM_NAMES.ZK_ACCOUNT_COMPRESSION_PROGRAM,
     },
-    gSbePebfvPy7tRqimPoVecS2UsBvYv46ynrzWocc92s: {
+    [PYTH_ORACLE_PROGRAM_IDS.devnet]: {
         deployments: [Cluster.Devnet],
-        name: PROGRAM_NAMES.PYTH_DEVNET,
+        name: PYTH_ORACLE_PROGRAM_LABEL,
     },
     [MANGO_PROGRAM_IDS.mainnet]: {
         deployments: [Cluster.MainnetBeta],

@@ -155,7 +155,7 @@ jobs:
         with:
           node-version: ${{ needs.read-nvmrc.outputs.node-version }}
 
-      # scripts/update-sitemap.ts imports app/utils/programs.ts, which imports the built @explorer/decoder-mango.
+      # scripts/update-sitemap.ts imports app/utils/programs.ts, which imports the built decoder packages.
       - name: Build workspace packages
         run: pnpm build:packages
 

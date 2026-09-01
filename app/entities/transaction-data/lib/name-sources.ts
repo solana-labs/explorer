@@ -2,6 +2,7 @@ import { type ProgramIdlNames } from '@entities/idl/@x/transaction-data';
 import { resolveLighthouseInstructionName } from '@entities/lighthouse/@x/transaction-data';
 import { resolveZkElGamalProofName } from '@entities/zk-elgamal-proof/@x/transaction-data';
 import { resolveMangoInstructionName } from '@explorer/decoder-mango/detection';
+import { resolvePythInstructionName } from '@explorer/decoder-pyth/detection';
 import { resolveSerumInstructionName } from '@explorer/decoder-serum/detection';
 
 import { resolveComputeBudgetInstructionName } from './compute-budget-name';
@@ -25,6 +26,7 @@ const NAME_SOURCES: readonly NameSource[] = [
     ({ programId, data }) => resolveZkElGamalProofName(programId, data),
     ({ programId, data }) => resolveLighthouseInstructionName(programId, data),
     ({ programId, data }) => resolveMangoInstructionName(programId, data),
+    ({ programId, data }) => resolvePythInstructionName(programId, data),
     ({ programId, data }) => resolveSerumInstructionName(programId, data),
     // Ahead of the IDL so a simulated System/Token instruction is worded as the RPC words it — see the
     // override map in program-client-name.
