@@ -26,6 +26,13 @@ describe('stabiliseCell', () => {
         // 1.487 MB formats to 1.49 MB — within one 0.01 MB step of the previous 1.48 MB.
         expect(stabiliseCell(1.487 * 1024 * 1024, '1.48 MB')).toBe('1.48 MB');
     });
+
+    it('should not preserve a hand-edited cell the generator could never emit', () => {
+        // "475 kB" parses fine and sits within tolerance, but only canonical output may anchor —
+        // otherwise a hand-tuned bench/BUILD.md would pass the freshness gate verbatim.
+        expect(stabiliseCell(470.2 * 1024, '475 kB')).toBe('480 kB');
+        expect(stabiliseCell(1.487 * 1024 * 1024, '1.490 MB')).toBe('1.49 MB');
+    });
 });
 
 describe('parsePreviousCells', () => {

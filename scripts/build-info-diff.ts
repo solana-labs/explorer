@@ -121,17 +121,42 @@ function routeCell(change: RouteChange): string {
     return `\`${change.route}\`${suffix}`;
 }
 
-export function formatReport(changes: RouteChange[], freshMarkdown: string, options: { baseLabel: string }): string {
+// Keeps only the -/+ payload: table rows self-identify, so git's file headers and hunk markers add noise.
+function stripDiffHeaders(diff: string): string {
+    const isHeader = (line: string) =>
+        line.startsWith('diff --git') ||
+        line.startsWith('index ') ||
+        line.startsWith('--- ') ||
+        line.startsWith('+++ ') ||
+        line.startsWith('@@');
+    return diff
+        .split('\n')
+        .filter(line => !isHeader(line))
+        .join('\n')
+        .trim();
+}
+
+export function formatReport(
+    changes: RouteChange[],
+    freshMarkdown: string,
+    options: { baseLabel: string; diff?: string },
+): string {
     const lines = [`### 📦 Bundle change vs \`${options.baseLabel}\``, ''];
     const significant = changes.filter(change => exceedsTolerance(change));
     const noiseCount = changes.length - significant.length;
+    const diff = options.diff === undefined ? undefined : stripDiffHeaders(options.diff);
 
     if (significant.length === 0) {
         lines.push('No route size changes.');
     } else {
         const count = (kind: RouteChange['kind']) => significant.filter(change => change.kind === kind).length;
-        lines.push(`**${count('changed')} changed · ${count('added')} added · ${count('removed')} removed**`, '');
-        lines.push('| Route | Size | First Load JS |', '|-------|------|---------------|');
+        lines.push(`**${count('changed')} changed · ${count('added')} added · ${count('removed')} removed**`);
+    }
+
+    if (diff) {
+        lines.push('', '```diff', diff, '```');
+    } else if (significant.length > 0) {
+        lines.push('', '| Route | Size | First Load JS |', '|-------|------|---------------|');
         for (const change of significant) {
             const size = movementCell(change.before?.size, change.after?.size);
             const firstLoad = movementCell(change.before?.firstLoad, change.after?.firstLoad);
@@ -170,9 +195,9 @@ export function formatCheckFailure(changes: RouteChange[]): string {
 }
 
 async function main() {
-    const [mode, basePath, freshPath, baseLabel] = process.argv.slice(2);
+    const [mode, basePath, freshPath, baseLabel, diffPath] = process.argv.slice(2);
     if ((mode !== 'report' && mode !== 'check') || !basePath || !freshPath) {
-        console.error('Usage: build-info-diff.ts <report|check> <base.md> <fresh.md> [base-label]');
+        console.error('Usage: build-info-diff.ts <report|check> <base.md> <fresh.md> [base-label] [diff-file]');
         process.exit(2);
     }
 
@@ -181,7 +206,8 @@ async function main() {
     const changes = diffBuildInfo(base, parseBuildInfoTable(freshMarkdown));
 
     if (mode === 'report') {
-        console.log(formatReport(changes, freshMarkdown, { baseLabel: baseLabel || 'master' }));
+        const diff = diffPath ? await readFile(diffPath, 'utf8') : undefined;
+        console.log(formatReport(changes, freshMarkdown, { baseLabel: baseLabel || 'master', diff }));
         return;
     }
 

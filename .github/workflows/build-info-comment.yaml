@@ -2,7 +2,7 @@ name: Build Info Comment
 
 # Posts the bundle-change report from CI's Build-Info job as a sticky PR comment. Split from ci.yaml
 # because fork PRs run CI with a read-only token; this workflow runs in the base repo with write
-# access and never checks out or executes PR code (the checkout below is the default branch).
+# access and never checks out or executes PR code.
 on:
   workflow_run:
     workflows: [CI]
@@ -21,10 +21,6 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      # Default-branch checkout, only to make the local composite action available.
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
       # The report artifact is missing when CI failed before Build-Info uploaded it; the PR number
       # comes from the head SHA (workflow_run.pull_requests is empty for fork PRs).
       - name: Locate report and pull request
@@ -38,13 +34,23 @@ jobs:
               return core.info('No bundle report artifact on this run; skipping.');
             }
             const { data: prs } = await github.rest.repos.listPullRequestsAssociatedWithCommit({ ...context.repo, commit_sha: run.head_sha });
-            const pr = prs.find(pr => pr.state === 'open');
+            // Strict match: the endpoint returns every PR containing the commit, so an open PR on a
+            // stacked branch could steal the comment, and a rerun for a superseded head could
+            // overwrite the current report with stale data.
+            const pr = prs.find(pr =>
+              pr.state === 'open' &&
+              pr.head.sha === run.head_sha &&
+              pr.head.ref === run.head_branch &&
+              pr.head.repo?.full_name === run.head_repository?.full_name
+            );
             if (!pr) {
-              return core.info('No open pull request for this commit; skipping.');
+              return core.info('No open pull request has this run\'s head as its current head; skipping.');
             }
             core.setOutput('found', 'true');
             core.setOutput('pr', String(pr.number));
 
+      # Outside the workspace on purpose: the artifact is fork-controlled and must not be able to
+      # plant files where later steps could pick them up.
       - name: Download report
         if: steps.locate.outputs.found == 'true'
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -52,11 +58,12 @@ jobs:
           name: build-info-comment
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/build-info-comment
 
       - name: Post sticky comment
         if: steps.locate.outputs.found == 'true'
-        uses: ./.github/actions/pr-sticky-comment
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
         with:
-          marker: build-info
-          body-path: bundle-report.md
-          pr-number: ${{ steps.locate.outputs.pr }}
+          header: build-info
+          path: ${{ runner.temp }}/build-info-comment/bundle-report.md
+          number_force: ${{ steps.locate.outputs.pr }}

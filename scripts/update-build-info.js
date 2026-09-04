@@ -255,6 +255,8 @@ function stabiliseCell(bytes, previousCell) {
     const newCell = formatBytes(bytes);
     const previousBytes = previousCell === undefined ? undefined : parseCellBytes(previousCell);
     if (previousBytes === undefined) return newCell;
+    // Only canonical generator output may anchor — a hand-edited cell must not survive regeneration.
+    if (formatBytes(previousBytes) !== previousCell) return newCell;
     const newBytes = parseCellBytes(newCell);
     return Math.abs(newBytes - previousBytes) <= DISPLAY_STEP_TOLERANCE_BYTES ? previousCell : newCell;
 }

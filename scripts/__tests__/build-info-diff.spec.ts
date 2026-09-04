@@ -192,6 +192,45 @@ describe('formatReport', () => {
         expect(report).toContain('<details>');
         expect(report).toContain('| Static | `/` | 130 kB | 530 kB |');
     });
+
+    it('should embed a provided unified diff in a diff fence instead of the synthesised table', () => {
+        const fresh = BASE.replace('| 500 kB | 900 kB |', '| 550 kB | 950 kB |');
+        const changes = diffBuildInfo(parseBuildInfoTable(BASE), parseBuildInfoTable(fresh));
+        const diff = [
+            '-| Dynamic | `/address/[address]` | 500 kB | 900 kB |',
+            '+| Dynamic | `/address/[address]` | 550 kB | 950 kB |',
+        ].join('\n');
+        const report = formatReport(changes, fresh, { baseLabel: 'master', diff });
+        expect(report).toContain('```diff');
+        expect(report).toContain('+| Dynamic | `/address/[address]` | 550 kB | 950 kB |');
+        expect(report).not.toContain('500 kB → 550 kB');
+        expect(report).toContain('**1 changed · 0 added · 0 removed**');
+    });
+
+    it('should strip git diff headers and hunk markers from the fence', () => {
+        const diff = [
+            'diff --git a/.next/BUILD.base.md b/.next/BUILD.fresh.md',
+            'index 1234567..89abcde 100644',
+            '--- a/.next/BUILD.base.md',
+            '+++ b/.next/BUILD.fresh.md',
+            '@@ -7 +7 @@',
+            '-| Dynamic | `/address/[address]` | 500 kB | 900 kB |',
+            '+| Dynamic | `/address/[address]` | 550 kB | 950 kB |',
+        ].join('\n');
+        const report = formatReport([], BASE, { baseLabel: 'master', diff });
+        expect(report).not.toContain('diff --git');
+        expect(report).not.toContain('@@');
+        expect(report).not.toContain('+++');
+        expect(report).toContain('-| Dynamic | `/address/[address]` | 500 kB | 900 kB |');
+    });
+
+    it('should show the diff fence even when only prose changed', () => {
+        const diff = ['-> old note', '+> new note'].join('\n');
+        const report = formatReport([], BASE, { baseLabel: 'master', diff });
+        expect(report).toContain('No route size changes');
+        expect(report).toContain('```diff');
+        expect(report).toContain('+> new note');
+    });
 });
 
 describe('formatCheckFailure', () => {

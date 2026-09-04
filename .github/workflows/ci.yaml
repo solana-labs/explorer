@@ -155,11 +155,14 @@ jobs:
       - name: Generate build info
         run: pnpm build:info .next/BUILD.fresh.md
 
+      # Plain `diff` (not `git diff`) so local git diff-tool config can never leak into the report;
+      # it exits 1 whenever the files differ, hence the `|| true`.
       - name: Render bundle change report
         run: |
           git fetch --depth=1 origin ${{ github.base_ref }}
           git show FETCH_HEAD:bench/BUILD.md > .next/BUILD.base.md
-          pnpm exec tsx scripts/build-info-diff.ts report .next/BUILD.base.md .next/BUILD.fresh.md ${{ github.base_ref }} > .next/bundle-report.md
+          diff -U0 .next/BUILD.base.md .next/BUILD.fresh.md > .next/BUILD.diff || true
+          pnpm exec tsx scripts/build-info-diff.ts report .next/BUILD.base.md .next/BUILD.fresh.md ${{ github.base_ref }} .next/BUILD.diff > .next/bundle-report.md
           cat .next/bundle-report.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Save bundle change report
