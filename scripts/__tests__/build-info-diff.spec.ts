@@ -224,6 +224,37 @@ describe('formatReport', () => {
         expect(report).toContain('-| Dynamic | `/address/[address]` | 500 kB | 900 kB |');
     });
 
+    it('should omit the diff fence when every changed row is rounding noise', () => {
+        const fresh = BASE.replace('| 500 kB | 900 kB |', '| 510 kB | 910 kB |');
+        const changes = diffBuildInfo(parseBuildInfoTable(BASE), parseBuildInfoTable(fresh));
+        const diff = [
+            '-| Dynamic | `/address/[address]` | 500 kB | 900 kB |',
+            '+| Dynamic | `/address/[address]` | 510 kB | 910 kB |',
+        ].join('\n');
+        const report = formatReport(changes, fresh, { baseLabel: 'master', diff });
+        expect(report).toContain('No route size changes');
+        expect(report).not.toContain('```diff');
+        expect(report).toContain('1 route moved by one rounding step');
+    });
+
+    it('should drop noise-route rows from the fence while keeping significant ones', () => {
+        const fresh = BASE.replace('| 500 kB | 900 kB |', '| 550 kB | 950 kB |').replace(
+            '| 130 kB | 530 kB |',
+            '| 140 kB | 540 kB |',
+        );
+        const changes = diffBuildInfo(parseBuildInfoTable(BASE), parseBuildInfoTable(fresh));
+        const diff = [
+            '-| Static | `/` | 130 kB | 530 kB |',
+            '+| Static | `/` | 140 kB | 540 kB |',
+            '-| Dynamic | `/address/[address]` | 500 kB | 900 kB |',
+            '+| Dynamic | `/address/[address]` | 550 kB | 950 kB |',
+        ].join('\n');
+        const report = formatReport(changes, fresh, { baseLabel: 'master', diff });
+        expect(report).toContain('+| Dynamic | `/address/[address]` | 550 kB | 950 kB |');
+        expect(report).not.toContain('+| Static | `/` | 140 kB | 540 kB |');
+        expect(report).not.toContain('-| Static | `/` | 130 kB | 530 kB |');
+    });
+
     it('should show the diff fence even when only prose changed', () => {
         const diff = ['-> old note', '+> new note'].join('\n');
         const report = formatReport([], BASE, { baseLabel: 'master', diff });

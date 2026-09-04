@@ -136,6 +136,19 @@ function stripDiffHeaders(diff: string): string {
         .trim();
 }
 
+// Drops -/+ rows for routes whose movement is one-step noise, mirroring the summary's suppression.
+function suppressNoiseRows(diff: string, noiseRoutes: Set<string>): string {
+    return diff
+        .split('\n')
+        .filter(line => {
+            if (!line.startsWith('-') && !line.startsWith('+')) return true;
+            const row = parseRow(line.slice(1));
+            return row === undefined || !noiseRoutes.has(row.route);
+        })
+        .join('\n')
+        .trim();
+}
+
 export function formatReport(
     changes: RouteChange[],
     freshMarkdown: string,
@@ -144,7 +157,9 @@ export function formatReport(
     const lines = [`### 📦 Bundle change vs \`${options.baseLabel}\``, ''];
     const significant = changes.filter(change => exceedsTolerance(change));
     const noiseCount = changes.length - significant.length;
-    const diff = options.diff === undefined ? undefined : stripDiffHeaders(options.diff);
+    const noiseRoutes = new Set(changes.filter(change => !exceedsTolerance(change)).map(change => change.route));
+    const diff =
+        options.diff === undefined ? undefined : suppressNoiseRows(stripDiffHeaders(options.diff), noiseRoutes);
 
     if (significant.length === 0) {
         lines.push('No route size changes.');
