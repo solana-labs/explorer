@@ -18,7 +18,7 @@ type SentryExtras = Record<string, unknown>;
 type SentryReport = boolean | 'always';
 
 type SentryContext = LogContext & {
-    /** `true` also sends the event to Sentry, from the server only; `'always'` reports from the browser too. */
+    /** `true` sends to Sentry from the server only — never from the browser; `'always'` reports from both. */
     sentry?: SentryReport;
     /** Extra data sent exclusively to Sentry (not included in console output). */
     sentryExtras?: SentryExtras;
@@ -41,13 +41,12 @@ type PanicContext = LogContext & {
  *
  * Sentry integration (each method always sets the correct severity level via `withScope`):
  * - `panic` (level: `fatal`) — always calls `captureException`, on every runtime.
- * - `error` (level: `error`) — calls `captureException` when `{ sentry: true }`.
- * - `warn`  (level: `warning`) — calls `captureMessage` when `{ sentry: true }`.
+ * - `error` (level: `error`) — `captureException` on the server only with `{ sentry: true }`; in the browser
+ *   nothing is sent unless the call site writes `{ sentry: 'always' }`.
+ * - `warn`  (level: `warning`) — `captureMessage` under the same rule.
  *
- * `sentry: true` reports from the server only — bot-heavy browser traffic must not page Sentry unless a
- * call site deliberately opts in with `sentry: 'always'` (an SSR pass counts as server, so the same call
- * site reports once, not once per runtime). Browser captures are tagged so the client Sentry config's
- * `beforeSend` can drop anything that did not come through here.
+ * `sentry: true` is a no-op in the browser, by design: bot-heavy client traffic must not page Sentry.
+ * Browser captures are tagged so the client config's `beforeSend` can drop anything not routed through here.
  *
  * Use `sentryExtras` to attach data exclusively to the Sentry event.
  * Context fields outside `sentryExtras` are only sent to the console.
@@ -113,7 +112,7 @@ function isLoggable(expectedLevel: LOG_LEVEL) {
     return !isNullish(currentLevel) && Number.isFinite(currentLevel) && expectedLevel <= currentLevel;
 }
 
-/** Browser reporting is opt-in per call site: `true` was almost always written with the server in mind. */
+/** `true` never reports from the browser: it was almost always written with the server in mind. */
 function shouldReport(sentry: SentryReport | undefined): boolean {
     if (!sentry) return false;
     return sentry === 'always' || typeof window === 'undefined';
