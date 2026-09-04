@@ -19,7 +19,6 @@ const STORAGE_KEY = 'explorer:timestamp-display';
 // (undefined) instead of rendering garbage. No getOnInit: the atom starts undefined to match SSR and
 // hydrates to the stored value on mount, avoiding a hydration mismatch.
 const jsonStorage = createJSONStorage<TimestampDisplay | undefined>(() => window.localStorage);
-const baseSubscribe = jsonStorage.subscribe;
 const validatedStorage: typeof jsonStorage = {
     ...jsonStorage,
     getItem: (key, initialValue) => {
@@ -55,30 +54,36 @@ const validatedStorage: typeof jsonStorage = {
             // ignore — the in-memory atom value is still the source of truth for this session.
         }
     },
-    subscribe:
-        baseSubscribe &&
-        ((key, callback, initialValue) => {
-            // Subscribing is best-effort too: if localStorage is blocked, skip cross-tab sync and
-            // return a no-op unsubscribe rather than throwing when the atom mounts.
+    // Own the storage-event wiring instead of delegating to jotai's built-in subscriber. Jotai's
+    // handler re-reads the storage factory (window.localStorage) to compare event.storageArea *before*
+    // it invokes the callback, so if access is revoked after mount that read throws out of jotai's
+    // handler — upstream of any callback wrapper we could supply. Handling the event ourselves keeps
+    // every localStorage access inside a guard, so a revoked context just ignores the event and retains
+    // the in-memory preference.
+    subscribe: (key, callback, initialValue) => {
+        if (typeof window === 'undefined' || typeof window.addEventListener !== 'function') {
+            return () => {};
+        }
+        const handler = (event: StorageEvent) => {
             try {
-                return baseSubscribe(
-                    key,
-                    // The storage-event callback fires asynchronously and re-reads localStorage, so it
-                    // runs outside the synchronous guard above. Wrap it too: if access is revoked after
-                    // mount, ignore the event and keep the in-memory preference instead of throwing.
-                    value => {
-                        try {
-                            callback(isTimestampDisplay(value) ? value : undefined);
-                        } catch {
-                            // ignore — retain the current in-memory atom value for this session.
-                        }
-                    },
-                    initialValue,
-                );
+                if (event.key !== key) return;
+                // Ignore events from a different storage area; guarded because reading
+                // window.localStorage can itself throw once access is revoked.
+                if (event.storageArea && event.storageArea !== window.localStorage) return;
+                let value: unknown;
+                try {
+                    value = event.newValue === null ? initialValue : JSON.parse(event.newValue);
+                } catch {
+                    value = initialValue;
+                }
+                callback(isTimestampDisplay(value) ? value : undefined);
             } catch {
-                return () => {};
+                // ignore — retain the current in-memory atom value for this session.
             }
-        }),
+        };
+        window.addEventListener('storage', handler);
+        return () => window.removeEventListener('storage', handler);
+    },
 };
 
 /** The global, persisted preference for which representation every Timestamp shows by default. */

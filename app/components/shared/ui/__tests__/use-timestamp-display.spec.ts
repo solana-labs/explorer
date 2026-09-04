@@ -73,6 +73,37 @@ describe('use-timestamp-display (localStorage persistence)', () => {
         expect(result.current).toBeUndefined();
     });
 
+    it('should ignore a storage event when localStorage access is revoked after mount', () => {
+        const { result } = renderHook(() => usePinnedTimestampDisplay());
+        act(() => setPinnedTimestampDisplay('unix'));
+        expect(result.current).toBe('unix');
+
+        // Simulate a context (embedded frame, browser policy) that revokes localStorage access after
+        // the atom mounts: every property read now throws. A cross-tab storage event must be ignored,
+        // keeping the in-memory preference, instead of throwing out of the subscribe handler.
+        // Capture the real storage object for the event's storageArea BEFORE revoking, so building the
+        // event doesn't itself trip the throwing getter — the throw must originate inside the handler.
+        const realStorage = window.localStorage;
+        Object.defineProperty(window, 'localStorage', {
+            configurable: true,
+            get() {
+                throw new DOMException('access denied', 'SecurityError');
+            },
+        });
+
+        try {
+            const event = new StorageEvent('storage', {
+                key: STORAGE_KEY,
+                newValue: stored('relative'),
+                storageArea: realStorage,
+            });
+            expect(() => act(() => window.dispatchEvent(event))).not.toThrow();
+            expect(result.current).toBe('unix');
+        } finally {
+            Object.defineProperty(window, 'localStorage', { configurable: true, value: realStorage });
+        }
+    });
+
     it('should read a value persisted from a previous session on a fresh mount', async () => {
         // Simulate a favorite saved on an earlier visit, then a brand-new page load (fresh module +
         // fresh component) — the value must survive and be read straight out of localStorage.
