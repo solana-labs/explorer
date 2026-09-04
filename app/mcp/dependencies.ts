@@ -8,7 +8,7 @@ import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 
 import { MCP_ENABLED_CLUSTER_NAMES } from '@/app/shared/config/mcp-clusters';
 import { Logger } from '@/app/shared/lib/logger';
-import { wrapMcpServerWithSentry } from '@/app/shared/lib/sentry';
+import { wrapMcpServerWithSentry } from '@/app/shared/lib/sentry/server';
 import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatcher';
 import { Cluster, serverClusterUrl } from '@/app/utils/cluster';
 import { programNameByAddress } from '@/app/utils/programs';

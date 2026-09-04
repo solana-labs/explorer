@@ -7,15 +7,8 @@
  * - `Logger.error(msg, { sentry: true })` or `Logger.warn(msg, { sentry: true })` for notable events
  *   (server-only; `sentry: 'always'` also reports from the browser)
  */
-export {
-    addBreadcrumb,
-    captureFeedback,
-    startSpan,
-    setTag,
-    setExtra,
-    setContext,
-    withScope,
-    wrapMcpServerWithSentry,
-} from '@sentry/nextjs';
+// No server-only re-exports here (e.g. wrapMcpServerWithSentry): the browser build of @sentry/nextjs
+// lacks them, and this barrel is imported from client components.
+export { addBreadcrumb, captureFeedback, startSpan, setTag, setExtra, setContext, withScope } from '@sentry/nextjs';
 export { withTraceData } from './trace-data';
 export { SentryErrorBoundary } from './SentryErrorBoundary';
