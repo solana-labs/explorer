@@ -16,4 +16,7 @@ export function isEnvEnabled(variable: undefined | string) {
 }
 
 export const EXPLORER_BASE_URL = 'https://explorer.solana.com';
+
+/** Closes the deployment for bots (staging): disallow-all robots.txt, 404 sitemaps, noindex header. */
+export const isSeoDisallowBots = () => isEnvEnabled(process.env.SEO_DISALLOW_BOTS);
 export const IBRL_EXPLORER_URL = process.env.NEXT_PUBLIC_IBRL_EXPLORER_URL || 'https://ibrl.wtf';

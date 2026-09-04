@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { botIdMiddleware } from '@/config/botid-middleware.mjs';
 
@@ -35,5 +35,30 @@ describe('Next.js proxy', () => {
 
         expect(response).toBe(blocked);
         expect(response.status).toBe(401);
+    });
+
+    describe('sitemap gating', () => {
+        afterEach(() => {
+            vi.unstubAllEnvs();
+        });
+
+        it.each(['/sitemap.xml', '/default-sitemap.xml', '/accounts-sitemap.xml'])(
+            'should return 404 for %s when SEO_DISALLOW_BOTS is true',
+            async pathname => {
+                vi.stubEnv('SEO_DISALLOW_BOTS', 'true');
+
+                const response = await proxy(createRequest(pathname));
+
+                expect(response.status).toBe(404);
+                expect(botIdMiddleware).not.toHaveBeenCalled();
+            },
+        );
+
+        it('should pass sitemap requests through when the flag is not set', async () => {
+            const response = await proxy(createRequest('/sitemap.xml'));
+
+            expect(response.status).toBe(200);
+            expect(botIdMiddleware).not.toHaveBeenCalled();
+        });
     });
 });
