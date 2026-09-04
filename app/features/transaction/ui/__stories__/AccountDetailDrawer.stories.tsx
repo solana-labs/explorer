@@ -4,7 +4,7 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { nextjsParameters, withClusterAccountsAndTokenInfo } from '@storybook-config/decorators';
 import { expect, fn, within } from 'storybook/test';
 
-import { AccountDetailSlideover } from '../AccountDetailSlideover';
+import { AccountDetailDrawer } from '../AccountDetailDrawer';
 
 const FEE_PAYER = new PublicKey(gen.blockhash(2));
 
@@ -22,7 +22,7 @@ const mockMessage = {
     recentBlockhash: gen.blockhash(0),
 } as unknown as ParsedMessage;
 
-const meta: Meta<typeof AccountDetailSlideover> = {
+const meta: Meta<typeof AccountDetailDrawer> = {
     args: {
         account: mockAccount,
         accountInfoLoading: false,
@@ -31,7 +31,7 @@ const meta: Meta<typeof AccountDetailSlideover> = {
         onOpenChange: fn(),
         open: true,
     },
-    component: AccountDetailSlideover,
+    component: AccountDetailDrawer,
     decorators: [withClusterAccountsAndTokenInfo],
     parameters: {
         ...nextjsParameters,
@@ -39,7 +39,7 @@ const meta: Meta<typeof AccountDetailSlideover> = {
         viewport: { defaultViewport: 'mobile1' },
     },
     tags: ['autodocs', 'test'],
-    title: 'Features/Transaction/AccountDetailSlideover@Media',
+    title: 'Features/Transaction/AccountDetailDrawer@Media',
 };
 
 export default meta;

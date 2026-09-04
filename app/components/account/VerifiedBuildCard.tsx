@@ -1,21 +1,21 @@
 import { ErrorCard } from '@components/common/ErrorCard';
-import { TableCardBody } from '@components/common/TableCardBody';
 import { UpgradeableLoaderAccountData } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
 import Link from 'next/link';
-import { ExternalLink as ExternalLinkIcon } from 'react-feather';
+import { type ReactNode } from 'react';
+import { ExternalLink, Info } from 'react-feather';
 
 import { Badge } from '@/app/components/shared/ui/badge';
-import { ExternalLink } from '@/app/components/shared/ui/external-link';
 import { getSafeExternalHref } from '@/app/shared/lib/url';
-import { Alert } from '@/app/shared/ui/Alert';
-import { Card, CardBody, CardHeader, CardTitle } from '@/app/shared/ui/Card';
-import { BaseTable } from '@/app/shared/ui/Table';
+import { Alert } from '@/app/shared/ui/Alert/Alert';
+import { CardBody } from '@/app/shared/ui/Card';
+import { SectionCard } from '@/app/shared/ui/Card/SectionCard';
+import { CopyableCode } from '@/app/shared/ui/CopyableCode';
+import { ExternalLinkValue, KeyValue, TextValue } from '@/app/shared/ui/key-value';
 import { OsecRegistryInfo, useVerifiedProgram, VerificationStatus } from '@/app/utils/verified-builds';
 import { VERIFIED_BUILDS_GUIDE_URL } from '@/app/utils/verified-builds-url';
 
 import { Address } from '../common/Address';
-import { Copyable } from '../common/Copyable';
 import { LoadingCard } from '../common/LoadingCard';
 import { BufferBuildCard } from './BufferBuildCard';
 
@@ -61,7 +61,7 @@ export function BaseVerifiedBuildCard({
 
     if (!registryInfo) {
         return (
-            <Card ui="dashkit">
+            <SectionCard title="Verified Build">
                 <CardBody ui="dashkit" className="text-center">
                     Verified build information not yet uploaded by the program authority. For more information, see the{' '}
                     <Link href={VERIFIED_BUILDS_GUIDE_URL} target="_blank">
@@ -72,48 +72,55 @@ export function BaseVerifiedBuildCard({
                     Note: Some programs were verified using older, deprecated versions of the API and may not include
                     on-chain verification details.
                 </CardBody>
-            </Card>
+            </SectionCard>
         );
     }
 
     // Define the message based on the verification status
-    let verificationMessage;
+    let verificationMessage: ReactNode;
     if (
         registryInfo.verification_status === VerificationStatus.Verified ||
         registryInfo.verification_status === VerificationStatus.PdaUploaded
     ) {
-        verificationMessage = 'Information provided by osec.io';
+        verificationMessage = (
+            <>
+                Information provided by{' '}
+                <a href="https://osec.io" target="_blank" rel="noopener noreferrer">
+                    osec.io
+                </a>
+            </>
+        );
     } else if (registryInfo.verification_status === VerificationStatus.NotVerified) {
         verificationMessage = 'No verified build found';
     }
 
     return (
-        <Card ui="dashkit">
-            <CardHeader ui="dashkit">
-                <CardTitle as="h3" ui="dashkit" className="flex items-center">
-                    Verified Build
-                </CardTitle>
-                <small>{verificationMessage}</small>
-            </CardHeader>
-            <Alert className="mb-1.5 mt-1.5">
-                A verified build badge indicates that this program was built from source code that is publicly
-                available, but does not imply that this program has been audited. For more details, refer to the{' '}
-                <ExternalLink href={VERIFIED_BUILDS_GUIDE_URL}>
-                    Verified Builds Guide <ExternalLinkIcon className="ml-[3px] align-text-top" size={13} />
-                </ExternalLink>
-                .
-            </Alert>
-            <TableCardBody>
-                {ROWS.filter(x => x.key in registryInfo).map((x, idx) => {
-                    return (
-                        <BaseTable.Row key={idx}>
-                            <BaseTable.Cell className="w-full">{x.display}</BaseTable.Cell>
-                            <RenderEntry value={registryInfo[x.key]} type={x.type} />
-                        </BaseTable.Row>
-                    );
-                })}
-            </TableCardBody>
-        </Card>
+        <>
+            <SectionCard
+                title="Verified Build"
+                noCardMargin
+                note={
+                    <Alert variant="info" appearance="outlined" icon={<Info size={16} />} className="!mb-0">
+                        A verified build badge indicates that this program was built from source code that is publicly
+                        available, but does not imply that this program has been audited. For more details, refer to the{' '}
+                        <a href={VERIFIED_BUILDS_GUIDE_URL} target="_blank" rel="noopener noreferrer">
+                            Verified Builds Guide
+                            <ExternalLink className="relative -top-0.5 ml-1.5" size={13} />
+                        </a>
+                        .
+                    </Alert>
+                }
+            >
+                {ROWS.filter(x => x.key in registryInfo).map(x => (
+                    <KeyValue key={x.key} label={x.display}>
+                        <RenderEntry value={registryInfo[x.key]} type={x.type} mono={x.mono ?? true} />
+                    </KeyValue>
+                ))}
+            </SectionCard>
+            {verificationMessage && (
+                <div className="mb-10 mt-3 px-1 text-sm text-outer-space-300">{verificationMessage}</div>
+            )}
+        </>
     );
 }
 
@@ -130,6 +137,8 @@ type TableRow = {
     display: string;
     key: keyof OsecRegistryInfo;
     type: DisplayType;
+    /** Render the value in the normal body font instead of monospace. */
+    mono?: boolean;
 };
 
 const ROWS: TableRow[] = [
@@ -141,6 +150,7 @@ const ROWS: TableRow[] = [
     {
         display: 'Message',
         key: 'message',
+        mono: false,
         type: DisplayType.String,
     },
     {
@@ -161,6 +171,7 @@ const ROWS: TableRow[] = [
     {
         display: 'Last Verified At',
         key: 'last_verified_at',
+        mono: false,
         type: DisplayType.Date,
     },
     {
@@ -171,88 +182,64 @@ const ROWS: TableRow[] = [
     {
         display: 'Repository URL',
         key: 'onchain_repo_url',
+        mono: false,
         type: DisplayType.URL,
     },
 ];
 
-function RenderEntry({ value, type }: { value: OsecRegistryInfo[keyof OsecRegistryInfo]; type: DisplayType }) {
+function RenderEntry({
+    value,
+    type,
+    mono,
+}: {
+    value: OsecRegistryInfo[keyof OsecRegistryInfo];
+    type: DisplayType;
+    mono: boolean;
+}) {
     switch (type) {
         case DisplayType.Boolean:
             return (
-                <BaseTable.Cell className="text-right font-mono">
-                    <Badge ui="dashkit" variant={value ? 'success' : 'warning'}>
-                        {String(value)}
-                    </Badge>
-                </BaseTable.Cell>
+                <Badge ui="dashkit" variant={value ? 'success' : 'warning'}>
+                    {String(value)}
+                </Badge>
             );
         case DisplayType.String:
             if (Object.values(VerificationStatus).includes(value as VerificationStatus)) {
                 const isVerified = value === VerificationStatus.Verified;
                 return (
-                    <BaseTable.Cell className="text-right font-mono">
-                        <Badge ui="dashkit" variant={isVerified ? 'success' : 'warning'}>
-                            {isVerified ? 'true' : 'false'}
-                        </Badge>
-                    </BaseTable.Cell>
+                    <Badge ui="dashkit" variant={isVerified ? 'success' : 'warning'}>
+                        {isVerified ? 'true' : 'false'}
+                    </Badge>
                 );
             }
             return (
-                <BaseTable.Cell className="text-right font-mono" style={{ whiteSpace: 'pre' }}>
+                <TextValue mono={mono} preserveWhitespace>
                     {value && (value as string).length > 1 ? value : '-'}
-                </BaseTable.Cell>
+                </TextValue>
             );
         case DisplayType.LongString:
-            return (
-                <BaseTable.Cell className="text-right">
-                    {value && (value as string).length > 1 ? (
-                        <div className="flex items-center justify-end">
-                            <Copyable text={value as string}>
-                                <span />
-                            </Copyable>
-                            <pre
-                                className="mb-0 text-left font-mono"
-                                style={{ overflowWrap: 'break-word', whiteSpace: 'pre-wrap' }}
-                            >
-                                {value}
-                            </pre>
-                        </div>
-                    ) : (
-                        '-'
-                    )}
-                </BaseTable.Cell>
+            return value && (value as string).length > 1 ? (
+                <CopyableCode value={value as string} />
+            ) : (
+                <TextValue mono={mono}>-</TextValue>
             );
         case DisplayType.URL:
-            if (getSafeExternalHref(value as string)) {
-                return (
-                    <BaseTable.Cell className="text-right">
-                        <span className="whitespace-nowrap font-mono">
-                            <ExternalLink href={value as string}>
-                                {value}
-                                <ExternalLinkIcon className="ml-1.5 align-text-top" size={13} />
-                            </ExternalLink>
-                        </span>
-                    </BaseTable.Cell>
-                );
-            }
-            return (
-                <BaseTable.Cell className="text-right font-mono">
+            return getSafeExternalHref(value as string) ? (
+                <ExternalLinkValue url={value as string} mono={mono} />
+            ) : (
+                <TextValue mono={mono}>
                     {value && (value as string).length > 1 ? (value as string).trim() : '-'}
-                </BaseTable.Cell>
+                </TextValue>
             );
         case DisplayType.Date:
             return (
-                <BaseTable.Cell className="text-right font-mono">
+                <TextValue mono={mono}>
                     {value && (value as string).length > 1 ? new Date(value as string).toUTCString() : '-'}
-                </BaseTable.Cell>
+                </TextValue>
             );
         case DisplayType.PublicKey:
-            return (
-                <BaseTable.Cell className="text-right font-mono">
-                    <Address pubkey={new PublicKey(value as string)} link alignRight />
-                </BaseTable.Cell>
-            );
+            return <Address pubkey={new PublicKey(value as string)} link />;
         default:
-            break;
+            return null;
     }
-    return <></>;
 }

@@ -103,9 +103,9 @@ export function AccountHeader({
 
 function AccountDetailsHeader({ title }: { title: string }) {
     return (
-        <div className="flex flex-col justify-center gap-1 md:min-h-[69px]">
-            <h6 className="uppercase tracking-[0.08em] text-dk-gray-700">Details</h6>
-            <h2 className="mb-0">{title}</h2>
+        <div className="flex flex-col gap-1.5">
+            <span className="text-xs font-normal uppercase text-muted">Details</span>
+            <h2 className="m-0 text-2xl font-normal leading-none text-white md:text-3xl">{title}</h2>
         </div>
     );
 }

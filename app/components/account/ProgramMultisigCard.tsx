@@ -2,6 +2,7 @@ import { useAnchorProgram } from '@entities/idl';
 import { PublicKey } from '@solana/web3.js';
 import { Suspense } from 'react';
 
+import { Skeleton } from '@/app/components/shared/ui/skeleton';
 import { UpgradeableLoaderAccountData } from '@/app/providers/accounts';
 import { useCluster } from '@/app/providers/cluster';
 import {
@@ -10,12 +11,16 @@ import {
     useSquadsMultisig,
     useSquadsMultisigLookup,
 } from '@/app/providers/squadsMultisig';
-import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
-import { BaseTable } from '@/app/shared/ui/Table';
+import { SectionCard } from '@/app/shared/ui/Card/SectionCard';
+import { KeyValue } from '@/app/shared/ui/key-value';
 
 import { Address } from '../common/Address';
 import { LoadingCard } from '../common/LoadingCard';
-import { TableCardBody } from '../common/TableCardBody';
+
+// The Squads program ids are static constants — decode them once at module load instead of building a
+// fresh PublicKey (base58 decode + validation) on every render.
+const SQUADS_V3_PUBKEY = new PublicKey(SQUADS_V3_ADDRESS);
+const SQUADS_V4_PUBKEY = new PublicKey(SQUADS_V4_ADDRESS);
 
 export function ProgramMultisigCard({ data }: { data: UpgradeableLoaderAccountData }) {
     return (
@@ -47,59 +52,28 @@ function ProgramMultisigCardInner({ programAuthority }: { programAuthority: Publ
         members = squadInfo?.multisig.keys ?? [];
     }
 
+    const memberCount =
+        squadInfo?.version === 'v4' ? squadInfo?.multisig.members.length : squadInfo?.multisig.keys.length;
+
     return (
-        <Card ui="dashkit">
-            <CardHeader ui="dashkit">
-                <CardTitle as="h3" ui="dashkit" className="flex items-center">
-                    Upgrade Authority Multisig Information
-                </CardTitle>
-            </CardHeader>
-            <TableCardBody>
-                <BaseTable.Row>
-                    <BaseTable.Cell>Multisig Program</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">
-                        {squadMapInfo?.version === 'v4' ? 'Squads V4' : 'Squads V3'}
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-                <BaseTable.Row>
-                    <BaseTable.Cell>Multisig Program Id</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">
-                        <Address
-                            pubkey={
-                                new PublicKey(squadMapInfo?.version === 'v4' ? SQUADS_V4_ADDRESS : SQUADS_V3_ADDRESS)
-                            }
-                            alignRight
-                            link
-                        />
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-                <BaseTable.Row>
-                    <BaseTable.Cell>Multisig Account</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">
-                        {squadMapInfo?.isSquad ? (
-                            <Address pubkey={new PublicKey(squadMapInfo.multisig)} alignRight link />
-                        ) : null}
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-                <BaseTable.Row>
-                    <BaseTable.Cell>Multisig Approval Threshold</BaseTable.Cell>
-                    <BaseTable.Cell className="text-right">
-                        {squadInfo?.multisig.threshold}
-                        {' of '}
-                        {squadInfo?.version === 'v4'
-                            ? squadInfo?.multisig.members.length
-                            : squadInfo?.multisig.keys.length}
-                    </BaseTable.Cell>
-                </BaseTable.Row>
-                {members.map((member, idx) => (
-                    <BaseTable.Row key={idx}>
-                        <BaseTable.Cell>Multisig Member {idx + 1}</BaseTable.Cell>
-                        <BaseTable.Cell className="text-right">
-                            <Address pubkey={member} alignRight link />
-                        </BaseTable.Cell>
-                    </BaseTable.Row>
-                ))}
-            </TableCardBody>
-        </Card>
+        <SectionCard title="Upgrade Authority Multisig Information">
+            <KeyValue label="Multisig Program">{squadMapInfo?.version === 'v4' ? 'Squads V4' : 'Squads V3'}</KeyValue>
+            <KeyValue label="Multisig Program Id">
+                <Address pubkey={squadMapInfo?.version === 'v4' ? SQUADS_V4_PUBKEY : SQUADS_V3_PUBKEY} link />
+            </KeyValue>
+            <KeyValue label="Multisig Account">
+                {squadMapInfo?.isSquad && <Address pubkey={new PublicKey(squadMapInfo.multisig)} link />}
+            </KeyValue>
+            <KeyValue label="Multisig Approval Threshold">
+                {/* `useSquadsMultisig` resolves after the Suspense-covered lookup, so guard the quorum
+                    text with a skeleton — otherwise the row flashes a bare "of" until it loads. */}
+                {squadInfo ? `${squadInfo.multisig.threshold} of ${memberCount}` : <Skeleton className="h-4 w-16" />}
+            </KeyValue>
+            {members.map((member, idx) => (
+                <KeyValue key={idx} label={`Multisig Member ${idx + 1}`}>
+                    <Address pubkey={member} link />
+                </KeyValue>
+            ))}
+        </SectionCard>
     );
 }

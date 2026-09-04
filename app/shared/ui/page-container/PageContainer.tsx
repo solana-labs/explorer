@@ -3,14 +3,15 @@ import * as React from 'react';
 
 import { cn } from '@/app/components/shared/utils';
 
-// Drop-in replacement for Bootstrap's `.container`. Padding mirrors dashkit's
-// `$container-padding-x` (0.75rem = px-3). Width comes in two flavours:
-//   - `stepped` (default): dashkit's `$container-max-widths` breakpoint steps
+// Drop-in replacement for Bootstrap's `.container`. Padding is the generous
+// responsive scale used by the redesign (px-4 up to xxl:px-12). Width comes in
+// three flavours:
+//   - `default` (default): wide single cap at 1400px, centred once reached.
+//   - `stepped`: dashkit's `$container-max-widths` breakpoint steps
 //     (sm 540 / md 720 / lg 960 / xl 1140).
-//   - `fluid`: fills the full available width, capped at a single max-width and
-//     centred once that cap is reached.
-const pageContainerVariants = cva('mx-auto w-full px-3', {
-    defaultVariants: { variant: 'default', width: 'stepped' },
+//   - `fluid`: fills the available width, capped at a single max-width.
+const pageContainerVariants = cva('mx-auto w-full px-4 sm:px-5 md:px-6 lg:px-8 xl:px-10 xxl:px-12', {
+    defaultVariants: { variant: 'default', width: 'default' },
     variants: {
         variant: {
             default: '',
@@ -18,6 +19,7 @@ const pageContainerVariants = cva('mx-auto w-full px-3', {
             'pulled-up': '-mt-dk-3',
         },
         width: {
+            default: 'max-w-[1400px]',
             fluid: 'max-w-[960px]',
             stepped: 'sm:max-w-[540px] md:max-w-[720px] lg:max-w-[960px] xl:max-w-[1140px]',
         },

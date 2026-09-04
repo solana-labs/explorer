@@ -24,7 +24,7 @@ export function DetailRow({ children, className, label }: DetailRowProps) {
             )}
         >
             <div className="text-sm text-outer-space-300">{label}</div>
-            <div className="text-sm">{children}</div>
+            <div className="min-w-0 break-words text-sm">{children}</div>
         </div>
     );
 }

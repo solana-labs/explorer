@@ -1,11 +1,16 @@
 // TODO(fsd): relocate this module to @shared or the appropriate feature/entity layer.
 import { Copyable } from '@components/common/Copyable';
 import { cva } from 'class-variance-authority';
-import React from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { ByteArray, toHex } from '@/app/shared/lib/bytes';
 
 import { cn } from './utils';
+
+// Measure the wrapped hex layout before the browser paints so the column-based checkerboard doesn't
+// flash from a flat single color on the first frame. Falls back to useEffect on the server, where
+// there is no layout to measure anyway (and useLayoutEffect would warn).
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export type HexSpan = { text: string; variant: 'primary' | 'secondary' | 'secondary-old' };
 export type HexRow = HexSpan[];
@@ -88,6 +93,7 @@ export function HexData({
     align = 'end',
     spanSize = SPAN_SIZE,
     rowSize = ROW_SIZE,
+    wrap = false,
 }: {
     raw: ByteArray;
     copyableRaw?: ByteArray;
@@ -99,6 +105,7 @@ export function HexData({
     isCopyable?: boolean;
     spanSize?: number;
     rowSize?: number;
+    wrap?: boolean;
 }) {
     if (!raw || raw.length === 0) {
         return (
@@ -133,6 +140,7 @@ export function HexData({
             spanSize={spanSize}
             rowSize={rowSize}
             isCopyable={isCopyable}
+            wrap={wrap}
         />
     );
 }
@@ -148,6 +156,74 @@ const hexSpanVariants = cva('', {
         },
     },
 });
+
+function WrapContent({
+    spans,
+    className,
+    copyText,
+    inverted,
+    isCopyable,
+}: {
+    spans: HexSpan[];
+    className?: string;
+    copyText: string | null;
+    inverted: boolean;
+    isCopyable: boolean;
+}) {
+    const preRef = useRef<HTMLPreElement>(null);
+    const [cols, setCols] = useState(1);
+
+    useIsomorphicLayoutEffect(() => {
+        const el = preRef.current;
+        if (!el) return;
+        const measure = () => {
+            const groups = el.querySelectorAll<HTMLElement>('[data-hex-group]');
+            if (groups.length === 0) return;
+            const firstTop = groups[0].offsetTop;
+            let count = 0;
+            for (const g of groups) {
+                if (g.offsetTop !== firstTop) break;
+                count++;
+            }
+            setCols(Math.max(1, count));
+        };
+        measure();
+        const ro = new ResizeObserver(measure);
+        ro.observe(el);
+        return () => ro.disconnect();
+    }, [spans]);
+
+    const first: HexSpan['variant'] = inverted ? 'secondary-old' : 'primary';
+    const second: HexSpan['variant'] = inverted ? 'primary' : 'secondary-old';
+
+    const content = (
+        // px-0 overrides the global `pre { padding: .33rem }` so the hex sits flush left.
+        <pre
+            ref={preRef}
+            className="mb-0 block whitespace-normal bg-heavy-metal-900 px-0 py-1.5 text-left font-mono text-xs"
+        >
+            {spans.map((span, i) => (
+                <React.Fragment key={i}>
+                    <span
+                        data-hex-group
+                        className={cn(
+                            'mr-3 inline-block whitespace-nowrap',
+                            hexSpanVariants({ tone: (i % cols) % 2 === 0 ? first : second }),
+                        )}
+                    >
+                        {span.text}
+                    </span>{' '}
+                </React.Fragment>
+            ))}
+        </pre>
+    );
+
+    return (
+        <div className={cn('w-full', className)}>
+            {isCopyable ? <Copyable text={copyText}>{content}</Copyable> : content}
+        </div>
+    );
+}
 
 function ColoredSpans({ spans }: { spans: HexSpan[] }) {
     return (
@@ -198,6 +274,7 @@ function FullContent({
     spanSize,
     rowSize,
     isCopyable,
+    wrap,
 }: {
     hexString: string;
     copyText: string | null;
@@ -207,9 +284,22 @@ function FullContent({
     spanSize: number;
     rowSize: number;
     isCopyable: boolean;
+    wrap: boolean;
 }) {
     const spans = formatHexSpans(splitHexPairs(hexString), { inverted }, spanSize);
     const rows = groupHexRows(spans, rowSize, spanSize);
+
+    if (wrap) {
+        return (
+            <WrapContent
+                spans={spans}
+                className={className}
+                copyText={copyText}
+                inverted={inverted}
+                isCopyable={isCopyable}
+            />
+        );
+    }
 
     const divs = rows.map((row, rowIdx) => (
         <div key={rowIdx}>
@@ -221,26 +311,11 @@ function FullContent({
         </div>
     ));
 
+    const pre = <pre className="mb-0 inline-block bg-heavy-metal-900 p-1.5 text-left text-xs">{divs}</pre>;
+
     return (
-        <>
-            <div className={cn('hidden lg:flex', fullContentVariants({ align }), className)}>
-                {isCopyable ? (
-                    <Copyable text={copyText}>
-                        <pre className="mb-0 inline-block bg-heavy-metal-900 p-1.5 text-left text-xs">{divs}</pre>
-                    </Copyable>
-                ) : (
-                    <pre className="mb-0 inline-block bg-heavy-metal-900 p-1.5 text-left text-xs">{divs}</pre>
-                )}
-            </div>
-            <div className={cn('flex lg:hidden', fullContentVariants({ align }), className)}>
-                {isCopyable ? (
-                    <Copyable text={copyText}>
-                        <pre className="mb-0 inline-block bg-heavy-metal-900 p-1.5 text-left text-xs">{divs}</pre>
-                    </Copyable>
-                ) : (
-                    <pre className="mb-0 inline-block bg-heavy-metal-900 p-1.5 text-left text-xs">{divs}</pre>
-                )}
-            </div>
-        </>
+        <div className={cn('flex', fullContentVariants({ align }), className)}>
+            {isCopyable ? <Copyable text={copyText}>{pre}</Copyable> : pre}
+        </div>
     );
 }

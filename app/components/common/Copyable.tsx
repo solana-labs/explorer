@@ -5,7 +5,14 @@ import { CheckCircle, Copy, Loader, XCircle } from 'react-feather';
 
 import { type CopyState, useCopyToClipboard } from '@/app/shared/lib/useCopyToClipboard';
 
-export function Copyable({ text, children }: { text: string | null; children?: ReactNode }) {
+type CopyableProps = {
+    text: string | null;
+    children?: ReactNode;
+};
+
+// Inline copy affordance: a small glyph that sits next to `children`. For a standalone labeled copy
+// button (e.g. drawer footer actions) use `CopyButton` instead.
+export function Copyable({ text, children }: CopyableProps) {
     const [clipboardState, copy] = useCopyToClipboard(1000);
     const [loading, setLoading] = useState(false);
 

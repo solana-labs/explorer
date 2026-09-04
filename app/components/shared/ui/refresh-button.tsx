@@ -10,14 +10,16 @@ type Props = {
     analyticsSection: string;
     fetching?: boolean;
     onClick: () => void;
+    className?: string;
 };
 
-export function RefreshButton({ analyticsSection, fetching = false, onClick }: Props) {
+export function RefreshButton({ analyticsSection, fetching = false, onClick, className }: Props) {
     return (
         <Button
             variant="outline"
             size="sm"
             aria-label="Refresh"
+            className={className}
             disabled={fetching}
             onClick={() => {
                 refreshAnalytics.trackButtonClicked(analyticsSection);
