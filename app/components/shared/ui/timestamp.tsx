@@ -104,6 +104,15 @@ function TimestampRow({
     );
 }
 
+// False during SSR and the first client render, true from the first client effect onward. Gates the
+// timezone-dependent `local` label so it renders the same (UTC) string on both sides and hydrates
+// cleanly before swapping to the viewer's local time.
+function useMounted(): boolean {
+    const [mounted, setMounted] = React.useState(false);
+    React.useEffect(() => setMounted(true), []);
+    return mounted;
+}
+
 // Clock for the relative label. When `fixed` is given, use it verbatim (no ticking). Otherwise set
 // once on mount — so SSR and the first client render use the absolute fallback and hydrate cleanly —
 // then tick every second only while "Relative" is the shown format.
@@ -133,15 +142,24 @@ export function Timestamp({ unixTimestamp, display = 'utc', children, referenceM
     const [open, setOpen] = React.useState(false);
     const now = useNow(open || effective === 'relative', referenceMs);
 
+    // `local` (viewer's timezone) and the `relative` fallback below both depend on client-only state
+    // — the browser's timezone and its clock — which the server can't know. Rendering them during SSR
+    // and the first client render would produce different markup on each side and break hydration, so
+    // both fall back to the timezone-independent UTC string until we've mounted, then swap to the real
+    // value. (Only UTC is safe to render eagerly; local/relative are not.)
+    const mounted = useMounted();
+
     const ms = unixTimestamp * 1000;
     // Machine-readable instant shared by every row and the trigger (all render the same moment).
     const dateTime = new Date(ms).toISOString();
+    const utc = displayTimestampAbsolute(ms, true);
     const labels: Record<TimestampDisplay, string> = {
-        local: displayTimestampAbsolute(ms, false),
-        // Until `now` is set on the client, fall back to the absolute time so hydration matches.
-        relative: now === undefined ? displayTimestampAbsolute(ms, false) : displayTimestampRelative(ms, now),
+        local: mounted ? displayTimestampAbsolute(ms, false) : utc,
+        // With a fixed `referenceMs`, `now` is deterministic and identical on both sides, so the
+        // relative value is hydration-safe; otherwise `now` is undefined until mount → UTC fallback.
+        relative: now === undefined ? utc : displayTimestampRelative(ms, now),
         unix: String(unixTimestamp),
-        utc: displayTimestampAbsolute(ms, true),
+        utc,
     };
 
     const rows: { key: TimestampDisplay; label: string }[] = [
