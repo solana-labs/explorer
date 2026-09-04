@@ -21,6 +21,16 @@ vi.mock('next/navigation', () => ({
     useSearchParams: () => new URLSearchParams(),
 }));
 
+// `InfoTooltip` pins the label's last word to its help icon inside a nested `nowrap` span, so a
+// label like "Fee under SIMD-0553" is split across elements. Match on the innermost element whose
+// full text equals the label rather than on a single text node.
+function byLabelText(label: string) {
+    return (_content: string, element: Element | null): boolean => {
+        if (element?.textContent !== label) return false;
+        return Array.from(element.children).every(child => child.textContent !== label);
+    };
+}
+
 function renderSummary(parsed = MOCK_PARSED_TX) {
     const Wrapper = withTransactionProviders(
         { [DEFAULT_SIGNATURE]: parsed },
@@ -47,7 +57,7 @@ describe('SummaryCard SIMD-0553 fee projection', () => {
 
         // The fee row itself still renders, so this asserts the projection alone is gated.
         expect(await screen.findByText('Fee')).toBeInTheDocument();
-        expect(screen.queryByText('Fee under SIMD-0553')).not.toBeInTheDocument();
+        expect(screen.queryByText(byLabelText('Fee under SIMD-0553'))).not.toBeInTheDocument();
     });
 
     it('should render a projection per staged rate when the flag is on', async () => {
@@ -55,7 +65,7 @@ describe('SummaryCard SIMD-0553 fee projection', () => {
 
         renderSummary();
 
-        expect(await screen.findByText('Fee under SIMD-0553')).toBeInTheDocument();
+        expect(await screen.findByText(byLabelText('Fee under SIMD-0553'))).toBeInTheDocument();
         expect(screen.getByText('at the 1/10 rate')).toBeInTheDocument();
         expect(screen.getByText('at the 1/4 rate')).toBeInTheDocument();
         expect(screen.getByText('at the 1/2 rate')).toBeInTheDocument();
