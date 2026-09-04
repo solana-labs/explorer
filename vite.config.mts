@@ -125,7 +125,9 @@ export default defineConfig({
                         provider: playwright(),
                         connectTimeout: 30000,
                     },
-                    setupFiles: ['./test-setup.ts', './.storybook/vitest.setup.ts'],
+                    // No .storybook/vitest.setup.ts: since Storybook 10.3 addon-vitest applies the
+                    // preview annotations (incl. addon previews) itself.
+                    setupFiles: ['./test-setup.ts'],
                     testTimeout: 15000,
                     hookTimeout: 30000,
                     retry: 1,
