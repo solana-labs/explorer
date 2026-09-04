@@ -262,6 +262,10 @@ function TransactionRawDataSize({ signature, isVisible }: { signature: string; i
     const loading = rawDetails === undefined || rawDetails.status === FetchStatus.Fetching;
     const retriesRef = useRef(0);
 
+    // Once the automated budget is spent and the fetch is still failing, the one-shot visibility can't
+    // re-arm it, so surface a manual retry rather than stranding the cell at `-` for the session.
+    const exhausted = rawDetails?.status === FetchStatus.FetchFailed && retriesRef.current >= MAX_RAW_FETCH_RETRIES;
+
     useEffect(() => {
         if (!isVisible || transactionData) return;
         // First time in view: no provider entry yet — kick off the initial fetch.
@@ -280,12 +284,19 @@ function TransactionRawDataSize({ signature, isVisible }: { signature: string; i
         }
     }, [isVisible, signature, rawDetails, transactionData, fetchRaw]);
 
+    // Reset the budget and re-fetch so a recovered RPC can populate the size on demand.
+    const retry = useCallback(() => {
+        retriesRef.current = 0;
+        fetchRaw(signature);
+    }, [fetchRaw, signature]);
+
     return (
         <RawDataSizeField
             size={transactionData?.length}
             data={transactionData}
             filename={signature}
             loading={loading}
+            onRetry={exhausted ? retry : undefined}
             // Collapse the fixed button height so the size sits inline with the other cells.
             buttonClassName="relative top-0.5 !h-auto !py-0 !text-sm [&_svg]:!size-3.5"
         />

@@ -1,5 +1,6 @@
 import { createNextjsParameters, withCluster } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
+import { displayTimestampUtc, unixTimestampToMs } from '@utils/date';
 
 import { Signature } from '@/app/components/common/Signature';
 import { Slot } from '@/app/components/common/Slot';
@@ -55,7 +56,7 @@ function renderRow(row: TransactionHistoryRowView, hasTimestamps: boolean) {
             </BaseTable.Cell>
             {hasTimestamps && (
                 <BaseTable.Cell className="w-px text-outer-space-300">
-                    {row.blockTime ? new Date(row.blockTime * 1000).toUTCString() : '---'}
+                    {row.blockTime ? displayTimestampUtc(unixTimestampToMs(row.blockTime), true) : '---'}
                 </BaseTable.Cell>
             )}
             <BaseTable.Cell className="w-px">

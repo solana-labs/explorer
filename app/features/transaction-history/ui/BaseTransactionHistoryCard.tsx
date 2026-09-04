@@ -3,9 +3,9 @@
 import { RefreshButton } from '@components/shared/ui/refresh-button';
 import { type ReactNode } from 'react';
 
-import { Button } from '@/app/components/shared/ui/button';
 import { cn } from '@/app/components/shared/utils';
 import { Card, CardTitle } from '@/app/shared/ui/Card';
+import { HistoryCardFooterContent } from '@/app/shared/ui/HistoryCard';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 export const STATUS_BADGE = {
@@ -117,26 +117,7 @@ export function BaseTransactionHistoryCard({
                         isEmpty && 'py-12',
                     )}
                 >
-                    {foundOldest ? (
-                        <div className="text-center text-dk-gray-700">Fetched full history</div>
-                    ) : (
-                        <Button
-                            ui="dashkit"
-                            variant="primary"
-                            className="w-full"
-                            onClick={() => onLoadMore()}
-                            disabled={fetching}
-                        >
-                            {fetching ? (
-                                <>
-                                    <span className="spinner-grow spinner-grow-sm mr-1.5 align-text-top"></span>
-                                    Loading
-                                </>
-                            ) : (
-                                'Load More'
-                            )}
-                        </Button>
-                    )}
+                    <HistoryCardFooterContent fetching={fetching} foundOldest={foundOldest} loadMore={onLoadMore} />
                 </div>
             </Card>
         </div>

@@ -13,6 +13,18 @@ type Props = {
     className?: string;
 };
 
+// Split a label into everything-but-the-last-word (`lead`) and its last word so the caller can pin
+// an inline icon to `lastWord` inside a `nowrap` run. `lead` keeps the trailing separator so earlier
+// words still wrap normally; it is empty for a single word, making the whole label + icon one
+// unbreakable run.
+export function splitLastWord(label: string): { lead: string; lastWord: string } {
+    // eslint-disable-next-line no-restricted-syntax -- trim trailing whitespace before locating the label's last word
+    const trimmed = label.replace(/\s+$/, '');
+    // eslint-disable-next-line no-restricted-syntax -- split off the last word on ANY whitespace (space/tab/NBSP) so the icon can be pinned to it
+    const match = trimmed.match(/^([\s\S]*\S\s+)(\S+)$/);
+    return match ? { lastWord: match[2], lead: match[1] } : { lastWord: trimmed, lead: '' };
+}
+
 export function InfoTooltip({ bottom, right, text, children, withHelpIcon = true, className }: Props) {
     if (!text) {
         return <>{children}</>;
@@ -59,14 +71,7 @@ export function InfoTooltip({ bottom, right, text, children, withHelpIcon = true
     // ignored across the element boundary). Earlier words still wrap on their spaces as normal.
     // Only a string child can be split this way; an arbitrary node can't, so its icon may wrap.
     if (typeof children === 'string') {
-        // eslint-disable-next-line no-restricted-syntax -- trim trailing whitespace before locating the label's last word
-        const trimmed = children.replace(/\s+$/, '');
-        // eslint-disable-next-line no-restricted-syntax -- split off the last word on ANY whitespace (space/tab/NBSP) so the icon can be pinned to it
-        const match = trimmed.match(/^([\s\S]*\S\s+)(\S+)$/);
-        // `lead` keeps the trailing separator so earlier words still wrap normally; empty for a
-        // single word, in which case the whole label + icon becomes one unbreakable run.
-        const lead = match ? match[1] : '';
-        const lastWord = match ? match[2] : trimmed;
+        const { lead, lastWord } = splitLastWord(children);
         return (
             <span className={className}>
                 {lead}

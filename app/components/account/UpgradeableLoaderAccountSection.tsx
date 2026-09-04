@@ -83,6 +83,7 @@ export function UpgradeableProgramSection({
             title={`${programData === undefined ? 'Closed ' : ''}Program Account`}
             account={account}
             headerOutside
+            listBody
             refresh={() => refresh(account.pubkey, 'parsed')}
             analyticsSection="program_section"
         >
@@ -157,6 +158,7 @@ export function UpgradeableProgramDataSection({
             title="Program Executable Data Account"
             account={account}
             headerOutside
+            listBody
             refresh={() => refresh(account.pubkey, 'parsed')}
             analyticsSection="program_data_section"
         >
@@ -200,6 +202,7 @@ export function UpgradeableProgramBufferSection({
             title="Program Deploy Buffer Account"
             account={account}
             headerOutside
+            listBody
             refresh={() => refresh(account.pubkey, 'parsed')}
             analyticsSection="program_buffer_section"
         >

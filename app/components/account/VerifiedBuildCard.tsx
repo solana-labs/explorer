@@ -12,7 +12,7 @@ import { CardBody } from '@/app/shared/ui/Card';
 import { SectionCard } from '@/app/shared/ui/Card/SectionCard';
 import { CopyableCode } from '@/app/shared/ui/CopyableCode';
 import { ExternalLinkValue, KeyValue, TextValue } from '@/app/shared/ui/key-value';
-import { OsecRegistryInfo, useVerifiedProgram, VerificationStatus } from '@/app/utils/verified-builds';
+import { OSEC_URL, OsecRegistryInfo, useVerifiedProgram, VerificationStatus } from '@/app/utils/verified-builds';
 import { VERIFIED_BUILDS_GUIDE_URL } from '@/app/utils/verified-builds-url';
 
 import { Address } from '../common/Address';
@@ -85,7 +85,7 @@ export function BaseVerifiedBuildCard({
         verificationMessage = (
             <>
                 Information provided by{' '}
-                <a href="https://osec.io" target="_blank" rel="noopener noreferrer">
+                <a href={OSEC_URL} target="_blank" rel="noopener noreferrer">
                     osec.io
                 </a>
             </>

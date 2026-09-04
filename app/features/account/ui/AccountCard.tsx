@@ -15,6 +15,8 @@ type AccountCardProps = TableCardBodyProps & {
     analyticsSection?: string;
     /** Render the title + actions as a section header above the card instead of in CardHeader. */
     headerOutside?: boolean;
+    /** Set when `children` are div-based `KeyValue` rows rather than `<tr>` table rows. */
+    listBody?: boolean;
 };
 
 // FIXME: missing Storybook story — RawAccountRows uses useRawAccountDataOnMount (SWR); visuals already covered by BaseAccountCard + RawAccountRows stories.
