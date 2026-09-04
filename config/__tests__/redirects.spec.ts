@@ -11,6 +11,7 @@ describe('next redirects', () => {
         { destination: '/', source: '/accounts' },
         { destination: '/', source: '/accounts/top' },
         { destination: '/', source: '/verified-programs' },
+        { destination: '/address/:address/idl', source: '/address/:address/anchor-program' },
     ])('should respond with 308 redirect for $source → $destination', ({ source, destination }) => {
         const entry = redirects.find(r => r.source === source);
         expect(entry).toMatchObject({ destination, permanent: true, source });

@@ -6,6 +6,7 @@ import { AccountCard } from '@features/account';
 import { Account } from '@providers/accounts';
 import { PublicKey } from '@solana/web3.js';
 import { parseFeatureAccount, useFeatureAccount } from '@utils/parseFeatureAccount';
+import { useBuildClusterPath } from '@utils/url';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -228,12 +229,14 @@ function ClusterActivationEpochAtCluster({
     activatedAt: number | null;
     isPending?: boolean;
 }) {
+    const buildClusterPath = useBuildClusterPath();
+
     if (cluster === Cluster.Custom) return null;
 
     if (activatedAt !== null && clusterInfo?.epochSchedule) {
         const epoch = getEpochForSlot(clusterInfo.epochSchedule, BigInt(activatedAt));
         return (
-            <Link href={`/epoch/${epoch}?cluster=${cluster}`}>
+            <Link href={buildClusterPath(`/epoch/${epoch}`)}>
                 {clusterName(cluster)} Epoch {epoch.toString()}
             </Link>
         );
@@ -244,7 +247,7 @@ function ClusterActivationEpochAtCluster({
         const remainingSlots = clusterInfo.epochInfo.slotsInEpoch - clusterInfo.epochInfo.slotIndex;
         return (
             <div>
-                <Link href={`/epoch/${nextEpoch}?cluster=${cluster}`}>
+                <Link href={buildClusterPath(`/epoch/${nextEpoch}`)}>
                     {clusterName(cluster)} Epoch {nextEpoch.toString()}
                 </Link>
                 <PendingEpochCountdown remainingSlots={remainingSlots} />
