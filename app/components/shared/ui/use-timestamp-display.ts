@@ -63,7 +63,16 @@ const validatedStorage: typeof jsonStorage = {
             try {
                 return baseSubscribe(
                     key,
-                    value => callback(isTimestampDisplay(value) ? value : undefined),
+                    // The storage-event callback fires asynchronously and re-reads localStorage, so it
+                    // runs outside the synchronous guard above. Wrap it too: if access is revoked after
+                    // mount, ignore the event and keep the in-memory preference instead of throwing.
+                    value => {
+                        try {
+                            callback(isTimestampDisplay(value) ? value : undefined);
+                        } catch {
+                            // ignore — retain the current in-memory atom value for this session.
+                        }
+                    },
                     initialValue,
                 );
             } catch {
