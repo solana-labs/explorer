@@ -77,6 +77,26 @@ describe('FeedbackWidget', () => {
         await waitFor(() => expect(screen.queryByRole('heading', { name: 'Give feedback' })).toBeNull());
     });
 
+    it('should not carry the previous rating into a form reopened after a successful send', async () => {
+        vi.stubEnv('NEXT_PUBLIC_SENTRY_DSN', SENTRY_DSN_FIXTURE);
+        render(<FeedbackWidget />);
+        await openForm();
+
+        await userEvent.click(screen.getByRole('radio', { name: '5 of 5 stars' }));
+        await userEvent.type(screen.getByRole('textbox', { name: 'Feedback' }), 'Rated once');
+        await userEvent.click(screen.getByRole('button', { name: 'Submit' }));
+        await waitFor(() => expect(screen.queryByRole('heading', { name: 'Give feedback' })).toBeNull());
+
+        await openForm();
+        await userEvent.type(screen.getByRole('textbox', { name: 'Feedback' }), 'Second try');
+        await userEvent.click(screen.getByRole('button', { name: 'Submit' }));
+
+        await waitFor(() => expect(sendFeedback).toHaveBeenCalledTimes(2));
+        const resubmission = vi.mocked(sendFeedback).mock.calls[1][0];
+        expect(resubmission.message).toBe('Second try');
+        expect(resubmission.tags?.rating).toBeUndefined();
+    });
+
     it('should keep the form open when delivery fails (e.g. Sentry blocked)', async () => {
         vi.stubEnv('NEXT_PUBLIC_SENTRY_DSN', SENTRY_DSN_FIXTURE);
         vi.mocked(sendFeedback).mockRejectedValueOnce('Unable to send feedback.');

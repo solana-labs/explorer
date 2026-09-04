@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ExternalLink as ExternalLinkIcon, X } from 'react-feather';
 
 import { Button } from '@/app/components/shared/ui/button';
@@ -49,16 +49,14 @@ export function BaseFeedbackForm({
     const [rating, setRating] = useState(0);
     const { isSm } = useBreakpoint();
 
-    // Text fields reset by unmounting with the dialog content; rating state lives here and must be reset by hand
-    const handleOpenChange = (nextOpen: boolean) => {
-        if (!nextOpen) setRating(0);
-        onOpenChange(nextOpen);
-    };
+    // Keyed off `open`, not onOpenChange: the programmatic close after a successful send never fires that callback
+    useEffect(() => {
+        if (!open) setRating(0);
+    }, [open]);
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
-        // Rating resets on close (handleOpenChange), not here — a failed send keeps the form state intact
         onSubmit({
             contact: String(data.get('contact') || '') || undefined,
             message: String(data.get('message') || ''),
@@ -113,7 +111,7 @@ export function BaseFeedbackForm({
     // Bottom drawer below `sm`, centered dialog above — the shared Slideover owns the slide-up animation
     if (!isSm) {
         return (
-            <Slideover open={open} onOpenChange={handleOpenChange}>
+            <Slideover open={open} onOpenChange={onOpenChange}>
                 <SlideoverContent aria-describedby={undefined}>
                     <SlideoverHeader>
                         {/* Preflight is skipped, so the UA h2 margins must be reset explicitly */}
@@ -134,7 +132,7 @@ export function BaseFeedbackForm({
     }
 
     return (
-        <Dialog open={open} onOpenChange={handleOpenChange}>
+        <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>Give feedback</DialogTitle>
