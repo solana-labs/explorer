@@ -1,4 +1,4 @@
-import { TableCardBody } from '@components/common/TableCardBody';
+import { TableCardBody, type TableCardBodyProps } from '@components/common/TableCardBody';
 import { useAnchorProgram } from '@entities/idl';
 import { ParsedMessage, PublicKey, TransactionInstruction, VersionedMessage } from '@solana/web3.js';
 import { getAnchorNameForInstruction, getAnchorProgramName } from '@utils/anchor';
@@ -93,13 +93,15 @@ export function ProgramLogsCardBody({
     cluster,
     url,
     className,
+    density,
 }: {
     message: VersionedMessage | ParsedMessage;
     logs: InstructionLogs[];
     cluster: Cluster;
     url: string;
-    /** Passed through to the underlying table body — used for dense row padding in the inspector panel. */
     className?: string;
+    /** Passed through to the underlying table — `"dense"` gives the compact rows the inspector panel uses. */
+    density?: TableCardBodyProps['density'];
 }) {
     let logIndex = 0;
     let instructionProgramIds: PublicKey[];
@@ -116,7 +118,7 @@ export function ProgramLogsCardBody({
     }
 
     return (
-        <TableCardBody className={className}>
+        <TableCardBody className={className} density={density}>
             {instructionProgramIds.map((programId, index) => {
                 const programAddress = programId.toBase58();
                 let programLogs: InstructionLogs | undefined = logs[logIndex];

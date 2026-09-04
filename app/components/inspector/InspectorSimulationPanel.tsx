@@ -18,7 +18,6 @@ import { BaseSimulatorCUProfilingCard } from '@/app/features/instruction-simulat
 import { LastSimulatedAt } from '@/app/features/instruction-simulation/ui/LastSimulatedAt';
 import { SIM_ZONE_STYLE } from '@/app/features/instruction-simulation/ui/sim-zone-style';
 import { SimulateButton } from '@/app/features/instruction-simulation/ui/SimulateButton';
-import { DENSE_ROW_PADDING } from '@/app/shared/ui/Table';
 
 function SimulatedTitle({ children }: { children: React.ReactNode }) {
     return (
@@ -122,7 +121,7 @@ export function InspectorSimulationPanel({
                             logs={logs}
                             cluster={cluster}
                             url={url}
-                            className={DENSE_ROW_PADDING}
+                            density="dense"
                         />
                     ) : (
                         <SimEmptyHint simulation={simulation}>
@@ -141,7 +140,7 @@ export function InspectorSimulationPanel({
                         {unresolvable ? (
                             // Logs exist, so this owes the user a card. Every CU figure would land on the wrong
                             // instruction, so saying why beats drawing it.
-                            <div className={cn(DENSE_ROW_PADDING, 'text-xs text-muted')}>
+                            <div className="text-xs text-muted">
                                 Unavailable: an instruction referenced an account this message does not resolve.
                             </div>
                         ) : (

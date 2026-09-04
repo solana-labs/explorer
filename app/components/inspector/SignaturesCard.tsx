@@ -1,7 +1,6 @@
 import { Address } from '@components/common/Address';
 import { Signature } from '@components/common/Signature';
 import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
-import { cn } from '@components/shared/utils';
 import {
     getBase58Encoder,
     getPublicKeyFromAddress,
@@ -15,7 +14,7 @@ import React from 'react';
 
 import { Badge } from '@/app/components/shared/ui/badge';
 import { toKitAddress } from '@/app/shared/lib/web3js-compat';
-import { BaseTable, DENSE_ROW_PADDING } from '@/app/shared/ui/Table';
+import { BaseTable } from '@/app/shared/ui/Table';
 
 import { CARD_TABLE_HEADER } from './inspector-table';
 
@@ -90,7 +89,7 @@ export function TransactionSignatures({
 
     return (
         <CollapsibleSection title="Signatures">
-            <BaseTable ui="dashkit" variant="card" nowrap className={cn(DENSE_ROW_PADDING, CARD_TABLE_HEADER)}>
+            <BaseTable ui="dashkit" variant="card" density="dense" nowrap className={CARD_TABLE_HEADER}>
                 <BaseTable.Head>
                     <BaseTable.Row>
                         <BaseTable.HeaderCell className="w-px text-outer-space-300">#</BaseTable.HeaderCell>
