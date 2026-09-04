@@ -1,0 +1,37 @@
+name: PR sticky comment
+description: Create or update a single marker-identified comment on a pull request.
+
+inputs:
+  marker:
+    description: Identifier embedded as a hidden HTML comment; one sticky comment exists per marker.
+    required: true
+  body-path:
+    description: File containing the markdown comment body.
+    required: true
+  pr-number:
+    description: Pull request number to comment on.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    # Inputs travel via env, not ${{ }} interpolation inside the script, to rule out script injection.
+    - name: Upsert comment
+      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+      env:
+        BODY_PATH: ${{ inputs.body-path }}
+        MARKER: ${{ inputs.marker }}
+        PR_NUMBER: ${{ inputs.pr-number }}
+      with:
+        script: |
+          const fs = require('fs');
+          const marker = `<!-- sticky-comment:${process.env.MARKER} -->`;
+          const body = `${marker}\n${fs.readFileSync(process.env.BODY_PATH, 'utf8')}`;
+          const issue_number = Number(process.env.PR_NUMBER);
+          const { data: comments } = await github.rest.issues.listComments({ ...context.repo, issue_number, per_page: 100 });
+          const existing = comments.find(comment => comment.body.startsWith(marker));
+          if (existing) {
+            await github.rest.issues.updateComment({ ...context.repo, body, comment_id: existing.id });
+          } else {
+            await github.rest.issues.createComment({ ...context.repo, body, issue_number });
+          }

@@ -120,6 +120,58 @@ jobs:
       - name: Test specs (shard ${{ matrix.shard }}/${{ needs.read-nvmrc.outputs.shard-total }})
         run: pnpm test:ci:specs --shard=${{ matrix.shard }}/${{ needs.read-nvmrc.outputs.shard-total }}
 
+  # Rebuilds the route-size table for the PR, enforces that bench/BUILD.md was refreshed, and
+  # publishes a bundle-change report. Gated behind Build-And-Test so it only runs on green builds.
+  # Fork PRs get a read-only token here, so the PR comment is posted by build-info-comment.yaml
+  # (workflow_run) from the artifact this job uploads.
+  Build-Info:
+    needs: [read-nvmrc, Build-And-Test]
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # Same key as Build-And-Test: that job has just built this tree, so its .next/cache makes
+      # the extra production build here mostly incremental.
+      - name: Setup Additional Cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
+            ${{ github.workspace }}/.next/cache
+          key: build-cache-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('**/.browserslistrc') }}-${{ hashFiles('**/*.ts', '**/*.tsx') }}
+          restore-keys: |
+            build-cache-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/pnpm-lock.yaml') }}-
+            build-cache-${{ runner.os }}-${{ runner.arch }}-
+
+      - name: Setup pnpm and Node.js
+        uses: ./.github/actions/pnpm-setup
+        with:
+          node-version: ${{ needs.read-nvmrc.outputs.node-version }}
+
+      - name: Generate build info
+        run: pnpm build:info .next/BUILD.fresh.md
+
+      - name: Render bundle change report
+        run: |
+          git fetch --depth=1 origin ${{ github.base_ref }}
+          git show FETCH_HEAD:bench/BUILD.md > .next/BUILD.base.md
+          pnpm exec tsx scripts/build-info-diff.ts report .next/BUILD.base.md .next/BUILD.fresh.md ${{ github.base_ref }} > .next/bundle-report.md
+          cat .next/bundle-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Save bundle change report
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: build-info-comment
+          path: .next/bundle-report.md
+
+      # Last on purpose: the report above uploads even when this gate fails.
+      - name: Check bench/BUILD.md freshness
+        run: pnpm exec tsx scripts/build-info-diff.ts check bench/BUILD.md .next/BUILD.fresh.md
+
   Security-Audit:
     # Independent of the build: the audit resolves the tree from pnpm-lock.yaml and queries
     # the registry, so it runs in parallel for faster, self-contained feedback.

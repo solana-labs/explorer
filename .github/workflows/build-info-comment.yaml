@@ -1,0 +1,62 @@
+name: Build Info Comment
+
+# Posts the bundle-change report from CI's Build-Info job as a sticky PR comment. Split from ci.yaml
+# because fork PRs run CI with a read-only token; this workflow runs in the base repo with write
+# access and never checks out or executes PR code (the checkout below is the default branch).
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: read
+  pull-requests: write
+
+jobs:
+  Comment:
+    # Any conclusion: the report uploads even when the bench/BUILD.md freshness gate fails.
+    if: github.event.workflow_run.event == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      # Default-branch checkout, only to make the local composite action available.
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # The report artifact is missing when CI failed before Build-Info uploaded it; the PR number
+      # comes from the head SHA (workflow_run.pull_requests is empty for fork PRs).
+      - name: Locate report and pull request
+        id: locate
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const run = context.payload.workflow_run;
+            const { data: { artifacts } } = await github.rest.actions.listWorkflowRunArtifacts({ ...context.repo, run_id: run.id });
+            if (!artifacts.some(artifact => artifact.name === 'build-info-comment')) {
+              return core.info('No bundle report artifact on this run; skipping.');
+            }
+            const { data: prs } = await github.rest.repos.listPullRequestsAssociatedWithCommit({ ...context.repo, commit_sha: run.head_sha });
+            const pr = prs.find(pr => pr.state === 'open');
+            if (!pr) {
+              return core.info('No open pull request for this commit; skipping.');
+            }
+            core.setOutput('found', 'true');
+            core.setOutput('pr', String(pr.number));
+
+      - name: Download report
+        if: steps.locate.outputs.found == 'true'
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: build-info-comment
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+
+      - name: Post sticky comment
+        if: steps.locate.outputs.found == 'true'
+        uses: ./.github/actions/pr-sticky-comment
+        with:
+          marker: build-info
+          body-path: bundle-report.md
+          pr-number: ${{ steps.locate.outputs.pr }}

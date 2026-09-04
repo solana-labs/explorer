@@ -17,7 +17,7 @@ const path = require('path');
 const zlib = require('zlib');
 const { performance } = require('perf_hooks');
 
-main();
+if (require.main === module) main();
 
 async function main() {
     const config = getConfig();
@@ -36,7 +36,8 @@ async function main() {
 
         const routes = await collectRoutes(config);
         const sizeInfo = await loadRouteSizes(config);
-        const content = formatTable(routes, sizeInfo);
+        const previousCells = await loadPreviousCells(config);
+        const content = formatTable(routes, sizeInfo, previousCells);
 
         const outputPath = path.join(config.projectRoot, config.outputFile);
         await writeOutputFile(outputPath, content);
@@ -91,12 +92,16 @@ async function readManifest(filePath) {
     try {
         raw = await fs.readFile(filePath, 'utf8');
     } catch (error) {
-        throw new Error(`Failed to read ${path.basename(filePath)} at ${filePath}: ${error.message}. This usually means the Next.js manifest layout changed; update scripts/update-build-info.js.`);
+        throw new Error(
+            `Failed to read ${path.basename(filePath)} at ${filePath}: ${error.message}. This usually means the Next.js manifest layout changed; update scripts/update-build-info.js.`,
+        );
     }
     try {
         return JSON.parse(raw);
     } catch (error) {
-        throw new Error(`Failed to parse ${path.basename(filePath)} at ${filePath}: ${error.message}. This usually means the Next.js manifest format changed; update scripts/update-build-info.js.`);
+        throw new Error(
+            `Failed to parse ${path.basename(filePath)} at ${filePath}: ${error.message}. This usually means the Next.js manifest format changed; update scripts/update-build-info.js.`,
+        );
     }
 }
 
@@ -169,7 +174,9 @@ async function loadRouteSizes(config) {
                 buf = await fs.readFile(absPath);
             } catch (error) {
                 // Missing chunk = manifest/disk mismatch; surfacing this is the whole point of the script.
-                throw new Error(`Chunk listed in route-bundle-stats.json is missing on disk: ${chunkPath} (${error.message}). This usually means Next.js changed how it emits or names chunks; update scripts/update-build-info.js.`);
+                throw new Error(
+                    `Chunk listed in route-bundle-stats.json is missing on disk: ${chunkPath} (${error.message}). This usually means Next.js changed how it emits or names chunks; update scripts/update-build-info.js.`,
+                );
             }
             gzipCache.set(chunkPath, zlib.gzipSync(buf).length);
         }
@@ -185,7 +192,7 @@ async function loadRouteSizes(config) {
     // baseline we subtract to get each route's own contribution.
     const sharedChunks = stats.reduce(
         (shared, entry) => shared.filter(chunk => entry.firstLoadChunkPaths.includes(chunk)),
-        stats[0] ? [...stats[0].firstLoadChunkPaths] : []
+        stats[0] ? [...stats[0].firstLoadChunkPaths] : [],
     );
     const sharedBytes = await sumGzip(sharedChunks);
 
@@ -200,24 +207,80 @@ async function loadRouteSizes(config) {
 // =============================================================================
 // Output Formatter
 // =============================================================================
+// One display step of the coarsest unit (10 kB cells, 0.01 MB ≈ 10.49 kB cells); mirrored in scripts/build-info-diff.ts.
+const DISPLAY_STEP_TOLERANCE_BYTES = 11 * 1024;
+
+/**
+ * Parses a previously generated table into route → displayed cells, so a
+ * regeneration can stabilise against it. Returns an empty map on prose-only content.
+ * @param {string} content - Previous markdown file content
+ * @returns {Map<string, {size: string, firstLoad: string}>} Route → displayed cells
+ */
+function parsePreviousCells(content) {
+    const cells = new Map();
+    for (const line of content.split('\n')) {
+        // Data rows carry six `|`-delimited fields with a backticked route cell.
+        const parts = line.split('|').map(cell => cell.trim());
+        if (parts.length !== 6 || parts[0] !== '' || parts[5] !== '') continue;
+        const route = parts[2];
+        if (route.length < 3 || !route.startsWith('`') || !route.endsWith('`')) continue;
+        cells.set(route.slice(1, -1), { firstLoad: parts[4], size: parts[3] });
+    }
+    return cells;
+}
+
+const CELL_UNIT_FACTORS = { B: 1, MB: 1024 * 1024, kB: 1024 };
+
+/**
+ * Parses a displayed cell back to bytes; undefined for the `—` placeholder or unknown formats.
+ * @param {string} cell - Displayed cell like "470 kB"
+ * @returns {number|undefined} Approximate byte count
+ */
+function parseCellBytes(cell) {
+    const [value, unit, ...rest] = cell.split(' ');
+    const factor = unit === undefined ? undefined : CELL_UNIT_FACTORS[unit];
+    const numeric = Number(value);
+    if (value === '' || Number.isNaN(numeric) || factor === undefined || rest.length > 0) return undefined;
+    return numeric * factor;
+}
+
+/**
+ * Rounding hysteresis: keeps the previously displayed cell when the new bytes
+ * round within one display step of it, so edge-of-rounding builds don't flip cells.
+ * @param {number} bytes - Fresh raw byte count
+ * @param {string|undefined} previousCell - Cell displayed for this route in the previous table
+ * @returns {string} Cell to display
+ */
+function stabiliseCell(bytes, previousCell) {
+    const newCell = formatBytes(bytes);
+    const previousBytes = previousCell === undefined ? undefined : parseCellBytes(previousCell);
+    if (previousBytes === undefined) return newCell;
+    const newBytes = parseCellBytes(newCell);
+    return Math.abs(newBytes - previousBytes) <= DISPLAY_STEP_TOLERANCE_BYTES ? previousCell : newCell;
+}
+
 /**
  * Formats the collected routes and their sizes into markdown table content
  * @param {Array<{route: string, type: string}>} routes - Routes from collectRoutes
  * @param {Map<string, {size: number, firstLoad: number}>} sizes - Sizes from loadRouteSizes
+ * @param {Map<string, {size: string, firstLoad: string}>} previousCells - Cells from the committed table, for hysteresis
  * @returns {string} Formatted markdown file content
  */
-function formatTable(routes, sizes) {
+function formatTable(routes, sizes, previousCells = new Map()) {
     const tableLines = [];
 
-    tableLines.push('> Sizes are gzipped, approximate, and rounded to reduce build-output noise. Next.js 16 (Turbopack) no longer prints sizes to stdout; these are derived by gzipping the first-load chunks listed in `.next/diagnostics/route-bundle-stats.json`. `Size` is First Load JS minus the chunks shared by all routes. Routes with no client JS (e.g. API routes) show `—`.');
+    tableLines.push(
+        '> Sizes are gzipped, approximate, and rounded to reduce build-output noise. Next.js 16 (Turbopack) no longer prints sizes to stdout; these are derived by gzipping the first-load chunks listed in `.next/diagnostics/route-bundle-stats.json`. `Size` is First Load JS minus the chunks shared by all routes. Routes with no client JS (e.g. API routes) show `—`. A cell keeps its previous value while the fresh bytes round within one step of it, so edge-of-rounding builds stay stable.',
+    );
     tableLines.push('');
     tableLines.push('| Type | Route | Size | First Load JS |');
     tableLines.push('|------|-------|------|---------------|');
 
     for (const { route, type } of routes) {
         const stat = sizes.get(route);
-        const size = stat ? formatBytes(stat.size) : '—';
-        const firstLoad = stat ? formatBytes(stat.firstLoad) : '—';
+        const previous = previousCells.get(route);
+        const size = stat ? stabiliseCell(stat.size, previous && previous.size) : '—';
+        const firstLoad = stat ? stabiliseCell(stat.firstLoad, previous && previous.firstLoad) : '—';
         tableLines.push(`| ${type} | \`${route}\` | ${size} | ${firstLoad} |`);
     }
 
@@ -238,6 +301,20 @@ function formatBytes(bytes) {
     const kb = Math.ceil(bytes / 1024 / 10) * 10;
     if (kb < 1000) return `${kb} kB`;
     return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+}
+
+/**
+ * Loads the committed bench/BUILD.md as the hysteresis anchor — always the canonical
+ * path, not the output file, so custom output targets still stabilise against the snapshot.
+ * @param {Object} config - Configuration object
+ * @returns {Promise<Map<string, {size: string, firstLoad: string}>>} Route → displayed cells; empty when missing
+ */
+async function loadPreviousCells(config) {
+    try {
+        return parsePreviousCells(await fs.readFile(path.join(config.projectRoot, 'bench/BUILD.md'), 'utf8'));
+    } catch {
+        return new Map();
+    }
 }
 
 // =============================================================================
@@ -302,3 +379,5 @@ function getConfig() {
         distDir: '.next',
     };
 }
+
+module.exports = { parsePreviousCells, stabiliseCell };
