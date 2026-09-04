@@ -11,7 +11,7 @@ import { BaseFeedbackForm } from './BaseFeedbackForm';
 import { BaseFeedbackWidget } from './BaseFeedbackWidget';
 
 export function FeedbackWidget() {
-    const { isOpen, setIsOpen, submit } = useFeedbackForm();
+    const { isOpen, isSubmitting, setIsOpen, submit } = useFeedbackForm();
 
     if (!isFeedbackWidgetEnabled()) return undefined;
 
@@ -26,6 +26,7 @@ export function FeedbackWidget() {
             <BaseFeedbackForm
                 bugReportUrl={BUG_REPORT_ISSUES_URL}
                 ideasUrl={FEEDBACK_ISSUES_URL}
+                isSubmitting={isSubmitting}
                 onOpenChange={setIsOpen}
                 onSubmit={submit}
                 open={isOpen}

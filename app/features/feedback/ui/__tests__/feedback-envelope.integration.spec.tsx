@@ -5,10 +5,19 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { FeedbackWidget } from '../FeedbackWidget';
 
-// Exercise the real captureFeedback → envelope path: unmock the shared module and route
+// Exercise the real feedback → envelope path: unmock the shared module and route
 // '@sentry/nextjs' to '@sentry/core' (the nextjs entry drags server-only pieces into jsdom).
+// The SDK's sendFeedback is browser-entry-only, so its envelope-producing core delegate stands in.
 vi.unmock('@/app/shared/lib/sentry');
 vi.mock('@sentry/nextjs', async () => vi.importActual('@sentry/core'));
+vi.mock('@/app/shared/lib/sentry/client', async () => {
+    const { captureFeedback } = await vi.importActual<typeof import('@sentry/core')>('@sentry/core');
+    return { sendFeedback: async (params: Parameters<typeof captureFeedback>[0]) => captureFeedback(params) };
+});
+vi.mock('@entities/cluster', () => ({
+    clusterSlug: () => 'mainnet-beta',
+    useCluster: () => ({ cluster: 0 }),
+}));
 
 const SENTRY_DSN_FIXTURE = 'https://examplePublicKey@o0.ingest.sentry.io/0';
 
@@ -47,7 +56,7 @@ describe('FeedbackWidget — real captureFeedback envelope', () => {
         vi.unstubAllEnvs();
     });
 
-    it('should deliver message, rating, and contact inside a feedback envelope', async () => {
+    it('should deliver message, rating, contact, and cluster inside a feedback envelope', async () => {
         render(<FeedbackWidget />);
         await userEvent.click(await screen.findByRole('button', { name: 'Feedback' }));
         await userEvent.click(await screen.findByText('Share feedback'));
@@ -65,6 +74,6 @@ describe('FeedbackWidget — real captureFeedback envelope', () => {
         expect(itemHeader.type).toBe('feedback');
         expect(event.type).toBe('feedback');
         expect(event.contexts?.feedback).toMatchObject({ message: 'Great explorer!', name: '@fren' });
-        expect(event.tags).toMatchObject({ rating: 4, source: 'widget', type: 'feedback' });
+        expect(event.tags).toMatchObject({ cluster: 'mainnet-beta', rating: 4, source: 'widget', type: 'feedback' });
     });
 });

@@ -18,7 +18,7 @@ export interface FeedbackTriggerProps {
 
 /** Inline trigger (e.g. a footer link) that opens the feedback form; renders nothing without a client DSN. */
 export function FeedbackTrigger({ children, className }: FeedbackTriggerProps) {
-    const { isOpen, setIsOpen, submit } = useFeedbackForm();
+    const { isOpen, isSubmitting, setIsOpen, submit } = useFeedbackForm();
 
     if (!isFeedbackWidgetEnabled() || !isFeedbackEnabled()) return undefined;
 
@@ -30,6 +30,7 @@ export function FeedbackTrigger({ children, className }: FeedbackTriggerProps) {
             <BaseFeedbackForm
                 bugReportUrl={BUG_REPORT_ISSUES_URL}
                 ideasUrl={FEEDBACK_ISSUES_URL}
+                isSubmitting={isSubmitting}
                 onOpenChange={setIsOpen}
                 onSubmit={submit}
                 open={isOpen}

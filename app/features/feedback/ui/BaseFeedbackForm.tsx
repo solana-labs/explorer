@@ -29,6 +29,8 @@ export interface FeedbackFormValues {
 export interface BaseFeedbackFormProps {
     bugReportUrl: string;
     ideasUrl: string;
+    /** Disables Submit while a send is in flight. */
+    isSubmitting?: boolean;
     onOpenChange: (open: boolean) => void;
     onSubmit: (values: FeedbackFormValues) => void;
     open: boolean;
@@ -36,7 +38,14 @@ export interface BaseFeedbackFormProps {
 
 const DESCRIPTION = "Any features missing or ideas to share? Drop them below and we'll consider adding them";
 
-export function BaseFeedbackForm({ bugReportUrl, ideasUrl, onOpenChange, onSubmit, open }: BaseFeedbackFormProps) {
+export function BaseFeedbackForm({
+    bugReportUrl,
+    ideasUrl,
+    isSubmitting = false,
+    onOpenChange,
+    onSubmit,
+    open,
+}: BaseFeedbackFormProps) {
     const [rating, setRating] = useState(0);
     const { isSm } = useBreakpoint();
 
@@ -49,12 +58,12 @@ export function BaseFeedbackForm({ bugReportUrl, ideasUrl, onOpenChange, onSubmi
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
+        // Rating resets on close (handleOpenChange), not here — a failed send keeps the form state intact
         onSubmit({
             contact: String(data.get('contact') || '') || undefined,
             message: String(data.get('message') || ''),
             rating: rating || undefined,
         });
-        setRating(0);
     };
 
     const form = (
@@ -82,7 +91,7 @@ export function BaseFeedbackForm({ bugReportUrl, ideasUrl, onOpenChange, onSubmi
                 <Input id="feedback-contact" maxLength={16} name="contact" variant="dark" />
                 <p className="m-0 text-xs text-neutral-400">So we can reach out if we have any questions</p>
             </div>
-            <Button type="submit" ui="tw" variant="accent">
+            <Button disabled={isSubmitting} type="submit" ui="tw" variant="accent">
                 Submit
             </Button>
         </form>
