@@ -1,6 +1,6 @@
 import { getBase58Encoder } from '@solana/kit';
 
-import { fromBase64, toBase64 } from '@/app/shared/lib/bytes';
+import { fromBase64, toBase64, toBase64Url } from '@/app/shared/lib/bytes';
 import { MIN_MESSAGE_LENGTH, parseTransactionBytes } from '@/app/shared/lib/parse-transaction-bytes';
 
 import type { SearchOptions, SearchProvider } from '../lib/types';
@@ -70,8 +70,7 @@ export const base64TxSearchProvider: SearchProvider = {
         const pathname = '/tx/inspector';
         const searchParams = new URLSearchParams();
 
-        const messageBase64 = toBase64(parsed.messageBytes);
-        searchParams.set('message', messageBase64);
+        searchParams.set('message', toBase64Url(parsed.messageBytes));
 
         if (parsed.signatures) {
             searchParams.set('signatures', JSON.stringify(parsed.signatures));

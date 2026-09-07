@@ -28,7 +28,7 @@ import { Badge } from '@/app/components/shared/ui/badge';
 import { Button } from '@/app/components/shared/ui/button';
 import { useCluster } from '@/app/providers/cluster';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
-import { toBase64 } from '@/app/shared/lib/bytes';
+import { fromBase64Url, toBase64Url } from '@/app/shared/lib/bytes';
 import {
     bridgeV1MessageBytes,
     isV1MessageBytes,
@@ -200,7 +200,7 @@ function decodeUrlParams(
     }
 
     try {
-        const buffer = Uint8Array.from(atob(messageParam), c => c.charCodeAt(0));
+        const buffer = fromBase64Url(messageParam);
 
         if (buffer.length < MIN_MESSAGE_LENGTH) {
             throw new Error('message buffer is too short');
@@ -401,8 +401,7 @@ export function TransactionInspectorPage({
                 }
             }
 
-            const base64 = toBase64(inspectorData.rawMessage);
-            const newParam = encodeURIComponent(base64);
+            const newParam = toBase64Url(inspectorData.rawMessage);
             if (currentSearchParams.get('message') !== newParam) {
                 nextQueryParams ||= new URLSearchParams(currentSearchParams?.toString());
                 nextQueryParams.set('message', newParam);

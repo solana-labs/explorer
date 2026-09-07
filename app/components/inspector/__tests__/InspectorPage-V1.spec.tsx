@@ -8,7 +8,7 @@ import { createV1TransactionBytes } from '@/app/entities/transaction-data/__fixt
 import { AccountsProvider } from '@/app/providers/accounts';
 import { ClusterProvider } from '@/app/providers/cluster';
 import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
-import { toBase64 } from '@/app/shared/lib/bytes';
+import { toBase64Url } from '@/app/shared/lib/bytes';
 import { parseTransactionBytes } from '@/app/shared/lib/parse-transaction-bytes';
 import { instructionParserDispatcher } from '@/app/tx/instruction-parser-dispatcher';
 
@@ -27,7 +27,7 @@ describe('TransactionInspectorPage with a v1 ?message= param', () => {
             createV1TransactionBytes({ computeUnitLimit: 300_000, priorityFeeLamports: 50n }),
         );
         const params = new URLSearchParams();
-        params.set('message', encodeURIComponent(toBase64(messageBytes)));
+        params.set('message', toBase64Url(messageBytes));
 
         vi.spyOn(await import('next/navigation'), 'useSearchParams').mockReturnValue(
             params as unknown as ReturnType<typeof useSearchParams>,

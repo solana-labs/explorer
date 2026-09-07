@@ -1,6 +1,7 @@
 import { Keypair, PublicKey, SystemProgram, TransactionMessage, VersionedTransaction } from '@solana/web3.js';
 import { describe, expect, it } from 'vitest';
 
+import { fromBase64Url } from '@/app/shared/lib/bytes';
 import { invariant } from '@/app/shared/lib/invariant';
 
 import { base64TxSearchProvider } from '../base64-tx-search-provider';
@@ -32,7 +33,7 @@ describe('base64TxSearchProvider', () => {
         const params = extractParams(results[0].options[0].pathname);
         const messageParam = params.get('message');
         invariant(messageParam, 'expected message param in inspector URL');
-        const decodedMessage = new Uint8Array(Buffer.from(messageParam, 'base64'));
+        const decodedMessage = fromBase64Url(messageParam);
 
         expect(decodedMessage).toEqual(messageBytes);
     });
@@ -81,7 +82,8 @@ describe('base64TxSearchProvider', () => {
     });
 
     it('should not double-encode the message param', async () => {
-        const b64 = createBase64Transaction();
+        const messageBytes = createMessageBytes();
+        const b64 = Buffer.from(messageBytes).toString('base64');
         const results = await base64TxSearchProvider.search(b64, ctx);
         const params = extractParams(results[0].options[0].pathname);
         const message = params.get('message');
@@ -89,8 +91,10 @@ describe('base64TxSearchProvider', () => {
 
         // A double-encoded value would contain '%25' (the encoding of '%')
         expect(message).not.toContain('%25');
-        // Should round-trip as valid base64
-        expect(Buffer.from(message, 'base64').toString('base64')).toBe(message);
+        expect(message).not.toContain('+');
+        expect(message).not.toContain('/');
+        expect(message).not.toContain('=');
+        expect(fromBase64Url(message)).toEqual(messageBytes);
     });
 
     describe('rejection cases', () => {

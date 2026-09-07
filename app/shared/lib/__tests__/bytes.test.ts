@@ -10,6 +10,7 @@ import {
     concatBytes,
     equals,
     fromBase64,
+    fromBase64Url,
     fromHex,
     fromUtf8,
     isByteArray,
@@ -21,6 +22,7 @@ import {
     readUint32LE,
     startsWith,
     toBase64,
+    toBase64Url,
     toBuffer,
     toHex,
     toLeBytes,
@@ -252,6 +254,31 @@ describe('bytes helpers', () => {
                     const base64 = toBase64(input);
                     expect(base64).toBe(allByteValuesBase64);
                 });
+            });
+        });
+
+        describe('base64url', () => {
+            it('should encode without URL-escaped characters or padding', () => {
+                const input = new Uint8Array([0xff, 0xfe, 0xfd, 0xfc]);
+
+                expect(toBase64Url(input)).toBe('__79_A');
+                expect(fromBase64Url('__79_A')).toEqual(input);
+            });
+
+            it('should decode existing standard base64 links', () => {
+                expect(fromBase64Url('//79/A==')).toEqual(new Uint8Array([0xff, 0xfe, 0xfd, 0xfc]));
+            });
+
+            it("should keep a maximum one-signature v1 message query below Vercel's URL limit", () => {
+                const message = new Uint8Array(4096 - 64).fill(0xff);
+                const query = new URLSearchParams({ message: toBase64Url(message) }).toString();
+
+                expect(query.length).toBeLessThan(14 * 1024);
+                expect(query).not.toContain('%');
+            });
+
+            it('should reject an impossible encoded length', () => {
+                expect(() => fromBase64Url('a')).toThrow('Invalid base64url string');
             });
         });
 

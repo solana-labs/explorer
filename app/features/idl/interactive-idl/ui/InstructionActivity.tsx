@@ -3,6 +3,7 @@ import { useExplorerLink } from '@entities/cluster';
 import { ProgramLogs, TxErrorStatus, TxExecutionStatus, TxSimulationStatus } from '@entities/program-logs';
 import { ReactNode } from 'react';
 
+import { fromBase64Url, toBase64Url } from '@/app/shared/lib/bytes';
 import { Card } from '@/app/shared/ui/Card';
 
 import type { InstructionExecutionResult, InstructionSimulationResult } from '../model/transaction/types';
@@ -76,7 +77,7 @@ function CardWithTabs({ tabs }: { tabs: { id: string; title: string; component: 
 function InstructionExecutionStatusHeader({ lastResult }: { lastResult: InstructionExecutionResult }) {
     const { link: txLink } = useExplorerLink(`/tx/${getTxSignature(lastResult) ?? ''}`);
     const { link: inspectorLink } = useExplorerLink(
-        `/tx/inspector?message=${encodeURIComponent(getInspectorMessage(lastResult) ?? '')}`,
+        `/tx/inspector?message=${toInspectorMessageParam(getInspectorMessage(lastResult))}`,
     );
 
     if (lastResult.status === 'success') {
@@ -116,7 +117,7 @@ function InstructionExecutionStatusHeader({ lastResult }: { lastResult: Instruct
 
 function SimulationStatusHeader({ lastSimulation }: { lastSimulation: InstructionSimulationResult }) {
     const { link: inspectorLink } = useExplorerLink(
-        `/tx/inspector?message=${encodeURIComponent(lastSimulation.serializedTxMessage ?? '')}`,
+        `/tx/inspector?message=${toInspectorMessageParam(lastSimulation.serializedTxMessage)}`,
     );
     const link = lastSimulation.serializedTxMessage ? inspectorLink : undefined;
 
@@ -140,6 +141,10 @@ function SimulationStatusHeader({ lastSimulation }: { lastSimulation: Instructio
             />
         </StatusWithError>
     );
+}
+
+function toInspectorMessageParam(message: string | undefined): string {
+    return message ? toBase64Url(fromBase64Url(message)) : '';
 }
 
 // Signature exists on a successful tx and on a broadcast that later failed; never on a local error.

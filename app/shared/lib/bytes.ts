@@ -92,6 +92,22 @@ export function toBase64(bytes: Uint8Array): string {
     return btoa(fromCharCode(bytes));
 }
 
+/** Decode unpadded base64url or standard base64 to bytes. */
+export function fromBase64Url(base64Url: string): Uint8Array {
+    const base64 = base64Url.replaceAll('-', '+').replaceAll('_', '/');
+    const remainder = base64.length % 4;
+    if (remainder === 1) throw new Error('Invalid base64url string');
+    return fromBase64(base64.padEnd(base64.length + ((4 - remainder) % 4), '='));
+}
+
+/** Encode bytes as unpadded base64url for compact query parameters. */
+export function toBase64Url(bytes: Uint8Array): string {
+    const base64 = toBase64(bytes);
+    const paddingIndex = base64.indexOf('=');
+    const unpadded = paddingIndex === -1 ? base64 : base64.slice(0, paddingIndex);
+    return unpadded.replaceAll('+', '-').replaceAll('/', '_');
+}
+
 /**
  * Fallback for fromHex when native API is not available.
  */
