@@ -114,6 +114,8 @@ const config: Config = {
                 // TODO: replace hex with OKLCH.
                 dark: {
                     accent: '#1dd79b',
+                    // Hover shade for accent-colored interactive text, matching the global `a:hover` (styles.css).
+                    'accent-hover': '#2b8a6e',
                     background: '#141816',
                     border: '#282d2b',
                     foreground: '#e5ebe9',
