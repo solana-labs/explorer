@@ -2,6 +2,6 @@
 
 import { McpDocsOverviewView } from '@/app/features/mcp-docs';
 
-export default function McpDocsPageClient() {
+export default function McpStartPageClient() {
     return <McpDocsOverviewView />;
 }
