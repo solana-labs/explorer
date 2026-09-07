@@ -642,6 +642,33 @@ export default tseslint.config(
         },
     },
 
+    // `scripts/**` runs as a plain Node process, where a slice's `server.ts` / `client.ts` barrel is
+    // the wrong door: the `server-only` / `client-only` marker on it resolves to its throwing
+    // `default` export outside Next's build, so the script dies on import. No green gate catches it —
+    // vite aliases both markers to a stub, so the specs pass and the cron is where it surfaces.
+    {
+        files: ['scripts/**/*.[jt]s?(x)'],
+        rules: {
+            'no-restricted-imports': [
+                'error',
+                {
+                    patterns: [
+                        {
+                            group: [
+                                '**/app/**/server',
+                                '**/app/**/server.ts',
+                                '**/app/**/client',
+                                '**/app/**/client.ts',
+                            ],
+                            message:
+                                "A slice's `server.ts`/`client.ts` barrel carries a `server-only`/`client-only` marker that throws outside Next's build. Import the module that owns the export instead.",
+                        },
+                    ],
+                },
+            ],
+        },
+    },
+
     // Allow type assertions in tests, mocks, fixtures, and Storybook stories — they routinely fake
     // partial shapes to exercise component/module surfaces and shouldn't be held to the production
     // typecast prohibition.

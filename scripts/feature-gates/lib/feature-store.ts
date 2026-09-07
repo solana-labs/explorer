@@ -8,7 +8,7 @@ import {
     type FeatureGate,
     type FeatureGateDraft,
     FeatureGatesArraySchema,
-} from '../../../app/entities/feature-gate/server';
+} from '../../../app/entities/feature-gate/lib/feature-gates-schema';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(SCRIPT_DIR, '..', '..', '..');

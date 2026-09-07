@@ -1,7 +1,7 @@
 /* eslint-disable unicorn/no-null -- null literals match the nullable feature-gate schema fields */
 import { array, assert, type Infer, nullable, number, record, string, type, union, unknown } from 'superstruct';
 
-import type { FeatureGateDraft } from '../../../app/entities/feature-gate/server';
+import type { FeatureGateDraft } from '../../../app/entities/feature-gate/lib/feature-gates-schema';
 import { fetchSimdProposals, resolveSimdLinks } from './simd-proposals';
 
 const SCHEDULE_URL = 'https://raw.githubusercontent.com/wiki/anza-xyz/agave/feature-gate-tracker-schedule.json';

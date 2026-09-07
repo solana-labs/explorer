@@ -28,7 +28,7 @@
  *       on the daily cron.
  */
 
-import type { FeatureGateDraft } from '../app/entities/feature-gate/server';
+import type { FeatureGateDraft } from '../app/entities/feature-gate/lib/feature-gates-schema';
 import { readFeatureGates, writeFeatureGates } from './feature-gates/lib/feature-store';
 import { appendNewFeatures, hasDescription, type RefreshMode, resolveEpoch } from './feature-gates/lib/merge';
 import { connectCluster, type FeatureProbeResult, probeFeatureActivation } from './feature-gates/lib/rpc';
