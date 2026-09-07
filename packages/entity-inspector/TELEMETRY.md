@@ -19,8 +19,9 @@ For where to obtain the Measurement ID and generate the API secret, see
 
 ## `client_id`
 
-Required on every request: `measurement_id` and `api_secret` go in the URL, `client_id` in the JSON body — all three
-sent by [`src/telemetry/providers/ga4.ts`](./src/telemetry/providers/ga4.ts). The host app supplies it as
+Required on every request: `measurement_id` and `api_secret` go in the URL, `client_id` in the JSON body, and
+`session_id` + `engagement_time_msec` in every event's params (next section) — all sent by
+[`src/telemetry/providers/ga4.ts`](./src/telemetry/providers/ga4.ts). The host app supplies `client_id` as
 `context.clientId`; this repo resolves it in `app/mcp/telemetry.ts`:
 
 | Source                             | Value sent                 |
@@ -38,6 +39,20 @@ Three limits to read reports against. GA4 counts users by `client_id`, so a call
 address" — NAT collapses several callers into one, a rotating IP fans one caller into several. Every caller on the
 `anon` branch collapses into a single GA4 user. And an unsalted SHA-256 over the 2³² IPv4 space is enumerable, so a
 hashed IP is pseudonymous, not anonymous. Event counts are the trustworthy figure; user counts are indicative.
+
+## `session_id` and `engagement_time_msec`
+
+Without both, GA4 shows Measurement Protocol events in Realtime but excludes them from processed reports — the event
+names never even appear in report filters or custom-definition pickers. Neither needs a custom definition: GA4 treats
+them as reserved parameters.
+
+`session_id` is derived in [`src/telemetry/providers/ga4.ts`](./src/telemetry/providers/ga4.ts) as FNV-1a over
+`client_id`: one long-lived GA4 session per client, deliberately not time-boxed. The `client_id` collapse/fan-out limits
+above therefore apply to session counts identically — sessions are not a meaningful figure here; event counts are.
+
+`engagement_time_msec` is a constant `1` — the minimum positive value (GA4 counts Active Users on nonzero engagement
+time, so `0` would zero out user-based reports). It deliberately makes no engagement claim: GA4's built-in _Average
+engagement time_ is meaningless on this property; latency questions are answered by the `duration_ms` custom metric.
 
 ## Events
 
