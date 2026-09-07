@@ -1,5 +1,4 @@
-import { type Address, address } from '@solana/kit';
-import { Connection, PublicKey } from '@solana/web3.js';
+import { type Address, address, createSolanaRpc } from '@solana/kit';
 import { Cluster, serverClusterUrl } from '@utils/cluster';
 import { NextResponse } from 'next/server';
 import { findAttestationPda, findSchemaPda } from 'sas-lib';
@@ -13,12 +12,7 @@ const RPC_TIMEOUT_MS = 15_000;
 // SAS protocol supports up to 256 schema versions. We decided to use 32 for now.
 const MAX_SCHEMA_VERSIONS = 32;
 
-const connection = new Connection(serverClusterUrl(Cluster.MainnetBeta), {
-    commitment: 'confirmed',
-    fetchMiddleware: (info, init, fetch) => {
-        fetch(info, { ...init, signal: AbortSignal.timeout(RPC_TIMEOUT_MS) });
-    },
-});
+const rpc = createSolanaRpc(serverClusterUrl(Cluster.MainnetBeta));
 
 async function getSchemaVersionPdas(credentialAddress: Address, schemaName: string): Promise<Address[]> {
     const versions = await Promise.all(
@@ -42,15 +36,15 @@ type Params = {
 export async function GET(_request: Request, props: Params) {
     const { mintAddress } = await props.params;
 
+    let mintAddr: Address;
     try {
-        new PublicKey(mintAddress);
+        mintAddr = address(mintAddress);
     } catch {
         return NextResponse.json({ error: 'Invalid mint address' }, { status: 400 });
     }
 
     try {
         const credentialAddr = address(BLUPRYNT_CONFIG.credentialAuthority);
-        const mintAddr = address(mintAddress);
 
         const schemaPdas = await getSchemaVersionPdas(credentialAddr, BLUPRYNT_CONFIG.schemaName);
 
@@ -64,9 +58,12 @@ export async function GET(_request: Request, props: Params) {
             ),
         );
 
-        const accountInfos = await connection.getMultipleAccountsInfo(
-            attestationPdas.map(([addr]) => new PublicKey(addr)),
-        );
+        const { value: accountInfos } = await rpc
+            .getMultipleAccounts(
+                attestationPdas.map(([addr]) => addr),
+                { commitment: 'confirmed', encoding: 'base64' },
+            )
+            .send({ abortSignal: AbortSignal.timeout(RPC_TIMEOUT_MS) });
         const verified = accountInfos.some(info => info !== null);
 
         return NextResponse.json({ verified }, { headers: CACHE_HEADERS });

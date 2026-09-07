@@ -1,6 +1,5 @@
 'use client';
 import './styles.css';
-import '@/app/types/bigint'; // polyfill toJSON for BigInt
 
 import { AddressLookupTableAccountSection } from '@components/account/address-lookup-table/AddressLookupTableAccountSection';
 import { isAddressLookupTableAccount } from '@components/account/address-lookup-table/types';

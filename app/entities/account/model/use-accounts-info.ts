@@ -1,7 +1,9 @@
-import { Connection, PublicKey } from '@solana/web3.js';
+import { getRpc } from '@entities/cluster/@x/account';
+import { address } from '@solana/kit';
+import { PublicKey } from '@solana/web3.js';
 import useSWR from 'swr';
 
-import { ByteArray } from '@/app/shared/lib/bytes';
+import { ByteArray, fromBase64 } from '@/app/shared/lib/bytes';
 
 export interface AccountInfo {
     data: ByteArray;
@@ -9,15 +11,20 @@ export interface AccountInfo {
 }
 
 async function fetchAccountsInfo(pubkeys: PublicKey[], clusterUrl: string): Promise<Map<string, AccountInfo>> {
-    const connection = new Connection(clusterUrl);
-    const infos = await connection.getMultipleAccountsInfo(pubkeys);
+    const { value: infos } = await getRpc(clusterUrl)
+        .getMultipleAccounts(
+            pubkeys.map(pubkey => address(pubkey.toBase58())),
+            { encoding: 'base64' },
+        )
+        .send();
 
     const result = new Map<string, AccountInfo>();
     infos.forEach((info, i) => {
         if (info) {
+            const data = fromBase64(info.data[0]);
             result.set(pubkeys[i].toBase58(), {
-                data: info.data,
-                size: info.data.length,
+                data,
+                size: data.length,
             });
         }
     });

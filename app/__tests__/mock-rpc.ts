@@ -55,4 +55,10 @@ export const mockSolanaRpc = (overrides?: Partial<ClusterInfo> & { genesisHash?:
     getGenesisHash: () => ({
         send: vi.fn().mockResolvedValue(mockGenesisHash(overrides?.genesisHash)),
     }),
+    getMultipleAccounts: (addresses: readonly unknown[]) => ({
+        send: vi.fn().mockResolvedValue({
+            context: { slot: 0n },
+            value: addresses.map(() => null),
+        }),
+    }),
 });
