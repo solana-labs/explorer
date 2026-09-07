@@ -17,6 +17,10 @@ export const gen = {
             for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
         } else {
             for (let i = 0; i < bytes.length; i++) bytes[i] = (seed * 19 + i * 23 + 5) & 0xff;
+            // Without this, `seed` and `seed + 256` collide: every byte above is mod 256, so a
+            // caller asking for 257 distinct addresses silently gets 256. Folding the high bits
+            // in pushes the repeat out to 65536 and leaves seeds under 256 byte-identical.
+            bytes[1] = (bytes[1] + (seed >>> 8)) & 0xff;
         }
         return BASE58_DECODER.decode(bytes);
     },

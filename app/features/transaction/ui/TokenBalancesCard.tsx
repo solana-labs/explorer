@@ -63,7 +63,8 @@ export function TokenBalancesCardInner({ rows }: TokenBalancesCardInnerProps) {
     const [tokenSymbols, setTokenSymbols] = useState<Map<string, string>>(new Map());
     const mintKey = rows.map(r => r.mint).join(',');
 
-    // genesisHash is required to derive a chainId on Custom/Simd296 clusters - without it getTokenInfos returns [].
+    // genesisHash is required to derive a chainId on Custom/Simd296 clusters - without one no mint
+    // resolves and the rows render without symbols.
     useAsyncEffect(
         async isMounted => {
             const mints = rows.map(r => new PublicKey(r.mint));

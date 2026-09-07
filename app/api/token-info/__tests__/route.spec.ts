@@ -46,6 +46,7 @@ describe('POST /api/token-info', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         vi.spyOn(Logger, 'warn').mockImplementation(() => {});
+        vi.spyOn(Logger, 'error').mockImplementation(() => {});
         mocks.getTokenInfos.mockResolvedValue([]);
         mocks.getTokenInfosFromMetaplex.mockResolvedValue([]);
     });
@@ -247,6 +248,71 @@ describe('POST /api/token-info', () => {
         expect(res.status).toBe(200);
         expect(await res.json()).toEqual({ content: [] });
         expect(mocks.getTokenInfos).not.toHaveBeenCalled();
+    });
+
+    it('should bound the upstream lookup with an abort signal', async () => {
+        const { POST } = await importRoute();
+        await POST(createRequest({ addresses: [MINT_A], cluster: Cluster.MainnetBeta }));
+
+        const config = mocks.getTokenInfos.mock.calls[0][3];
+        expect(config.signal).toBeInstanceOf(AbortSignal);
+    });
+
+    describe('when the upstream list lookup fails', () => {
+        // `getTokenInfos` answers `[]` for an outage and for a genuine all-not-found alike, and
+        // reports a partial drop through the same hook. Only the first may be cached as an answer.
+        function failUpstream(resolved: TokenInfo[] = []) {
+            mocks.getTokenInfos.mockImplementation(async (_addresses, _cluster, _genesisHash, config) => {
+                config.onError(new Error('upstream exploded'));
+                return resolved;
+            });
+        }
+
+        it('should answer 503 rather than an empty list when nothing resolved', async () => {
+            failUpstream();
+
+            const { POST } = await importRoute();
+            const res = await POST(createRequest({ addresses: [MINT_A, MINT_B], cluster: Cluster.MainnetBeta }));
+
+            expect(res.status).toBe(503);
+            expect(await res.json()).toEqual({ error: 'Token list unavailable' });
+            expect(Logger.error).toHaveBeenCalled();
+        });
+
+        it('should not run the on-chain fallback when the list lookup failed outright', async () => {
+            failUpstream();
+
+            const { POST } = await importRoute();
+            await POST(
+                createRequest({
+                    addresses: [MINT_A],
+                    cluster: Cluster.MainnetBeta,
+                    includeOnChainFallback: true,
+                }),
+            );
+
+            expect(mocks.getTokenInfosFromMetaplex).not.toHaveBeenCalled();
+        });
+
+        it('should still answer the tokens it did resolve when only some were dropped', async () => {
+            failUpstream([token(MINT_A)]);
+
+            const { POST } = await importRoute();
+            const res = await POST(createRequest({ addresses: [MINT_A, MINT_B], cluster: Cluster.MainnetBeta }));
+
+            expect(res.status).toBe(200);
+            expect(await res.json()).toEqual({ content: [token(MINT_A)] });
+        });
+
+        it('should keep answering 200 for a genuine all-not-found, which reports no error', async () => {
+            mocks.getTokenInfos.mockResolvedValue([]);
+
+            const { POST } = await importRoute();
+            const res = await POST(createRequest({ addresses: [MINT_A], cluster: Cluster.MainnetBeta }));
+
+            expect(res.status).toBe(200);
+            expect(await res.json()).toEqual({ content: [] });
+        });
     });
 });
 

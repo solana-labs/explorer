@@ -312,9 +312,9 @@ function TokenHistoryTable({ tokens }: { tokens: TokenInfoWithPubkey[] }) {
     );
 }
 
-// Resolves one mint's label through the shared token-info batch provider (the same cache the holdings rows use).
-// Fetches on mount and coalesces with the holdings fetch into one batched POST.
-// The cache-aware provider then skips this mint on any later re-request (filter change, holdings Load More).
+// Resolves one mint's label through the batch provider, which coalesces the dropdown's mints into one
+// POST and skips a mint it has already resolved. The holdings card resolves its own list separately, so
+// a mint on both pays for two lookups.
 function TokenFilterLabel({ mint }: { mint: string }) {
     const { cluster, genesisHash } = useCluster();
     const info = useTokenInfo(true, mint, cluster, genesisHash);

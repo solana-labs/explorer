@@ -11,6 +11,7 @@ import { fetchAll } from '@utils/fetch-all';
 
 import { MAX_SIZE, USER_AGENT } from '@/app/api/metadata/proxy/config';
 import { fetchResource, matchJsonContent } from '@/app/api/metadata/proxy/feature';
+import { chunk } from '@/app/shared/lib/array';
 import { IPFS_PROTOCOL, resolveIpfsUri } from '@/app/shared/lib/ipfs';
 import { parseUrl } from '@/app/shared/lib/url';
 
@@ -57,14 +58,6 @@ const NULL_CHAR = String.fromCharCode(0);
  */
 function removeEmptyChars(value: string): string {
     return value.split(NULL_CHAR).join('');
-}
-
-function chunk<T>(items: T[], size: number): T[][] {
-    const chunks: T[][] = [];
-    for (let i = 0; i < items.length; i += size) {
-        chunks.push(items.slice(i, i + size));
-    }
-    return chunks;
 }
 
 /**
