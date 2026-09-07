@@ -140,8 +140,7 @@
         "superstruct": "0.15.3",
         "swr": "2.2.0",
         "tailwind-merge": "2.6.1",
-        "undici": "6.28.0",
-        "use-async-effect": "2.2.7"
+        "undici": "6.28.0"
     },
     "devDependencies": {
         "@eslint-community/eslint-plugin-eslint-comments": "4.5.0",
