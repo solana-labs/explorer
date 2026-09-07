@@ -2206,7 +2206,7 @@
     "description": "Reduce lamports_per_byte incrementally from 6960 to 696 via five steps: 6333, 5080, 2575, 1322, and 696. This proposal supersedes SIMD-0436, providing a more granular reduction schedule.",
     "devnet_activation_epoch": 1137,
     "key": "4a6f7o7iTcA8hRDCrPLkSatnt5Ykxiu36wo5p1Tt12wC",
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 1028,
     "min_agave_versions": [
       "v4.2.0-beta.1"
     ],
@@ -2230,7 +2230,7 @@
   {
     "comms_required": null,
     "description": "The current live transaction formats, v0 and legacy, have a number of limitations that make them unsuitable for efficient ingestion, processing, and unable to support developer features that are required for today's applications.",
-    "devnet_activation_epoch": null,
+    "devnet_activation_epoch": 1140,
     "key": "txv1aq4pp281K9um3tnPgkfX8UqtFT6wcVW3hNezGLL",
     "mainnet_activation_epoch": null,
     "min_agave_versions": [
@@ -2282,7 +2282,7 @@
   {
     "comms_required": null,
     "description": "Reduce lamports_per_byte incrementally from 6960 to 696 via five steps: 6333, 5080, 2575, 1322, and 696. This proposal supersedes SIMD-0436, providing a more granular reduction schedule.",
-    "devnet_activation_epoch": null,
+    "devnet_activation_epoch": 1141,
     "key": "61BtM7BkDEE8Yq5fskEVAQT9mYA8qCejJWoLe5apqg81",
     "mainnet_activation_epoch": null,
     "min_agave_versions": [
@@ -2302,7 +2302,7 @@
     "simds": [
       "0437"
     ],
-    "testnet_activation_epoch": null,
+    "testnet_activation_epoch": 1026,
     "title": "SIMD-0437-2: Set lamports per byte to 5080"
   }
 ]

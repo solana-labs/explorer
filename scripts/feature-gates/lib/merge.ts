@@ -1,4 +1,4 @@
-import type { FeatureGateDraft } from '../../../app/entities/feature-gate/server';
+import type { FeatureGateDraft } from '../../../app/entities/feature-gate/lib/feature-gates-schema';
 import type { FeatureProbeResult } from './rpc';
 
 export type RefreshMode = 'default' | 'refresh-activated';
