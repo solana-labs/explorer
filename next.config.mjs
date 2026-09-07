@@ -35,12 +35,21 @@ const nextConfig = {
             },
         ];
 
-        return [
-            { source: '/robots.txt', headers: seoFileHeaders },
+        // robots.txt is a route handler (app/robots.txt/route.ts) and owns its own Cache-Control.
+        const headers = [
             { source: '/sitemap.xml', headers: seoFileHeaders },
             { source: '/default-sitemap.xml', headers: seoFileHeaders },
             { source: '/accounts-sitemap.xml', headers: seoFileHeaders },
         ];
+
+        if (process.env.SEO_DISALLOW_BOTS === 'true') {
+            headers.push({
+                source: '/:path*',
+                headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+            });
+        }
+
+        return headers;
     },
     async redirects() {
         return buildRedirects();
