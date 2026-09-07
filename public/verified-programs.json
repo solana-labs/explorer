@@ -326,8 +326,8 @@
   {
     "address": "64e3qPrkVWfXbp8VVBLpxBymbqzkrNgHeNZGxq5gR2eD",
     "name": "lougerone/thereap-escrow",
-    "repoUrl": "https://github.com/lougerone/thereap-escrow/tree/c20ae27b2b3a1e8c95e4b7a3eeddd3e14a251bf5",
-    "verifiedAt": "2026-09-01T15:42:04"
+    "repoUrl": "https://github.com/lougerone/thereap-escrow/tree/81c1f6f6afdfbd31a2844df4a64fbfb8e6301fb5",
+    "verifiedAt": "2026-09-04T03:54:39"
   },
   {
     "address": "65BeAsYduu3X91yWbF9TQFj6EqD5TpqFyfWMEkrpdNZv",
@@ -620,8 +620,8 @@
   {
     "address": "A1TH3GZoz6QV4wPECMH2r3tnV3wEWvEtwZwGnfP3U6RX",
     "name": "Vermont-Secure-Computing/truth-net",
-    "repoUrl": "https://github.com/Vermont-Secure-Computing/truth-net/tree/bbc9d6e6e6953876aad11acbb9aa7362243b545b",
-    "verifiedAt": "2026-08-28T02:12:46"
+    "repoUrl": "https://github.com/Vermont-Secure-Computing/truth-net/tree/32404871916a8e83a1f96ff2e435a2b574b0f997",
+    "verifiedAt": "2026-09-07T01:48:39"
   },
   {
     "address": "A8W6AL4JhE4EDDcfXZ1Q8vQpwp83AnPj4UZ6y86gVFKN",
@@ -750,12 +750,6 @@
     "verifiedAt": "2026-01-21T14:11:55"
   },
   {
-    "address": "B7xiwfxGcR2Xz7tcUKrkB8Ly6NV8jU7LH1m6GJZRUuf",
-    "name": "nerdscardano-payada/solhandle",
-    "repoUrl": "https://github.com/nerdscardano-payada/solhandle/tree/bfdedf4bd6c0e737df212493bd55b963101991c9",
-    "verifiedAt": "2026-08-31T17:05:43"
-  },
-  {
     "address": "B8XxuJynFpSVkuYumB6mXFxHEkDvdddavCudCHH7NJWM",
     "name": "Vermont-Secure-Computing/bitbet",
     "repoUrl": "https://github.com/Vermont-Secure-Computing/bitbet/tree/d25f270f75e10f42cf052a47a12715a6f1dc2dfb",
@@ -804,6 +798,12 @@
     "verifiedAt": "2026-08-18T06:30:02"
   },
   {
+    "address": "BRjCjFUFQmd3tVCSvWH8NqkJyULbgRKzTTbFzdZzsotV",
+    "name": "Vermont-Secure-Computing/predictsol",
+    "repoUrl": "https://github.com/Vermont-Secure-Computing/predictsol/tree/5327ec258ee13ed60785a734267d559fe727eac",
+    "verifiedAt": "2026-09-07T08:03:05"
+  },
+  {
     "address": "BRoueHsu3h2SfEse9ohXipm1R9uRGRSe3zPYsAT8RySr",
     "name": "LayerZero-Labs/execution-beacon",
     "repoUrl": "https://github.com/LayerZero-Labs/execution-beacon/tree/f7c5b82ce2cf7bb019154c92ae51aac255fd7b9d",
@@ -842,8 +842,8 @@
   {
     "address": "C5JTCJ5K9uhCkQHqCzFLw5MHTdYjTqvU9F5kxZXjDWJ9",
     "name": "Goodgrek/mai_presale_native",
-    "repoUrl": "https://github.com/Goodgrek/mai_presale_native/tree/88149cb5e8a54ad3ddf4faae64b0b07bbaec2e48",
-    "verifiedAt": "2026-08-31T16:00:42"
+    "repoUrl": "https://github.com/Goodgrek/mai_presale_native/tree/327b0e7a0767b27696fc21362ebac851ad65f267",
+    "verifiedAt": "2026-09-04T08:10:56"
   },
   {
     "address": "CaWcaw5YfBYQZ1jraTPqiLx2CJc5CwBL8J4Z1DN5neVs",
@@ -906,6 +906,12 @@
     "verifiedAt": "2026-03-29T04:45:45"
   },
   {
+    "address": "ChnryP5RcZtMvP8vvVyPGUhwCg6uDJc53vCe3sxr11Sz",
+    "name": "chancery",
+    "repoUrl": "https://github.com/SolomonLabs/chancery/tree/0dafa95d1aded954de098208f0f515d436aa496c",
+    "verifiedAt": "2026-09-03T18:45:00"
+  },
+  {
     "address": "ChompZg47TcVy5fk2LxPEpW6SytFYBES5SHoqgrm8A4D",
     "name": "jarry-xiao/chomping-glass",
     "repoUrl": "https://github.com/jarry-xiao/chomping-glass",
@@ -960,6 +966,12 @@
     "verifiedAt": "2024-09-11T16:30:40"
   },
   {
+    "address": "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d",
+    "name": "metaplex-foundation/mpl-core",
+    "repoUrl": "https://github.com/metaplex-foundation/mpl-core/tree/e72d63e4118a0a95ac9b40221e81b19d49e1e102",
+    "verifiedAt": "2026-09-03T18:36:18"
+  },
+  {
     "address": "cov9UDypG7nsryxdgMcKhKU2spRVWLVjxT2iTv6do5Y",
     "name": "open-covenant/covenant",
     "repoUrl": "https://github.com/open-covenant/covenant/tree/7cc35dbbcd45028e0fa16299d77a44872d3d3c33",
@@ -994,6 +1006,12 @@
     "name": "koshak01/tidex6",
     "repoUrl": "https://github.com/koshak01/tidex6/tree/33c6b08",
     "verifiedAt": "2026-07-30T12:48:42"
+  },
+  {
+    "address": "DAanVG7q38LfrTsxuGPn6gxWU7jKtEChXhiiJVNCZv4G",
+    "name": "Vermont-Secure-Computing/bitbet",
+    "repoUrl": "https://github.com/Vermont-Secure-Computing/bitbet/tree/e4162b216f1363593385d323989a275cbe07b650",
+    "verifiedAt": "2026-09-07T05:06:55"
   },
   {
     "address": "Dash3ZZKehWHGNvbCpkde6gvJTR2io7YZCt5DyU73PuJ",
@@ -1304,8 +1322,8 @@
   {
     "address": "FarmsPZpWu9i7Kky8tPN37rs2TpmMrAZrC7S7vJa91Hr",
     "name": "farms",
-    "repoUrl": "https://github.com/Kamino-Finance/kfarms/tree/72c94b4dbb6197b0f061943be65fbea5bd706838",
-    "verifiedAt": "2025-11-16T02:25:50"
+    "repoUrl": "https://github.com/Kamino-Finance/kfarms/tree/bfa186034ba8ecd36e7faf27cae6b38ee24d0bc4",
+    "verifiedAt": "2026-09-03T18:09:28"
   },
   {
     "address": "Feature111111111111111111111111111111111111",
@@ -1453,7 +1471,7 @@
   },
   {
     "address": "FYp8R5K4B3B1Kfr7QuWzMz4TwoT7wptjYtxgCrY5sRXb",
-    "name": "cowprotocol/solana-programs",
+    "name": "cow_settlement",
     "repoUrl": "https://github.com/cowprotocol/solana-programs/tree/28f1d9284b557e4bbeffe3a2582a4c315502a4db",
     "verifiedAt": "2026-08-28T16:16:31"
   },
@@ -1654,6 +1672,12 @@
     "name": "game",
     "repoUrl": "https://github.com/ErenVance/DoomsdayArk/tree/b62f1f4863376dbee4aa3c2baf28ac8cb49a483b",
     "verifiedAt": "2025-01-16T07:12:29"
+  },
+  {
+    "address": "HDTbJM8xLj9LbWGxG7BqZqtACoKmwVmXvFLpCQBgLztU",
+    "name": "pockless-ai/contracts",
+    "repoUrl": "https://github.com/pockless-ai/contracts/tree/30b7ba9feaf3787139dfc8141aa2605f514bc70b",
+    "verifiedAt": "2026-09-02T23:21:02"
   },
   {
     "address": "HEBAUSMDyqBGbEr74ywsctAJJYiJpWarNWgRCyGgkffN",
@@ -1946,8 +1970,8 @@
   {
     "address": "MFv2hWf31Z9kbCa1snEPYctwafyhdvnV7FZnsebVacA",
     "name": "marginfi",
-    "repoUrl": "https://github.com/mrgnlabs/marginfi-v2/tree/3f6ce8b598d0b966966d1560b2d2ae0350294aa4",
-    "verifiedAt": "2026-08-26T17:15:53"
+    "repoUrl": "https://github.com/0dotxyz/marginfi-v2/tree/33c67987a661f59c6683a65485ebb4f0ef030b77",
+    "verifiedAt": "2026-09-04T19:00:08"
   },
   {
     "address": "MidasZepq8k2oFNCCm1rm31rbbj68JSPJeXwqQu6NfZ",
@@ -2132,8 +2156,8 @@
   {
     "address": "oreV3EG1i9BEgiAJ8b177Z2S2rMarzak4NMv1kULvWv",
     "name": "regolith-labs/ore",
-    "repoUrl": "https://github.com/regolith-labs/ore/tree/09da4ebde3f1d3f98b4513e7cdf97ab94028a683",
-    "verifiedAt": "2026-09-01T21:57:21"
+    "repoUrl": "https://github.com/regolith-labs/ore/tree/c71b4193e2f4b4817f369d7d804b51ffbd0030c1",
+    "verifiedAt": "2026-09-06T00:05:09"
   },
   {
     "address": "paxosVkYuJBKUQoZGAidRA47Qt4uidqG5fAt5kmr1nR",
