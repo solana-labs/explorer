@@ -1,5 +1,5 @@
-import { getBase58Decoder } from '@solana/kit';
-import { Connection, PublicKey } from '@solana/web3.js';
+import { getRpc } from '@entities/cluster';
+import { address, type Base58EncodedBytes, getBase58Decoder, getBase64Encoder } from '@solana/kit';
 import pLimit from 'p-limit';
 
 import { fromHex } from '@/app/shared/lib/bytes';
@@ -8,6 +8,7 @@ import { Logger } from '@/app/shared/lib/logger';
 import { NftokenTypes } from './nftoken-types';
 
 const BASE58_DECODER = getBase58Decoder();
+const BASE64_ENCODER = getBase64Encoder();
 
 export const NFTOKEN_ADDRESS = 'nftokf9qcHSYkVSP3P2gUMmV6d4AwjMueXgUu43HyLL';
 
@@ -22,36 +23,43 @@ export namespace NftokenFetcher {
         collection: string;
         rpcUrl: string;
     }): Promise<NftokenTypes.NftInfo[]> => {
-        const connection = new Connection(rpcUrl);
-        const accounts = await connection.getProgramAccounts(new PublicKey(NFTOKEN_ADDRESS), {
-            filters: [
-                {
-                    memcmp: {
-                        bytes: BASE58_DECODER.decode(fromHex(nftokenAccountDiscInHex)),
-                        offset: 0,
+        const accounts = await getRpc(rpcUrl)
+            .getProgramAccounts(address(NFTOKEN_ADDRESS), {
+                encoding: 'base64',
+                // Offsets are typed as bigint, but the BigInt toJSON polyfill in app/types/bigint.ts
+                // (loaded by the address layout) turns bigints into JSON strings before kit's
+                // serializer can handle them, and the RPC rejects string offsets. Plain numbers
+                // serialize correctly either way.
+                filters: [
+                    {
+                        memcmp: {
+                            bytes: BASE58_DECODER.decode(fromHex(nftokenAccountDiscInHex)) as Base58EncodedBytes,
+                            encoding: 'base58',
+                            offset: 0 as unknown as bigint,
+                        },
                     },
-                },
-                {
-                    memcmp: {
-                        // authority_can_update
-                        bytes: collection,
-                        offset:
-                            8 + // discriminator
-                            1 + // version
-                            32 + // holder
-                            32 + // authority
-                            1,
+                    {
+                        memcmp: {
+                            // authority_can_update
+                            bytes: collection as Base58EncodedBytes,
+                            encoding: 'base58',
+                            offset: (8 + // discriminator
+                                1 + // version
+                                32 + // holder
+                                32 + // authority
+                                1) as unknown as bigint,
+                        },
                     },
-                },
-            ],
-        });
+                ],
+            })
+            .send();
 
         const parsed_accounts: NftokenTypes.NftAccount[] = accounts.flatMap(account => {
             try {
-                const parsed = NftokenTypes.nftAccountDecoder.decode(account.account.data);
+                const parsed = NftokenTypes.nftAccountDecoder.decode(BASE64_ENCODER.encode(account.account.data[0]));
 
                 return {
-                    address: account.pubkey.toBase58(),
+                    address: account.pubkey.toString(),
                     authority: parsed.authority,
                     authority_can_update: Boolean(parsed.authority_can_update),
                     collection: parsed.collection,

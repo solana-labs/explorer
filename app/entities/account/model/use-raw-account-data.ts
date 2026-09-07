@@ -1,20 +1,18 @@
+import { getRpc, type SolanaRpc } from '@entities/cluster/@x/account';
 import { useCluster } from '@providers/cluster';
-import { Connection, PublicKey } from '@solana/web3.js';
-import { useMemo } from 'react';
+import { address } from '@solana/kit';
+import { PublicKey } from '@solana/web3.js';
 import useSWR from 'swr';
 import useSWRImmutable from 'swr/immutable';
 
+import { fromBase64 } from '@/app/shared/lib/bytes';
+
 export const rawAccountDataKey = (url: string, address: string) => ['raw-account-data', url, address] as const;
 
-function useConnection() {
+export function useRawAccountData(accountAddress: string) {
     const { url } = useCluster();
-    return useMemo(() => new Connection(url, 'confirmed'), [url]);
-}
 
-export function useRawAccountData(address: string) {
-    const connection = useConnection();
-
-    return useSWR(rawAccountDataKey(connection.rpcEndpoint, address), () => fetchRawAccountData(connection, address), {
+    return useSWR(rawAccountDataKey(url, accountAddress), () => fetchRawAccountData(getRpc(url), accountAddress), {
         revalidateOnFocus: false,
         revalidateOnMount: false,
         revalidateOnReconnect: false,
@@ -23,16 +21,18 @@ export function useRawAccountData(address: string) {
 
 /** Eager variant — fetches immediately on mount. Used by RawAccountRows in AccountCard. */
 export function useRawAccountDataOnMount(pubkey: PublicKey): { data: Uint8Array | undefined; isLoading: boolean } {
-    const connection = useConnection();
+    const { url } = useCluster();
 
-    const { data, isLoading } = useSWRImmutable(rawAccountDataKey(connection.rpcEndpoint, pubkey.toBase58()), () =>
-        fetchRawAccountData(connection, pubkey.toBase58()),
+    const { data, isLoading } = useSWRImmutable(rawAccountDataKey(url, pubkey.toBase58()), () =>
+        fetchRawAccountData(getRpc(url), pubkey.toBase58()),
     );
 
     return { data, isLoading };
 }
 
-async function fetchRawAccountData(connection: Connection, address: string): Promise<Uint8Array | undefined> {
-    const info = await connection.getAccountInfo(new PublicKey(address));
-    return info?.data ? new Uint8Array(info.data) : undefined;
+async function fetchRawAccountData(rpc: SolanaRpc, accountAddress: string): Promise<Uint8Array | undefined> {
+    const { value } = await rpc
+        .getAccountInfo(address(accountAddress), { commitment: 'confirmed', encoding: 'base64' })
+        .send();
+    return value ? fromBase64(value.data[0]) : undefined;
 }

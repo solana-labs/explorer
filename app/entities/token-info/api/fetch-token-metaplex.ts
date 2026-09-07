@@ -6,7 +6,7 @@ import {
     TokenStandard,
 } from '@metaplex-foundation/mpl-token-metadata';
 import { publicKey, unwrapOption } from '@metaplex-foundation/umi';
-import { Connection, PublicKey } from '@solana/web3.js';
+import { address, createSolanaRpc } from '@solana/kit';
 import { fetchAll } from '@utils/fetch-all';
 
 import { MAX_SIZE, USER_AGENT } from '@/app/api/metadata/proxy/config';
@@ -79,16 +79,21 @@ async function fetchDecimals(
     const decimals = new Map<string, number>();
     if (mints.length === 0) return decimals;
 
-    const connection = new Connection(rpcEndpoint);
+    const rpc = createSolanaRpc(rpcEndpoint);
 
     await Promise.all(
         chunk(mints, ACCOUNTS_CHUNK_SIZE).map(async batch => {
             try {
-                const { value } = await connection.getMultipleParsedAccounts(batch.map(mint => new PublicKey(mint)));
+                const { value } = await rpc
+                    .getMultipleAccounts(
+                        batch.map(mint => address(mint)),
+                        { encoding: 'jsonParsed' },
+                    )
+                    .send();
                 value.forEach((account, index) => {
                     const data = account?.data;
                     if (!data || !('parsed' in data)) return;
-                    const parsedDecimals = data.parsed?.info?.decimals;
+                    const parsedDecimals = (data.parsed as { info?: { decimals?: unknown } }).info?.decimals;
                     if (typeof parsedDecimals === 'number') {
                         decimals.set(batch[index], parsedDecimals);
                     }

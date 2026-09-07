@@ -13,16 +13,6 @@ vi.mock('swr', () => ({
     default: vi.fn(() => ({ data: undefined, error: undefined, isLoading: false })),
 }));
 
-vi.mock('@solana/web3.js', async () => {
-    const actual = await vi.importActual<typeof import('@solana/web3.js')>('@solana/web3.js');
-    return {
-        ...actual,
-        Connection: vi.fn().mockImplementation(() => ({
-            getMultipleAccountsInfo: vi.fn(),
-        })),
-    };
-});
-
 describe('useAccountsInfo', () => {
     beforeEach(() => {
         vi.mocked(useSWR).mockImplementation(
