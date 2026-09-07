@@ -46,8 +46,8 @@ const STATIC_OVERRIDES: Record<string, RouteOverride> = {
     '/tx/inspector': { priority: 0.3, changefreq: 'weekly' },
 };
 
-// `/mcp/start` is excluded until the MCP endpoint is announced — drop the entry to list it again.
-const EXCLUDED_STATIC_ROUTES = ['/_not-found', '/opengraph-image.png', '/mcp/start'];
+// The MCP pages stay out until the MCP endpoint is announced — drop an entry to list it again.
+const EXCLUDED_STATIC_ROUTES = ['/_not-found', '/opengraph-image.png', '/mcp/start', '/mcp/docs'];
 
 // Collect all known program addresses from programs.ts (MainnetBeta only)
 const MAINNET_PROGRAM_IDS = Object.entries(PROGRAM_INFO_BY_ID)
