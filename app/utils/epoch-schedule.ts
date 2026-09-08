@@ -96,7 +96,6 @@ interface ComputeUnitConfigEntry {
         readonly [Cluster.MainnetBeta]: number;
         readonly [Cluster.Devnet]: number;
         readonly [Cluster.Testnet]: number;
-        readonly [Cluster.Simd296]: number;
     };
 }
 
@@ -110,7 +109,6 @@ const COMPUTE_UNIT_CONFIGS: readonly ComputeUnitConfigEntry[] = [
             [Cluster.MainnetBeta]: 0,
             [Cluster.Devnet]: 0,
             [Cluster.Testnet]: 0,
-            [Cluster.Simd296]: 0,
         },
         maxComputeUnits: 48_000_000,
     },
@@ -119,7 +117,6 @@ const COMPUTE_UNIT_CONFIGS: readonly ComputeUnitConfigEntry[] = [
             [Cluster.MainnetBeta]: 770,
             [Cluster.Devnet]: 857,
             [Cluster.Testnet]: 764,
-            [Cluster.Simd296]: 0,
         },
         featureAccount: '5oMCU3JPaFLr8Zr4ct7yFA7jdk6Mw1RmB8K4u9ZbS42z',
         maxComputeUnits: 50_000_000,
@@ -130,7 +127,6 @@ const COMPUTE_UNIT_CONFIGS: readonly ComputeUnitConfigEntry[] = [
             [Cluster.MainnetBeta]: 822,
             [Cluster.Devnet]: 915,
             [Cluster.Testnet]: 812,
-            [Cluster.Simd296]: 0,
         },
         featureAccount: '6oMCUgfY6BzZ6jwB681J6ju5Bh6CjVXbd7NeWYqiXBSu',
         maxComputeUnits: 60_000_000,
@@ -141,7 +137,6 @@ const COMPUTE_UNIT_CONFIGS: readonly ComputeUnitConfigEntry[] = [
             [Cluster.MainnetBeta]: 1009,
             [Cluster.Devnet]: 1100,
             [Cluster.Testnet]: 983,
-            [Cluster.Simd296]: 0,
         },
         featureAccount: 'P1BCUMpAC7V2GRBRiJCNUgpMyWZhoqt3LKo712ePqsz',
         maxComputeUnits: 100_000_000,
@@ -168,8 +163,7 @@ export function getMaxComputeUnitsInBlock({ epoch = 0n, cluster }: { epoch?: big
 
     for (const config of COMPUTE_UNIT_CONFIGS) {
         const activationEpoch = config.activations[cluster];
-        // `>=` so that on clusters where several configs share an activation epoch (e.g. the
-        // Simd296 surfnet, where every config activates at epoch 0) the latest config wins.
+        // `>=` so that when several configs share an activation epoch on a cluster, the latest one wins.
         if (activationEpoch <= epochNumber && activationEpoch >= highestActivationEpoch) {
             applicableConfig = config;
             highestActivationEpoch = activationEpoch;

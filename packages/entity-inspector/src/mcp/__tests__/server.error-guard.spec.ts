@@ -17,7 +17,6 @@ const TEST_CONFIG: EntityInspectorConfig = {
     rpcEndpoints: {
         devnet: 'https://devnet.rpc.address',
         'mainnet-beta': ENDPOINT_WITH_KEY,
-        simd296: 'https://simd296.rpc.address',
         testnet: 'https://testnet.rpc.address',
     },
 };

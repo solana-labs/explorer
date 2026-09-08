@@ -110,7 +110,7 @@ export function McpDocsOverviewView() {
                         )}
                     </HeroFact>
                     <HeroFact label="Clusters">
-                        <span className="text-sm">mainnet-beta · devnet · testnet · simd296</span>
+                        <span className="text-sm">mainnet-beta · devnet · testnet</span>
                     </HeroFact>
                     <HeroFact label="Tools">
                         <span className="text-sm">inspect_entity · ping</span>

@@ -21,7 +21,7 @@ export function supportsVerifiedBuilds(cluster: Cluster): boolean {
     return getOsecRegistryUrl(cluster) !== undefined;
 }
 
-// OSEC hosts a separate verified-builds registry per cluster; Testnet/Custom/SIMD-296 have none.
+// OSEC hosts a separate verified-builds registry per cluster; Testnet/Custom have none.
 export function getOsecRegistryUrl(cluster: Cluster): string | undefined {
     switch (cluster) {
         case Cluster.MainnetBeta:

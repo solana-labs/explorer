@@ -34,13 +34,12 @@ describe('parseClusterId', () => {
     it.each([
         ['1', Cluster.Testnet],
         ['2', Cluster.Devnet],
-        ['3', Cluster.Simd296],
     ])('should return cluster for valid id "%s"', (input, expected) => {
         expect(parseClusterId(input)).toBe(expected);
     });
 
-    // '0' is mainnet (not allowed), '4'/'999' out of range, 'devnet' → NaN, '' → 0 (mainnet)
-    it.each(['0', '4', '999', 'devnet', ''])('should return undefined for invalid cluster id "%s"', input => {
+    // '0' is mainnet (not allowed), '3' is custom (client-only), '999' out of range, 'devnet' → NaN, '' → 0 (mainnet)
+    it.each(['0', '3', '999', 'devnet', ''])('should return undefined for invalid cluster id "%s"', input => {
         expect(parseClusterId(input)).toBe(undefined);
     });
 });

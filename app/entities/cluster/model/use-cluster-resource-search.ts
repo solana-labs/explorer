@@ -17,8 +17,8 @@ export interface ClusterResourceSearch {
  */
 export type ClusterResourceProbe = (url: string, resourceId: string) => Promise<boolean>;
 
-// The clusters this searches, and the only ones it may. Cluster.Simd296 is a temporary surfnet, so matches
-// there aren't linkable later. Cluster.Custom is absent on purpose — see `getSelectionsToProbe`.
+// The clusters this searches, and the only ones it may. Cluster.Custom is absent on purpose — see
+// `getSelectionsToProbe`.
 const PUBLIC_CLUSTERS: ServerCluster[] = [Cluster.MainnetBeta, Cluster.Devnet, Cluster.Testnet];
 const PROBE_DELAY_MS = 700;
 

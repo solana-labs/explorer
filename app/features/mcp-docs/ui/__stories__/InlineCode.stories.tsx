@@ -22,7 +22,7 @@ export const InSentence: Story = {
         <p className="m-0 text-sm text-neutral-300">
             Pass <InlineCode>cluster</InlineCode> explicitly when the user is not on{' '}
             <InlineCode>mainnet-beta</InlineCode> — one of <InlineCode>devnet</InlineCode>,{' '}
-            <InlineCode>testnet</InlineCode> or <InlineCode>simd296</InlineCode>.
+            <InlineCode>testnet</InlineCode>.
         </p>
     ),
 };

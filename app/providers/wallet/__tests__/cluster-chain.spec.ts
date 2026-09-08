@@ -13,10 +13,7 @@ describe('clusterToWalletChain', () => {
         expect(clusterToWalletChain(cluster)).toBe(expected);
     });
 
-    it.each([Cluster.Custom, Cluster.Simd296])(
-        'should map cluster %s to localnet, since it points at an arbitrary endpoint',
-        cluster => {
-            expect(clusterToWalletChain(cluster)).toBe('solana:localnet');
-        },
-    );
+    it('should map the Custom cluster to localnet, since it points at an arbitrary endpoint', () => {
+        expect(clusterToWalletChain(Cluster.Custom)).toBe('solana:localnet');
+    });
 });

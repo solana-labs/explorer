@@ -4,7 +4,7 @@ import { defaultCluster, SUPPORTED_CLUSTERS } from '../config.js';
 
 describe('SUPPORTED_CLUSTERS', () => {
     it('should list the clusters the inspector can query', () => {
-        expect(SUPPORTED_CLUSTERS).toEqual(['mainnet-beta', 'devnet', 'testnet', 'simd296']);
+        expect(SUPPORTED_CLUSTERS).toEqual(['mainnet-beta', 'devnet', 'testnet']);
     });
 });
 

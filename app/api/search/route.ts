@@ -83,20 +83,6 @@ export async function GET(request: Request) {
         );
     }
 
-    // SIMD-296 is an experimental cluster not covered by Jupiter/UTL token lists.
-    if (cluster === Cluster.Simd296) {
-        return NextResponse.json(
-            {
-                meta: { total: 0 },
-                query: trimmed,
-                queryType: detectQueryType(trimmed),
-                results: { tokens: [] },
-                success: true,
-            },
-            { headers: NO_STORE_HEADERS },
-        );
-    }
-
     const queryType = detectQueryType(trimmed);
     const tokens = await resolveSearchTokens(trimmed, cluster, { filterUnverified });
 

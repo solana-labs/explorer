@@ -15,7 +15,7 @@ describe('inspectEntityInputSchema', () => {
     it('should reject a cluster the deployment has not enabled', () => {
         const schema = inspectEntityInputSchema(['mainnet-beta', 'devnet']);
 
-        expect(() => schema.parse({ cluster: 'simd296', identifier: 'abc' })).toThrow();
+        expect(() => schema.parse({ cluster: 'testnet', identifier: 'abc' })).toThrow();
     });
 
     it('should default to the enabled cluster when none is given', () => {

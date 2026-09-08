@@ -110,8 +110,7 @@ function InspectEntityDoc() {
                     </ToolParam>
                     <ToolParam name="cluster">
                         One of <InlineCode>mainnet-beta</InlineCode>, <InlineCode>devnet</InlineCode>,{' '}
-                        <InlineCode>testnet</InlineCode>, <InlineCode>simd296</InlineCode>. Defaults to{' '}
-                        <InlineCode>mainnet-beta</InlineCode>.
+                        <InlineCode>testnet</InlineCode>. Defaults to <InlineCode>mainnet-beta</InlineCode>.
                     </ToolParam>
                 </div>
             </ToolDocSection>

@@ -21,8 +21,8 @@ export type ResolvedProgramIdls = ProgramIdlSources<unknown>;
  *
  * Both come from `fetchLatestIdls` — the package's own `GET /api/latest` resolver (PMP canonical →
  * fndn fallback, Anchor PDA, side by side). Native/builtin programs skip the Anchor leg (PMP only via
- * `fetchPmpIdl`): they can't have an Anchor IDL and some RPCs (SIMD-296) throw, instead of returning
- * absent, for the derived PDA (see NON_ANCHOR_PROGRAMS).
+ * `fetchPmpIdl`): they can't have an Anchor IDL and some RPCs throw, instead of returning absent, for the
+ * derived PDA (see NON_ANCHOR_PROGRAMS).
  *
  * Every `@solana/idl` fetcher surfaces absent/undecodable as a value and throws **only on RPC
  * failure**, so a blip propagates to the caller (retryable 502 / SWR retry) and is never cached as a
@@ -30,7 +30,7 @@ export type ResolvedProgramIdls = ProgramIdlSources<unknown>;
  */
 export async function resolveProgramIdls(rpc: IdlRpc, programId: Address): Promise<ResolvedProgramIdls> {
     // Native/builtin programs can't have an Anchor IDL — skip the PDA lookup (see NON_ANCHOR_PROGRAMS);
-    // some RPCs even throw (SIMD-296) for the derived PDA, so we must not attempt it.
+    // some RPCs even throw for the derived PDA, so we must not attempt it.
     const resolveAnchor = !NON_ANCHOR_PROGRAMS.has(programId);
 
     let anchorContent: string | undefined;

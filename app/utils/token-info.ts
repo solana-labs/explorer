@@ -129,7 +129,7 @@ export function isRedactedTokenAddress(address: string): boolean {
  * The UTL SDK only returns the most common fields, we sometimes need eg extensions
  * @param address Public key of the token
  * @param cluster Cluster to fetch the token info for
- * @param genesisHash Genesis hash for cluster identification (required for SIMD-296)
+ * @param genesisHash Genesis hash for cluster identification (required for the Custom cluster)
  */
 export type FullTokenInfoSwrKey = ['get-full-token-info', string, Cluster, string, string | undefined];
 

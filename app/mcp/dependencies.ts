@@ -58,12 +58,11 @@ const logger: EntityInspectorConfig['logger'] = {
 
 // Resolved at handler init (cold start), not module scope, so key-bearing URLs come from runtime env, never a build artifact.
 // Unset falls back to the app's own server RPC config (`serverClusterUrl` → `*_RPC_URL` env), which is the proxied
-// default for every cluster except simd296. Every supported cluster gets an entry whether or not it is enabled.
+// default for every cluster. Every supported cluster gets an entry whether or not it is enabled.
 function resolveRpcEndpoints(): EntityInspectorConfig['rpcEndpoints'] {
     return {
         devnet: process.env.MCP_SOLANA_RPC_URL_DEVNET || serverClusterUrl(Cluster.Devnet),
         'mainnet-beta': process.env.MCP_SOLANA_RPC_URL_MAINNET_BETA || serverClusterUrl(Cluster.MainnetBeta),
-        simd296: process.env.MCP_SOLANA_RPC_URL_SIMD296 || serverClusterUrl(Cluster.Simd296),
         testnet: process.env.MCP_SOLANA_RPC_URL_TESTNET || serverClusterUrl(Cluster.Testnet),
     };
 }

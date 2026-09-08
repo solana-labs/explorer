@@ -142,11 +142,4 @@ describe('getMaxComputeUnitsForEpoch', () => {
         expect(getMaxComputeUnitsInBlock({ cluster: Cluster.Custom, epoch: undefined })).toEqual(100_000_000);
         expect(getMaxComputeUnitsInBlock({ cluster: Cluster.Custom, epoch: -1n })).toEqual(100_000_000);
     });
-
-    // Every config activates at epoch 0 on the Simd296 surfnet, so the latest config must win.
-    it('should return the latest max compute units on simd296', () => {
-        expect(getMaxComputeUnitsInBlock({ cluster: Cluster.Simd296, epoch: 0n })).toEqual(100_000_000);
-        expect(getMaxComputeUnitsInBlock({ cluster: Cluster.Simd296, epoch: 1009n })).toEqual(100_000_000);
-        expect(getMaxComputeUnitsInBlock({ cluster: Cluster.Simd296, epoch: undefined })).toEqual(100_000_000);
-    });
 });

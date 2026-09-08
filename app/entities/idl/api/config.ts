@@ -8,8 +8,8 @@ import { TOKEN_2022_PROGRAM_ADDRESS } from '@solana-program/token-2022';
 import { LOADER_IDS, ZK_ELGAMAL_PROOF_PROGRAM_ID } from '@/app/utils/programs';
 
 // Programs that definitionally have no Anchor IDL. Skip the IDL PDA lookup so we don't depend on the
-// RPC returning `null` for it — some (e.g. the SIMD-296 testnet) return transient errors instead,
-// which used to Sentry-panic on every transaction touching a builtin. Curated behavioral list, not the
+// RPC returning `null` for it — some RPCs return transient errors instead, which used to Sentry-panic
+// on every transaction touching a builtin. Curated behavioral list, not the
 // `@/app/utils/programs` display registry: reuse canonical exports where they exist, literals otherwise.
 export const NON_ANCHOR_PROGRAMS = new Set<string>([
     SYSTEM_PROGRAM_ADDRESS,
