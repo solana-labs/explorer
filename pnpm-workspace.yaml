@@ -9,27 +9,27 @@ frozenLockfile: true
 
 catalogs:
   oxc:
-    oxfmt: ^0.56.0
-    oxlint: ^1.71.0
+    oxfmt: ^0.65.0
+    oxlint: ^1.80.0
   storybook:
-    '@storybook/addon-a11y': 10.5.7
-    '@storybook/addon-docs': 10.5.7
-    '@storybook/addon-vitest': 10.5.7
-    '@storybook/nextjs-vite': 10.5.7
-    '@storybook/react': 10.5.7
-    eslint-plugin-storybook: 10.5.7
-    storybook: 10.5.7
+    '@storybook/addon-a11y': 10.5.10
+    '@storybook/addon-docs': 10.5.10
+    '@storybook/addon-vitest': 10.5.10
+    '@storybook/nextjs-vite': 10.5.10
+    '@storybook/react': 10.5.10
+    eslint-plugin-storybook: 10.5.10
+    storybook: 10.5.10
   tooling:
     '@eslint/js': 9.39.4
     eslint: 9.39.4
     prettier: 3.9.6
     typescript: 5.7.3
   vitest:
-    '@vitest/browser': 4.1.10
-    '@vitest/browser-playwright': 4.1.10
-    '@vitest/coverage-v8': 4.1.10
+    '@vitest/browser': 4.1.11
+    '@vitest/browser-playwright': 4.1.11
+    '@vitest/coverage-v8': 4.1.11
     jsdom: 26.0.0
-    vitest: 4.1.10
+    vitest: 4.1.11
 
 ignoreScripts: true
 
