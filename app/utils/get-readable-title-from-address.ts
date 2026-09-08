@@ -1,4 +1,4 @@
-import { Cluster } from '@utils/cluster';
+import { clusterFromSlug, DEFAULT_CLUSTER } from '@utils/cluster';
 
 import { getTokenInfo } from '@/app/entities/token-info/server';
 
@@ -7,7 +7,7 @@ export type AddressPageMetadataProps = Readonly<{
         address: string;
     }>;
     searchParams: Promise<{
-        cluster: string;
+        cluster?: string;
     }>;
 }>;
 
@@ -15,20 +15,8 @@ export default async function getReadableTitleFromAddress(props: AddressPageMeta
     const { address } = await props.params;
     const { cluster: clusterParam } = await props.searchParams;
 
-    let cluster: Cluster;
-    switch (clusterParam) {
-        case 'custom':
-            cluster = Cluster.Custom;
-            break;
-        case 'devnet':
-            cluster = Cluster.Devnet;
-            break;
-        case 'testnet':
-            cluster = Cluster.Testnet;
-            break;
-        default:
-            cluster = Cluster.MainnetBeta;
-    }
+    // An absent param means the default cluster, matching how the page itself reads the query.
+    const cluster = clusterParam === undefined ? DEFAULT_CLUSTER : (clusterFromSlug(clusterParam) ?? DEFAULT_CLUSTER);
 
     try {
         const tokenInfo = await getTokenInfo(address, cluster);

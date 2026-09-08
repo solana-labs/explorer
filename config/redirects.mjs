@@ -34,6 +34,14 @@ export function buildRedirects() {
             permanent: true,
             source: '/address/:address/history',
         },
+        // Renamed-tab redirect: a program may have several IDLs, so the Anchor-specific tab became `/idl`.
+        // Here rather than in the page, because a page's `redirect()` drops the query and would strand an
+        // incoming devnet link on mainnet.
+        {
+            destination: '/address/:address/idl',
+            permanent: true,
+            source: '/address/:address/anchor-program',
+        },
         // Removed-page redirect: keep as 308 while external links/crawlers update, then drop.
         {
             destination: '/',
