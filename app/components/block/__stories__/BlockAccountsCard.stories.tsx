@@ -1,4 +1,5 @@
-import { PublicKey } from '@solana/web3.js';
+import type { BlockData, BlockTransaction } from '@entities/block-data';
+import { address, blockhash, lamports } from '@solana/kit';
 import { nextjsParameters, withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
@@ -33,22 +34,42 @@ const ACCOUNT_IDS = [
     'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s',
 ];
 
-// Minimal stand-in for a VersionedBlockResponse — just the shape BlockAccountsCard reads. Account j
+// Build the Kit-native block shape consumed by BlockAccountsCard. Account j
 // is referenced in every (j+1)-th transaction (descending usage); every 3rd account is writable, so
 // the read-write / read-only split varies across rows.
-function makeBlock(txCount: number) {
-    const keys = ACCOUNT_IDS.map(id => new PublicKey(id));
-    const accountKeys = { get: (i: number) => keys[i], length: keys.length };
-    const transactions = Array.from({ length: txCount }, (_, k) => {
+function makeBlock(txCount: number): BlockData {
+    const keys = ACCOUNT_IDS.map(address);
+    const transactions: BlockTransaction[] = Array.from({ length: txCount }, (_, k) => {
         const accountKeyIndexes = ACCOUNT_IDS.map((_, j) => j).filter(j => k % (j + 1) === 0);
-        const message = {
-            compiledInstructions: [{ accountKeyIndexes }],
-            getAccountKeys: () => accountKeys,
-            isAccountWritable: (i: number) => i % 3 === 0,
+        return {
+            index: k,
+            message: {
+                header: {
+                    numReadonlyNonSignerAccounts: 8,
+                    numReadonlySignerAccounts: 0,
+                    numSignerAccounts: 0,
+                },
+                instructions: [{ accountIndices: accountKeyIndexes, programAddressIndex: 0 }],
+                lifetimeToken: blockhash('11111111111111111111111111111111'),
+                staticAccounts: keys,
+                version: 'legacy',
+            },
+            meta: {
+                err: null,
+                fee: lamports(5_000n),
+                logMessages: [],
+            },
+            signatures: [],
         };
-        return { meta: { loadedAddresses: undefined }, transaction: { message } };
     });
-    return { transactions } as any;
+    return {
+        blockTime: null,
+        blockhash: blockhash('11111111111111111111111111111111'),
+        parentSlot: 0n,
+        previousBlockhash: blockhash('11111111111111111111111111111111'),
+        rewards: [],
+        transactions,
+    };
 }
 
 export const WithData: Story = {
@@ -61,7 +82,7 @@ export const WithData: Story = {
 // Empty block — wrapper-only story for visual-regression coverage of the outer card.
 export const EmptyBlock: Story = {
     args: {
-        block: { transactions: [] } as any,
+        block: makeBlock(0),
         blockSlot: 312_456_789,
     },
 };

@@ -1,6 +1,5 @@
-import { TransactionError } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
-import { getTransactionInstructionError } from '@utils/program-err';
+import { getTransactionInstructionError, type SupportedTransactionError } from '@utils/program-err';
 import { getProgramName } from '@utils/tx';
 
 import { Logger } from '@/app/shared/lib/logger';
@@ -20,8 +19,8 @@ export type InstructionLogs = {
 };
 
 export function parseProgramLogs(
-    logs: string[],
-    error: TransactionError | null | undefined,
+    logs: readonly string[],
+    error: SupportedTransactionError | null | undefined,
     cluster: Cluster,
 ): InstructionLogs[] {
     let depth = 0;

@@ -20,9 +20,9 @@ export const isSortMode = (value: string | null): value is SortMode => value !==
 // can pass their richer rows straight through.
 export type SortableTransaction = {
     index: number;
-    meta: { fee: number } | null;
+    meta: { fee: bigint } | null;
     computeUnits?: number;
-    costUnits?: number;
+    costUnits?: bigint;
     reservedComputeUnits?: number;
 };
 
@@ -40,15 +40,21 @@ export function sortTransactions<T extends SortableTransaction>(
     if (mode === 'index') {
         sorted.sort((a, b) => dir * (a.index - b.index));
     } else if (mode === 'compute' && showComputeUnits) {
-        sorted.sort((a, b) => dir * ((a.computeUnits ?? 0) - (b.computeUnits ?? 0)));
+        sorted.sort((a, b) => dir * compareIntegers(a.computeUnits, b.computeUnits));
     } else if (mode === 'txnCost') {
-        sorted.sort((a, b) => dir * ((a.costUnits ?? 0) - (b.costUnits ?? 0)));
+        sorted.sort((a, b) => dir * compareIntegers(a.costUnits, b.costUnits));
     } else if (mode === 'fee') {
-        sorted.sort((a, b) => dir * ((a.meta?.fee || 0) - (b.meta?.fee || 0)));
+        sorted.sort((a, b) => dir * compareIntegers(a.meta?.fee, b.meta?.fee));
     } else if (mode === 'reservedCUs') {
-        sorted.sort((a, b) => dir * ((a.reservedComputeUnits || 0) - (b.reservedComputeUnits || 0)));
+        sorted.sort((a, b) => dir * compareIntegers(a.reservedComputeUnits, b.reservedComputeUnits));
     }
     return sorted;
+}
+
+function compareIntegers(a: number | bigint | undefined, b: number | bigint | undefined): number {
+    const left = typeof a === 'bigint' ? a : BigInt(a ?? 0);
+    const right = typeof b === 'bigint' ? b : BigInt(b ?? 0);
+    return left < right ? -1 : left > right ? 1 : 0;
 }
 
 // The next `sort`/`dir` URL params for a sort click, given the currently-active sort:

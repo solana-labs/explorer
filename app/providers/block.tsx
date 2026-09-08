@@ -1,17 +1,15 @@
 'use client';
 
-import { type BlockWithV1, fetchBlock as fetchBlockBySlot } from '@entities/block-data';
+import { type BlockData, fetchBlock as fetchBlockBySlot } from '@entities/block-data';
 import { getRpc } from '@entities/cluster';
 import * as Cache from '@providers/cache';
 import { useCacheEntry } from '@providers/cache-entry';
 import { useCluster } from '@providers/cluster';
-import type { Address } from '@solana/kit';
-import type { PublicKey } from '@solana/web3.js';
+import type { Address, Slot } from '@solana/kit';
 import { Cluster } from '@utils/cluster';
 import React from 'react';
 
 import { Logger } from '@/app/shared/lib/logger';
-import { toLegacyPublicKey } from '@/app/shared/lib/web3js-compat';
 
 export enum FetchStatus {
     Fetching,
@@ -25,11 +23,11 @@ export enum ActionType {
 }
 
 type Block = {
-    block?: BlockWithV1;
-    blockLeader?: PublicKey;
-    childSlot?: number;
-    childLeader?: PublicKey;
-    parentLeader?: PublicKey;
+    block?: BlockData;
+    blockLeader?: Address;
+    childSlot?: Slot;
+    childLeader?: Address;
+    parentLeader?: Address;
 };
 
 type State = Cache.State<Block>;
@@ -83,22 +81,21 @@ export async function fetchBlock(dispatch: Dispatch, url: string, cluster: Clust
             data = {};
             status = FetchStatus.Fetched;
         } else {
-            const childSlotBigint = (await rpc.getBlocks(BigInt(slot + 1), BigInt(slot + 100)).send()).at(0);
-            const childSlot = childSlotBigint === undefined ? undefined : Number(childSlotBigint);
+            const childSlot = (await rpc.getBlocks(BigInt(slot + 1), BigInt(slot + 100)).send()).at(0);
             const firstLeaderSlot = block.parentSlot;
 
             let leaders: Address[] = [];
             try {
-                const lastLeaderSlot = childSlot !== undefined ? childSlot : slot;
-                const slotLeadersLimit = lastLeaderSlot - block.parentSlot + 1;
-                leaders = await rpc.getSlotLeaders(BigInt(firstLeaderSlot), slotLeadersLimit).send();
+                const lastLeaderSlot = childSlot ?? BigInt(slot);
+                const slotLeadersLimit = Number(lastLeaderSlot - block.parentSlot + 1n);
+                leaders = await rpc.getSlotLeaders(firstLeaderSlot, slotLeadersLimit).send();
             } catch (_err) {
                 // ignore errors
             }
 
-            const getLeader = (slot: number): PublicKey | undefined => {
-                const leader = leaders.at(slot - firstLeaderSlot);
-                return leader === undefined ? undefined : toLegacyPublicKey(leader);
+            const getLeader = (leaderSlot: Slot | bigint | number): Address | undefined => {
+                const leaderIndex = Number(BigInt(leaderSlot) - firstLeaderSlot);
+                return leaders.at(leaderIndex);
             };
 
             data = {

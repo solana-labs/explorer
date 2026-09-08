@@ -1,5 +1,3 @@
-import { TransactionError } from '@solana/web3.js';
-
 const instructionErrorMessage: Map<string, string> = new Map([
     ['GenericError', 'generic instruction error'],
     ['InvalidArgument', 'invalid program argument'],
@@ -58,14 +56,20 @@ export type ProgramError = {
     message: string;
 };
 
-export function getTransactionInstructionError(error?: TransactionError | null): ProgramError | undefined {
+export type SupportedTransactionError =
+    import('@solana/kit').TransactionError | import('@solana/web3.js').TransactionError;
+
+export function getTransactionInstructionError(error?: SupportedTransactionError | null): ProgramError | undefined {
     if (!error) {
         return;
     }
 
     if (typeof error === 'object' && 'InstructionError' in error) {
-        const innerError = error['InstructionError'] as any;
-        const index = innerError[0] as number;
+        const innerError = error.InstructionError;
+        if (!Array.isArray(innerError) || innerError.length < 2) return;
+        // kit's JSON parser can retain RPC integers as bigint. Instruction indexes are bounded by
+        // the transaction's instruction count, so convert only where the value indexes a UI array.
+        const index = Number(innerError[0]);
         const instructionError = innerError[1];
 
         return {
@@ -75,7 +79,7 @@ export function getTransactionInstructionError(error?: TransactionError | null):
     }
 }
 
-function getInstructionError(error: any): string {
+function getInstructionError(error: unknown): string {
     let out;
     let value;
 
@@ -84,16 +88,16 @@ function getInstructionError(error: any): string {
         if (message) {
             return message;
         }
-    } else if ('Custom' in error) {
+    } else if (error !== null && typeof error === 'object' && 'Custom' in error) {
         out = instructionErrorMessage.get('Custom');
         value = error['Custom'];
-    } else if ('BorshIoError' in error) {
+    } else if (error !== null && typeof error === 'object' && 'BorshIoError' in error) {
         out = instructionErrorMessage.get('BorshIoError');
         value = error['BorshIoError'];
     }
 
     if (out && value) {
-        return out.replace('{0}', value);
+        return out.replace('{0}', String(value));
     }
 
     return 'Unknown instruction error';

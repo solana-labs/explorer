@@ -4,10 +4,16 @@ import { Signature } from '@components/common/Signature';
 import { SolBalance } from '@components/common/SolBalance';
 import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import { cn } from '@components/shared/utils';
-import type { BlockWithV1 } from '@entities/block-data';
+import {
+    type BlockData,
+    type BlockTransactionMeta,
+    getBlockTransactionAccounts,
+    getBlockTransactionInstructions,
+    isBlockTransaction,
+} from '@entities/block-data';
 import { estimateRequestedComputeUnits } from '@entities/compute-unit';
 import { useCluster } from '@providers/cluster';
-import { ConfirmedTransactionMeta, PublicKey, TransactionSignature, VOTE_PROGRAM_ID } from '@solana/web3.js';
+import { type Address as KitAddress, address, type Signature as KitSignature } from '@solana/kit';
 import { parseProgramLogs } from '@utils/program-logs';
 import { displayAddress } from '@utils/tx';
 import Link from 'next/link';
@@ -32,17 +38,18 @@ import { invariant } from '@/app/shared/lib/invariant';
 import { Card } from '@/app/shared/ui/Card';
 
 const PAGE_SIZE = 25;
+const VOTE_PROGRAM_ADDRESS = address('Vote111111111111111111111111111111111111111');
 
 const useQueryProgramFilter = (query: ReadonlyURLSearchParams): string => {
     const filter = query.get('filter');
     return filter || '';
 };
 
-const useQueryAccountFilter = (query: ReadonlyURLSearchParams): PublicKey | null => {
+const useQueryAccountFilter = (query: ReadonlyURLSearchParams): KitAddress | null => {
     const filter = query.get('accountFilter');
     if (filter !== null) {
         try {
-            return new PublicKey(filter);
+            return address(filter);
         } catch {
             /* empty */
         }
@@ -60,16 +67,17 @@ const useQuerySort = (query: ReadonlyURLSearchParams): { mode: SortMode; directi
 
 type TransactionWithInvocations = {
     index: number;
-    signature?: TransactionSignature;
-    meta: ConfirmedTransactionMeta | null;
+    signature?: KitSignature;
+    meta: BlockTransactionMeta | null;
     invocations: Map<string, number>;
     computeUnits?: number;
-    costUnits?: number;
+    costUnits?: bigint;
     reservedComputeUnits?: number;
     logTruncated: boolean;
+    unavailable: boolean;
 };
 
-export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: bigint | undefined }) {
+export function BlockHistoryCard({ block, epoch }: { block: BlockData; epoch: bigint | undefined }) {
     const [numDisplayed, setNumDisplayed] = React.useState(PAGE_SIZE);
     const currentPathname = usePathname();
     const currentSearchParams = useSearchParams();
@@ -102,14 +110,22 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: 
     const { transactions, invokedPrograms } = React.useMemo(() => {
         const invokedPrograms = new Map<string, number>();
 
-        const transactions: TransactionWithInvocations[] = block.transactions.map((tx, index) => {
-            let signature: TransactionSignature | undefined;
-            if (tx.transaction.signatures.length > 0) {
-                signature = tx.transaction.signatures[0];
+        const transactions: TransactionWithInvocations[] = block.transactions.map(entry => {
+            if (!isBlockTransaction(entry)) {
+                return {
+                    index: entry.index,
+                    invocations: new Map(),
+                    logTruncated: false,
+                    meta: null,
+                    unavailable: true,
+                };
             }
 
-            const programIndexes = tx.transaction.message.compiledInstructions
-                .map(ix => ix.programIdIndex)
+            const tx = entry;
+            const signature = tx.signatures[0];
+
+            const programIndexes = getBlockTransactionInstructions(tx.message)
+                .map(ix => ix.programAddressIndex)
                 .concat(
                     tx.meta?.innerInstructions?.flatMap(ix => {
                         return ix.instructions.map(ix => ix.programIdIndex);
@@ -123,13 +139,11 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: 
             });
 
             const invocations = new Map<string, number>();
-            const accountKeys = tx.transaction.message.getAccountKeys({
-                accountKeysFromLookups: tx.meta?.loadedAddresses,
-            });
+            const accountKeys = getBlockTransactionAccounts(tx);
             indexMap.forEach((count, i) => {
-                const accountKey = accountKeys.get(i);
+                const accountKey = accountKeys[i];
                 invariant(accountKey, `account key index ${i} out of range`);
-                const programId = accountKey.toBase58();
+                const programId = accountKey;
                 invocations.set(programId, count);
                 const programTransactionCount = invokedPrograms.get(programId) || 0;
                 invokedPrograms.set(programId, programTransactionCount + 1);
@@ -146,12 +160,7 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: 
                 // ignore parsing errors because some old logs aren't parsable
             }
 
-            let costUnits: number | undefined = undefined;
-            try {
-                costUnits = tx.meta?.costUnits ?? 0;
-            } catch (_err) {
-                // ignore parsing errors because some old logs aren't parsable
-            }
+            const costUnits = tx.meta?.costUnits;
 
             // Calculate reserved compute units
             const reservedComputeUnits = estimateRequestedComputeUnits(tx, epoch, cluster);
@@ -159,19 +168,20 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: 
             return {
                 computeUnits,
                 costUnits,
-                index,
+                index: tx.index,
                 invocations,
                 logTruncated,
                 meta: tx.meta,
                 reservedComputeUnits,
                 signature,
+                unavailable: false,
             };
         });
         return { invokedPrograms, transactions };
     }, [block, cluster, epoch]);
 
     const [filteredTransactions, showComputeUnits] = React.useMemo((): [TransactionWithInvocations[], boolean] => {
-        const voteFilter = VOTE_PROGRAM_ID.toBase58();
+        const voteFilter = VOTE_PROGRAM_ADDRESS;
         const filteredTxs: TransactionWithInvocations[] = transactions
             .filter(({ invocations }) => {
                 if (programFilter === ALL_TRANSACTIONS) {
@@ -188,13 +198,8 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: 
                 }
 
                 const tx = block.transactions[index];
-                const accountKeys = tx.transaction.message.getAccountKeys({
-                    accountKeysFromLookups: tx.meta?.loadedAddresses,
-                });
-                return accountKeys
-                    .keySegments()
-                    .flat()
-                    .find(key => key.equals(accountFilter));
+                if (!tx || !isBlockTransaction(tx)) return false;
+                return getBlockTransactionAccounts(tx).includes(accountFilter);
             });
 
         const showComputeUnits = filteredTxs.every(tx => tx.computeUnits !== undefined);
@@ -267,7 +272,7 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: 
                     <div className="text-sm text-white">
                         Showing transactions which load account:
                         <span className="ml-1.5 inline-block align-middle">
-                            <Address pubkey={accountFilter} link />
+                            <Address address={accountFilter} link />
                         </span>
                     </div>
                 )}
@@ -294,11 +299,12 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockWithV1; epoch: 
 const HISTORY_STATUS = {
     failed: { label: 'Failed', variant: 'warning' },
     success: { label: 'Success', variant: 'success' },
+    unavailable: { label: 'Unavailable', variant: 'warning' },
 } as const;
 
 // One shared formatter instance — constructing `Intl.NumberFormat` per call is needlessly expensive.
 const NUMBER_FORMAT = new Intl.NumberFormat('en-US');
-const numberFmt = (n: number) => NUMBER_FORMAT.format(n);
+const numberFmt = (n: number | bigint) => NUMBER_FORMAT.format(n);
 
 // A dim up/down chevron pair marking a sortable header; the arrow for the active direction lights up
 // white. Absolutely positioned in an `h-4`/`w-1` box so the taller glyph stack doesn't grow the row.
@@ -413,7 +419,11 @@ function BlockHistoryGridRow({
     gridStyle: React.CSSProperties;
 }) {
     const failed = Boolean(tx.meta?.err) || !tx.signature;
-    const status = failed ? HISTORY_STATUS.failed : HISTORY_STATUS.success;
+    const status = tx.unavailable
+        ? HISTORY_STATUS.unavailable
+        : failed
+          ? HISTORY_STATUS.failed
+          : HISTORY_STATUS.success;
     const badge = (
         <Badge ui="dashkit" variant={status.variant}>
             {status.label}
@@ -438,7 +448,7 @@ function BlockHistoryGridRow({
                         <span className="whitespace-nowrap text-right tabular-nums text-outer-space-300">
                             {count} ×
                         </span>
-                        <Address pubkey={new PublicKey(programId)} link />
+                        <Address address={address(programId)} link />
                     </React.Fragment>
                 ))}
             </div>
@@ -515,7 +525,7 @@ function buildFilterModel(
     const defaultFilterOption: FilterOption = {
         name: 'All Except Votes',
         programId: HIDE_VOTES,
-        transactionCount: totalTransactionCount - (invokedPrograms.get(VOTE_PROGRAM_ID.toBase58()) || 0),
+        transactionCount: totalTransactionCount - (invokedPrograms.get(VOTE_PROGRAM_ADDRESS) || 0),
     };
     const allTransactionsOption: FilterOption = {
         name: 'All Transactions',

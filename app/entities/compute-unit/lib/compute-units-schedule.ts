@@ -1,11 +1,12 @@
-import { address, getBase58Encoder } from '@solana/kit';
 import {
-    ComputeBudgetProgram,
-    type ParsedInstruction,
-    type PartiallyDecodedInstruction,
-    type PublicKey,
-} from '@solana/web3.js';
+    type BlockTransaction,
+    getBlockTransactionConfig,
+    getBlockTransactionInstructions,
+} from '@entities/block-data/@x/compute-unit';
+import { type Address, address, getBase58Encoder } from '@solana/kit';
+import { type ParsedInstruction, type PartiallyDecodedInstruction } from '@solana/web3.js';
 import {
+    COMPUTE_BUDGET_PROGRAM_ADDRESS,
     ComputeBudgetInstruction,
     identifyComputeBudgetInstruction,
     parseRequestUnitsInstruction,
@@ -139,8 +140,8 @@ export function getReservedComputeUnits({
 /**
  * Helper to extract compute units from a compute budget instruction
  */
-function extractComputeUnitsFromInstruction(instruction: { programId: PublicKey; data: Uint8Array }): number | null {
-    if (instruction.programId.toBase58() !== ComputeBudgetProgram.programId.toBase58()) {
+function extractComputeUnitsFromInstruction(instruction: { programAddress: Address; data: Uint8Array }): number | null {
+    if (instruction.programAddress !== COMPUTE_BUDGET_PROGRAM_ADDRESS) {
         return null;
     }
 
@@ -148,7 +149,7 @@ function extractComputeUnitsFromInstruction(instruction: { programId: PublicKey;
         const ix = {
             accounts: [],
             data: instruction.data,
-            programAddress: address(instruction.programId.toBase58()),
+            programAddress: instruction.programAddress,
         };
 
         const type = identifyComputeBudgetInstruction(ix);
@@ -175,34 +176,22 @@ function extractComputeUnitsFromInstruction(instruction: { programId: PublicKey;
  * @returns The estimated compute units requested
  */
 export function estimateRequestedComputeUnits(
-    tx: {
-        transaction: {
-            message: {
-                compiledInstructions: Array<{
-                    programIdIndex: number;
-                    data: Uint8Array;
-                }>;
-                staticAccountKeys: PublicKey[];
-            };
-        };
-        transactionConfig?: { computeUnitLimit?: number };
-        version?: 'legacy' | 0 | 1;
-    },
+    tx: BlockTransaction,
     epoch: bigint | undefined,
     cluster: Cluster,
 ): number {
     // v1 carries its compute unit limit in the message config; an absent limit means zero.
-    if (tx.version === 1) {
-        return Math.min(tx.transactionConfig?.computeUnitLimit ?? 0, MAX_COMPUTE_UNITS);
+    if (tx.message.version === 1) {
+        return Math.min(getBlockTransactionConfig(tx.message)?.computeUnitLimit ?? 0, MAX_COMPUTE_UNITS);
     }
 
     // First, check for explicit compute budget instructions
     let totalReservedUnits = 0;
-    for (const instruction of tx.transaction.message.compiledInstructions) {
-        const programId = tx.transaction.message.staticAccountKeys[instruction.programIdIndex];
+    for (const instruction of getBlockTransactionInstructions(tx.message)) {
+        const programAddress = tx.message.staticAccounts[instruction.programAddressIndex];
         const requestedUnits = extractComputeUnitsFromInstruction({
             data: instruction.data,
-            programId,
+            programAddress,
         });
 
         if (requestedUnits !== null) {
@@ -212,7 +201,7 @@ export function estimateRequestedComputeUnits(
             const reservedUnits = getReservedComputeUnits({
                 cluster,
                 epoch,
-                programId: programId.toBase58(),
+                programId: programAddress,
             });
             totalReservedUnits += reservedUnits;
         }
@@ -240,7 +229,7 @@ export function estimateRequestedComputeUnitsForParsedTransaction(
         if ('data' in instruction && typeof instruction.data === 'string') {
             const requestedUnits = extractComputeUnitsFromInstruction({
                 data: new Uint8Array(BASE58_ENCODER.encode(instruction.data)),
-                programId: instruction.programId,
+                programAddress: address(instruction.programId.toBase58()),
             });
 
             if (requestedUnits !== null) {

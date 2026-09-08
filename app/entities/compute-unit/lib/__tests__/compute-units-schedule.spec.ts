@@ -1,4 +1,6 @@
-import { ComputeBudgetProgram, PublicKey, type VersionedBlockResponse } from '@solana/web3.js';
+import type { BlockTransaction } from '@entities/block-data/@x/compute-unit';
+import { address, blockhash } from '@solana/kit';
+import { ComputeBudgetProgram } from '@solana/web3.js';
 import { Cluster } from '@utils/cluster';
 
 import { alloc, writeUint32LE } from '@/app/shared/lib/bytes';
@@ -186,19 +188,23 @@ describe('estimateRequestedComputeUnits', () => {
             data: Uint8Array;
         }>,
     ): Parameters<typeof estimateRequestedComputeUnits>[0] => {
-        const staticAccountKeys = [...new Set(instructions.map(ix => ix.programId))].map(id => new PublicKey(id));
+        const staticAccounts = [...new Set(instructions.map(ix => ix.programId))].map(address);
 
         return {
-            transaction: {
-                message: {
-                    compiledInstructions: instructions.map(ix => ({
-                        data: ix.data,
-                        programIdIndex: staticAccountKeys.findIndex(key => key.toBase58() === ix.programId),
-                    })),
-                    staticAccountKeys,
-                },
+            index: 0,
+            message: {
+                header: { numReadonlyNonSignerAccounts: 0, numReadonlySignerAccounts: 0, numSignerAccounts: 0 },
+                instructions: instructions.map(ix => ({
+                    data: ix.data,
+                    programAddressIndex: staticAccounts.findIndex(account => account === ix.programId),
+                })),
+                lifetimeToken: blockhash('11111111111111111111111111111111'),
+                staticAccounts,
+                version: 'legacy',
             },
-        } as VersionedBlockResponse['transactions'][number];
+            meta: null,
+            signatures: [],
+        };
     };
 
     describe('with explicit compute budget', () => {
@@ -393,11 +399,31 @@ describe('estimateRequestedComputeUnits', () => {
             data[0] = 2; // SetComputeUnitLimit
             writeUint32LE(data, 999_999, 1);
 
+            const programAddress = address(ComputeBudgetProgram.programId.toBase58());
+            const configValues =
+                transactionConfig?.computeUnitLimit === undefined
+                    ? []
+                    : [{ kind: 'u32' as const, value: transactionConfig.computeUnitLimit }];
+
             return {
-                ...createMockTransaction([{ data, programId: ComputeBudgetProgram.programId.toBase58() }]),
-                transactionConfig,
-                version: 1,
-            };
+                index: 0,
+                message: {
+                    configMask: transactionConfig?.computeUnitLimit === undefined ? 0 : 4,
+                    configValues,
+                    header: { numReadonlyNonSignerAccounts: 0, numReadonlySignerAccounts: 0, numSignerAccounts: 0 },
+                    instructionHeaders: [
+                        { numInstructionAccounts: 0, numInstructionDataBytes: data.length, programAccountIndex: 0 },
+                    ],
+                    instructionPayloads: [{ instructionAccountIndices: [], instructionData: data }],
+                    lifetimeToken: blockhash('11111111111111111111111111111111'),
+                    numInstructions: 1,
+                    numStaticAccounts: 1,
+                    staticAccounts: [programAddress],
+                    version: 1,
+                },
+                meta: null,
+                signatures: [],
+            } satisfies BlockTransaction;
         };
 
         it('should read the limit from the message config rather than the instructions', () => {

@@ -1,4 +1,5 @@
-import { PublicKey } from '@solana/web3.js';
+import type { BlockData, BlockTransaction } from '@entities/block-data';
+import { address, blockhash, lamports } from '@solana/kit';
 import { nextjsParameters, withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
@@ -24,23 +25,46 @@ const PROGRAM_IDS = [
     'So11111111111111111111111111111111111111112',
 ];
 
-// Minimal stand-in for a VersionedBlockResponse — just the shape BlockProgramsCard reads. Program j
+// Build the Kit-native block shape consumed by BlockProgramsCard. Program j
 // appears in every (j+1)-th transaction, giving a descending usage distribution; every 5th tx is
 // marked failed (`err`) so Success Rate lands below 100%. All txs carry `meta`, so the Success Rate
 // column shows.
-function makeBlock(txCount: number) {
-    const keys = PROGRAM_IDS.map(id => new PublicKey(id));
-    const accountKeys = { get: (i: number) => keys[i], length: keys.length };
-    const transactions = Array.from({ length: txCount }, (_, k) => {
-        const compiledInstructions = PROGRAM_IDS.map((_, j) => j)
+function makeBlock(txCount: number): BlockData {
+    const keys = PROGRAM_IDS.map(address);
+    const transactions: BlockTransaction[] = Array.from({ length: txCount }, (_, k) => {
+        const instructions = PROGRAM_IDS.map((_, j) => j)
             .filter(j => k % (j + 1) === 0)
-            .map(j => ({ programIdIndex: j }));
+            .map(j => ({ programAddressIndex: j }));
         return {
-            meta: { err: k % 5 === 0 ? { InstructionError: [0, 'Custom'] } : null, innerInstructions: [] },
-            transaction: { message: { compiledInstructions, getAccountKeys: () => accountKeys } },
+            index: k,
+            message: {
+                header: {
+                    numReadonlyNonSignerAccounts: keys.length,
+                    numReadonlySignerAccounts: 0,
+                    numSignerAccounts: 0,
+                },
+                instructions,
+                lifetimeToken: blockhash('11111111111111111111111111111111'),
+                staticAccounts: keys,
+                version: 'legacy',
+            },
+            meta: {
+                err: k % 5 === 0 ? { InstructionError: [0, { Custom: 1 }] } : null,
+                fee: lamports(5_000n),
+                innerInstructions: [],
+                logMessages: [],
+            },
+            signatures: [],
         };
     });
-    return { transactions } as any;
+    return {
+        blockTime: null,
+        blockhash: blockhash('11111111111111111111111111111111'),
+        parentSlot: 0n,
+        previousBlockhash: blockhash('11111111111111111111111111111111'),
+        rewards: [],
+        transactions,
+    };
 }
 
 export const WithData: Story = {
@@ -49,9 +73,8 @@ export const WithData: Story = {
     },
 };
 
-// Empty block exercises the wrapper without a full BlockWithV1 fixture.
 export const EmptyBlock: Story = {
     args: {
-        block: { transactions: [] } as any,
+        block: makeBlock(0),
     },
 };
