@@ -8,7 +8,7 @@ const pushMock = vi.fn();
 
 vi.mock('next/navigation', () => ({
     useRouter: () => ({ push: pushMock }),
-    useSearchParams: () => new URLSearchParams('cluster=devnet'),
+    useSearchParams: () => new URLSearchParams('cluster=devnet&q=token'),
 }));
 
 vi.mock('@providers/cluster', () => ({

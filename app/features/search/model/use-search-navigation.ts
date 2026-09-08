@@ -36,7 +36,9 @@ export function useSearchNavigation(): (option: SearchItem) => void {
                     router.push(`${pathname}?cluster=${clusterSlug(effectiveCluster)}`);
                 }
             } else {
-                const nextQueryString = searchParams?.toString();
+                const nextSearchParams = new URLSearchParams(searchParams?.toString());
+                nextSearchParams.delete('q');
+                const nextQueryString = nextSearchParams.toString();
                 router.push(`${pathname}${nextQueryString ? `?${nextQueryString}` : ''}`);
             }
         },
