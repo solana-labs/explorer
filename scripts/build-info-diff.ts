@@ -8,8 +8,8 @@
  *   pnpm exec tsx scripts/build-info-diff.ts check <committed.md> <fresh.md>
  *
  * `report` prints a markdown bundle-change summary to stdout.
- * `check` exits 1 when the committed table drifts from the fresh one beyond
- * one display step, telling the author to rerun `pnpm build:info`.
+ * `check` exits 1 unless the committed table is byte-identical to the fresh
+ * one, telling the author to rerun `pnpm build:info`.
  */
 
 import { readFile } from 'fs/promises';
@@ -152,9 +152,15 @@ function suppressNoiseRows(diff: string, noiseRoutes: Set<string>): string {
 export function formatReport(
     changes: RouteChange[],
     freshMarkdown: string,
-    options: { baseLabel: string; diff?: string },
+    options: { baseLabel: string; diff?: string; stale?: boolean },
 ): string {
     const lines = [`### 📦 Bundle change vs \`${options.baseLabel}\``, ''];
+    if (options.stale) {
+        lines.push(
+            '⚠️ `bench/BUILD.md` is out of date for this branch — run `pnpm build:info` and commit the refreshed file.',
+            '',
+        );
+    }
     const significant = changes.filter(change => exceedsTolerance(change));
     const noiseCount = changes.length - significant.length;
     const noiseRoutes = new Set(changes.filter(change => !exceedsTolerance(change)).map(change => change.route));
@@ -210,28 +216,44 @@ export function formatCheckFailure(changes: RouteChange[]): string {
 }
 
 async function main() {
-    const [mode, basePath, freshPath, baseLabel, diffPath] = process.argv.slice(2);
+    const [mode, basePath, freshPath, baseLabel, diffPath, committedPath] = process.argv.slice(2);
     if ((mode !== 'report' && mode !== 'check') || !basePath || !freshPath) {
-        console.error('Usage: build-info-diff.ts <report|check> <base.md> <fresh.md> [base-label] [diff-file]');
+        console.error(
+            'Usage: build-info-diff.ts <report|check> <base.md> <fresh.md> [base-label] [diff-file] [committed.md]',
+        );
         process.exit(2);
     }
 
-    const base = parseBuildInfoTable(await readFile(basePath, 'utf8'));
+    const baseMarkdown = await readFile(basePath, 'utf8');
     const freshMarkdown = await readFile(freshPath, 'utf8');
-    const changes = diffBuildInfo(base, parseBuildInfoTable(freshMarkdown));
+    const fresh = parseBuildInfoTable(freshMarkdown);
+    const changes = diffBuildInfo(parseBuildInfoTable(baseMarkdown), fresh);
 
     if (mode === 'report') {
         const diff = diffPath ? await readFile(diffPath, 'utf8') : undefined;
-        console.log(formatReport(changes, freshMarkdown, { baseLabel: baseLabel || 'master', diff }));
+        const stale = committedPath ? (await readFile(committedPath, 'utf8')) !== freshMarkdown : false;
+        console.log(formatReport(changes, freshMarkdown, { baseLabel: baseLabel || 'master', diff, stale }));
         return;
     }
 
-    const drifted = changes.filter(change => exceedsTolerance(change));
-    if (drifted.length > 0) {
-        console.error(formatCheckFailure(drifted));
-        process.exit(1);
+    // The gate is byte equality: hysteresis reproduces committed cells whenever fresh bytes round
+    // within one step, so any difference is real drift, a hand edit, or stale prose.
+    if (baseMarkdown === freshMarkdown) {
+        console.log('bench/BUILD.md matches the fresh build byte-for-byte.');
+        return;
     }
-    console.log('bench/BUILD.md matches the fresh build (within one display step).');
+    console.error(
+        changes.length > 0
+            ? formatCheckFailure(changes)
+            : 'bench/BUILD.md differs from the fresh build outside the route table. Run `pnpm build:info` and commit the refreshed bench/BUILD.md.',
+    );
+    // Annotation surfaces the remedy on the PR's Checks tab without opening the step log.
+    if (process.env.GITHUB_ACTIONS) {
+        console.error(
+            '::error file=bench/BUILD.md::bench/BUILD.md is out of date — run `pnpm build:info` and commit the refreshed file.',
+        );
+    }
+    process.exit(1);
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

@@ -255,6 +255,17 @@ describe('formatReport', () => {
         expect(report).not.toContain('-| Static | `/` | 130 kB | 530 kB |');
     });
 
+    it('should tell the author to refresh bench/BUILD.md when the committed table is stale', () => {
+        const report = formatReport([], BASE, { baseLabel: 'master', stale: true });
+        expect(report).toContain('bench/BUILD.md');
+        expect(report).toContain('pnpm build:info');
+    });
+
+    it('should not mention refreshing when the committed table is fresh', () => {
+        const report = formatReport([], BASE, { baseLabel: 'master', stale: false });
+        expect(report).not.toContain('pnpm build:info');
+    });
+
     it('should show the diff fence even when only prose changed', () => {
         const diff = ['-> old note', '+> new note'].join('\n');
         const report = formatReport([], BASE, { baseLabel: 'master', diff });

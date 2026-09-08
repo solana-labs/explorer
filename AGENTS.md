@@ -57,7 +57,7 @@
   - `pre-commit` — runs `pretty:format`, `eslint:lint`, and `test:changed` scoped to staged files.
   - `pre-push` — runs the full pipeline (format, lint, openspec:validate, build, test).
 - Optionally, use [`act`](https://github.com/nektos/act) to run GitHub Actions workflows locally before pushing.
-- [`bench/BUILD.md`](bench/BUILD.md) is the committed route-size snapshot. Any PR that changes client bundle sizes must refresh it with `pnpm build:info` and commit the result — the `Build-Info` CI job fails when the committed table drifts from the fresh build by more than one rounding step.
+- [`bench/BUILD.md`](bench/BUILD.md) is the committed route-size snapshot. Any PR that changes client bundle sizes must refresh it with `pnpm build:info` and commit the result — the `Build-Info` CI job fails unless the committed file is byte-identical to the fresh build (rounding hysteresis absorbs sub-step variance).
 
 ## Design Decisions (OpenSpec)
 
