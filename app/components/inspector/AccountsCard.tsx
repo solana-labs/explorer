@@ -18,10 +18,11 @@ import { type PublicKey, type VersionedMessage } from '@solana/web3.js';
 import { ClusterStatus } from '@utils/cluster';
 import BN from 'bn.js';
 import React, { useMemo } from 'react';
-import { Code } from 'react-feather';
+import { AlertTriangle, Code } from 'react-feather';
 
 import { Badge } from '@/app/components/shared/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/app/components/shared/ui/popover';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/shared/ui/tooltip';
 import type { SolBalanceChange } from '@/app/features/instruction-simulation/lib/types';
 import { useLastSimulatedAt } from '@/app/features/instruction-simulation/model/use-last-simulated-at';
 import { type SimulationState } from '@/app/features/instruction-simulation/model/use-simulation';
@@ -43,6 +44,20 @@ const IDLE_SIMULATION: SimulationState = { simulate: () => undefined, status: 'i
 // other case (including a failed run) falls back to the Simulate affordance instead.
 function hasReliableChanges(simulation: SimulationState): simulation is Extract<SimulationState, { status: 'done' }> {
     return simulation.status === 'done' && !simulation.result.error;
+}
+
+// A run that reverted (`status: 'done'` carrying an execution error) or that failed outright
+// (`status: 'error'`) produces no reliable balance deltas. Without this the Change column would fall
+// straight back to the pre-run Simulate affordance, so a completed-but-reverted run looked identical to
+// never having run — the failure was only visible down in the Logs. Returns the message to explain it,
+// or `undefined` when the run did not fail. The `done`-with-error case only carries a generic
+// `TransactionError`, so it points at the Logs rather than repeating it.
+function simulationFailureMessage(simulation: SimulationState): string | undefined {
+    if (simulation.status === 'error') return simulation.error;
+    if (simulation.status === 'done' && simulation.result.error) {
+        return 'Transaction reverted during simulation — see the Logs for the program error.';
+    }
+    return undefined;
 }
 
 // Shared 6-column track for the desktop (lg+) table: # / Address / Owner / Change / Post Balance / Size.
@@ -338,6 +353,31 @@ function ChangeDash() {
     return <span className="text-outer-space-500">—</span>;
 }
 
+// Change-column marker for a run that reverted or failed: a small "Failed" label whose tooltip carries
+// the reason. Shown in place of a delta so the row reflects that a run happened and did not produce
+// usable balance changes (re-running stays available from the column header's "S" popover and the
+// Simulation panel). `drawer` bumps the text up for the mobile detail popup.
+function ChangeFailed({ message, size = 'table' }: { message: string; size?: 'table' | 'drawer' }) {
+    return (
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <span
+                    className={cn(
+                        'inline-flex cursor-default items-center gap-1 leading-none text-yellow-500',
+                        size === 'drawer' ? 'text-xs' : 'text-[10px]',
+                    )}
+                >
+                    <AlertTriangle size={size === 'drawer' ? 12 : 10} />
+                    Failed
+                </span>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="max-w-56 break-words">
+                {message}
+            </TooltipContent>
+        </Tooltip>
+    );
+}
+
 // The Change-column form of the shared Simulate button. Both variants are pinned to `!h-5` — the row's
 // text line-height — so the button never grows the row taller than the plain dash/delta state (i.e. the
 // row height doesn't jump between pre-run, hover and post-run). `table` is the tiny in-cell form;
@@ -424,6 +464,11 @@ function ChangeCell({
         // Unchanged accounts render a "+0" delta badge, matching the transaction details page.
         return <BalanceDelta delta={change ? change.delta : ZERO_DELTA} isSol />;
     }
+
+    // A reverted/failed run has no reliable deltas: show a "Failed" marker in every mode so the table
+    // and drawer reflect that a run happened, rather than silently reverting to the Simulate affordance.
+    const failure = simulationFailureMessage(simulation);
+    if (failure) return <ChangeFailed message={failure} size={mode === 'action' ? 'drawer' : 'table'} />;
 
     if (mode === 'plain') return <ChangeDash />;
     if (mode === 'action') return <ChangeSimulateButton simulation={simulation} size="drawer" />;
