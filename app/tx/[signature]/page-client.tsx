@@ -25,6 +25,7 @@ import { generateTokenBalanceRows, TokenBalancesCard } from '@/app/features/tran
 import { AutoRefresh, useAutoRefreshState } from '@/app/shared/lib/use-auto-refresh';
 import { useBreakpoint } from '@/app/shared/lib/use-breakpoint';
 import { BaseNavigationTabs } from '@/app/shared/ui/navigation-tabs/ui/BaseNavigationTabs';
+import { PageHeader, PageLayout, PageSections } from '@/app/shared/ui/page-layout';
 import { useLogsPanelScrollSync } from '@/app/tx/[signature]/use-logs-scroll-sync';
 import useTabVisibility from '@/app/utils/use-tab-visibility';
 
@@ -85,25 +86,26 @@ export function TransactionDetailsPageClient({ params: { signature: raw } }: Pro
     }
 
     return (
-        <div className="mx-auto flex max-w-5xl flex-col space-y-9 px-4 pt-3 selection:bg-[#13d89b40] selection:text-inherit lg:space-y-12 lg:px-6 lg:pt-5">
-            <header className="-mb-6 flex flex-col gap-1.5 pb-3 pt-2 lg:mb-0">
-                <span className="text-xs font-normal uppercase text-muted">Details</span>
-                <h1 className="m-0 text-2xl font-normal leading-none text-white md:text-3xl">Transaction</h1>
-            </header>
+        // The translucent-green text-selection highlight (`#13d89b` at 25% alpha) is a one-off colour,
+        // not a token; kept as a literal so the transaction and block pages stay visually in step.
+        <PageLayout className="selection:bg-[#13d89b40] selection:text-inherit">
+            <PageSections>
+                <PageHeader eyebrow="Details" title="Transaction" />
 
-            {signature === undefined ? (
-                <ErrorCard text={`Signature "${raw}" is not valid`} />
-            ) : clusterStatus === ClusterStatus.Failure ? (
-                <ErrorCard text="RPC is not responding. Please change your RPC url and try again." />
-            ) : (
-                <SignatureContext.Provider value={signature}>
-                    <SummaryCard signature={signature} autoRefresh={autoRefresh} />
-                    <Suspense fallback={<LoadingCard message="Loading transaction details" />}>
-                        <DetailsSection signature={signature} />
-                    </Suspense>
-                </SignatureContext.Provider>
-            )}
-        </div>
+                {signature === undefined ? (
+                    <ErrorCard text={`Signature "${raw}" is not valid`} />
+                ) : clusterStatus === ClusterStatus.Failure ? (
+                    <ErrorCard text="RPC is not responding. Please change your RPC url and try again." />
+                ) : (
+                    <SignatureContext.Provider value={signature}>
+                        <SummaryCard signature={signature} autoRefresh={autoRefresh} />
+                        <Suspense fallback={<LoadingCard message="Loading transaction details" />}>
+                            <DetailsSection signature={signature} />
+                        </Suspense>
+                    </SignatureContext.Provider>
+                )}
+            </PageSections>
+        </PageLayout>
     );
 }
 
