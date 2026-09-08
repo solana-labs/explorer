@@ -33,7 +33,14 @@ const tableVariants = cva([], {
             variant: 'card',
         },
     ],
-    defaultVariants: { body: 'default', head: 'default', nowrap: false, ui: 'tw', variant: 'plain' },
+    defaultVariants: {
+        body: 'default',
+        density: 'default',
+        head: 'default',
+        nowrap: false,
+        ui: 'tw',
+        variant: 'plain',
+    },
     variants: {
         // `body` mirrors `head` for the data rows: `subtle` sets 8px vertical / 12px horizontal padding.
         // Same specificity story as `head` — `tbody tr td` (0,1,3) beats base `td` (0,1,1); the edge
@@ -43,6 +50,20 @@ const tableVariants = cva([], {
             default: '',
             subtle: [
                 '[&_tbody_tr_td]:px-3 [&_tbody_tr_td]:py-2',
+                '[&_tbody_tr_td:first-child]:pl-3 [&_tbody_tr_td:last-child]:pr-3',
+            ].join(' '),
+        },
+        // `density="dense"` tightens every cell to 12px horizontal / 10px vertical padding with content
+        // top-aligned — the compact spacing the inspector's card tables use. Same specificity story as
+        // `head`/`body`: `thead tr th` / `tbody tr td` (0,1,3) beat the base `p-4`/`align-middle` (0,1,1),
+        // and the `:first-child`/`:last-child` edge overrides (0,2,3) beat the card variant's `pl-6`/`pr-6`
+        // (0,2,2) — so it needs no `!important` and stays overridable by a later `className`.
+        density: {
+            default: '',
+            dense: [
+                '[&_thead_tr_th]:px-3 [&_thead_tr_th]:py-2.5 [&_thead_tr_th]:align-top',
+                '[&_thead_tr_th:first-child]:pl-3 [&_thead_tr_th:last-child]:pr-3',
+                '[&_tbody_tr_td]:px-3 [&_tbody_tr_td]:py-2.5 [&_tbody_tr_td]:align-top',
                 '[&_tbody_tr_td:first-child]:pl-3 [&_tbody_tr_td:last-child]:pr-3',
             ].join(' '),
         },
@@ -106,9 +127,13 @@ export interface BaseTableProps
     extends React.TableHTMLAttributes<HTMLTableElement>, VariantProps<typeof tableVariants> {}
 
 const BaseTableRoot = React.forwardRef<HTMLTableElement, BaseTableProps>(
-    ({ body, className, head, nowrap, ui, variant, ...props }, ref) => {
+    ({ body, className, density, head, nowrap, ui, variant, ...props }, ref) => {
         const table = (
-            <table ref={ref} className={cn(tableVariants({ body, head, nowrap, ui, variant }), className)} {...props} />
+            <table
+                ref={ref}
+                className={cn(tableVariants({ body, density, head, nowrap, ui, variant }), className)}
+                {...props}
+            />
         );
         if (variant === 'card') {
             return <div className={cn(wrapperVariants({ ui }))}>{table}</div>;

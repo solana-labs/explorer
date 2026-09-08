@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { Copyable } from './Copyable';
 import { useMidTruncation } from './useMidTruncation';
 
-const signatureVariants = cva('relative flex w-full min-w-0 justify-start', {
+const signatureVariants = cva('relative flex w-full min-w-0 justify-start overflow-x-hidden', {
     defaultVariants: {
         alignItems: 'center',
         alignRight: false,

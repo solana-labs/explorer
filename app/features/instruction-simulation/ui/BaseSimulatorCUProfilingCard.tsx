@@ -11,6 +11,11 @@ type BaseSimulatorCUProfilingCardProps = {
     unitsConsumed?: number;
     cluster: ReturnType<typeof useCluster>['cluster'];
     epoch: bigint;
+    /**
+     * Render only the chart + legend body, without the built-in card chrome/header, so a caller can supply
+     * its own section header (e.g. the inspector's header-outside layout). Defaults to false.
+     */
+    headerless?: boolean;
 };
 
 export function BaseSimulatorCUProfilingCard({
@@ -19,11 +24,14 @@ export function BaseSimulatorCUProfilingCard({
     unitsConsumed,
     cluster,
     epoch,
+    headerless = false,
 }: BaseSimulatorCUProfilingCardProps) {
     const instructionsForCU = useMemo(
         () => formatInstructionLogs({ cluster, epoch, instructionLogs: logs, instructions }),
         [instructions, logs, cluster, epoch],
     );
 
-    return <BaseCUProfilingCard instructions={instructionsForCU} unitsConsumed={unitsConsumed} />;
+    return (
+        <BaseCUProfilingCard instructions={instructionsForCU} unitsConsumed={unitsConsumed} headerless={headerless} />
+    );
 }

@@ -10,6 +10,12 @@ const meta: Meta<typeof BaseTable> = {
             description: 'Data row styling. `subtle` sets 8px vertical / 12px horizontal cell padding.',
             options: ['default', 'subtle'],
         },
+        density: {
+            control: 'inline-radio',
+            description:
+                'Cell spacing. `dense` sets 12px horizontal / 10px vertical padding with top-aligned content — the inspector card tables.',
+            options: ['default', 'dense'],
+        },
         head: {
             control: 'inline-radio',
             description:
@@ -163,6 +169,19 @@ export const DashkitCardSubtleHead: Story = {
 export const DashkitCardSubtleHeadAndBody: Story = {
     args: { body: 'subtle', head: 'subtle', nowrap: true, ui: 'dashkit', variant: 'card' },
     name: 'Dashkit / Card variant + subtle head & body',
+    render: args => (
+        <BaseTable {...args}>
+            <CardSampleRows />
+        </BaseTable>
+    ),
+};
+
+// `density="dense"` tightens every cell to 12px horizontal / 10px vertical padding with content
+// top-aligned — the compact spacing the inspector's Signatures / simulation-log card tables use. Flip
+// the `density` control to compare with `default`.
+export const DashkitCardDense: Story = {
+    args: { density: 'dense', nowrap: true, ui: 'dashkit', variant: 'card' },
+    name: 'Dashkit / Card variant + dense',
     render: args => (
         <BaseTable {...args}>
             <CardSampleRows />

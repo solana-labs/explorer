@@ -1,4 +1,5 @@
 import { BaseInstructionCard } from '@components/common/BaseInstructionCard';
+import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
 import { type InstructionSurface, InstructionSurfaceProvider } from '@entities/instruction-card';
 import { isParsedInstruction, toParsedTransaction, useInstructionParser } from '@entities/instruction-parser';
 import {
@@ -106,25 +107,32 @@ export function InstructionsSection({
         : {};
 
     return (
-        <InstructionSurfaceProvider surface={INSPECTOR_SURFACE}>
-            {transactionMessage.instructions.map((ix, index) => {
-                const batchInnerCards = batchByIndex[index]?.map((innerIx, childIndex) => (
-                    <ErrorBoundary key={childIndex} fallback={null}>
-                        <TokenBatchCard index={index} childIndex={childIndex} ix={innerIx} result={INSPECTOR_RESULT} />
-                    </ErrorBoundary>
-                ));
+        <CollapsibleSection id="instructions" title="Instructions" className="">
+            <InstructionSurfaceProvider surface={INSPECTOR_SURFACE}>
+                {transactionMessage.instructions.map((ix, index) => {
+                    const batchInnerCards = batchByIndex[index]?.map((innerIx, childIndex) => (
+                        <ErrorBoundary key={childIndex} fallback={null}>
+                            <TokenBatchCard
+                                index={index}
+                                childIndex={childIndex}
+                                ix={innerIx}
+                                result={INSPECTOR_RESULT}
+                            />
+                        </ErrorBoundary>
+                    ));
 
-                return (
-                    <InspectorInstructionCard
-                        key={index}
-                        index={index}
-                        ix={ix}
-                        message={message}
-                        innerCards={batchInnerCards}
-                    />
-                );
-            })}
-        </InstructionSurfaceProvider>
+                    return (
+                        <InspectorInstructionCard
+                            key={index}
+                            index={index}
+                            ix={ix}
+                            message={message}
+                            innerCards={batchInnerCards}
+                        />
+                    );
+                })}
+            </InstructionSurfaceProvider>
+        </CollapsibleSection>
     );
 }
 

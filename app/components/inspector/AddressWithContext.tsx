@@ -1,4 +1,5 @@
 import { Address } from '@components/common/Address';
+import { cn } from '@components/shared/utils';
 import { Account, useAccountInfo, useAddressLookupTable, useFetchAccountInfo } from '@providers/accounts';
 import { useCluster } from '@providers/cluster';
 import { PublicKey, SystemProgram } from '@solana/web3.js';
@@ -30,10 +31,12 @@ export function AddressFromLookupTableWithContext({
     lookupTableKey,
     lookupTableIndex,
     hideInfo = false,
+    align = 'right',
 }: {
     lookupTableKey: PublicKey;
     lookupTableIndex: number;
     hideInfo?: boolean;
+    align?: 'left' | 'right';
 }) {
     const lookupTableInfo = useAddressLookupTable(lookupTableKey.toBase58());
     const lookupTable = lookupTableInfo && lookupTableInfo[0];
@@ -51,8 +54,8 @@ export function AddressFromLookupTableWithContext({
     } else {
         const pubkey = lookupTable.state.addresses[lookupTableIndex];
         return (
-            <div className="flex flex-col items-end">
-                <Address pubkey={pubkey} link alignRight />
+            <div className={cn('flex flex-col', align === 'left' ? 'items-start' : 'items-end')}>
+                <Address pubkey={pubkey} link alignRight={align === 'right'} />
                 {hideInfo ? null : <AccountInfo pubkey={pubkey} />}
             </div>
         );
@@ -63,14 +66,20 @@ export function AddressWithContext({
     pubkey,
     validator,
     hideInfo = false,
+    align = 'right',
+    badges,
 }: {
     pubkey: PublicKey;
     validator?: AccountValidator;
     hideInfo?: boolean;
+    align?: 'left' | 'right';
+    // Optional content rendered directly under the address, before the account-info explanation.
+    badges?: React.ReactNode;
 }) {
     return (
-        <div className="flex flex-col items-end">
-            <Address pubkey={pubkey} link alignRight />
+        <div className={cn('flex flex-col', align === 'left' ? 'items-start' : 'items-end')}>
+            <Address pubkey={pubkey} link alignRight={align === 'right'} />
+            {badges}
             {hideInfo ? null : <AccountInfo pubkey={pubkey} validator={validator} />}
         </div>
     );
@@ -109,7 +118,7 @@ function AccountInfo({ pubkey, validator }: { pubkey: PublicKey; validator?: Acc
     const ownerLabel = addressLabel(ownerAddress, cluster);
 
     return (
-        <span className="text-dk-gray-700">
+        <span className="mt-0.5 text-xs text-outer-space-300">
             {`Owned by ${ownerLabel || ownerAddress}.`}
             {` Balance is ${lamportsToSolString(account.lamports)} SOL.`}
             {account.space !== undefined && ` Size is ${new Intl.NumberFormat('en-US').format(account.space)} byte(s).`}

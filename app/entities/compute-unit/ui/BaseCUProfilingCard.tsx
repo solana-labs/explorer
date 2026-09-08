@@ -235,9 +235,12 @@ function useCUProfileChartOptions(totalCU: number): ChartOptions<'bar'> {
 type BaseCUProfilingCardProps = {
     instructions: InstructionCUData[];
     unitsConsumed?: number;
+    // When true, render only the chart + legend body — no card chrome, no built-in header — so a
+    // caller can supply its own section header (e.g. the inspector's header-outside layout).
+    headerless?: boolean;
 };
 
-export function BaseCUProfilingCard({ instructions, unitsConsumed }: BaseCUProfilingCardProps) {
+export function BaseCUProfilingCard({ instructions, unitsConsumed, headerless = false }: BaseCUProfilingCardProps) {
     const instructionsWithDisplay = useMemo(() => toInstructionCUDisplay(instructions), [instructions]);
 
     const totalDisplayCU = useMemo(
@@ -280,39 +283,45 @@ export function BaseCUProfilingCard({ instructions, unitsConsumed }: BaseCUProfi
 
     if (instructions.length === 0) return undefined;
 
+    const body = (
+        <CardBody ui="dashkit" className={headerless ? 'px-3 py-3' : undefined}>
+            {Boolean(unitsConsumed) && <div className="mb-3">Total: {unitsConsumed?.toLocaleString()} CU</div>}
+
+            <div style={{ height: '32px', marginLeft: '-8px' }}>
+                <Bar data={chartData} options={chartOptions} />
+            </div>
+
+            {/* Legend */}
+            <div className="mt-3 flex flex-wrap gap-3 text-xs">
+                {instructionsWithDisplay.map((item, i) => {
+                    return (
+                        // min-w-0 lets a long resolved name truncate instead of overflowing the card.
+                        <div key={i} className="align-items-center flex min-w-0">
+                            <div
+                                style={{
+                                    backgroundColor: getInstructionColor(i),
+                                    borderRadius: '4px',
+                                    flexShrink: 0,
+                                    height: '16px',
+                                    marginRight: '8px',
+                                    width: '16px',
+                                }}
+                            />
+                            <span className="truncate" title={`${item.legendLabel}: ${item.displayValue}`}>
+                                {item.legendLabel}: {item.displayValue}
+                            </span>
+                        </div>
+                    );
+                })}
+            </div>
+        </CardBody>
+    );
+
+    if (headerless) return body;
+
     return (
         <CollapsibleCard title="CU profiling" className={baseCardVariants({ ui: 'dashkit' })}>
-            <CardBody ui="dashkit">
-                {Boolean(unitsConsumed) && <div className="mb-3">Total: {unitsConsumed?.toLocaleString()} CU</div>}
-
-                <div style={{ height: '32px', marginLeft: '-8px' }}>
-                    <Bar data={chartData} options={chartOptions} />
-                </div>
-
-                {/* Legend */}
-                <div className="mt-3 flex flex-wrap gap-3 text-xs">
-                    {instructionsWithDisplay.map((item, i) => {
-                        return (
-                            // min-w-0 lets a long resolved name truncate instead of overflowing the card.
-                            <div key={i} className="align-items-center flex min-w-0">
-                                <div
-                                    style={{
-                                        backgroundColor: getInstructionColor(i),
-                                        borderRadius: '4px',
-                                        flexShrink: 0,
-                                        height: '16px',
-                                        marginRight: '8px',
-                                        width: '16px',
-                                    }}
-                                />
-                                <span className="truncate" title={`${item.legendLabel}: ${item.displayValue}`}>
-                                    {item.legendLabel}: {item.displayValue}
-                                </span>
-                            </div>
-                        );
-                    })}
-                </div>
-            </CardBody>
+            {body}
         </CollapsibleCard>
     );
 }
