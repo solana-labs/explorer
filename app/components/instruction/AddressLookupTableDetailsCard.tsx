@@ -1,6 +1,7 @@
+import type { InstructionNode } from '@entities/instruction-card';
 import { InstructionDetailsProps } from '@features/transaction';
 import { useCluster } from '@providers/cluster';
-import React from 'react';
+import { ParsedInfo } from '@validators/index';
 import { create } from 'superstruct';
 
 import { CloseLookupTableDetailsCard } from '@/app/components/instruction/address-lookup-table/CloseLookupTableDetails';
@@ -9,7 +10,6 @@ import { DeactivateLookupTableDetailsCard } from '@/app/components/instruction/a
 import { ExtendLookupTableDetailsCard } from '@/app/components/instruction/address-lookup-table/ExtendLookupTableDetails';
 import { FreezeLookupTableDetailsCard } from '@/app/components/instruction/address-lookup-table/FreezeLookupTableDetails';
 import {
-    AddressLookupTableInstructionInfo,
     CloseLookupTableInfo,
     CreateLookupTableInfo,
     DeactivateLookupTableInfo,
@@ -23,23 +23,36 @@ export function AddressLookupTableDetailsCard(props: InstructionDetailsProps) {
     const { ix } = props;
     const { url } = useCluster();
 
+    const node: InstructionNode = {
+        childIndex: props.childIndex,
+        index: props.index,
+        innerCards: props.innerCards,
+        ix,
+        programId: ix.programId,
+    };
+
     try {
-        const parsed = create(ix.parsed, AddressLookupTableInstructionInfo);
+        const parsed = create(ix.parsed, ParsedInfo);
         switch (parsed.type) {
             case 'createLookupTable': {
-                return <CreateLookupTableDetailsCard {...props} info={parsed.info as CreateLookupTableInfo} />;
+                const info = create(parsed.info, CreateLookupTableInfo);
+                return <CreateLookupTableDetailsCard info={info} node={node} />;
             }
             case 'extendLookupTable': {
-                return <ExtendLookupTableDetailsCard {...props} info={parsed.info as ExtendLookupTableInfo} />;
+                const info = create(parsed.info, ExtendLookupTableInfo);
+                return <ExtendLookupTableDetailsCard info={info} node={node} />;
             }
             case 'freezeLookupTable': {
-                return <FreezeLookupTableDetailsCard {...props} info={parsed.info as FreezeLookupTableInfo} />;
+                const info = create(parsed.info, FreezeLookupTableInfo);
+                return <FreezeLookupTableDetailsCard info={info} node={node} />;
             }
             case 'deactivateLookupTable': {
-                return <DeactivateLookupTableDetailsCard {...props} info={parsed.info as DeactivateLookupTableInfo} />;
+                const info = create(parsed.info, DeactivateLookupTableInfo);
+                return <DeactivateLookupTableDetailsCard info={info} node={node} />;
             }
             case 'closeLookupTable': {
-                return <CloseLookupTableDetailsCard {...props} info={parsed.info as CloseLookupTableInfo} />;
+                const info = create(parsed.info, CloseLookupTableInfo);
+                return <CloseLookupTableDetailsCard info={info} node={node} />;
             }
             default:
                 return <UnknownDetailsCard {...props} />;
