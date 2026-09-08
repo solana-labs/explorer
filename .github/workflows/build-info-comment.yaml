@@ -21,6 +21,14 @@ jobs:
     timeout-minutes: 5
 
     steps:
+      # Default-branch code only, and just the one file — safe in this privileged context.
+      - name: Checkout locate script
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: |
+            scripts/build-info-locate-pr.mjs
+          sparse-checkout-cone-mode: false
+
       # The report artifact is missing when CI failed before Build-Info uploaded it; the PR number
       # comes from the head SHA (workflow_run.pull_requests is empty for fork PRs).
       - name: Locate report and pull request
@@ -28,26 +36,8 @@ jobs:
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
-            const run = context.payload.workflow_run;
-            const { data: { artifacts } } = await github.rest.actions.listWorkflowRunArtifacts({ ...context.repo, run_id: run.id });
-            if (!artifacts.some(artifact => artifact.name === 'build-info-comment')) {
-              return core.info('No bundle report artifact on this run; skipping.');
-            }
-            const { data: prs } = await github.rest.repos.listPullRequestsAssociatedWithCommit({ ...context.repo, commit_sha: run.head_sha });
-            // Strict match: the endpoint returns every PR containing the commit, so an open PR on a
-            // stacked branch could steal the comment, and a rerun for a superseded head could
-            // overwrite the current report with stale data.
-            const pr = prs.find(pr =>
-              pr.state === 'open' &&
-              pr.head.sha === run.head_sha &&
-              pr.head.ref === run.head_branch &&
-              pr.head.repo?.full_name === run.head_repository?.full_name
-            );
-            if (!pr) {
-              return core.info('No open pull request has this run\'s head as its current head; skipping.');
-            }
-            core.setOutput('found', 'true');
-            core.setOutput('pr', String(pr.number));
+            const { locatePullRequest } = await import('${{ github.workspace }}/scripts/build-info-locate-pr.mjs');
+            await locatePullRequest({ context, core, github });
 
       # Outside the workspace on purpose: the artifact is fork-controlled and must not be able to
       # plant files where later steps could pick them up.
