@@ -8,10 +8,43 @@ function TooltipProvider({ delayDuration = 0, ...props }: React.ComponentProps<t
     return <TooltipPrimitive.Provider data-slot="tooltip-provider" delayDuration={delayDuration} {...props} />;
 }
 
-function Tooltip({ ...props }: React.ComponentProps<typeof TooltipPrimitive.Root>) {
+// Radix opens tooltips on hover/focus only, so on touch devices (which deliver neither) the tooltip is
+// unreachable. This context lets the trigger drive the tooltip's controlled open state on tap: the first
+// tap opens it and a second tap closes it, while hover and keyboard focus keep working unchanged on
+// desktop. Consumers can still control the tooltip themselves via `open`/`onOpenChange`.
+type TooltipContextValue = {
+    open: boolean;
+    setOpen: (open: boolean) => void;
+    wasOpenOnPointerDown: React.RefObject<boolean>;
+};
+const TooltipContext = React.createContext<TooltipContextValue | undefined>(undefined);
+
+function Tooltip({
+    open: openProp,
+    defaultOpen,
+    onOpenChange,
+    ...props
+}: React.ComponentProps<typeof TooltipPrimitive.Root>) {
+    const [uncontrolledOpen, setUncontrolledOpen] = React.useState(defaultOpen ?? false);
+    const isControlled = openProp !== undefined;
+    const open = isControlled ? openProp : uncontrolledOpen;
+    // Captured on pointer-down (before Radix runs its own dismiss-on-press) so the click handler can tell
+    // an opening tap (was closed) from a dismissing tap (was already open).
+    const wasOpenOnPointerDown = React.useRef(false);
+
+    const setOpen = React.useCallback(
+        (next: boolean) => {
+            if (!isControlled) setUncontrolledOpen(next);
+            onOpenChange?.(next);
+        },
+        [isControlled, onOpenChange],
+    );
+
     return (
         <TooltipProvider>
-            <TooltipPrimitive.Root data-slot="tooltip" {...props} />
+            <TooltipContext.Provider value={{ open, setOpen, wasOpenOnPointerDown }}>
+                <TooltipPrimitive.Root data-slot="tooltip" open={open} onOpenChange={setOpen} {...props} />
+            </TooltipContext.Provider>
         </TooltipProvider>
     );
 }
@@ -19,8 +52,26 @@ function Tooltip({ ...props }: React.ComponentProps<typeof TooltipPrimitive.Root
 const TooltipTrigger = React.forwardRef<
     React.ElementRef<typeof TooltipPrimitive.Trigger>,
     React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Trigger>
->((props, ref) => {
-    return <TooltipPrimitive.Trigger ref={ref} data-slot="tooltip-trigger" {...props} />;
+>(({ onPointerDown, onClick, ...props }, ref) => {
+    const ctx = React.useContext(TooltipContext);
+
+    return (
+        <TooltipPrimitive.Trigger
+            ref={ref}
+            data-slot="tooltip-trigger"
+            {...props}
+            onPointerDown={event => {
+                if (ctx) ctx.wasOpenOnPointerDown.current = ctx.open;
+                onPointerDown?.(event);
+            }}
+            onClick={event => {
+                onClick?.(event);
+                // Radix's own press handling already closes an open tooltip; we only need to force it open
+                // on a tap that found it closed (i.e. a touch tap, which never triggered a hover open).
+                if (ctx && !ctx.wasOpenOnPointerDown.current) ctx.setOpen(true);
+            }}
+        />
+    );
 });
 TooltipTrigger.displayName = 'TooltipTrigger';
 

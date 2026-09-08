@@ -337,18 +337,15 @@ function ChangeDash() {
 // Change-column marker for a run that reverted or failed: a small "Failed" label whose tooltip carries
 // the reason. Shown in place of a delta so the row reflects that a run happened and did not produce
 // usable balance changes (re-running stays available from the column header's "S" popover and the
-// Simulation panel). `drawer` bumps the text up for the mobile detail popup.
-function ChangeFailed({ message, size = 'table' }: { message: string; size?: 'table' | 'drawer' }) {
+// Simulation panel).
+function ChangeFailed({ message }: { message: string }) {
     return (
         <Tooltip>
             <TooltipTrigger asChild>
                 <span
-                    className={cn(
-                        'inline-flex cursor-default items-center gap-1 leading-none text-yellow-500',
-                        size === 'drawer' ? 'text-xs' : 'text-[10px]',
-                    )}
+                    className={cn('inline-flex cursor-default items-center gap-1 text-sm leading-none text-yellow-500')}
                 >
-                    <AlertTriangle size={size === 'drawer' ? 12 : 10} />
+                    <AlertTriangle size={14} />
                     Failed
                 </span>
             </TooltipTrigger>
@@ -447,7 +444,7 @@ function ChangeCell({
     // A reverted/failed run has no reliable deltas: show a "Failed" marker in every mode so the table
     // and drawer reflect that a run happened, rather than silently reverting to the Simulate affordance.
     const failure = simulationFailureMessage(simulation);
-    if (failure) return <ChangeFailed message={failure} size={mode === 'action' ? 'drawer' : 'table'} />;
+    if (failure) return <ChangeFailed message={failure} />;
 
     if (mode === 'plain') return <ChangeDash />;
     if (mode === 'action') return <ChangeSimulateButton simulation={simulation} size="drawer" />;
