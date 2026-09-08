@@ -334,22 +334,35 @@ function ChangeDash() {
     return <span className="text-outer-space-500">—</span>;
 }
 
-// Change-column marker for a run that reverted or failed: a small "Failed" label whose tooltip carries
-// the reason. Shown in place of a delta so the row reflects that a run happened and did not produce
-// usable balance changes (re-running stays available from the column header's "S" popover and the
-// Simulation panel).
-function ChangeFailed({ message }: { message: string }) {
+// Change-column marker for a run that reverted or failed: a small "Failed" label. Shown in place of a
+// delta so the row reflects that a run happened and did not produce usable balance changes (re-running
+// stays available from the column header's "S" popover and the Simulation panel).
+//
+// `interactive` controls whether the reason is shown here via a tooltip:
+//   • desktop rows and the mobile detail drawer pass `interactive` — the tooltip carries the reason
+//     (hover on desktop, tap on touch). In the drawer it must sit above the Slideover, so its content is
+//     lifted past the slideover's z-index.
+//   • the mobile list summary leaves it off — there the whole card is a tap target, so the label stays a
+//     plain, non-interactive marker and a tap falls through to open the detail drawer (which shows the
+//     full reason).
+function ChangeFailed({ message, interactive = false }: { message: string; interactive?: boolean }) {
+    const label = (
+        <span className={cn('inline-flex items-center gap-1 text-sm leading-none text-yellow-500')}>
+            <AlertTriangle size={14} />
+            Failed
+        </span>
+    );
+
+    if (!interactive) return label;
+
     return (
         <Tooltip>
             <TooltipTrigger asChild>
-                <span
-                    className={cn('inline-flex cursor-default items-center gap-1 text-sm leading-none text-yellow-500')}
-                >
-                    <AlertTriangle size={14} />
-                    Failed
-                </span>
+                <span className="inline-flex cursor-default">{label}</span>
             </TooltipTrigger>
-            <TooltipContent side="top" className="max-w-56 break-words">
+            {/* z above the mobile detail Slideover (z-[1201]) so the reason is visible when the tooltip
+                lives inside the drawer. */}
+            <TooltipContent side="top" className="z-[1300] max-w-56 break-words">
                 {message}
             </TooltipContent>
         </Tooltip>
@@ -443,8 +456,10 @@ function ChangeCell({
 
     // A reverted/failed run has no reliable deltas: show a "Failed" marker in every mode so the table
     // and drawer reflect that a run happened, rather than silently reverting to the Simulate affordance.
+    // The reason is exposed via a tooltip on the desktop table and in the drawer; in the mobile list the
+    // marker stays plain so a tap opens the drawer (which carries the reason) instead.
     const failure = simulationFailureMessage(simulation);
-    if (failure) return <ChangeFailed message={failure} />;
+    if (failure) return <ChangeFailed message={failure} interactive={mode !== 'plain'} />;
 
     if (mode === 'plain') return <ChangeDash />;
     if (mode === 'action') return <ChangeSimulateButton simulation={simulation} size="drawer" />;
