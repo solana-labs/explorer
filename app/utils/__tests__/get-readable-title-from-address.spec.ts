@@ -2,7 +2,7 @@ import { gen } from '@__fixtures__/gen';
 import { describe, expect, it, vi } from 'vitest';
 
 import { getTokenInfo } from '@/app/entities/token-info/server';
-import { Cluster, clusterSlug } from '@/app/utils/cluster';
+import { Cluster, CLUSTERS, clusterSlug } from '@/app/utils/cluster';
 import getReadableTitleFromAddress from '@/app/utils/get-readable-title-from-address';
 
 vi.mock('@/app/entities/token-info/server', () => ({
@@ -10,14 +10,11 @@ vi.mock('@/app/entities/token-info/server', () => ({
 }));
 
 describe('getReadableTitleFromAddress', () => {
-    it.each([Cluster.Devnet, Cluster.Testnet, Cluster.Simd296, Cluster.Custom, Cluster.MainnetBeta])(
-        'should look the token up on the cluster the slug names (%i)',
-        async cluster => {
-            await getReadableTitleFromAddress(props(clusterSlug(cluster)));
+    it.each(CLUSTERS)('should look the token up on the cluster the slug names (%i)', async cluster => {
+        await getReadableTitleFromAddress(props(clusterSlug(cluster)));
 
-            expect(getTokenInfo).toHaveBeenCalledWith(TOKEN_ADDRESS, cluster);
-        },
-    );
+        expect(getTokenInfo).toHaveBeenCalledWith(TOKEN_ADDRESS, cluster);
+    });
 
     it.each([undefined, 'not-a-cluster'])('should fall back to the default cluster for %s', async clusterParam => {
         await getReadableTitleFromAddress(props(clusterParam));
