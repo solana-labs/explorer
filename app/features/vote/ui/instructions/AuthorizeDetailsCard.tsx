@@ -1,34 +1,25 @@
-import { InstructionCard } from '@components/instruction/InstructionCard';
+import { address, defineInstructionCard, type InstructionFieldList } from '@entities/instruction-card';
 
 import type { AuthorizeInfo } from '../../lib/instruction-types';
-import { AuthorityTypeRows } from './AuthorityTypeRows';
-import { DetailRow, VoteProgramRow } from './DetailRow';
-import type { VoteCardProps } from './types';
+import { authorityTypeFields } from './authority-type-fields';
 
-export function AuthorizeDetailsCard({
-    ix,
-    index,
-    result,
-    info,
-    title,
-    innerCards,
-    childIndex,
-}: VoteCardProps<AuthorizeInfo> & { title: string }) {
-    return (
-        <InstructionCard
-            ix={ix}
-            index={index}
-            result={result}
-            title={title}
-            innerCards={innerCards}
-            childIndex={childIndex}
-        >
-            <VoteProgramRow />
-            <DetailRow label="Vote Account" pubkey={info.voteAccount} />
-            <DetailRow label="Clock Sysvar" pubkey={info.clockSysvar} />
-            <DetailRow label="Old Authority" pubkey={info.authority} />
-            <DetailRow label="New Authority" pubkey={info.newAuthority} />
-            <AuthorityTypeRows authorityType={info.authorityType} />
-        </InstructionCard>
-    );
+export const AuthorizeDetailsCard = defineInstructionCard<AuthorizeInfo>({
+    fields,
+    title: 'Vote: Authorize',
+});
+
+export const AuthorizeCheckedDetailsCard = defineInstructionCard<AuthorizeInfo>({
+    fields,
+    title: 'Vote: Authorize Checked',
+});
+
+/** Both variants carry the same payload, so one field list serves both cards. */
+function fields(info: AuthorizeInfo): InstructionFieldList {
+    return [
+        address('Vote Account', info.voteAccount),
+        address('Clock Sysvar', info.clockSysvar),
+        address('Old Authority', info.authority),
+        address('New Authority', info.newAuthority),
+        ...authorityTypeFields(info.authorityType),
+    ];
 }

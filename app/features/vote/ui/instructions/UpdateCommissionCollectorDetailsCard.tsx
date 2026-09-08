@@ -1,31 +1,13 @@
-import { InstructionCard } from '@components/instruction/InstructionCard';
+import { address, defineInstructionCard, text } from '@entities/instruction-card';
 
 import type { UpdateCommissionCollectorInfo } from '../../lib/instruction-types';
-import { DetailRow, VoteProgramRow } from './DetailRow';
-import type { VoteCardProps } from './types';
 
-export function UpdateCommissionCollectorDetailsCard({
-    ix,
-    index,
-    result,
-    info,
-    innerCards,
-    childIndex,
-}: VoteCardProps<UpdateCommissionCollectorInfo>) {
-    return (
-        <InstructionCard
-            ix={ix}
-            index={index}
-            result={result}
-            title="Vote: Update Commission Collector"
-            innerCards={innerCards}
-            childIndex={childIndex}
-        >
-            <VoteProgramRow />
-            <DetailRow label="Vote Account" pubkey={info.voteAccount} />
-            <DetailRow label="New Collector" pubkey={info.newCollector} />
-            <DetailRow label="Withdraw Authority" pubkey={info.withdrawAuthority} />
-            <DetailRow label="Commission Kind">{info.commissionKind}</DetailRow>
-        </InstructionCard>
-    );
-}
+export const UpdateCommissionCollectorDetailsCard = defineInstructionCard<UpdateCommissionCollectorInfo>({
+    fields: info => [
+        address('Vote Account', info.voteAccount),
+        address('New Collector', info.newCollector),
+        address('Withdraw Authority', info.withdrawAuthority),
+        text('Commission Kind', info.commissionKind),
+    ],
+    title: 'Vote: Update Commission Collector',
+});

@@ -1,6 +1,6 @@
 export { defineInstructionCard } from './model/define-instruction-card';
 export type { InstructionCardProps, InstructionCardSpec } from './model/define-instruction-card';
-export { address, bytes, compactFields, custom, seed, sol, text, timestamp } from './model/fields';
+export { address, bytes, compactFields, custom, preformatted, seed, sol, text, timestamp } from './model/fields';
 export type { InstructionField, InstructionFieldList } from './model/fields';
 export type { InstructionNode } from './model/node';
 export { InstructionSurfaceProvider, useInstructionSurface } from './model/surface';

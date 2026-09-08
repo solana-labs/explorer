@@ -10,6 +10,8 @@ vi.mock('next/navigation', () => ({
     useSearchParams: vi.fn(() => ({ get: vi.fn(), has: vi.fn(), toString: () => '' })),
 }));
 
+import { TxInstructionSurface } from '@entities/instruction-card';
+
 import { AccountsProvider } from '@/app/providers/accounts';
 import { ClusterProvider } from '@/app/providers/cluster';
 import { ScrollAnchorProvider } from '@/app/providers/scroll-anchor';
@@ -132,7 +134,9 @@ function renderCard(ix: ParsedInstruction) {
             <ClusterProvider>
                 <TransactionsProvider>
                     <AccountsProvider>
-                        <VoteDetailsCard index={0} ix={ix} result={{ err: null }} tx={voteParsedTransaction(ix)} />
+                        <TxInstructionSurface result={{ err: null }}>
+                            <VoteDetailsCard index={0} ix={ix} result={{ err: null }} tx={voteParsedTransaction(ix)} />
+                        </TxInstructionSurface>
                     </AccountsProvider>
                 </TransactionsProvider>
             </ClusterProvider>

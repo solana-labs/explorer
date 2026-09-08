@@ -1,33 +1,24 @@
-import { InstructionCard } from '@components/instruction/InstructionCard';
+import { address, defineInstructionCard, type InstructionFieldList, preformatted } from '@entities/instruction-card';
 
 import type { TowerSyncInfo } from '../../lib/instruction-types';
-import { DetailHashRow, DetailRow, VoteProgramRow } from './DetailRow';
-import type { VoteCardProps } from './types';
-import { VoteStateRows } from './VoteStateRows';
+import { voteStateFields } from './vote-state-fields';
 
-export function TowerSyncDetailsCard({
-    ix,
-    index,
-    result,
-    info,
-    title,
-    innerCards,
-    childIndex,
-}: VoteCardProps<TowerSyncInfo> & { title: string }) {
-    return (
-        <InstructionCard
-            ix={ix}
-            index={index}
-            result={result}
-            title={title}
-            innerCards={innerCards}
-            childIndex={childIndex}
-        >
-            <VoteProgramRow />
-            <DetailRow label="Vote Account" pubkey={info.voteAccount} />
-            <DetailRow label="Vote Authority" pubkey={info.voteAuthority} />
-            <VoteStateRows voteState={info.towerSync} />
-            {info.hash !== undefined && <DetailHashRow label="Switch Proof Hash" hash={info.hash} />}
-        </InstructionCard>
-    );
+export const TowerSyncDetailsCard = defineInstructionCard<TowerSyncInfo>({
+    fields,
+    title: 'Vote: Tower Sync',
+});
+
+export const TowerSyncSwitchDetailsCard = defineInstructionCard<TowerSyncInfo>({
+    fields,
+    title: 'Vote: Tower Sync Switch',
+});
+
+/** Only the switch variant carries a top-level hash, so one field list serves both cards. */
+function fields(info: TowerSyncInfo): InstructionFieldList {
+    return [
+        address('Vote Account', info.voteAccount),
+        address('Vote Authority', info.voteAuthority),
+        ...voteStateFields(info.towerSync),
+        info.hash !== undefined && preformatted('Switch Proof Hash', info.hash),
+    ];
 }
