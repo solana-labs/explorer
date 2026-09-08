@@ -1,7 +1,7 @@
 // Programs that definitionally have no Anchor IDL. Skipping their IDL-PDA lookup is not just a saved
-// read: it removes a dependency on the RPC answering `null` for the derived address, and some (the
-// SIMD-296 cluster among them) answer a transient error instead — which would turn "no IDL" into a
-// retryable failure on every transaction touching a builtin. Behavioural list, not a display registry.
+// read: it removes a dependency on the RPC answering `null` for the derived address, and some answer a
+// transient error instead — which would turn "no IDL" into a retryable failure on every transaction
+// touching a builtin. Behavioural list, not a display registry.
 import {
     ADDRESS_LOOKUP_TABLE_PROGRAM_ID,
     BPF_LOADER_2_PROGRAM_ID,

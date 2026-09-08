@@ -24,7 +24,6 @@ export function getChainId(cluster: Cluster, genesisHash?: string): ChainId | un
             return ChainId.TESTNET;
         case Cluster.Devnet:
             return ChainId.DEVNET;
-        case Cluster.Simd296:
         case Cluster.Custom:
             return genesisHash ? getChainIdFromGenesisHash(genesisHash) : undefined;
         default:

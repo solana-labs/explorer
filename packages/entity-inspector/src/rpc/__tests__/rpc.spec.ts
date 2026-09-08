@@ -23,7 +23,6 @@ const createSolanaRpcMock = vi.mocked(createSolanaRpc);
 const RPC_ENDPOINTS = {
     devnet: 'https://devnet.rpc.address',
     'mainnet-beta': 'https://mainnet-beta.rpc.address',
-    simd296: 'https://simd296.rpc.address',
     testnet: 'https://testnet.rpc.address',
 };
 

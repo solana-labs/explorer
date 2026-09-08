@@ -349,14 +349,5 @@ describe('GET /api/search', () => {
             expect(data.results.tokens).toHaveLength(1);
             expect(res.headers.get('Cache-Control')).toContain('s-maxage=30');
         });
-
-        it('should short-circuit Simd296 with empty result and no-store headers', async () => {
-            const res = await GET(makeRequest('sol', 'simd296'));
-            expect(res.status).toBe(200);
-            const data = await res.json();
-            expect(data).toMatchObject({ results: { tokens: [] }, success: true });
-            expect(res.headers.get('Cache-Control')).toContain('no-store');
-            expect(fetchMock).not.toHaveBeenCalled();
-        });
     });
 });

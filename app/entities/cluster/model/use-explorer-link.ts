@@ -15,7 +15,6 @@ export function buildExplorerLink(selection: ClusterSelection, path: string): st
     switch (selection.cluster) {
         case Cluster.Testnet:
         case Cluster.Devnet:
-        case Cluster.Simd296:
             params.append('cluster', clusterSlug(selection.cluster));
             break;
         case Cluster.Custom:

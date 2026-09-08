@@ -81,8 +81,8 @@ secret from **Project Settings → Deployment Protection**, as an `x-vercel-prot
 
 Inert by default (`503`). Keys documented inline in [`.env.example`](../../.env.example): `MCP_ENDPOINT_ENABLED`,
 `MCP_ACCESS_KEYS`, `MCP_BLOCKED_IPS`, `MCP_GA_MEASUREMENT_ID`, `MCP_GA_API_SECRET`, and
-`MCP_SOLANA_RPC_URL_MAINNET_BETA` / `_DEVNET` / `_TESTNET` / `_SIMD296`. Set them in **Project Settings → Environment
-Variables**, then redeploy — keys and blocklist are parsed at module scope, so a change needs one.
+`MCP_SOLANA_RPC_URL_MAINNET_BETA` / `_DEVNET` / `_TESTNET`. Set them in **Project Settings → Environment Variables**,
+then redeploy — keys and blocklist are parsed at module scope, so a change needs one.
 
 Analytics stay off unless an API secret and a measurement id both resolve. Events are sent after the response via Next's
 `after()`. Event names and the custom dimensions that must be registered in the GA4 property are in

@@ -18,7 +18,6 @@ const BLANKABLE_ENDPOINTS: [string, ServerCluster, string][] = [
     ['mainnet-beta', Cluster.MainnetBeta, 'NEXT_PUBLIC_MAINNET_RPC_URL'],
     ['testnet', Cluster.Testnet, 'NEXT_PUBLIC_TESTNET_RPC_URL'],
     ['devnet', Cluster.Devnet, 'NEXT_PUBLIC_DEVNET_RPC_URL'],
-    ['simd296', Cluster.Simd296, 'NEXT_PUBLIC_SIMD296_RPC_URL'],
 ];
 
 describe('ClusterSelection', () => {
@@ -46,7 +45,7 @@ describe('clusterUrl', () => {
     });
 
     it('should resolve every known cluster to its own endpoint, ignoring any custom URL', () => {
-        const clusters: ServerCluster[] = [Cluster.MainnetBeta, Cluster.Testnet, Cluster.Devnet, Cluster.Simd296];
+        const clusters: ServerCluster[] = [Cluster.MainnetBeta, Cluster.Testnet, Cluster.Devnet];
 
         for (const cluster of clusters) {
             const url = clusterUrl({ cluster });
@@ -89,7 +88,7 @@ describe('clusterSelection', () => {
 
 describe('serverClusterUrl', () => {
     it('should resolve each non-custom cluster to its own valid endpoint', () => {
-        const clusters: ServerCluster[] = [Cluster.MainnetBeta, Cluster.Testnet, Cluster.Devnet, Cluster.Simd296];
+        const clusters: ServerCluster[] = [Cluster.MainnetBeta, Cluster.Testnet, Cluster.Devnet];
         const urls = clusters.map(serverClusterUrl);
 
         for (const url of urls) {

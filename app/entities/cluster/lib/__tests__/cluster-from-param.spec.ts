@@ -12,12 +12,11 @@ describe('clusterFromParam', () => {
         expect(clusterFromParam('0')).toBe(Cluster.MainnetBeta);
         expect(clusterFromParam('1')).toBe(Cluster.Testnet);
         expect(clusterFromParam('2')).toBe(Cluster.Devnet);
-        expect(clusterFromParam('3')).toBe(Cluster.Simd296);
-        expect(clusterFromParam('4')).toBe(Cluster.Custom);
+        expect(clusterFromParam('3')).toBe(Cluster.Custom);
     });
 
     it('should return undefined for out-of-range numbers', () => {
-        expect(clusterFromParam('5')).toBeUndefined();
+        expect(clusterFromParam('4')).toBeUndefined();
         expect(clusterFromParam('-1')).toBeUndefined();
         expect(clusterFromParam('999')).toBeUndefined();
     });
@@ -41,7 +40,7 @@ describe('resolveServerClusterUrl', () => {
     });
 
     it.each([
-        ['the custom cluster', '4'],
+        ['the custom cluster', '3'],
         ['an unknown cluster', '999'],
         ['a malformed param', '01'],
     ])('should refuse %s as the caller’s input', (_reason, value) => {
@@ -63,7 +62,7 @@ describe('serverClusterUrlFromParam', () => {
 
     it('should return undefined for a custom cluster (no server endpoint)', () => {
         // Custom short-circuits before `serverClusterUrl`, which cannot resolve it. Custom is client-only.
-        expect(serverClusterUrlFromParam('4')).toBeUndefined();
+        expect(serverClusterUrlFromParam('3')).toBeUndefined();
     });
 
     it('should return undefined when the cluster env var is set to an empty string', () => {

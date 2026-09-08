@@ -17,6 +17,5 @@ export {
     MAINNET_BETA_URL,
     type ServerCluster,
     serverClusterUrl,
-    SIMD296_URL,
     TESTNET_URL,
 } from '@entities/cluster/lib/cluster';

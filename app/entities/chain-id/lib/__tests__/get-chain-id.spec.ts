@@ -24,7 +24,9 @@ describe('getChainId', () => {
         });
     });
 
-    describe.each([Cluster.Simd296, Cluster.Custom])('%s cluster', cluster => {
+    describe('Custom cluster', () => {
+        const cluster = Cluster.Custom;
+
         it('should return undefined when no genesisHash provided', () => {
             expect(getChainId(cluster)).toBeUndefined();
         });

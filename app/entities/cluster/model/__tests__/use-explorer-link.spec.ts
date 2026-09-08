@@ -17,7 +17,6 @@ describe('buildExplorerLink', () => {
         it.each([
             { cluster: Cluster.Devnet, expectedParam: 'cluster=devnet' },
             { cluster: Cluster.Testnet, expectedParam: 'cluster=testnet' },
-            { cluster: Cluster.Simd296, expectedParam: 'cluster=simd296' },
         ])('should append $expectedParam for $cluster', ({ cluster, expectedParam }) => {
             const result = buildExplorerLink(clusterSelection(cluster), '/tx/abc');
             expect(result).toBe(`${BASE}/tx/abc?${expectedParam}`);
