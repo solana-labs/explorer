@@ -8,11 +8,11 @@ import type { BlockWithV1 } from '@entities/block-data';
 import { summarizeBlockComputeUnits } from '@entities/compute-unit';
 import { useCluster } from '@providers/cluster';
 import { PublicKey } from '@solana/web3.js';
-import { displayTimestamp, displayTimestampUtc } from '@utils/date';
 import { IBRL_EXPLORER_URL } from '@utils/env';
 import { ExternalLink } from 'react-feather';
 
 import { Label, Row, Value } from '@/app/components/shared/ui/detail-row';
+import { Timestamp } from '@/app/components/shared/ui/timestamp';
 import { Card } from '@/app/shared/ui/Card';
 
 type BlockOverviewCardProps = {
@@ -86,23 +86,12 @@ export function BlockOverviewCard({
                         </Value>
                     </Row>
                 )}
-                {block.blockTime ? (
-                    <>
-                        <Row divider>
-                            <Label>Timestamp (Local)</Label>
-                            <Value mono={false}>{displayTimestamp(block.blockTime * 1000, true)}</Value>
-                        </Row>
-                        <Row divider>
-                            <Label>Timestamp (UTC)</Label>
-                            <Value mono={false}>{displayTimestampUtc(block.blockTime * 1000, true)}</Value>
-                        </Row>
-                    </>
-                ) : (
-                    <Row divider>
-                        <Label>Timestamp</Label>
-                        <Value>Unavailable</Value>
-                    </Row>
-                )}
+                <Row divider>
+                    <Label>Timestamp</Label>
+                    <Value mono={false}>
+                        {block.blockTime ? <Timestamp unixTimestamp={block.blockTime} /> : 'Unavailable'}
+                    </Value>
+                </Row>
                 {epoch !== undefined && (
                     <Row divider>
                         <Label>Epoch</Label>
