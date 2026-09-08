@@ -28,37 +28,18 @@ import { useLastSimulatedAt } from '@/app/features/instruction-simulation/model/
 import { type SimulationState } from '@/app/features/instruction-simulation/model/use-simulation';
 import { LastSimulatedAtLabel } from '@/app/features/instruction-simulation/ui/LastSimulatedAt';
 import { SimulateButton } from '@/app/features/instruction-simulation/ui/SimulateButton';
+import { SimulatedBadge } from '@/app/features/instruction-simulation/ui/SimulatedBadge';
 import { Section } from '@/app/features/transaction/ui/Section';
 
 import { AccountDetailSlideover } from './AccountDetailSlideover';
 import { AddressFromLookupTableWithContext } from './AddressWithContext';
 import { LG_ONLY_CARD } from './inspector-table';
+import { hasReliableChanges, simulationFailureMessage } from './simulation-changes';
+import { SimulationHint } from './SimulationHint';
 
 // Fallback for callers (isolated stories/tests) that don't own a simulation: the Change column then
 // simply offers the Simulate affordance, which is a no-op until wired to a real run.
 const IDLE_SIMULATION: SimulationState = { simulate: () => undefined, status: 'idle' };
-
-// A simulation can complete (`status: 'done'`) yet still carry an execution error — the run reverted.
-// Its SOL balance changes come from that failed execution and are unreliable, so the Change column must
-// not present them as results. Only a run that completed *without* an error yields usable deltas; every
-// other case (including a failed run) falls back to the Simulate affordance instead.
-function hasReliableChanges(simulation: SimulationState): simulation is Extract<SimulationState, { status: 'done' }> {
-    return simulation.status === 'done' && !simulation.result.error;
-}
-
-// A run that reverted (`status: 'done'` carrying an execution error) or that failed outright
-// (`status: 'error'`) produces no reliable balance deltas. Without this the Change column would fall
-// straight back to the pre-run Simulate affordance, so a completed-but-reverted run looked identical to
-// never having run — the failure was only visible down in the Logs. Returns the message to explain it,
-// or `undefined` when the run did not fail. The `done`-with-error case only carries a generic
-// `TransactionError`, so it points at the Logs rather than repeating it.
-function simulationFailureMessage(simulation: SimulationState): string | undefined {
-    if (simulation.status === 'error') return simulation.error;
-    if (simulation.status === 'done' && simulation.result.error) {
-        return 'Transaction reverted during simulation — see the Logs for the program error.';
-    }
-    return undefined;
-}
 
 // Shared 6-column track for the desktop (lg+) table: # / Address / Owner / Change / Post Balance / Size.
 // The header row and every body row use the same columns so they stay aligned.
@@ -217,7 +198,7 @@ export function AccountsCard({
     }
 
     return (
-        <Section title="Account List" className={LG_ONLY_CARD}>
+        <Section title="Account List" className={LG_ONLY_CARD} belowTitle={<SimulationHint simulation={simulation} />}>
             <div className={HEADER_GRID}>
                 <div>#</div>
                 <div>Address</div>
@@ -421,9 +402,7 @@ function SimulatedHeaderTag({ simulation, simulatedAt }: { simulation: Simulatio
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
                 <span className="cursor-default" onMouseEnter={openNow} onMouseLeave={closeSoon}>
-                    <Badge ui="dashkit" className="border-accent/50 border border-solid !text-[10px] text-accent">
-                        S
-                    </Badge>
+                    <SimulatedBadge>S</SimulatedBadge>
                 </span>
             </PopoverTrigger>
             <PopoverContent

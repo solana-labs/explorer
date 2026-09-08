@@ -11,6 +11,7 @@ export function Section({
     id,
     title,
     actions,
+    belowTitle,
     children,
     className = baseCardVariants({ ui: 'dashkit' }),
     titleClassName,
@@ -19,6 +20,8 @@ export function Section({
     id?: string;
     title: ReactNode;
     actions?: ReactNode;
+    /** Full-width content between the title row and the card — e.g. a note explaining the card's state. */
+    belowTitle?: ReactNode;
     children: ReactNode;
     className?: string;
     titleClassName?: string;
@@ -34,6 +37,7 @@ export function Section({
                 </h2>
                 {actions && <div className="flex shrink-0 items-center gap-1">{actions}</div>}
             </div>
+            {belowTitle}
             <div className={className}>{children}</div>
         </section>
     );

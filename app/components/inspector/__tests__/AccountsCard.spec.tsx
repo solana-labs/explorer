@@ -32,6 +32,26 @@ describe('inspector::AccountsCard', () => {
         });
     });
 
+    test('should explain the empty Change column and link to the Logs block', async () => {
+        const m = mock.deserializeMessage(stubs.systemTransferMsg);
+
+        render(
+            <ClusterProvider>
+                <AccountsProvider>
+                    <AccountsCard message={m} />
+                </AccountsProvider>
+            </ClusterProvider>,
+        );
+
+        // No simulation is wired up here, so the Change column has nothing to show: the hint under the
+        // heading must say why, offer a Simulate control, and point at the Logs block via an anchor.
+        await waitFor(() => {
+            expect(screen.getByText(/Simulate to see balance changes/, { selector: 'p' })).toBeInTheDocument();
+        });
+        expect(screen.getByRole('link', { name: 'Logs block' })).toHaveAttribute('href', '#logs');
+        expect(screen.getAllByRole('button', { name: 'Simulate' }).length).toBeGreaterThan(0);
+    });
+
     test('should render accounts from versioned message', async () => {
         const m = mock.deserializeMessageV0(stubs.tokenTransferMsg);
 
