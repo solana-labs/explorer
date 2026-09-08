@@ -202,7 +202,7 @@ export function BlockHistoryCard({ block, epoch }: { block: BlockData; epoch: bi
                 return getBlockTransactionAccounts(tx).includes(accountFilter);
             });
 
-        const showComputeUnits = filteredTxs.every(tx => tx.computeUnits !== undefined);
+        const showComputeUnits = filteredTxs.every(tx => tx.unavailable || tx.computeUnits !== undefined);
 
         return [sortTransactions(filteredTxs, sortMode, sortDirection, showComputeUnits), showComputeUnits];
     }, [block.transactions, transactions, programFilter, accountFilter, sortMode, sortDirection]);

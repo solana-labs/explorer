@@ -40,9 +40,17 @@ describe('sortTransactions', () => {
         expect(indexes(input)).toEqual([0, 1, 2]);
     });
 
-    it('should treat missing numeric fields as zero', () => {
-        const sparse = [tx({ index: 0, meta: null }), tx({ index: 1, meta: { fee: 1n } })];
-        expect(sortTransactions(sparse, 'fee', 'desc', true).map(r => r.index)).toEqual([1, 0]);
+    it('should sort missing numeric fields after known values in either direction', () => {
+        const sparse = [
+            tx({ index: 0, meta: null }),
+            tx({ computeUnits: 100, index: 1, meta: { fee: 1n } }),
+            tx({ computeUnits: 200, index: 2, meta: { fee: 2n } }),
+        ];
+
+        expect(indexes(sortTransactions(sparse, 'compute', 'asc', true))).toEqual([1, 2, 0]);
+        expect(indexes(sortTransactions(sparse, 'compute', 'desc', true))).toEqual([2, 1, 0]);
+        expect(indexes(sortTransactions(sparse, 'fee', 'asc', true))).toEqual([1, 2, 0]);
+        expect(indexes(sortTransactions(sparse, 'fee', 'desc', true))).toEqual([2, 1, 0]);
     });
 });
 

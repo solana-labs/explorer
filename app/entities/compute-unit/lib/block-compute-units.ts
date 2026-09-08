@@ -15,6 +15,7 @@ export type BlockComputeUnitsSummary = {
     requested: number;
     cost: bigint;
     max: number;
+    incomplete: boolean;
 };
 
 // Folds a block's per-transaction compute-unit figures into the four totals the block overview renders,
@@ -28,15 +29,20 @@ export function summarizeBlockComputeUnits({
     epoch: bigint | undefined;
     cluster: Cluster;
 }): BlockComputeUnitsSummary {
+    const max = getMaxComputeUnitsInBlock({ cluster, epoch });
     let consumed = 0n;
     let requested = 0;
     let cost = 0n;
+    let incomplete = false;
     for (const tx of block.transactions) {
-        if (!isBlockTransaction(tx)) continue;
+        if (!isBlockTransaction(tx)) {
+            incomplete = true;
+            continue;
+        }
         requested += estimateRequestedComputeUnits(tx, epoch, cluster);
         consumed += tx.meta?.computeUnitsConsumed ?? 0n;
         cost += tx.meta?.costUnits ?? 0n;
     }
 
-    return { consumed, cost, max: getMaxComputeUnitsInBlock({ cluster, epoch }), requested };
+    return { consumed, cost, incomplete, max, requested };
 }

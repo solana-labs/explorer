@@ -46,7 +46,7 @@ function mockTransaction({
     } satisfies BlockTransaction;
 }
 
-function mockBlock(transactions: ReturnType<typeof mockTransaction>[]): BlockData {
+function mockBlock(transactions: BlockData['transactions']): BlockData {
     return {
         blockTime: null,
         blockhash: blockhash('11111111111111111111111111111111'),
@@ -70,6 +70,7 @@ describe('summarizeBlockComputeUnits', () => {
         expect(summarizeBlockComputeUnits({ block, cluster: CLUSTER, epoch: EPOCH })).toEqual({
             consumed: 130_000n,
             cost: 110_000n,
+            incomplete: false,
             max: getMaxComputeUnitsInBlock({ cluster: CLUSTER, epoch: EPOCH }),
             requested: 150_000,
         });
@@ -84,6 +85,7 @@ describe('summarizeBlockComputeUnits', () => {
         expect(summarizeBlockComputeUnits({ block, cluster: CLUSTER, epoch: EPOCH })).toEqual({
             consumed: 25_000n,
             cost: 20_000n,
+            incomplete: false,
             max: getMaxComputeUnitsInBlock({ cluster: CLUSTER, epoch: EPOCH }),
             requested: 130_000,
         });
@@ -93,8 +95,24 @@ describe('summarizeBlockComputeUnits', () => {
         expect(summarizeBlockComputeUnits({ block: mockBlock([]), cluster: CLUSTER, epoch: EPOCH })).toEqual({
             consumed: 0n,
             cost: 0n,
+            incomplete: false,
             max: getMaxComputeUnitsInBlock({ cluster: CLUSTER, epoch: EPOCH }),
             requested: 0,
+        });
+    });
+
+    it('should mark readable-transaction totals as incomplete when any transaction is unavailable', () => {
+        const block = mockBlock([
+            mockTransaction({ consumed: 90_000, cost: 80_000, requestedUnits: 100_000 }),
+            { index: 1, unavailable: true },
+        ]);
+
+        expect(summarizeBlockComputeUnits({ block, cluster: CLUSTER, epoch: EPOCH })).toEqual({
+            consumed: 90_000n,
+            cost: 80_000n,
+            incomplete: true,
+            max: getMaxComputeUnitsInBlock({ cluster: CLUSTER, epoch: EPOCH }),
+            requested: 100_000,
         });
     });
 });

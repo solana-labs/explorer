@@ -26,9 +26,9 @@ export type SortableTransaction = {
     reservedComputeUnits?: number;
 };
 
-// Returns a new array sorted by `mode`. Base comparators are ascending; `direction` flips them so a
-// repeat click reverses the order. `compute` falls back to no-op when compute data isn't available for
-// every row (`showComputeUnits` false), matching the hidden Compute column.
+// Returns a new array sorted by `mode`. Missing numeric values stay after known values in either direction.
+// `compute` falls back to no-op when compute data isn't available for every readable row, matching the
+// hidden Compute column.
 export function sortTransactions<T extends SortableTransaction>(
     txs: readonly T[],
     mode: SortMode,
@@ -40,21 +40,29 @@ export function sortTransactions<T extends SortableTransaction>(
     if (mode === 'index') {
         sorted.sort((a, b) => dir * (a.index - b.index));
     } else if (mode === 'compute' && showComputeUnits) {
-        sorted.sort((a, b) => dir * compareIntegers(a.computeUnits, b.computeUnits));
+        sorted.sort((a, b) => compareOptionalIntegers(a.computeUnits, b.computeUnits, direction));
     } else if (mode === 'txnCost') {
-        sorted.sort((a, b) => dir * compareIntegers(a.costUnits, b.costUnits));
+        sorted.sort((a, b) => compareOptionalIntegers(a.costUnits, b.costUnits, direction));
     } else if (mode === 'fee') {
-        sorted.sort((a, b) => dir * compareIntegers(a.meta?.fee, b.meta?.fee));
+        sorted.sort((a, b) => compareOptionalIntegers(a.meta?.fee, b.meta?.fee, direction));
     } else if (mode === 'reservedCUs') {
-        sorted.sort((a, b) => dir * compareIntegers(a.reservedComputeUnits, b.reservedComputeUnits));
+        sorted.sort((a, b) => compareOptionalIntegers(a.reservedComputeUnits, b.reservedComputeUnits, direction));
     }
     return sorted;
 }
 
-function compareIntegers(a: number | bigint | undefined, b: number | bigint | undefined): number {
-    const left = typeof a === 'bigint' ? a : BigInt(a ?? 0);
-    const right = typeof b === 'bigint' ? b : BigInt(b ?? 0);
-    return left < right ? -1 : left > right ? 1 : 0;
+function compareOptionalIntegers(
+    a: number | bigint | undefined,
+    b: number | bigint | undefined,
+    direction: SortDirection,
+): number {
+    if (a === undefined) return b === undefined ? 0 : 1;
+    if (b === undefined) return -1;
+
+    const left = typeof a === 'bigint' ? a : BigInt(a);
+    const right = typeof b === 'bigint' ? b : BigInt(b);
+    const comparison = left < right ? -1 : left > right ? 1 : 0;
+    return direction === 'asc' ? comparison : -comparison;
 }
 
 // The next `sort`/`dir` URL params for a sort click, given the currently-active sort:

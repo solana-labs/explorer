@@ -7,6 +7,7 @@ import { cn } from '@components/shared/utils';
 import { type BlockData, isBlockTransaction } from '@entities/block-data';
 import { summarizeBlockComputeUnits } from '@entities/compute-unit';
 import { useCluster } from '@providers/cluster';
+import { Alert } from '@shared/ui/Alert';
 import type { Address as KitAddress, Slot as KitSlot } from '@solana/kit';
 import { displayTimestamp, displayTimestampUtc } from '@utils/date';
 import { IBRL_EXPLORER_URL } from '@utils/env';
@@ -42,6 +43,7 @@ export function BlockOverviewCard({
         consumed: totalCUs,
         requested: totalRequestedCUs,
         cost: totalCostUnits,
+        incomplete: computeTotalsIncomplete,
         max: maxComputeUnits,
     } = summarizeBlockComputeUnits({ block, cluster, epoch });
     const maxCostUnits = BigInt(maxComputeUnits);
@@ -63,6 +65,11 @@ export function BlockOverviewCard({
                     </ExternalLinkWarning>
                 )}
             </div>
+            {computeTotalsIncomplete && (
+                <Alert variant="warning" className="mb-0">
+                    Some transactions could not be parsed. Compute and cost totals include only readable transactions.
+                </Alert>
+            )}
             <Card ui="dashkit">
                 <Row divider>
                     <Label>Blockhash</Label>
@@ -163,13 +170,17 @@ export function BlockOverviewCard({
                 )}
                 <Row divider>
                     <Label>Total CUs Consumed</Label>
-                    <Value mono={false}>{totalCUs.toLocaleString()}</Value>
+                    <Value mono={false}>
+                        {totalCUs.toLocaleString()}{' '}
+                        {computeTotalsIncomplete && <span className="text-outer-space-300">(incomplete)</span>}
+                    </Value>
                 </Row>
                 <Row divider>
                     <Label>Transaction Cost Utilization</Label>
                     <Value mono={false} breakAll={false}>
                         {totalCostUnits.toLocaleString()} / {maxComputeUnits.toLocaleString()}{' '}
-                        <span className="text-outer-space-300">({totalCostPercent}%)</span>
+                        <span className="text-outer-space-300">({totalCostPercent}%)</span>{' '}
+                        {computeTotalsIncomplete && <span className="text-outer-space-300">(incomplete)</span>}
                     </Value>
                 </Row>
                 <Row>
@@ -178,7 +189,8 @@ export function BlockOverviewCard({
                         {totalRequestedCUs.toLocaleString()} / {maxComputeUnits.toLocaleString()}{' '}
                         <span className="text-outer-space-300">
                             ({Math.round((totalRequestedCUs / maxComputeUnits) * 100)}%)
-                        </span>
+                        </span>{' '}
+                        {computeTotalsIncomplete && <span className="text-outer-space-300">(incomplete)</span>}
                     </Value>
                 </Row>
             </Card>
