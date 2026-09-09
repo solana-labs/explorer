@@ -23,7 +23,9 @@ import { UnknownAccountCard } from './UnknownAccountCard';
 export function CompressedNftCard({ account }: { account: Account }) {
     const { url } = useCluster();
     const compressedNft = useCompressedNft({ address: account.pubkey.toString(), url });
-    if (!compressedNft) return <UnknownAccountCard account={account} />;
+    // getAsset resolves fungible tokens too, and those have no single owner: DAS returns an empty
+    // string, which is not a public key. Without an owner this card has nothing to describe.
+    if (!compressedNft?.ownership.owner) return <UnknownAccountCard account={account} />;
 
     const collectionGroup = compressedNft.grouping.find(group => group.group_key === 'collection');
     const updateAuthority = compressedNft.authorities.find(authority => authority.scopes.includes('full'))?.address;
@@ -93,6 +95,8 @@ export function CompressedNFTHeader({ compressedNft }: { compressedNft: Compress
     // Empty strings are possible, so the check is necessary.
     const proxiedURI = compressedNft.content.json_uri ? getProxiedUri(compressedNft.content.json_uri) : null;
     const metadataJson = useMetadataJsonLink(proxiedURI);
+    const isCompressed = compressedNft.compression.compressed;
+    const hasCollection = compressedNft.grouping.some(group => group.group_key === 'collection');
 
     return (
         <div className="-mx-3 flex flex-wrap">
@@ -100,21 +104,23 @@ export function CompressedNFTHeader({ compressedNft }: { compressedNft: Compress
                 <NFTImageContent uri={metadataJson?.image} />
             </div>
             <div className="mb-3 mt-3 min-w-0 flex-1 px-3">
-                {<h6 className="ml-[3px] uppercase tracking-[0.08em] text-dk-gray-700">Metaplex Compressed NFT</h6>}
+                <h6 className="ml-[3px] uppercase tracking-[0.08em] text-dk-gray-700">
+                    {getAssetTypeLabel(compressedNft)}
+                </h6>
                 <div className="flex items-center">
                     <h2 className="mb-0 ml-[3px] items-center overflow-hidden text-ellipsis whitespace-nowrap">
                         {compressedNft.content.metadata.name !== ''
                             ? compressedNft.content.metadata.name
-                            : 'No NFT name was found'}
+                            : 'No name was found'}
                     </h2>
-                    {getVerifiedCollectionPill()}
+                    {hasCollection ? getVerifiedCollectionPill() : null}
                 </div>
                 <h4 className="ml-[3px] mt-[3px] overflow-hidden text-ellipsis whitespace-nowrap uppercase tracking-[0.08em] text-dk-gray-700">
                     {compressedNft.content.metadata.symbol !== ''
                         ? compressedNft.content.metadata.symbol
                         : 'No Symbol was found'}
                 </h4>
-                <div className="mb-1.5 mt-1.5">{getCompressedNftPill()}</div>
+                {isCompressed && <div className="mb-1.5 mt-1.5">{getCompressedNftPill()}</div>}
                 <div className="mb-3 mt-1.5">{getIsMutablePill(compressedNft.mutable)}</div>
                 <Dropdown className="inline-flex">
                     <DropdownToggle asChild>
@@ -127,6 +133,28 @@ export function CompressedNFTHeader({ compressedNft }: { compressedNft: Compress
             </div>
         </div>
     );
+}
+
+// getAsset resolves any indexed asset, not just compressed NFTs, so the type shown has to follow
+// the response instead of assuming compression.
+const ASSET_TYPE_LABELS: Record<string, string> = {
+    Custom: 'Custom Asset',
+    Executable: 'Executable Asset',
+    FungibleAsset: 'Fungible Asset',
+    FungibleToken: 'Token',
+    Identity: 'Identity Asset',
+    LEGACY_NFT: 'Metaplex NFT',
+    MplCoreAsset: 'Metaplex Core Asset',
+    MplCoreCollection: 'Metaplex Core Collection',
+    ProgrammableNFT: 'Metaplex Programmable NFT',
+    V1_NFT: 'Metaplex NFT',
+    V1_PRINT: 'Metaplex NFT Print',
+    V2_NFT: 'Metaplex NFT',
+};
+
+export function getAssetTypeLabel(asset: CompressedNft): string {
+    if (asset.compression.compressed) return 'Metaplex Compressed NFT';
+    return ASSET_TYPE_LABELS[asset.interface] ?? 'Asset';
 }
 
 function getCompressedNftPill() {

@@ -10,18 +10,28 @@ function buildCompressedNft(
         name: string;
         symbol: string;
         mutable: boolean;
+        compressed: boolean;
+        assetInterface: string;
+        collection: string | null;
     }> = {},
 ): CompressedNft {
-    const { name = 'Compressed Ape #42', symbol = 'cAPE', mutable = true } = overrides;
+    const {
+        name = 'Compressed Ape #42',
+        symbol = 'cAPE',
+        mutable = true,
+        compressed = true,
+        assetInterface = 'V1_NFT',
+        collection = null,
+    } = overrides;
     return {
         authorities: [],
         burnt: false,
         compression: {
             asset_hash: '',
-            compressed: true,
+            compressed,
             creator_hash: '',
             data_hash: '',
-            eligible: true,
+            eligible: compressed,
             leaf_id: 0,
             seq: 0,
             tree: '',
@@ -35,9 +45,9 @@ function buildCompressedNft(
             metadata: { attributes: [], description: '', name, symbol, token_standard: '' },
         },
         creators: [],
-        grouping: [],
+        grouping: collection ? [{ group_key: 'collection', group_value: collection }] : [],
         id: 'CompressedNftaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-        interface: '',
+        interface: assetInterface,
         mutable,
         ownership: { delegate: null, delegated: false, frozen: false, owner: '', ownership_model: 'single' },
         royalty: {
@@ -76,4 +86,20 @@ export const NoName: Story = {
 
 export const NoSymbol: Story = {
     args: { compressedNft: buildCompressedNft({ symbol: '' }) },
+};
+
+export const VerifiedCollection: Story = {
+    args: { compressedNft: buildCompressedNft({ collection: 'CoLLeCtionaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' }) },
+};
+
+export const UncompressedToken: Story = {
+    args: {
+        compressedNft: buildCompressedNft({
+            assetInterface: 'FungibleToken',
+            compressed: false,
+            mutable: false,
+            name: 'dogwifhat',
+            symbol: '$WIF',
+        }),
+    },
 };
