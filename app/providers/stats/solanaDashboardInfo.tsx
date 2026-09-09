@@ -5,6 +5,7 @@ import { PerformanceSample } from './solanaPerformanceInfo';
 
 /** Each sample covers one minute, so an hour of history is 60 of them. */
 const SAMPLES_PER_HOUR = 60;
+const SAMPLES_PER_MINUTE = 1;
 
 export type DashboardInfo = {
     status: ClusterStatsStatus;
@@ -81,7 +82,7 @@ export function dashboardInfoReducer(state: DashboardInfo, action: DashboardInfo
 
         case DashboardInfoActionType.SetPerfSamples: {
             const msPerSlot_1h = measureMsPerSlot(action.data, SAMPLES_PER_HOUR);
-            const msPerSlot_1min = measureMsPerSlot(action.data, 1);
+            const msPerSlot_1min = measureMsPerSlot(action.data, SAMPLES_PER_MINUTE);
 
             // Rather than label an older minute "1min" when the newest one produced no slot, the last
             // figures stand until the next poll.
