@@ -139,6 +139,9 @@ importers:
       '@explorer/decoder-mango':
         specifier: workspace:*
         version: link:packages/decoder-mango
+      '@explorer/decoder-pyth':
+        specifier: workspace:*
+        version: link:packages/decoder-pyth
       '@explorer/decoder-serum':
         specifier: workspace:*
         version: link:packages/decoder-serum
@@ -603,6 +606,22 @@ importers:
       '@solana-program/token':
         specifier: 0.15.0
         version: 0.15.0(@solana/kit@7.0.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10))
+      typescript:
+        specifier: catalog:tooling
+        version: 5.7.3
+      vitest:
+        specifier: catalog:vitest
+        version: 4.1.10(@opentelemetry/api@1.9.0)(@types/node@22.15.3)(@vitest/browser-playwright@4.1.10)(@vitest/coverage-v8@4.1.10)(jsdom@26.0.0(bufferutil@4.0.7)(utf-8-validate@5.0.10))(msw@2.14.6(@types/node@22.15.3)(typescript@5.7.3))(vite@6.4.3(@types/node@22.15.3)(jiti@2.4.2)(lightningcss@1.29.2)(sass@1.53.0)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))
+
+  packages/decoder-pyth:
+    dependencies:
+      '@solana/kit':
+        specifier: ^7.0.0
+        version: 7.0.0(bufferutil@4.0.7)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(utf-8-validate@5.0.10)
+      '@solana/web3.js':
+        specifier: ^1.98.0
+        version: 1.98.4(bufferutil@4.0.7)(typescript@5.7.3)(utf-8-validate@5.0.10)
+    devDependencies:
       typescript:
         specifier: catalog:tooling
         version: 5.7.3

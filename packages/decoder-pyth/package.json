@@ -1,0 +1,37 @@
+{
+    "name": "@explorer/decoder-pyth",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "sideEffects": false,
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "default": "./dist/index.js"
+        },
+        "./detection": {
+            "types": "./dist/detection.d.ts",
+            "import": "./dist/detection.js",
+            "default": "./dist/detection.js"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "tsc",
+        "test": "pnpm run typecheck && vitest run",
+        "test:changed": "git diff --cached --name-only --diff-filter=ACMR -z --relative -- . | xargs -0 -r vitest related --run",
+        "test:watch": "vitest",
+        "typecheck": "tsc --noEmit"
+    },
+    "devDependencies": {
+        "typescript": "catalog:tooling",
+        "vitest": "catalog:vitest"
+    },
+    "peerDependencies": {
+        "@solana/kit": "^7.0.0",
+        "@solana/web3.js": "^1.98.0"
+    }
+}

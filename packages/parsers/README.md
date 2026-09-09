@@ -8,6 +8,6 @@ The design and rationale live in the OpenSpec proposal [`unify-instruction-parsi
 
 Program decoders shared between the app slices and `@explorer/entity-inspector` live under `src/programs/<program>` (exported as `@explorer/parsers/programs/<program>`), starting with the System program.
 
-Not to be confused with the per-program `@explorer/decoder-serum` / `@explorer/decoder-mango` packages: those decode one protocol each, this package carries the generic parsing contract they and the app slices plug into.
+Not to be confused with the per-program `@explorer/decoder-*` packages (serum, mango, pyth): those decode one protocol each, this package carries the generic parsing contract they and the app slices plug into.
 
 The agadoo tree-shaking gate covers the root contract entry only: the `/compat` and `/programs/*` entries define superstruct schemas at module scope, which Rollup cannot prove pure without annotating every nested field call — and schema modules are imported for their struct values wholesale, so the check adds nothing there (same trade-off as `@explorer/decoder-serum`).

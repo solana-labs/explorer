@@ -355,16 +355,6 @@ export default tseslint.config(
             // app/components (pre-FSD legacy)
             'app/components/account/token-extensions/ScaledUiAmountMultiplierTooltip.tsx',
             'app/components/instruction/AnchorDetailsCard.tsx',
-            'app/components/instruction/pyth/AddMappingDetailsCard.tsx',
-            'app/components/instruction/pyth/AddPriceDetailsCard.tsx',
-            'app/components/instruction/pyth/AddProductDetailsCard.tsx',
-            'app/components/instruction/pyth/AggregatePriceDetailsCard.tsx',
-            'app/components/instruction/pyth/BasePublisherOperationCard.tsx',
-            'app/components/instruction/pyth/InitMappingDetailsCard.tsx',
-            'app/components/instruction/pyth/InitPriceDetailsCard.tsx',
-            'app/components/instruction/pyth/SetMinPublishersDetailsCard.tsx',
-            'app/components/instruction/pyth/UpdatePriceDetailsCard.tsx',
-            'app/components/instruction/pyth/UpdateProductDetailsCard.tsx',
 
             // app/providers (pre-FSD legacy)
             'app/providers/accounts/flagged-accounts.tsx',
@@ -801,7 +791,6 @@ export default tseslint.config(
             'app/components/instruction/codama/codamaUtils.tsx',
             'app/components/instruction/ed25519/Ed25519DetailsCard.tsx',
             'app/components/instruction/program-metadata-idl/ProgramMetadataIdlInstructionDetailsCard.tsx',
-            'app/components/instruction/pyth/UpdateProductDetailsCard.tsx',
             'app/components/instruction/token/TokenDetailsCard.tsx',
             'app/components/shared/StatusBadge.tsx',
             'app/components/shared/account/ProgramHeader.tsx',
@@ -968,7 +957,6 @@ export default tseslint.config(
             'app/components/instruction/bpf-upgradeable-loader/BpfUpgradeableLoaderDetailsCard.tsx',
             'app/components/instruction/codama/codamaUtils.tsx',
             'app/components/instruction/program-metadata-idl/ProgramMetadataIdlInstructionDetailsCard.tsx',
-            'app/components/instruction/pyth/program.ts',
             'app/components/instruction/sas/SolanaAttestationDetailsCard.tsx',
             'app/components/instruction/token/TokenDetailsCard.tsx',
 
