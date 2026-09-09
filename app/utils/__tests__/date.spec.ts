@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatDuration, formatRelativeTime } from '../date';
+import { displayTimestampAbsolute, displayTimestampRelative, formatDuration, formatRelativeTime } from '../date';
 
 const NOW = new Date('2026-05-25T12:00:00Z').getTime();
 const SECOND = 1_000;
@@ -80,5 +80,67 @@ const DURATION_CASES: Array<[seconds: number, expected: string]> = [
 describe('formatDuration', () => {
     it.each(DURATION_CASES)('should render %i seconds as %s', (seconds, expected) => {
         expect(formatDuration(seconds, 'seconds')).toBe(expected);
+    });
+});
+
+// One representative case per granularity band, plus its future ("in …") counterpart. Calendar-based
+// bands (months/years) are asymmetric by design: the same day count spans a different number of
+// whole months/years depending on the direction from NOW.
+const RELATIVE_PAST_CASES: Array<[label: string, offsetMs: number, expected: string]> = [
+    ['25s', 25 * SECOND, '25 seconds ago'],
+    ['3m20s', 3 * MINUTE + 20 * SECOND, '3 minutes 20 seconds ago'],
+    ['9m59s', 9 * MINUTE + 59 * SECOND, '9 minutes 59 seconds ago'],
+    ['25m', 25 * MINUTE, '25 minutes ago'],
+    ['59m', 59 * MINUTE, '59 minutes ago'],
+    ['3h15m', 3 * HOUR + 15 * MINUTE, '3 hours 15 minutes ago'],
+    ['7h59m', 7 * HOUR + 59 * MINUTE, '7 hours 59 minutes ago'],
+    ['20h', 20 * HOUR, '20 hours ago'],
+    ['47h', 47 * HOUR, '47 hours ago'],
+    ['5d4h', 5 * DAY + 4 * HOUR, '5 days 4 hours ago'],
+    ['11d', 11 * DAY, '11 days ago'],
+    ['20d', 20 * DAY, '20 days ago'],
+    ['29d', 29 * DAY, '29 days ago'],
+    ['100d', 100 * DAY, '3 months 11 days ago'],
+    ['400d', 400 * DAY, '1 year 1 month ago'],
+    ['4y', 4 * 365 * DAY, '3 years ago'],
+];
+
+const RELATIVE_FUTURE_CASES: Array<[label: string, offsetMs: number, expected: string]> = [
+    ['25s', 25 * SECOND, 'in 25 seconds'],
+    ['3m20s', 3 * MINUTE + 20 * SECOND, 'in 3 minutes 20 seconds'],
+    ['25m', 25 * MINUTE, 'in 25 minutes'],
+    ['3h15m', 3 * HOUR + 15 * MINUTE, 'in 3 hours 15 minutes'],
+    ['20h', 20 * HOUR, 'in 20 hours'],
+    ['5d4h', 5 * DAY + 4 * HOUR, 'in 5 days 4 hours'],
+    ['20d', 20 * DAY, 'in 20 days'],
+    ['100d', 100 * DAY, 'in 3 months 8 days'],
+    ['400d', 400 * DAY, 'in 1 year 1 month'],
+    ['4y', 4 * 365 * DAY, 'in 3 years'],
+];
+
+describe('displayTimestampRelative', () => {
+    it.each(RELATIVE_PAST_CASES)('should render past %s as %s', (_label, offset, expected) => {
+        expect(displayTimestampRelative(NOW - offset, NOW)).toBe(expected);
+    });
+
+    it.each(RELATIVE_FUTURE_CASES)('should render future %s as %s', (_label, offset, expected) => {
+        expect(displayTimestampRelative(NOW + offset, NOW)).toBe(expected);
+    });
+
+    it('should render a sub-second difference as "just now"', () => {
+        expect(displayTimestampRelative(NOW, NOW)).toBe('just now');
+        expect(displayTimestampRelative(NOW - 200, NOW)).toBe('just now');
+    });
+
+    it('should return an empty string for non-finite inputs', () => {
+        expect(displayTimestampRelative(NaN, NOW)).toBe('');
+        expect(displayTimestampRelative(NOW, Infinity)).toBe('');
+        expect(displayTimestampRelative(-Infinity, NOW)).toBe('');
+    });
+});
+
+describe('displayTimestampAbsolute', () => {
+    it('should render a UTC instant in date-first order with a short zone name', () => {
+        expect(displayTimestampAbsolute(NOW, true)).toBe('May 25, 2026 at 12:00:00 UTC');
     });
 });
