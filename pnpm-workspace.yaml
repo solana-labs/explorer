@@ -29,7 +29,7 @@ catalogs:
     '@vitest/browser-playwright': 4.1.10
     '@vitest/coverage-v8': 4.1.10
     jsdom: 26.0.0
-    vitest: 4.1.10
+    vitest: 4.1.11
 
 ignoreScripts: true
 
