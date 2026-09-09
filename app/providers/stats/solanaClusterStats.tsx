@@ -42,8 +42,6 @@ const initialPerformanceInfo: PerformanceInfo = {
 };
 
 const initialDashboardInfo: DashboardInfo = {
-    avgSlotTime_1h: 0,
-    avgSlotTime_1min: 0,
     epochInfo: {
         absoluteSlot: BigInt(0),
         blockHeight: BigInt(0),
@@ -51,6 +49,8 @@ const initialDashboardInfo: DashboardInfo = {
         slotIndex: BigInt(0),
         slotsInEpoch: BigInt(0),
     },
+    msPerSlot_1h: 0,
+    msPerSlot_1min: 0,
     status: ClusterStatsStatus.Loading,
 };
 

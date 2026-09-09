@@ -1,10 +1,16 @@
+import { measureMsPerSlot } from '@entities/slot-time';
+
 import { ClusterStatsStatus } from './solanaClusterStats';
 import { PerformanceSample } from './solanaPerformanceInfo';
 
+/** Each sample covers one minute, so an hour of history is 60 of them. */
+const SAMPLES_PER_HOUR = 60;
+const SAMPLES_PER_MINUTE = 1;
+
 export type DashboardInfo = {
     status: ClusterStatsStatus;
-    avgSlotTime_1h: number;
-    avgSlotTime_1min: number;
+    msPerSlot_1h: number;
+    msPerSlot_1min: number;
     epochInfo: EpochInfo;
     blockTime?: number;
     lastBlockTime?: BlockTimeInfo;
@@ -75,55 +81,40 @@ export function dashboardInfoReducer(state: DashboardInfo, action: DashboardInfo
         }
 
         case DashboardInfoActionType.SetPerfSamples: {
-            if (action.data.length < 1) {
+            const msPerSlot_1h = measureMsPerSlot(action.data, SAMPLES_PER_HOUR);
+            const msPerSlot_1min = measureMsPerSlot(action.data, SAMPLES_PER_MINUTE);
+
+            // Rather than label an older minute "1min" when the newest one produced no slot, the last
+            // figures stand until the next poll.
+            if (msPerSlot_1h === undefined || msPerSlot_1min === undefined) {
                 return state;
             }
-
-            const samples = action.data
-                .filter(sample => {
-                    return sample.numSlots !== BigInt(0);
-                })
-                .map(sample => {
-                    return sample.samplePeriodSecs / Number(sample.numSlots);
-                })
-                .slice(0, 60);
-
-            if (samples.length === 0) {
-                return state;
-            }
-
-            const samplesInHour = samples.length < 60 ? samples.length : 60;
-            const avgSlotTime_1h =
-                samples.reduce((sum: number, cur: number) => {
-                    return sum + cur;
-                }, 0) / samplesInHour;
 
             const status =
                 state.epochInfo.absoluteSlot !== BigInt(0) ? ClusterStatsStatus.Ready : ClusterStatsStatus.Loading;
 
             return {
                 ...state,
-                avgSlotTime_1h,
-                avgSlotTime_1min: samples[0],
+                msPerSlot_1h,
+                msPerSlot_1min,
                 status,
             };
         }
 
         case DashboardInfoActionType.SetEpochInfo: {
-            const status = state.avgSlotTime_1h !== 0 ? ClusterStatsStatus.Ready : ClusterStatsStatus.Loading;
+            const status = state.msPerSlot_1h !== 0 ? ClusterStatsStatus.Ready : ClusterStatsStatus.Loading;
 
             let blockTime = state.blockTime;
 
             // interpolate blocktime based on last known blocktime and average slot time
             if (
                 state.lastBlockTime &&
-                state.avgSlotTime_1h !== 0 &&
+                state.msPerSlot_1h !== 0 &&
                 action.data.absoluteSlot >= state.lastBlockTime.slot
             ) {
                 blockTime = Number(
                     BigInt(state.lastBlockTime.blockTime) +
-                        (action.data.absoluteSlot - state.lastBlockTime.slot) *
-                            BigInt(Math.floor(state.avgSlotTime_1h * 1000)),
+                        (action.data.absoluteSlot - state.lastBlockTime.slot) * BigInt(state.msPerSlot_1h),
                 );
             }
 

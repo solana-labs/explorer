@@ -64,7 +64,7 @@ export async function fetchSlotTimeFromRpc(url: ConnectableUrl): Promise<number>
         .getRecentPerformanceSamples(MEASURED_SAMPLES)
         .send({ abortSignal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS) });
 
-    return toMsPerSlot(samples);
+    return toMsPerSlot(samples, MEASURED_SAMPLES);
 }
 
 // Asking again can only answer differently for these: the route's transient upstream error and its

@@ -9,8 +9,8 @@ import type { PerformanceInfo } from '@providers/stats/solanaPerformanceInfo';
 import type { ReactNode } from 'react';
 
 const defaultDashboard: DashboardInfo = {
-    avgSlotTime_1h: 0.42,
-    avgSlotTime_1min: 0.4,
+    msPerSlot_1h: 420,
+    msPerSlot_1min: 400,
     epochInfo: {
         absoluteSlot: 312_456_789n,
         blockHeight: 295_456_321n,

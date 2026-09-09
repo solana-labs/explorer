@@ -13,8 +13,6 @@ import { PerformanceSample } from '../solanaPerformanceInfo';
 
 describe('dashboardInfoReducer', () => {
     const createInitialState = (overrides?: Partial<DashboardInfo>): DashboardInfo => ({
-        avgSlotTime_1h: 0,
-        avgSlotTime_1min: 0,
         epochInfo: {
             absoluteSlot: BigInt(0),
             blockHeight: BigInt(0),
@@ -22,6 +20,8 @@ describe('dashboardInfoReducer', () => {
             slotIndex: BigInt(0),
             slotsInEpoch: BigInt(0),
         },
+        msPerSlot_1h: 0,
+        msPerSlot_1min: 0,
         status: ClusterStatsStatus.Loading,
         ...overrides,
     });
@@ -124,7 +124,7 @@ describe('dashboardInfoReducer', () => {
             expect(result).toBe(initialState);
         });
 
-        it('should calculate avgSlotTime_1h and avgSlotTime_1min correctly with single sample', () => {
+        it('should calculate msPerSlot_1h and msPerSlot_1min correctly with single sample', () => {
             const initialState = createInitialState();
             const action: DashboardInfoAction = {
                 data: [
@@ -139,12 +139,12 @@ describe('dashboardInfoReducer', () => {
 
             const result = dashboardInfoReducer(initialState, action);
 
-            expect(result.avgSlotTime_1h).toBe(6); // 60 / 10
-            expect(result.avgSlotTime_1min).toBe(6); // 60 / 10
+            expect(result.msPerSlot_1h).toBe(6000); // 60 s / 10 slots
+            expect(result.msPerSlot_1min).toBe(6000); // 60 s / 10 slots
             expect(result.status).toBe(ClusterStatsStatus.Loading); // epochInfo.absoluteSlot is 0
         });
 
-        it('should calculate avgSlotTime_1h as average of all samples when less than 60', () => {
+        it('should measure msPerSlot_1h over all samples when less than 60', () => {
             const initialState = createInitialState({
                 epochInfo: {
                     absoluteSlot: BigInt(1000),
@@ -177,34 +177,66 @@ describe('dashboardInfoReducer', () => {
 
             const result = dashboardInfoReducer(initialState, action);
 
-            // (60/10 + 60/20 + 60/30) / 3 = (6 + 3 + 2) / 3 = 11/3 ≈ 3.667
-            expect(result.avgSlotTime_1h).toBeCloseTo(11 / 3, 5);
-            expect(result.avgSlotTime_1min).toBe(6); // First sample: 60/10
+            // 180 s over 60 slots. Not the mean of the three rates, (6000 + 3000 + 2000) / 3 = 3667 ms:
+            // the slow minute produced 10 of the 60 slots, so it is a sixth of the answer, not a third.
+            expect(result.msPerSlot_1h).toBe(3000);
+            expect(result.msPerSlot_1min).toBe(6000); // Newest sample: 60 s / 10 slots
             expect(result.status).toBe(ClusterStatsStatus.Ready); // epochInfo.absoluteSlot is not 0
         });
 
         it('should limit samples to 60 when more than 60 samples provided', () => {
             const initialState = createInitialState();
-            const samples: PerformanceSample[] = Array.from({ length: 100 }, () => ({
+            const withinTheHour: PerformanceSample[] = Array.from({ length: 60 }, () => ({
                 numSlots: BigInt(10),
+                numTransactions: BigInt(100),
+                samplePeriodSecs: 60,
+            }));
+            const older: PerformanceSample[] = Array.from({ length: 40 }, () => ({
+                numSlots: BigInt(1),
                 numTransactions: BigInt(100),
                 samplePeriodSecs: 60,
             }));
 
             const action: DashboardInfoAction = {
-                data: samples,
+                data: [...withinTheHour, ...older],
                 type: DashboardInfoActionType.SetPerfSamples,
             };
 
             const result = dashboardInfoReducer(initialState, action);
 
-            // Should only use first 60 samples, all with same value
-            expect(result.avgSlotTime_1h).toBe(6); // 60/10
-            expect(result.avgSlotTime_1min).toBe(6); // First sample: 60/10
+            // The 40 older minutes would drag the rate up if the window did not stop at 60.
+            expect(result.msPerSlot_1h).toBe(6000); // 60 s / 10 slots
+            expect(result.msPerSlot_1min).toBe(6000); // Newest sample: 60 s / 10 slots
         });
 
-        it('should filter out samples with zero numSlots', () => {
+        it('should skip a minute that produced no slot', () => {
             const initialState = createInitialState();
+            const action: DashboardInfoAction = {
+                data: [
+                    {
+                        numSlots: BigInt(10),
+                        numTransactions: BigInt(100),
+                        samplePeriodSecs: 60,
+                    },
+                    {
+                        numSlots: BigInt(0),
+                        numTransactions: BigInt(200),
+                        samplePeriodSecs: 60,
+                    },
+                ],
+                type: DashboardInfoActionType.SetPerfSamples,
+            };
+
+            const result = dashboardInfoReducer(initialState, action);
+
+            expect(result.msPerSlot_1h).toBe(6000); // 60 s / 10 slots
+            expect(result.msPerSlot_1min).toBe(6000); // 60 s / 10 slots
+        });
+
+        // Reporting the minute before it as the "1min" figure would label a measurement as something it
+        // is not, so the last poll's figures stand until the next one.
+        it('should keep the previous figures when the newest minute produced no slot', () => {
+            const initialState = createInitialState({ msPerSlot_1h: 400, msPerSlot_1min: 400 });
             const action: DashboardInfoAction = {
                 data: [
                     {
@@ -217,20 +249,13 @@ describe('dashboardInfoReducer', () => {
                         numTransactions: BigInt(200),
                         samplePeriodSecs: 60,
                     },
-                    {
-                        numSlots: BigInt(0),
-                        numTransactions: BigInt(300),
-                        samplePeriodSecs: 60,
-                    },
                 ],
                 type: DashboardInfoActionType.SetPerfSamples,
             };
 
             const result = dashboardInfoReducer(initialState, action);
 
-            // Should only use the sample with numSlots = 10
-            expect(result.avgSlotTime_1h).toBe(6); // 60/10
-            expect(result.avgSlotTime_1min).toBe(6); // 60/10
+            expect(result).toBe(initialState);
         });
 
         it('should set status to Ready when epochInfo.absoluteSlot is not zero', () => {
@@ -287,8 +312,8 @@ describe('dashboardInfoReducer', () => {
     });
 
     describe('SetEpochInfo', () => {
-        it('should update epochInfo and set status to Ready when avgSlotTime_1h is not zero', () => {
-            const initialState = createInitialState({ avgSlotTime_1h: 0.5 });
+        it('should update epochInfo and set status to Ready when msPerSlot_1h is not zero', () => {
+            const initialState = createInitialState({ msPerSlot_1h: 500 });
             const epochInfo: EpochInfo = {
                 absoluteSlot: BigInt(1000),
                 blockHeight: BigInt(500),
@@ -307,8 +332,8 @@ describe('dashboardInfoReducer', () => {
             expect(result.status).toBe(ClusterStatsStatus.Ready);
         });
 
-        it('should set status to Loading when avgSlotTime_1h is zero', () => {
-            const initialState = createInitialState({ avgSlotTime_1h: 0 });
+        it('should set status to Loading when msPerSlot_1h is zero', () => {
+            const initialState = createInitialState({ msPerSlot_1h: 0 });
             const epochInfo: EpochInfo = {
                 absoluteSlot: BigInt(1000),
                 blockHeight: BigInt(500),
@@ -329,8 +354,8 @@ describe('dashboardInfoReducer', () => {
 
         it('should preserve existing blockTime when interpolation conditions are not met', () => {
             const initialState = createInitialState({
-                avgSlotTime_1h: 0.5,
                 blockTime: 1234567890,
+                msPerSlot_1h: 500,
             });
             const epochInfo: EpochInfo = {
                 absoluteSlot: BigInt(1000),
@@ -355,9 +380,9 @@ describe('dashboardInfoReducer', () => {
                 slot: BigInt(500),
             };
             const initialState = createInitialState({
-                avgSlotTime_1h: 0.5,
                 blockTime: 1000000000,
-                lastBlockTime, // 500ms per slot
+                lastBlockTime,
+                msPerSlot_1h: 500, // 500ms per slot
             });
             const epochInfo: EpochInfo = {
                 absoluteSlot: BigInt(1000), // 500 slots ahead
@@ -384,9 +409,9 @@ describe('dashboardInfoReducer', () => {
                 slot: BigInt(1000),
             };
             const initialState = createInitialState({
-                avgSlotTime_1h: 0.5,
                 blockTime: 1000000000,
                 lastBlockTime,
+                msPerSlot_1h: 500,
             });
             const epochInfo: EpochInfo = {
                 absoluteSlot: BigInt(500), // Less than lastBlockTime.slot
@@ -405,15 +430,15 @@ describe('dashboardInfoReducer', () => {
             expect(result.blockTime).toBe(1000000000); // Preserved, no interpolation
         });
 
-        it('should not interpolate when avgSlotTime_1h is zero', () => {
+        it('should not interpolate when msPerSlot_1h is zero', () => {
             const lastBlockTime: BlockTimeInfo = {
                 blockTime: 1000000000,
                 slot: BigInt(500),
             };
             const initialState = createInitialState({
-                avgSlotTime_1h: 0,
                 blockTime: 1000000000,
                 lastBlockTime,
+                msPerSlot_1h: 0,
             });
             const epochInfo: EpochInfo = {
                 absoluteSlot: BigInt(1000),
@@ -434,9 +459,9 @@ describe('dashboardInfoReducer', () => {
 
         it('should not interpolate when lastBlockTime is not set', () => {
             const initialState = createInitialState({
-                avgSlotTime_1h: 0.5,
                 blockTime: 1000000000,
                 lastBlockTime: undefined,
+                msPerSlot_1h: 500,
             });
             const epochInfo: EpochInfo = {
                 absoluteSlot: BigInt(1000),
@@ -461,9 +486,9 @@ describe('dashboardInfoReducer', () => {
                 slot: BigInt(500),
             };
             const initialState = createInitialState({
-                avgSlotTime_1h: 0.5,
                 blockTime: 1000000000,
                 lastBlockTime,
+                msPerSlot_1h: 500,
             });
             const epochInfo: EpochInfo = {
                 absoluteSlot: BigInt(500), // Same as lastBlockTime.slot
@@ -503,9 +528,9 @@ describe('dashboardInfoReducer', () => {
 
         it('should preserve all other state properties', () => {
             const initialState = createInitialState({
-                avgSlotTime_1h: 0.5,
-                avgSlotTime_1min: 0.6,
                 blockTime: 1234567890,
+                msPerSlot_1h: 500,
+                msPerSlot_1min: 600,
                 status: ClusterStatsStatus.Loading,
             });
             const action: DashboardInfoAction = {
@@ -516,8 +541,8 @@ describe('dashboardInfoReducer', () => {
             const result = dashboardInfoReducer(initialState, action);
 
             expect(result.status).toBe(ClusterStatsStatus.Error);
-            expect(result.avgSlotTime_1h).toBe(0.5);
-            expect(result.avgSlotTime_1min).toBe(0.6);
+            expect(result.msPerSlot_1h).toBe(500);
+            expect(result.msPerSlot_1min).toBe(600);
             expect(result.blockTime).toBe(1234567890);
         });
     });
@@ -525,13 +550,11 @@ describe('dashboardInfoReducer', () => {
     describe('Reset', () => {
         it('should replace entire state with action data', () => {
             const initialState = createInitialState({
-                avgSlotTime_1h: 0.5,
-                avgSlotTime_1min: 0.6,
+                msPerSlot_1h: 500,
+                msPerSlot_1min: 600,
                 status: ClusterStatsStatus.Ready,
             });
             const newState: DashboardInfo = {
-                avgSlotTime_1h: 0.7,
-                avgSlotTime_1min: 0.8,
                 blockTime: 9876543210,
                 epochInfo: {
                     absoluteSlot: BigInt(2000),
@@ -540,6 +563,8 @@ describe('dashboardInfoReducer', () => {
                     slotIndex: BigInt(200),
                     slotsInEpoch: BigInt(432000),
                 },
+                msPerSlot_1h: 700,
+                msPerSlot_1min: 800,
                 status: ClusterStatsStatus.Loading,
             };
             const action: DashboardInfoAction = {
@@ -555,17 +580,15 @@ describe('dashboardInfoReducer', () => {
 
         it('should completely replace state even with partial data', () => {
             const initialState = createInitialState({
-                avgSlotTime_1h: 0.5,
                 blockTime: 1234567890,
                 lastBlockTime: {
                     blockTime: 1234567890,
                     slot: BigInt(1000),
                 },
+                msPerSlot_1h: 500,
                 status: ClusterStatsStatus.Ready,
             });
             const newState: DashboardInfo = {
-                avgSlotTime_1h: 0,
-                avgSlotTime_1min: 0,
                 epochInfo: {
                     absoluteSlot: BigInt(0),
                     blockHeight: BigInt(0),
@@ -573,6 +596,8 @@ describe('dashboardInfoReducer', () => {
                     slotIndex: BigInt(0),
                     slotsInEpoch: BigInt(0),
                 },
+                msPerSlot_1h: 0,
+                msPerSlot_1min: 0,
                 status: ClusterStatsStatus.Error,
             };
             const action: DashboardInfoAction = {
