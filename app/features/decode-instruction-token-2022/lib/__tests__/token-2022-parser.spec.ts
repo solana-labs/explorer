@@ -5,6 +5,7 @@ import {
     getInitializeTokenGroupInstructionDataEncoder,
     getInitializeTokenMetadataInstructionDataEncoder,
     getRemoveTokenMetadataKeyInstructionDataEncoder,
+    getTransferCheckedInstructionDataEncoder,
     getUpdateTokenGroupMaxSizeInstructionDataEncoder,
     getUpdateTokenGroupUpdateAuthorityInstructionDataEncoder,
     getUpdateTokenMetadataFieldInstructionDataDecoder,
@@ -151,5 +152,16 @@ describe('parseToken2022Instruction — SPL interface instructions', () => {
             value: 'X',
         });
         expect(() => getUpdateTokenMetadataFieldInstructionDataDecoder().decode(data)).toThrow();
+    });
+
+    test('should build uiAmountString as an exact decimal for transferChecked', () => {
+        // 1 base unit of a 9-decimal mint. The buggy float path produced "1e-9"
+        // (and lost precision for amounts above 2^53); uiAmountString must be the
+        // exact plain decimal, matching Solana RPC jsonParsed output.
+        const data = getTransferCheckedInstructionDataEncoder().encode({ amount: 1n, decimals: 9 });
+        const parsed = parse(data, [MINT_AUTHORITY, MINT, METADATA, AUTHORITY]);
+        expect(parsed?.type).toBe('transferChecked');
+        const info = parsed?.info as { tokenAmount: { uiAmountString: string } };
+        expect(info.tokenAmount.uiAmountString).toBe('0.000000001');
     });
 });

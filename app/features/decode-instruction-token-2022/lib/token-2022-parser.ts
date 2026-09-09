@@ -1,4 +1,5 @@
 import { getTokenIxValidator } from '@components/instruction/token/types';
+import { formatTokenAmount } from '@entities/token-amount';
 import { isParsedInstructionProgram, type ParserProgramLabel } from '@explorer/parsers';
 import { unwrapOption } from '@solana/kit';
 import { type ParsedInstruction, PublicKey } from '@solana/web3.js';
@@ -18,7 +19,6 @@ import {
     parseUpdateMetadataPointerInstruction,
     Token2022Instruction,
 } from '@solana-program/token-2022';
-import { normalizeTokenAmount } from '@utils/index';
 import { create } from 'superstruct';
 
 import type { KitInstruction } from '@/app/shared/lib/web3js-compat';
@@ -112,7 +112,7 @@ export function parseToken2022Instruction(ix: KitInstruction): Token2022Parsed |
                         tokenAmount: {
                             amount,
                             decimals,
-                            uiAmountString: normalizeTokenAmount(amount, decimals).toString(),
+                            uiAmountString: formatTokenAmount({ amount: BigInt(amount), decimals }),
                         },
                     },
                     type: 'transferChecked',
