@@ -1,7 +1,13 @@
 import { Address } from '@components/common/Address';
 import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
-import type { BlockWithV1 } from '@entities/block-data';
-import { PublicKey } from '@solana/web3.js';
+import {
+    type BlockData,
+    getBlockTransactionAccounts,
+    getBlockTransactionInstructions,
+    isBlockTransaction,
+    isBlockTransactionAccountWritable,
+} from '@entities/block-data';
+import type { Address as KitAddress } from '@solana/kit';
 import { useClusterPath } from '@utils/url';
 import Link from 'next/link';
 import React from 'react';
@@ -32,24 +38,21 @@ const ACCOUNTS_GRID: React.CSSProperties = {
     gridTemplateColumns: 'minmax(0,1fr) repeat(2, minmax(auto,5rem)) minmax(auto,8.5rem)',
 };
 
-export function BlockAccountsCard({ block, blockSlot }: { block: BlockWithV1; blockSlot: number }) {
+export function BlockAccountsCard({ block, blockSlot }: { block: BlockData; blockSlot: number }) {
     const [numDisplayed, setNumDisplayed] = React.useState(10);
     const totalTransactions = block.transactions.length;
 
     const accountStats = React.useMemo(() => {
-        const statsMap = new Map<string, AccountStats>();
+        const statsMap = new Map<KitAddress, AccountStats>();
         block.transactions.forEach(tx => {
-            const message = tx.transaction.message;
-            const txSet = new Map<string, boolean>();
-            const accountKeys = message.getAccountKeys({
-                accountKeysFromLookups: tx.meta?.loadedAddresses,
-            });
-            message.compiledInstructions.forEach(ix => {
-                ix.accountKeyIndexes.forEach(index => {
-                    const accountKey = accountKeys.get(index);
+            if (!isBlockTransaction(tx)) return;
+            const txSet = new Map<KitAddress, boolean>();
+            const accountKeys = getBlockTransactionAccounts(tx);
+            getBlockTransactionInstructions(tx.message).forEach(ix => {
+                ix.accountIndices.forEach(index => {
+                    const accountKey = accountKeys[index];
                     invariant(accountKey, `account key index ${index} out of range`);
-                    const address = accountKey.toBase58();
-                    txSet.set(address, message.isAccountWritable(index));
+                    txSet.set(accountKey, isBlockTransactionAccountWritable(tx, index));
                 });
             });
 
@@ -64,7 +67,7 @@ export function BlockAccountsCard({ block, blockSlot }: { block: BlockWithV1; bl
             });
         });
 
-        const accountEntries: [string, AccountStats][] = [];
+        const accountEntries: [KitAddress, AccountStats][] = [];
         statsMap.forEach((value, key) => {
             accountEntries.push([key, value]);
         });
@@ -123,7 +126,7 @@ function AccountsGridRow({
     reads,
     totalTransactions,
 }: {
-    address: string;
+    address: KitAddress;
     blockSlot: number;
     writes: number;
     reads: number;
@@ -137,7 +140,7 @@ function AccountsGridRow({
     const totalPct = percentOf(total, totalTransactions);
     const accountLink = (
         <Link href={accountPath} className="block min-w-0">
-            <Address pubkey={new PublicKey(address)} />
+            <Address address={address} />
         </Link>
     );
     const cells: ResponsiveCell[] = [

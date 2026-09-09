@@ -4,15 +4,16 @@
 
 Block pages pin `maxSupportedTransactionVersion: 0`. `getBlock` has no partial mode, so one v1 transaction fails the whole block. Pinning to `1` fails at runtime on web3.js 1.98.4, whose schema admits only `0`/`legacy` and cannot hold `transactionConfig`. kit is the migration direction, so blocks follow the transaction and inspector paths.
 
-Two non-obvious choices:
+Three non-obvious choices:
 
-- **`base64` over `json`** — kit's RPC types don't model `transactionConfig`, so the wire bytes are its only source, and they reuse `bridgeV1MessageBytes`.
-- **The estimator gates on `version === 1`, not on a config existing** — an absent v1 config means zero, not a default.
+- **`base64` over `json`** — the wire bytes let kit decode every supported message version, including v1 config values that the RPC JSON response does not expose.
+- **Kit types remain intact through the block feature** — addresses, messages, signatures, slots, lamports, and RPC quantities are not adapted into web3.js shapes.
+- **Unreadable transactions retain their position** — a failed transaction decode becomes an explicit unavailable entry, so one malformed response cannot silently remove a row and shift every later transaction index.
 
 ## What Changes
 
-New `app/entities/block-data`, fetched from `app/providers/block.tsx`. `estimateRequestedComputeUnits` reads v1's limit from the message config. The four block cards retype their `block` prop; no logic changes.
+New `app/entities/block-data`, fetched from `app/providers/block.tsx`. The entity decodes compiled messages with kit and provides version-neutral helpers for the block cards. `estimateRequestedComputeUnits` reads v1's limit from the decoded message config. The block provider and cards consume kit types directly.
 
 ## Impact
 
-Legacy/v0 unchanged. Still pinned at `0`: receipt, transaction history, PMP discovery, interactive IDL, `entity-inspector` default. Deferred: moving the cards off web3.js types, which deletes this adapter.
+Legacy/v0 behavior is unchanged. Still pinned at `0`: receipt, transaction history, PMP discovery, interactive IDL, `entity-inspector` default. Those paths remain outside this block-focused migration.

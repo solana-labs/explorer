@@ -1,14 +1,14 @@
 import { isSortMode, nextSortParams, type SortableTransaction, sortTransactions } from '../block-history-sort';
 
 function tx(overrides: Partial<SortableTransaction> & { index: number }): SortableTransaction {
-    return { meta: { fee: 0 }, ...overrides };
+    return { meta: { fee: 0n }, ...overrides };
 }
 
 describe('sortTransactions', () => {
     const rows: SortableTransaction[] = [
-        tx({ computeUnits: 300, costUnits: 30, index: 0, meta: { fee: 5 }, reservedComputeUnits: 3000 }),
-        tx({ computeUnits: 100, costUnits: 10, index: 1, meta: { fee: 15 }, reservedComputeUnits: 1000 }),
-        tx({ computeUnits: 200, costUnits: 20, index: 2, meta: { fee: 10 }, reservedComputeUnits: 2000 }),
+        tx({ computeUnits: 300, costUnits: 30n, index: 0, meta: { fee: 5n }, reservedComputeUnits: 3000 }),
+        tx({ computeUnits: 100, costUnits: 10n, index: 1, meta: { fee: 15n }, reservedComputeUnits: 1000 }),
+        tx({ computeUnits: 200, costUnits: 20n, index: 2, meta: { fee: 10n }, reservedComputeUnits: 2000 }),
     ];
 
     const indexes = (result: SortableTransaction[]) => result.map(r => r.index);
@@ -40,9 +40,17 @@ describe('sortTransactions', () => {
         expect(indexes(input)).toEqual([0, 1, 2]);
     });
 
-    it('should treat missing numeric fields as zero', () => {
-        const sparse = [tx({ index: 0, meta: null }), tx({ index: 1, meta: { fee: 1 } })];
-        expect(sortTransactions(sparse, 'fee', 'desc', true).map(r => r.index)).toEqual([1, 0]);
+    it('should sort missing numeric fields after known values in either direction', () => {
+        const sparse = [
+            tx({ index: 0, meta: null }),
+            tx({ computeUnits: 100, index: 1, meta: { fee: 1n } }),
+            tx({ computeUnits: 200, index: 2, meta: { fee: 2n } }),
+        ];
+
+        expect(indexes(sortTransactions(sparse, 'compute', 'asc', true))).toEqual([1, 2, 0]);
+        expect(indexes(sortTransactions(sparse, 'compute', 'desc', true))).toEqual([2, 1, 0]);
+        expect(indexes(sortTransactions(sparse, 'fee', 'asc', true))).toEqual([1, 2, 0]);
+        expect(indexes(sortTransactions(sparse, 'fee', 'desc', true))).toEqual([2, 1, 0]);
     });
 });
 

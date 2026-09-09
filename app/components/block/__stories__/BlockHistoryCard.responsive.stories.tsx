@@ -1,17 +1,19 @@
-import type { BlockWithV1 } from '@entities/block-data';
+import type { BlockData } from '@entities/block-data';
+import { blockhash } from '@solana/kit';
 import { nextjsParameters, withCluster } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
 import { BlockHistoryCard } from '../BlockHistoryCard';
 
-const emptyBlock = {
+const emptyBlock: BlockData = {
     blockTime: null,
-    blockhash: 'GnPnX9Y6w6vYi3iWQGfh',
-    parentSlot: 0,
-    previousBlockhash: 'GnPnX9Y6w6vYi3iWQGfh',
+    blockhash: blockhash('11111111111111111111111111111111'),
+    parentSlot: 0n,
+    previousBlockhash: blockhash('11111111111111111111111111111111'),
+    rewards: [],
     transactions: [],
-} as unknown as BlockWithV1;
+};
 
 const meta: Meta<typeof BlockHistoryCard> = {
     component: BlockHistoryCard,

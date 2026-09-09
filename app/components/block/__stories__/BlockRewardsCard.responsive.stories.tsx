@@ -1,3 +1,5 @@
+import type { BlockData } from '@entities/block-data';
+import { address, blockhash, lamports, type Reward } from '@solana/kit';
 import { nextjsParameters, withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
@@ -11,10 +13,11 @@ const PUBKEYS = [
     'SysvarRent111111111111111111111111111111111',
 ];
 
-const sampleReward = (i: number) => ({
-    lamports: 1_500_000 + i * 1_000,
-    postBalance: 12_345_678_900 + i * 1_000_000,
-    pubkey: PUBKEYS[i % PUBKEYS.length],
+const sampleReward = (i: number): Reward => ({
+    commission: 5,
+    lamports: BigInt(1_500_000 + i * 1_000),
+    postBalance: lamports(BigInt(12_345_678_900 + i * 1_000_000)),
+    pubkey: address(PUBKEYS[i % PUBKEYS.length]),
     rewardType: i % 2 === 0 ? 'Staking' : 'Voting',
 });
 
@@ -32,7 +35,15 @@ const meta: Meta<typeof BlockRewardsCard> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = { block: { rewards: Array.from({ length: 4 }, (_, i) => sampleReward(i)) } as any };
+const block: BlockData = {
+    blockTime: null,
+    blockhash: blockhash('11111111111111111111111111111111'),
+    parentSlot: 0n,
+    previousBlockhash: blockhash('11111111111111111111111111111111'),
+    rewards: Array.from({ length: 4 }, (_, index) => sampleReward(index)),
+    transactions: [],
+};
+const args = { block };
 
 export const Mobile: Story = { args, globals: { viewport: { value: 'iphonex' } } };
 export const TabletPortrait: Story = { args, globals: { viewport: { value: 'ipad' } } };

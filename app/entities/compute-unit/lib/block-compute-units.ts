@@ -1,4 +1,4 @@
-import type { BlockWithV1 } from '@entities/block-data/@x/compute-unit';
+import { type BlockData, isBlockTransaction } from '@entities/block-data/@x/compute-unit';
 import { Cluster } from '@utils/cluster';
 
 import { getMaxComputeUnitsInBlock } from '@/app/utils/epoch-schedule';
@@ -11,10 +11,11 @@ import { estimateRequestedComputeUnits } from './compute-units-schedule';
 // - `cost`      — cost units charged against the block limit (sum of each transaction's `costUnits`).
 // - `max`       — the block's compute-unit ceiling for the given epoch/cluster.
 export type BlockComputeUnitsSummary = {
-    consumed: number;
+    consumed: bigint;
     requested: number;
-    cost: number;
+    cost: bigint;
     max: number;
+    incomplete: boolean;
 };
 
 // Folds a block's per-transaction compute-unit figures into the four totals the block overview renders,
@@ -24,18 +25,24 @@ export function summarizeBlockComputeUnits({
     epoch,
     cluster,
 }: {
-    block: BlockWithV1;
+    block: BlockData;
     epoch: bigint | undefined;
     cluster: Cluster;
 }): BlockComputeUnitsSummary {
-    let consumed = 0;
+    const max = getMaxComputeUnitsInBlock({ cluster, epoch });
+    let consumed = 0n;
     let requested = 0;
-    let cost = 0;
+    let cost = 0n;
+    let incomplete = false;
     for (const tx of block.transactions) {
+        if (!isBlockTransaction(tx)) {
+            incomplete = true;
+            continue;
+        }
         requested += estimateRequestedComputeUnits(tx, epoch, cluster);
-        consumed += tx.meta?.computeUnitsConsumed ?? 0;
-        cost += tx.meta?.costUnits ?? 0;
+        consumed += tx.meta?.computeUnitsConsumed ?? 0n;
+        cost += tx.meta?.costUnits ?? 0n;
     }
 
-    return { consumed, cost, max: getMaxComputeUnitsInBlock({ cluster, epoch }), requested };
+    return { consumed, cost, incomplete, max, requested };
 }

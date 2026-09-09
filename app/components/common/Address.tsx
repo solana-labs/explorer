@@ -5,6 +5,7 @@ import { cn } from '@components/shared/utils';
 import { useTokenMetadata } from '@entities/nft';
 import { useTokenInfo } from '@entities/token-info';
 import { useCluster } from '@providers/cluster';
+import type { Address } from '@solana/kit';
 import { PublicKey } from '@solana/web3.js';
 import { displayAddress, TokenLabelInfo } from '@utils/tx';
 import { useClusterPath } from '@utils/url';
@@ -31,7 +32,6 @@ const rowVariants = cva('relative flex w-full min-w-0 items-baseline overflow-x-
 });
 
 type Props = {
-    pubkey: PublicKey;
     alignRight?: boolean;
     className?: string;
     link?: boolean;
@@ -44,9 +44,10 @@ type Props = {
     'aria-label'?: string;
     noCopy?: boolean;
     noNicknameEditing?: boolean;
-};
+} & ({ address: Address; pubkey?: PublicKey } | { address?: Address; pubkey: PublicKey });
 
 export function Address({
+    address: suppliedAddress,
     pubkey,
     alignRight,
     link,
@@ -61,7 +62,8 @@ export function Address({
     noCopy,
     noNicknameEditing,
 }: Props) {
-    const address = pubkey.toBase58();
+    const address = suppliedAddress ?? pubkey?.toBase58();
+    if (address === undefined) throw new Error('Address requires an address or pubkey');
     const { cluster, genesisHash } = useCluster();
     const addressPath = useClusterPath({ pathname: `/address/${address}` });
     const [showNicknameEditor, setShowNicknameEditor] = useState(false);

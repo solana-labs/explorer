@@ -1,7 +1,12 @@
 import { Address } from '@components/common/Address';
 import { CollapsibleSection } from '@components/shared/ui/collapsible-section';
-import type { BlockWithV1 } from '@entities/block-data';
-import { PublicKey } from '@solana/web3.js';
+import {
+    type BlockData,
+    getBlockTransactionAccounts,
+    getBlockTransactionInstructions,
+    isBlockTransaction,
+} from '@entities/block-data';
+import type { Address as KitAddress } from '@solana/kit';
 import React from 'react';
 
 import {
@@ -17,40 +22,39 @@ import { invariant } from '@/app/shared/lib/invariant';
 import { Card } from '@/app/shared/ui/Card';
 
 type ProgramStats = {
-    ixFrequency: Map<string, number>;
-    programEntries: [string, number][];
+    ixFrequency: Map<KitAddress, number>;
+    programEntries: [KitAddress, number][];
     showSuccessRate: boolean;
     totalInstructions: number;
     totalTransactions: number;
-    txSuccesses: Map<string, number>;
+    txSuccesses: Map<KitAddress, number>;
 };
 
 // Aggregates program usage across a block's transactions.
-function computeProgramStats(block: BlockWithV1): ProgramStats {
+function computeProgramStats(block: BlockData): ProgramStats {
     const totalTransactions = block.transactions.length;
-    const txSuccesses = new Map<string, number>();
-    const txFrequency = new Map<string, number>();
-    const ixFrequency = new Map<string, number>();
+    const txSuccesses = new Map<KitAddress, number>();
+    const txFrequency = new Map<KitAddress, number>();
+    const ixFrequency = new Map<KitAddress, number>();
 
     let totalInstructions = 0;
     block.transactions.forEach(tx => {
-        const message = tx.transaction.message;
-        totalInstructions += message.compiledInstructions.length;
-        const programUsed = new Set<string>();
-        const accountKeys = tx.transaction.message.getAccountKeys({
-            accountKeysFromLookups: tx.meta?.loadedAddresses,
-        });
+        if (!isBlockTransaction(tx)) return;
+        const instructions = getBlockTransactionInstructions(tx.message);
+        totalInstructions += instructions.length;
+        const programUsed = new Set<KitAddress>();
+        const accountKeys = getBlockTransactionAccounts(tx);
         const trackProgram = (index: number) => {
             if (index >= accountKeys.length) return;
-            const programId = accountKeys.get(index);
+            const programId = accountKeys[index];
             invariant(programId, `account key index ${index} out of range`);
-            const programAddress = programId.toBase58();
+            const programAddress = programId;
             programUsed.add(programAddress);
             const frequency = ixFrequency.get(programAddress);
             ixFrequency.set(programAddress, frequency ? frequency + 1 : 1);
         };
 
-        message.compiledInstructions.forEach(ix => trackProgram(ix.programIdIndex));
+        instructions.forEach(ix => trackProgram(ix.programAddressIndex));
         tx.meta?.innerInstructions?.forEach(inner => {
             totalInstructions += inner.instructions.length;
             inner.instructions.forEach(innerIx => trackProgram(innerIx.programIdIndex));
@@ -67,7 +71,7 @@ function computeProgramStats(block: BlockWithV1): ProgramStats {
         });
     });
 
-    const programEntries: [string, number][] = [];
+    const programEntries: [KitAddress, number][] = [];
     txFrequency.forEach((txFreq, programId) => {
         programEntries.push([programId, txFreq]);
     });
@@ -78,11 +82,11 @@ function computeProgramStats(block: BlockWithV1): ProgramStats {
         return 0;
     });
 
-    const showSuccessRate = block.transactions.every(tx => tx.meta !== null);
+    const showSuccessRate = block.transactions.every(tx => isBlockTransaction(tx) && tx.meta !== null);
     return { ixFrequency, programEntries, showSuccessRate, totalInstructions, totalTransactions, txSuccesses };
 }
 
-export function BlockProgramsCard({ block }: { block: BlockWithV1 }) {
+export function BlockProgramsCard({ block }: { block: BlockData }) {
     const stats = computeProgramStats(block);
 
     // gap-6 (24px) between the two sections matches the spacing between instruction blocks on the
@@ -174,7 +178,7 @@ function ProgramRow({
     showSuccessRate,
     gridStyle,
 }: {
-    programId: string;
+    programId: KitAddress;
     txFreq: number;
     ixFreq: number;
     successes: number;
@@ -188,7 +192,7 @@ function ProgramRow({
     const successRate = showSuccessRate ? percentOf(successes, txFreq, 0) : undefined;
     const cells: ResponsiveCell[] = [
         {
-            children: <Address pubkey={new PublicKey(programId)} link />,
+            children: <Address address={programId} link />,
             desktopClassName: 'min-w-0',
             key: 'program',
             label: 'Program',

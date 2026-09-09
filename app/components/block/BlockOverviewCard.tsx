@@ -4,10 +4,11 @@ import { Epoch } from '@components/common/Epoch';
 import { ExternalLinkWarning } from '@components/common/ExternalLinkWarning';
 import { Slot } from '@components/common/Slot';
 import { cn } from '@components/shared/utils';
-import type { BlockWithV1 } from '@entities/block-data';
+import { type BlockData, isBlockTransaction } from '@entities/block-data';
 import { summarizeBlockComputeUnits } from '@entities/compute-unit';
 import { useCluster } from '@providers/cluster';
-import { PublicKey } from '@solana/web3.js';
+import { Alert } from '@shared/ui/Alert';
+import type { Address as KitAddress, Slot as KitSlot } from '@solana/kit';
 import { displayTimestamp, displayTimestampUtc } from '@utils/date';
 import { IBRL_EXPLORER_URL } from '@utils/env';
 import { ExternalLink } from 'react-feather';
@@ -16,13 +17,13 @@ import { Label, Row, Value } from '@/app/components/shared/ui/detail-row';
 import { Card } from '@/app/shared/ui/Card';
 
 type BlockOverviewCardProps = {
-    block: BlockWithV1;
+    block: BlockData;
     slot: number;
     epoch: bigint | undefined;
-    blockLeader?: PublicKey;
-    childSlot?: number;
-    childLeader?: PublicKey;
-    parentLeader?: PublicKey;
+    blockLeader?: KitAddress;
+    childSlot?: KitSlot;
+    childLeader?: KitAddress;
+    parentLeader?: KitAddress;
     className?: string;
 };
 
@@ -42,11 +43,14 @@ export function BlockOverviewCard({
         consumed: totalCUs,
         requested: totalRequestedCUs,
         cost: totalCostUnits,
+        incomplete: computeTotalsIncomplete,
         max: maxComputeUnits,
     } = summarizeBlockComputeUnits({ block, cluster, epoch });
+    const maxCostUnits = BigInt(maxComputeUnits);
+    const totalCostPercent = ((totalCostUnits * 100n + maxCostUnits / 2n) / maxCostUnits).toString();
 
-    const showSuccessfulCount = block.transactions.every(tx => tx.meta !== null);
-    const successfulTxs = block.transactions.filter(tx => tx.meta?.err === null);
+    const showSuccessfulCount = block.transactions.every(tx => isBlockTransaction(tx) && tx.meta !== null);
+    const successfulTxs = block.transactions.filter(tx => isBlockTransaction(tx) && tx.meta?.err === null);
 
     return (
         <section className={cn('flex flex-col gap-3', className)}>
@@ -61,6 +65,11 @@ export function BlockOverviewCard({
                     </ExternalLinkWarning>
                 )}
             </div>
+            {computeTotalsIncomplete && (
+                <Alert variant="warning" className="mb-0">
+                    Some transactions could not be parsed. Compute and cost totals include only readable transactions.
+                </Alert>
+            )}
             <Card ui="dashkit">
                 <Row divider>
                     <Label>Blockhash</Label>
@@ -82,7 +91,7 @@ export function BlockOverviewCard({
                     <Row divider>
                         <Label>Slot Leader</Label>
                         <Value>
-                            <Address pubkey={blockLeader} link noTruncate />
+                            <Address address={blockLeader} link noTruncate />
                         </Value>
                     </Row>
                 )}
@@ -90,11 +99,11 @@ export function BlockOverviewCard({
                     <>
                         <Row divider>
                             <Label>Timestamp (Local)</Label>
-                            <Value mono={false}>{displayTimestamp(block.blockTime * 1000, true)}</Value>
+                            <Value mono={false}>{displayTimestamp(Number(block.blockTime) * 1000, true)}</Value>
                         </Row>
                         <Row divider>
                             <Label>Timestamp (UTC)</Label>
-                            <Value mono={false}>{displayTimestampUtc(block.blockTime * 1000, true)}</Value>
+                            <Value mono={false}>{displayTimestampUtc(Number(block.blockTime) * 1000, true)}</Value>
                         </Row>
                     </>
                 ) : (
@@ -129,7 +138,7 @@ export function BlockOverviewCard({
                     <Row divider>
                         <Label>Parent Slot Leader</Label>
                         <Value>
-                            <Address pubkey={parentLeader} link noTruncate />
+                            <Address address={parentLeader} link noTruncate />
                         </Value>
                     </Row>
                 )}
@@ -145,7 +154,7 @@ export function BlockOverviewCard({
                     <Row divider>
                         <Label>Child Slot Leader</Label>
                         <Value>
-                            <Address pubkey={childLeader} link noTruncate />
+                            <Address address={childLeader} link noTruncate />
                         </Value>
                     </Row>
                 )}
@@ -161,15 +170,17 @@ export function BlockOverviewCard({
                 )}
                 <Row divider>
                     <Label>Total CUs Consumed</Label>
-                    <Value mono={false}>{totalCUs.toLocaleString()}</Value>
+                    <Value mono={false}>
+                        {totalCUs.toLocaleString()}{' '}
+                        {computeTotalsIncomplete && <span className="text-outer-space-300">(incomplete)</span>}
+                    </Value>
                 </Row>
                 <Row divider>
                     <Label>Transaction Cost Utilization</Label>
                     <Value mono={false} breakAll={false}>
                         {totalCostUnits.toLocaleString()} / {maxComputeUnits.toLocaleString()}{' '}
-                        <span className="text-outer-space-300">
-                            ({Math.round((totalCostUnits / maxComputeUnits) * 100)}%)
-                        </span>
+                        <span className="text-outer-space-300">({totalCostPercent}%)</span>{' '}
+                        {computeTotalsIncomplete && <span className="text-outer-space-300">(incomplete)</span>}
                     </Value>
                 </Row>
                 <Row>
@@ -178,7 +189,8 @@ export function BlockOverviewCard({
                         {totalRequestedCUs.toLocaleString()} / {maxComputeUnits.toLocaleString()}{' '}
                         <span className="text-outer-space-300">
                             ({Math.round((totalRequestedCUs / maxComputeUnits) * 100)}%)
-                        </span>
+                        </span>{' '}
+                        {computeTotalsIncomplete && <span className="text-outer-space-300">(incomplete)</span>}
                     </Value>
                 </Row>
             </Card>

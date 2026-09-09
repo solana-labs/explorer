@@ -35,10 +35,10 @@ function lastUpdate() {
     const calls = dispatch.mock.calls;
     return calls[calls.length - 1][0] as {
         data?: {
-            blockLeader?: { toBase58(): string };
-            childLeader?: { toBase58(): string };
-            childSlot?: number;
-            parentLeader?: { toBase58(): string };
+            blockLeader?: string;
+            childLeader?: string;
+            childSlot?: bigint;
+            parentLeader?: string;
         };
         status: FetchStatus;
     };
@@ -50,11 +50,11 @@ beforeEach(() => {
         getBlocks: (...args: unknown[]) => ({ send: () => getBlocks(...args) }),
         getSlotLeaders: (...args: unknown[]) => ({ send: () => getSlotLeaders(...args) }),
     });
-    fetchBlockBySlot.mockResolvedValue({ parentSlot: PARENT_SLOT });
+    fetchBlockBySlot.mockResolvedValue({ parentSlot: BigInt(PARENT_SLOT) });
 });
 
 describe('fetchBlock', () => {
-    it('should convert the child slot from a bigint and resolve leaders positionally', async () => {
+    it('should keep the child slot and leaders in their kit types', async () => {
         getBlocks.mockResolvedValue([101n, 102n]);
         getSlotLeaders.mockResolvedValue(LEADERS);
 
@@ -67,10 +67,10 @@ describe('fetchBlock', () => {
 
         const data = lastUpdate().data;
         expect(lastUpdate().status).toBe(FetchStatus.Fetched);
-        expect(data?.childSlot).toBe(101);
-        expect(data?.parentLeader?.toBase58()).toBe(LEADERS[0]);
-        expect(data?.blockLeader?.toBase58()).toBe(LEADERS[1]);
-        expect(data?.childLeader?.toBase58()).toBe(LEADERS[2]);
+        expect(data?.childSlot).toBe(101n);
+        expect(data?.parentLeader).toBe(LEADERS[0]);
+        expect(data?.blockLeader).toBe(LEADERS[1]);
+        expect(data?.childLeader).toBe(LEADERS[2]);
     });
 
     it('should leave the child slot and child leader undefined when no later block exists', async () => {
@@ -83,7 +83,7 @@ describe('fetchBlock', () => {
         const data = lastUpdate().data;
         expect(data?.childSlot).toBeUndefined();
         expect(data?.childLeader).toBeUndefined();
-        expect(data?.blockLeader?.toBase58()).toBe(LEADERS[1]);
+        expect(data?.blockLeader).toBe(LEADERS[1]);
     });
 
     it('should still report the block when the leader lookup fails', async () => {

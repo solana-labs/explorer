@@ -1,3 +1,5 @@
+import type { BlockData } from '@entities/block-data';
+import { address, blockhash, lamports, type Reward } from '@solana/kit';
 import { nextjsParameters, withCluster, withTokenInfoBatch } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
@@ -32,24 +34,32 @@ const PUBKEYS = [
     'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s',
 ];
 
-const sampleReward = (i: number) => ({
-    lamports: 1_500_000 + i * 1_000,
-    postBalance: 12_345_678_900 + i * 1_000_000,
-    pubkey: PUBKEYS[i % PUBKEYS.length],
+const sampleReward = (i: number): Reward => ({
+    commission: 5,
+    lamports: BigInt(1_500_000 + i * 1_000),
+    postBalance: lamports(BigInt(12_345_678_900 + i * 1_000_000)),
+    pubkey: address(PUBKEYS[i % PUBKEYS.length]),
     rewardType: i % 2 === 0 ? 'Staking' : 'Voting',
 });
 
-const rewards = (n: number) => ({ rewards: Array.from({ length: n }, (_, i) => sampleReward(i)) }) as any;
+const blockWithRewards = (count: number): BlockData => ({
+    blockTime: null,
+    blockhash: blockhash('11111111111111111111111111111111'),
+    parentSlot: 0n,
+    previousBlockhash: blockhash('11111111111111111111111111111111'),
+    rewards: Array.from({ length: count }, (_, index) => sampleReward(index)),
+    transactions: [],
+});
 
 export const WithRewards: Story = {
     args: {
-        block: rewards(8),
+        block: blockWithRewards(8),
     },
 };
 
 // More than one page (PAGE_SIZE = 10) so the "Load More" footer shows.
 export const WithManyRewards: Story = {
     args: {
-        block: rewards(25),
+        block: blockWithRewards(25),
     },
 };

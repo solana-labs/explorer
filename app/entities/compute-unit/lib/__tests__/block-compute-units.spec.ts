@@ -1,5 +1,6 @@
-import type { BlockWithV1 } from '@entities/block-data/@x/compute-unit';
-import { ComputeBudgetProgram, PublicKey } from '@solana/web3.js';
+import type { BlockData, BlockTransaction } from '@entities/block-data/@x/compute-unit';
+import { address, blockhash, lamports } from '@solana/kit';
+import { COMPUTE_BUDGET_PROGRAM_ADDRESS } from '@solana-program/compute-budget';
 import { Cluster } from '@utils/cluster';
 
 import { alloc, writeUint32LE } from '@/app/shared/lib/bytes';
@@ -23,21 +24,37 @@ function mockTransaction({
     const data = alloc(5);
     data[0] = 2; // SetComputeUnitLimit instruction type
     writeUint32LE(data, requestedUnits, 1);
-    const programId = ComputeBudgetProgram.programId;
-
     return {
-        meta: hasMeta ? { computeUnitsConsumed: consumed, costUnits: cost, err: null } : null,
-        transaction: {
-            message: {
-                compiledInstructions: [{ data, programIdIndex: 0 }],
-                staticAccountKeys: [new PublicKey(programId.toBase58())],
-            },
+        index: 0,
+        message: {
+            header: { numReadonlyNonSignerAccounts: 0, numReadonlySignerAccounts: 0, numSignerAccounts: 0 },
+            instructions: [{ data, programAddressIndex: 0 }],
+            lifetimeToken: blockhash('11111111111111111111111111111111'),
+            staticAccounts: [address(COMPUTE_BUDGET_PROGRAM_ADDRESS)],
+            version: 'legacy',
         },
-    };
+        meta: hasMeta
+            ? {
+                  computeUnitsConsumed: BigInt(consumed),
+                  costUnits: BigInt(cost),
+                  err: null,
+                  fee: lamports(0n),
+                  logMessages: [],
+              }
+            : null,
+        signatures: [],
+    } satisfies BlockTransaction;
 }
 
-function mockBlock(transactions: ReturnType<typeof mockTransaction>[]): BlockWithV1 {
-    return { transactions } as unknown as BlockWithV1;
+function mockBlock(transactions: BlockData['transactions']): BlockData {
+    return {
+        blockTime: null,
+        blockhash: blockhash('11111111111111111111111111111111'),
+        parentSlot: 0n,
+        previousBlockhash: blockhash('11111111111111111111111111111111'),
+        rewards: [],
+        transactions,
+    };
 }
 
 const EPOCH = 1000n;
@@ -51,8 +68,9 @@ describe('summarizeBlockComputeUnits', () => {
         ]);
 
         expect(summarizeBlockComputeUnits({ block, cluster: CLUSTER, epoch: EPOCH })).toEqual({
-            consumed: 130_000,
-            cost: 110_000,
+            consumed: 130_000n,
+            cost: 110_000n,
+            incomplete: false,
             max: getMaxComputeUnitsInBlock({ cluster: CLUSTER, epoch: EPOCH }),
             requested: 150_000,
         });
@@ -65,8 +83,9 @@ describe('summarizeBlockComputeUnits', () => {
         ]);
 
         expect(summarizeBlockComputeUnits({ block, cluster: CLUSTER, epoch: EPOCH })).toEqual({
-            consumed: 25_000,
-            cost: 20_000,
+            consumed: 25_000n,
+            cost: 20_000n,
+            incomplete: false,
             max: getMaxComputeUnitsInBlock({ cluster: CLUSTER, epoch: EPOCH }),
             requested: 130_000,
         });
@@ -74,10 +93,26 @@ describe('summarizeBlockComputeUnits', () => {
 
     it('should return zeroed totals (plus the block ceiling) for an empty block', () => {
         expect(summarizeBlockComputeUnits({ block: mockBlock([]), cluster: CLUSTER, epoch: EPOCH })).toEqual({
-            consumed: 0,
-            cost: 0,
+            consumed: 0n,
+            cost: 0n,
+            incomplete: false,
             max: getMaxComputeUnitsInBlock({ cluster: CLUSTER, epoch: EPOCH }),
             requested: 0,
+        });
+    });
+
+    it('should mark readable-transaction totals as incomplete when any transaction is unavailable', () => {
+        const block = mockBlock([
+            mockTransaction({ consumed: 90_000, cost: 80_000, requestedUnits: 100_000 }),
+            { index: 1, unavailable: true },
+        ]);
+
+        expect(summarizeBlockComputeUnits({ block, cluster: CLUSTER, epoch: EPOCH })).toEqual({
+            consumed: 90_000n,
+            cost: 80_000n,
+            incomplete: true,
+            max: getMaxComputeUnitsInBlock({ cluster: CLUSTER, epoch: EPOCH }),
+            requested: 100_000,
         });
     });
 });

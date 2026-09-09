@@ -1,24 +1,47 @@
-import type { TransactionVersion } from '@solana/kit';
-import type { VersionedBlockResponse } from '@solana/web3.js';
+import type {
+    Blockhash,
+    CompiledTransactionMessage,
+    CompiledTransactionMessageWithLifetime,
+    Reward,
+    Signature,
+    Slot,
+    TransactionForFullBase64,
+    UnixTimestamp,
+} from '@solana/kit';
 
-import type { V1TransactionConfig } from '@/app/shared/lib/v1-message-bridge';
+export type BlockTransactionMeta = Pick<
+    NonNullable<TransactionForFullBase64<1>['meta']>,
+    'computeUnitsConsumed' | 'err' | 'fee' | 'logMessages'
+> &
+    Partial<Pick<NonNullable<TransactionForFullBase64<1>['meta']>, 'innerInstructions' | 'loadedAddresses'>> &
+    Readonly<{
+        /** Served by RPC nodes, but not yet included in kit's transaction meta type. */
+        costUnits?: bigint;
+    }>;
 
-/**
- * A block transaction in the shape the block cards consume.
- *
- * Matches a web3.js `VersionedBlockResponse` entry so existing consumers are unaffected, with the
- * version widened to cover v1, which web3.js `TransactionVersion` cannot describe.
- */
-export type BlockTransaction = Omit<VersionedBlockResponse['transactions'][number], 'version'> & {
-    transactionConfig?: V1TransactionConfig;
-    version: TransactionVersion;
-};
+export type BlockTransaction = Readonly<{
+    index: number;
+    message: CompiledTransactionMessage & CompiledTransactionMessageWithLifetime;
+    meta: BlockTransactionMeta | null;
+    signatures: readonly Signature[];
+}>;
 
-/**
- * A block in the shape the block pages consume.
- *
- * Matches web3.js `VersionedBlockResponse` apart from the widened transaction version.
- */
-export type BlockWithV1 = Omit<VersionedBlockResponse, 'transactions'> & {
-    transactions: BlockTransaction[];
-};
+export type UnavailableBlockTransaction = Readonly<{
+    index: number;
+    unavailable: true;
+}>;
+
+export type BlockTransactionEntry = BlockTransaction | UnavailableBlockTransaction;
+
+export type BlockData = Readonly<{
+    blockTime: UnixTimestamp | null;
+    blockhash: Blockhash;
+    parentSlot: Slot;
+    previousBlockhash: Blockhash;
+    rewards: readonly Reward[];
+    transactions: readonly BlockTransactionEntry[];
+}>;
+
+export function isBlockTransaction(entry: BlockTransactionEntry): entry is BlockTransaction {
+    return !('unavailable' in entry);
+}
