@@ -6,6 +6,7 @@ import { TableCardBody } from '@components/common/TableCardBody';
 import { TimestampToggle } from '@components/common/TimestampToggle';
 import { LiveTransactionStatsCard } from '@components/LiveTransactionStatsCard';
 import { StatsNotReady } from '@components/StatsNotReady';
+import { TempBundleWeight } from '@components/TempBundleWeight';
 import { UpcomingFeatures } from '@features/feature-gate';
 import { useCluster } from '@providers/cluster';
 import { StatsProvider } from '@providers/stats';
@@ -29,6 +30,7 @@ export default function Page() {
     return (
         <StatsProvider>
             <PageContainer className="mt-4">
+                <TempBundleWeight />
                 <StakingSection />
 
                 <div className="flex flex-col lg:flex-row lg:gap-6">
