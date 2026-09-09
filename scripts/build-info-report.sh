@@ -20,9 +20,5 @@ fi
 git fetch --depth=1 origin "$base_ref"
 git show FETCH_HEAD:bench/BUILD.md > .next/BUILD.base.md
 
-# Plain `diff` (not `git diff`) so local git diff-tool config can never leak into the report;
-# it exits 1 whenever the files differ, hence the `|| true`.
-diff -U0 .next/BUILD.base.md "$fresh" > .next/BUILD.diff || true
-
-pnpm exec tsx scripts/build-info-diff.ts report .next/BUILD.base.md "$fresh" "$base_ref" .next/BUILD.diff bench/BUILD.md > .next/bundle-report.md
+pnpm exec tsx scripts/build-info-diff.ts report .next/BUILD.base.md "$fresh" "$base_ref" bench/BUILD.md > .next/bundle-report.md
 cat .next/bundle-report.md

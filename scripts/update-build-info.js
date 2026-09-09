@@ -272,7 +272,7 @@ function formatTable(routes, sizes, previousCells = new Map()) {
     const tableLines = [];
 
     tableLines.push(
-        '> Sizes are gzipped, approximate, and rounded to reduce build-output noise. Next.js 16 (Turbopack) no longer prints sizes to stdout; these are derived by gzipping the first-load chunks listed in `.next/diagnostics/route-bundle-stats.json`. `Size` is First Load JS minus the chunks shared by all routes. Routes with no client JS (e.g. API routes) show `—`. A cell keeps its previous value while the fresh bytes round within one step of it, so edge-of-rounding builds stay stable.',
+        '> Gzipped first-load sizes from `.next/diagnostics/route-bundle-stats.json`, rounded to reduce noise; a cell keeps its previous value while fresh bytes round within one step of it. `Size` is First Load JS minus the chunks shared by all routes; routes with no client JS show `—`.',
     );
     tableLines.push('');
     tableLines.push('| Type | Route | Size | First Load JS |');

@@ -121,38 +121,10 @@ function routeCell(change: RouteChange): string {
     return `\`${change.route}\`${suffix}`;
 }
 
-// Keeps only the -/+ payload: table rows self-identify, so git's file headers and hunk markers add noise.
-function stripDiffHeaders(diff: string): string {
-    const isHeader = (line: string) =>
-        line.startsWith('diff --git') ||
-        line.startsWith('index ') ||
-        line.startsWith('--- ') ||
-        line.startsWith('+++ ') ||
-        line.startsWith('@@');
-    return diff
-        .split('\n')
-        .filter(line => !isHeader(line))
-        .join('\n')
-        .trim();
-}
-
-// Drops -/+ rows for routes whose movement is one-step noise, mirroring the summary's suppression.
-function suppressNoiseRows(diff: string, noiseRoutes: Set<string>): string {
-    return diff
-        .split('\n')
-        .filter(line => {
-            if (!line.startsWith('-') && !line.startsWith('+')) return true;
-            const row = parseRow(line.slice(1));
-            return row === undefined || !noiseRoutes.has(row.route);
-        })
-        .join('\n')
-        .trim();
-}
-
 export function formatReport(
     changes: RouteChange[],
     freshMarkdown: string,
-    options: { baseLabel: string; diff?: string; stale?: boolean },
+    options: { baseLabel: string; stale?: boolean },
 ): string {
     const lines = [`### 📦 Bundle change vs \`${options.baseLabel}\``, ''];
     if (options.stale) {
@@ -163,20 +135,12 @@ export function formatReport(
     }
     const significant = changes.filter(change => exceedsTolerance(change));
     const noiseCount = changes.length - significant.length;
-    const noiseRoutes = new Set(changes.filter(change => !exceedsTolerance(change)).map(change => change.route));
-    const diff =
-        options.diff === undefined ? undefined : suppressNoiseRows(stripDiffHeaders(options.diff), noiseRoutes);
 
     if (significant.length === 0) {
         lines.push('No route size changes.');
     } else {
         const count = (kind: RouteChange['kind']) => significant.filter(change => change.kind === kind).length;
         lines.push(`**${count('changed')} changed · ${count('added')} added · ${count('removed')} removed**`);
-    }
-
-    if (diff) {
-        lines.push('', '```diff', diff, '```');
-    } else if (significant.length > 0) {
         lines.push('', '| Route | Size | First Load JS |', '|-------|------|---------------|');
         for (const change of significant) {
             const size = movementCell(change.before?.size, change.after?.size);
@@ -216,11 +180,9 @@ export function formatCheckFailure(changes: RouteChange[]): string {
 }
 
 async function main() {
-    const [mode, basePath, freshPath, baseLabel, diffPath, committedPath] = process.argv.slice(2);
+    const [mode, basePath, freshPath, baseLabel, committedPath] = process.argv.slice(2);
     if ((mode !== 'report' && mode !== 'check') || !basePath || !freshPath) {
-        console.error(
-            'Usage: build-info-diff.ts <report|check> <base.md> <fresh.md> [base-label] [diff-file] [committed.md]',
-        );
+        console.error('Usage: build-info-diff.ts <report|check> <base.md> <fresh.md> [base-label] [committed.md]');
         process.exit(2);
     }
 
@@ -230,9 +192,8 @@ async function main() {
     const changes = diffBuildInfo(parseBuildInfoTable(baseMarkdown), fresh);
 
     if (mode === 'report') {
-        const diff = diffPath ? await readFile(diffPath, 'utf8') : undefined;
         const stale = committedPath ? (await readFile(committedPath, 'utf8')) !== freshMarkdown : false;
-        console.log(formatReport(changes, freshMarkdown, { baseLabel: baseLabel || 'master', diff, stale }));
+        console.log(formatReport(changes, freshMarkdown, { baseLabel: baseLabel || 'master', stale }));
         return;
     }
 
