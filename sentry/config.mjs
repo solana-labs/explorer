@@ -2,12 +2,19 @@
  * @typedef {'client' | 'server' | 'edge'} RuntimeContext
  */
 
+// Server traces are ~5 spans each; browser pageloads emit hundreds, so client/edge stay near zero.
+const TRACE_SAMPLE_RATES = {
+    client: 1 / 100000000,
+    edge: 1 / 100000000,
+    server: 1 / 100000,
+};
+
 /**
  * Creates the common Sentry configuration for all runtimes
- * @param {RuntimeContext} _context - The runtime context (client, server, or edge)
+ * @param {RuntimeContext} context - The runtime context (client, server, or edge)
  * @returns {import('@sentry/core').Options} Sentry configuration options
  */
-export function createSentryConfig(_context) {
+export function createSentryConfig(context) {
     return {
         sampleRate: 1,
 
@@ -34,7 +41,7 @@ export function createSentryConfig(_context) {
                 return 0;
             }
 
-            return 1 / 100000000;
+            return TRACE_SAMPLE_RATES[context];
         },
 
         // Enable logs to be sent to Sentry
