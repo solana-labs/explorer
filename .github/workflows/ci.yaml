@@ -53,19 +53,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      # The pnpm store is not here: setup-node caches it, and holding both stored the same tree twice.
-      # A source hash suits an incremental build cache, where a near miss still helps.
       - name: Setup Additional Cache
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: additional_cache
-        with:
-          path: |
-            ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
-            ${{ github.workspace }}/.next/cache
-          key: build-cache-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('**/.browserslistrc') }}-${{ hashFiles('**/*.ts', '**/*.tsx') }}
-          restore-keys: |
-            build-cache-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/pnpm-lock.yaml') }}-
-            build-cache-${{ runner.os }}-${{ runner.arch }}-
+        uses: ./.github/actions/build-cache
 
       - name: Setup pnpm and Node.js
         uses: ./.github/actions/pnpm-setup
@@ -137,15 +126,7 @@ jobs:
       # Same key as Build-And-Test: that job has just built this tree, so its .next/cache makes
       # the extra production build here mostly incremental.
       - name: Setup Additional Cache
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: |
-            ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
-            ${{ github.workspace }}/.next/cache
-          key: build-cache-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('**/.browserslistrc') }}-${{ hashFiles('**/*.ts', '**/*.tsx') }}
-          restore-keys: |
-            build-cache-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/pnpm-lock.yaml') }}-
-            build-cache-${{ runner.os }}-${{ runner.arch }}-
+        uses: ./.github/actions/build-cache
 
       - name: Setup pnpm and Node.js
         uses: ./.github/actions/pnpm-setup
