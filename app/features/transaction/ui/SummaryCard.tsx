@@ -34,7 +34,7 @@ import { getTransactionInstructionError } from '@utils/program-err';
 import { intoTransactionInstruction } from '@utils/tx';
 import { useBuildClusterPath, useClusterPath } from '@utils/url';
 import Link from 'next/link';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { ZoomIn } from 'react-feather';
 
 import { Label, Row, Value } from '@/app/components/shared/ui/detail-row';
@@ -126,11 +126,19 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
     // `getTransaction` answers null until the block is confirmed, so a transaction that is merely processed
     // has no wire bytes and no block time yet. Retry it alongside the status until one arrives; auto-refresh
     // only runs while confirmations are short of max, so this stops on its own.
-    const hasRawTransaction = Boolean(rawDetails?.data?.raw);
+    //
+    // Read the entry through a ref: the hook needs a stable callback, and the entry changes on every
+    // fetch, so a dependency would rebuild the interval and push the next status refresh out.
+    const rawEntryRef = useRef(rawDetails);
+    rawEntryRef.current = rawDetails;
     const refresh = useCallback(() => {
         fetchStatus(signature);
-        if (!hasRawTransaction) fetchRaw(signature);
-    }, [fetchStatus, fetchRaw, hasRawTransaction, signature]);
+        const entry = rawEntryRef.current;
+        // Never open a second request while one is still running. The cache keeps whichever response
+        // lands last, so a slow null would replace a transaction a later request had already found, and
+        // auto-refresh can stop on the very next status before anything retries.
+        if (!entry?.data?.raw && entry?.status !== FetchStatus.Fetching) fetchRaw(signature);
+    }, [fetchStatus, fetchRaw, signature]);
     useAutoRefreshInterval(autoRefresh, refresh);
 
     if (!status || (status.status === FetchStatus.Fetching && autoRefresh === AutoRefresh.Inactive)) {
