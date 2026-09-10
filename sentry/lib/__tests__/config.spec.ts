@@ -145,10 +145,13 @@ describe('createSentryConfig environment', () => {
 });
 
 describe('sampleRate', () => {
-    it('should keep error events at full sample on every runtime', () => {
-        expect(createSentryConfig('client').sampleRate).toBe(1);
+    it('should keep server and edge error events at full sample', () => {
         expect(createSentryConfig('server').sampleRate).toBe(1);
         expect(createSentryConfig('edge').sampleRate).toBe(1);
+    });
+
+    it('should sample client error events at the dialled-down rate', () => {
+        expect(createSentryConfig('client').sampleRate).toBe(1 / 1000000);
     });
 });
 

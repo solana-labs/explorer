@@ -5,14 +5,19 @@ import { vitalsTraceSampleRate } from './vitals.mjs';
  * @typedef {'client' | 'server' | 'edge'} RuntimeContext
  */
 
-// Error events are rare and load-bearing; every runtime keeps them all.
+// Server/edge errors are rare and load-bearing; the client starts near zero until quota headroom is proven.
+// TODO(rollout): client 1e-6 → 1e-4 → 1e-2 → 1; each ×100 step bounds the next volume at 100× the measured
+// one, advance when that still fits quota. Restore 1 when the beforeSend opt-in gate (feat/feedback-widget)
+// lands and becomes the quota guard.
 const SAMPLE_RATES = {
-    client: 1,
+    client: 1 / 1000000,
     edge: 1,
     server: 1,
 };
 
 // Server traces are ~5 spans each; browser pageloads emit hundreds, so client/edge stay near zero.
+// TODO(rollout): server 1e-5 → 1e-4 → 1e-3 while span quota holds (dampener env vars are the brake);
+// client/edge baselines stay near zero — client visibility ships via the vitals gate, not this map.
 const TRACE_SAMPLE_RATES = {
     client: 1 / 100000000,
     edge: 1 / 100000000,
