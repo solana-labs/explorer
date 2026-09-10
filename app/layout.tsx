@@ -16,6 +16,7 @@ import { Suspense } from 'react';
 import { SearchBar } from '@/app/components/SearchBarLoader';
 import { TokenInfoBatchProvider } from '@/app/entities/token-info';
 import { CookieConsent } from '@/app/features/cookie';
+import { FeedbackWidget } from '@/app/features/feedback';
 import { VisibilityProvider } from '@/app/shared/lib/visibility';
 import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
 import { rubikFont } from '@/app/styles';
@@ -72,6 +73,8 @@ export default function RootLayout({ analytics, children }: { analytics: React.R
                                         <Footer />
                                     </div>
                                     <Toaster position="bottom-center" toastOptions={{ duration: 5_000 }} />
+                                    {/* Inside ClusterProvider: submissions are tagged with the active cluster */}
+                                    <FeedbackWidget />
                                 </TokenInfoBatchProvider>
                             </VisibilityProvider>
                         </ClusterProvider>

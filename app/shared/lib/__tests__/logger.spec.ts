@@ -6,7 +6,7 @@ vi.unmock('@/app/shared/lib/logger');
 // Mock @sentry/nextjs since Logger imports captureException/captureMessage/withScope directly from it.
 const captureException = vi.fn();
 const captureMessage = vi.fn();
-const mockScope = { setExtras: vi.fn(), setLevel: vi.fn() };
+const mockScope = { setExtras: vi.fn(), setLevel: vi.fn(), setTag: vi.fn() };
 vi.mock('@sentry/nextjs', () => ({
     captureException: (...args: unknown[]) => captureException(...args),
     captureMessage: (...args: unknown[]) => captureMessage(...args),
@@ -19,10 +19,12 @@ describe('Logger', () => {
     beforeEach(() => {
         vi.restoreAllMocks();
         vi.unstubAllEnvs();
+        vi.unstubAllGlobals();
         captureException.mockClear();
         captureMessage.mockClear();
         mockScope.setLevel.mockClear();
         mockScope.setExtras.mockClear();
+        mockScope.setTag.mockClear();
     });
 
     describe('isLoggable gating', () => {
@@ -169,7 +171,10 @@ describe('Logger', () => {
         });
     });
 
+    // jsdom provides `window`, so plain `sentry: true` is the browser path; these describe the server.
     describe('error with sentry', () => {
+        beforeEach(() => vi.stubGlobal('window', undefined));
+
         it('should call captureException with error level when sentry flag is true', () => {
             vi.stubEnv('NEXT_LOG_LEVEL', '1');
             vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -257,6 +262,8 @@ describe('Logger', () => {
     });
 
     describe('warn with sentry', () => {
+        beforeEach(() => vi.stubGlobal('window', undefined));
+
         it('should call captureMessage with warning level when sentry flag is true', () => {
             vi.stubEnv('NEXT_LOG_LEVEL', '2');
             vi.spyOn(console, 'warn').mockImplementation(() => {});
@@ -303,6 +310,67 @@ describe('Logger', () => {
             Logger.warn('[api] rate limited', { route: '/tokens', sentry: true });
 
             expect(spy).toHaveBeenCalledWith('[api] rate limited', { route: '/tokens' });
+        });
+
+        it('should not tag server captures with the client report tag', () => {
+            vi.stubEnv('NEXT_LOG_LEVEL', '2');
+            vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+            Logger.warn('[api] rate limited', { sentry: true });
+
+            expect(captureMessage).toHaveBeenCalled();
+            expect(mockScope.setTag).not.toHaveBeenCalled();
+        });
+    });
+
+    // jsdom keeps `window` defined, which is the browser runtime to the Logger.
+    describe('browser gating', () => {
+        beforeEach(() => {
+            vi.stubEnv('NEXT_LOG_LEVEL', '2');
+            vi.spyOn(console, 'error').mockImplementation(() => {});
+            vi.spyOn(console, 'warn').mockImplementation(() => {});
+        });
+
+        it('should not call captureException in the browser when sentry is true', () => {
+            Logger.error(new Error('server-minded call site'), { sentry: true });
+
+            expect(captureException).not.toHaveBeenCalled();
+        });
+
+        it('should not call captureMessage in the browser when sentry is true', () => {
+            Logger.warn('[api] rate limited', { sentry: true });
+
+            expect(captureMessage).not.toHaveBeenCalled();
+        });
+
+        it('should call captureException in the browser when sentry is "always"', () => {
+            const err = new Error('client-only failure');
+
+            Logger.error(err, { sentry: 'always' });
+
+            expect(captureException).toHaveBeenCalledWith(err);
+        });
+
+        it('should call captureMessage in the browser when sentry is "always"', () => {
+            Logger.warn('[idl] fetch failed', { sentry: 'always' });
+
+            expect(captureMessage).toHaveBeenCalledWith('[idl] fetch failed');
+        });
+
+        // The client config's beforeSend drops untagged events, so an untagged capture would vanish.
+        it('should tag browser captures so the client beforeSend passes them through', () => {
+            Logger.error(new Error('client-only failure'), { sentry: 'always' });
+
+            expect(mockScope.setTag).toHaveBeenCalledWith('client_report', 'allowed');
+        });
+
+        it('should capture panic in the browser without an opt-in and tag it', () => {
+            const err = new Error('render crash');
+
+            Logger.panic(err);
+
+            expect(captureException).toHaveBeenCalledWith(err);
+            expect(mockScope.setTag).toHaveBeenCalledWith('client_report', 'allowed');
         });
     });
 });

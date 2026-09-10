@@ -1,6 +1,8 @@
 import type { SeverityLevel } from '@sentry/core';
 import { captureException, captureMessage, withScope } from '@sentry/nextjs';
 
+import { CLIENT_REPORT_ALLOWED, CLIENT_REPORT_TAG } from '@/sentry/client-report.mjs';
+
 enum LOG_LEVEL {
     PANIC,
     ERROR,
@@ -13,9 +15,11 @@ type LogContext = Record<string, unknown>;
 
 type SentryExtras = Record<string, unknown>;
 
+type SentryReport = boolean | 'always';
+
 type SentryContext = LogContext & {
-    /** When true, the event is also sent to Sentry. */
-    sentry?: boolean;
+    /** `true` sends to Sentry from the server only — never from the browser; `'always'` reports from both. */
+    sentry?: SentryReport;
     /** Extra data sent exclusively to Sentry (not included in console output). */
     sentryExtras?: SentryExtras;
 };
@@ -36,9 +40,13 @@ type PanicContext = LogContext & {
  * - Dynamic values go in the context object for searchable stable messages
  *
  * Sentry integration (each method always sets the correct severity level via `withScope`):
- * - `panic` (level: `fatal`) — always calls `captureException`.
- * - `error` (level: `error`) — calls `captureException` when `{ sentry: true }`.
- * - `warn`  (level: `warning`) — calls `captureMessage` when `{ sentry: true }`.
+ * - `panic` (level: `fatal`) — always calls `captureException`, on every runtime.
+ * - `error` (level: `error`) — `captureException` on the server only with `{ sentry: true }`; in the browser
+ *   nothing is sent unless the call site writes `{ sentry: 'always' }`.
+ * - `warn`  (level: `warning`) — `captureMessage` under the same rule.
+ *
+ * `sentry: true` is a no-op in the browser, by design: bot-heavy client traffic must not page Sentry.
+ * Browser captures are tagged so the client config's `beforeSend` can drop anything not routed through here.
  *
  * Use `sentryExtras` to attach data exclusively to the Sentry event.
  * Context fields outside `sentryExtras` are only sent to the console.
@@ -53,13 +61,13 @@ class StraightforwardLogger {
     }
     error(maybeError: unknown, context?: SentryContext) {
         const error = resolveError(maybeError);
-        if (context?.sentry) {
+        if (shouldReport(context?.sentry)) {
             withSentryLevel('error', context, () => captureException(error));
         }
         isLoggable(LOG_LEVEL.ERROR) && console.error(error, ...consoleArgs(context));
     }
     warn(message: string, context?: SentryContext) {
-        if (context?.sentry) {
+        if (shouldReport(context?.sentry)) {
             withSentryLevel('warning', context, () => captureMessage(message));
         }
         isLoggable(LOG_LEVEL.WARN) && console.warn(message, ...consoleArgs(context));
@@ -104,6 +112,12 @@ function isLoggable(expectedLevel: LOG_LEVEL) {
     return !isNullish(currentLevel) && Number.isFinite(currentLevel) && expectedLevel <= currentLevel;
 }
 
+/** `true` never reports from the browser: it was almost always written with the server in mind. */
+function shouldReport(sentry: SentryReport | undefined): boolean {
+    if (!sentry) return false;
+    return sentry === 'always' || typeof window === 'undefined';
+}
+
 /** Logs a debug warning when the error field is not a real Error instance. */
 function warnIfNotError(value: unknown) {
     if (value instanceof Error) return;
@@ -136,6 +150,9 @@ function withSentryLevel(
 ) {
     withScope(scope => {
         scope.setLevel(level);
+        // The client Sentry config's beforeSend drops browser events without this tag, so a capture
+        // that bypasses the Logger cannot report from the browser.
+        if (typeof window !== 'undefined') scope.setTag(CLIENT_REPORT_TAG, CLIENT_REPORT_ALLOWED);
         if (context?.sentryExtras) scope.setExtras(context.sentryExtras);
         capture();
     });

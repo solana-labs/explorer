@@ -1,14 +1,32 @@
+import { CLIENT_REPORT_ALLOWED, CLIENT_REPORT_TAG } from './client-report.mjs';
+
 /**
  * @typedef {'client' | 'server' | 'edge'} RuntimeContext
  */
 
 /**
  * Creates the common Sentry configuration for all runtimes
- * @param {RuntimeContext} _context - The runtime context (client, server, or edge)
+ * @param {RuntimeContext} context - The runtime context (client, server, or edge)
  * @returns {import('@sentry/core').Options} Sentry configuration options
  */
-export function createSentryConfig(_context) {
+export function createSentryConfig(context) {
     return {
+        // Client bundles only see inlined NEXT_PUBLIC_* literals (the browser SDK has no env
+        // fallback); server/edge prefer SENTRY_DSN but accept the public DSN, so one var covers all.
+        dsn:
+            context === 'client'
+                ? process.env.NEXT_PUBLIC_SENTRY_DSN
+                : process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN,
+
+        // Browser error events must carry the Logger's opt-in tag; everything else — a stray
+        // captureException, a `sentry: true` written with the server in mind, SDK auto-captures — is
+        // dropped, so bot-heavy client traffic cannot page Sentry. Feedback events bypass beforeSend.
+        ...(context === 'client' && {
+            beforeSend: (/** @type {import('@sentry/core').ErrorEvent} */ event) =>
+                // eslint-disable-next-line unicorn/no-null -- Sentry's drop signal is null
+                event.tags?.[CLIENT_REPORT_TAG] === CLIENT_REPORT_ALLOWED ? event : null,
+        }),
+
         sampleRate: 1,
 
         // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
