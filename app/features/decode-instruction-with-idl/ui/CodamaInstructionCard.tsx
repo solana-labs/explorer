@@ -13,23 +13,29 @@ export function CodamaInstructionCard({
     ix,
     result,
     index,
+    childIndex,
     innerCards,
     parsedIx,
 }: {
     ix: TransactionInstruction;
     result: SignatureResult;
     index: number;
+    childIndex?: number;
     innerCards?: JSX.Element[];
     parsedIx: ReturnType<typeof parseInstruction>;
 }) {
     if (parsedIx?.path[0].kind !== 'rootNode') {
-        return <UnknownDetailsCard ix={ix} result={result} index={index} innerCards={innerCards} />;
+        return (
+            <UnknownDetailsCard ix={ix} result={result} index={index} childIndex={childIndex} innerCards={innerCards} />
+        );
     }
     const rawProgramName = parsedIx?.path[0].program.name;
     const programName = rawProgramName.charAt(0).toUpperCase() + rawProgramName.slice(1);
     const lastNode = parsedIx?.path[parsedIx?.path.length - 1];
     if (lastNode.kind !== 'instructionNode') {
-        return <UnknownDetailsCard ix={ix} result={result} index={index} innerCards={innerCards} />;
+        return (
+            <UnknownDetailsCard ix={ix} result={result} index={index} childIndex={childIndex} innerCards={innerCards} />
+        );
     }
     const instructionName = lastNode.name;
     const ixTitle = `${programName}: ${instructionName.charAt(0).toUpperCase() + instructionName.slice(1)}`;
@@ -74,7 +80,14 @@ export function CodamaInstructionCard({
     const hasArgs = argRows.some(Boolean);
 
     return (
-        <InstructionCard title={ixTitle} ix={ix} result={result} index={index} innerCards={innerCards}>
+        <InstructionCard
+            title={ixTitle}
+            ix={ix}
+            result={result}
+            index={index}
+            childIndex={childIndex}
+            innerCards={innerCards}
+        >
             <BaseTable.Row>
                 <BaseTable.Cell>Program</BaseTable.Cell>
                 <BaseTable.Cell className="text-right" colSpan={2}>
