@@ -10,6 +10,7 @@ import {
     MOCK_FAILED_TX,
     MOCK_LOOSE_BUDGET_TX,
     MOCK_PARSED_TX,
+    MOCK_PARSED_TX_NO_BLOCK_TIME,
     MOCK_RAW_TX,
     MOCK_STATUS,
 } from '../__fixtures__/transaction';
@@ -93,8 +94,8 @@ export const NoTimestamp: Story = {
     decorators: [
         Story => {
             const Wrapper = withTransactionProviders(
-                { [DEFAULT_SIGNATURE]: MOCK_PARSED_TX },
-                { [DEFAULT_SIGNATURE]: mockTransactionStatus({ timestamp: 'unavailable' }) },
+                { [DEFAULT_SIGNATURE]: MOCK_PARSED_TX_NO_BLOCK_TIME },
+                { [DEFAULT_SIGNATURE]: mockTransactionStatus() },
             );
             return (
                 <Wrapper>

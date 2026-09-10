@@ -2,6 +2,7 @@ import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { useFirstAvailableBlock } from '@/app/providers/cluster';
 import { Cluster } from '@/app/utils/cluster';
 
 import { TransactionNotFoundCard } from '../TransactionNotFoundCard';
@@ -9,6 +10,7 @@ import { TransactionNotFoundCard } from '../TransactionNotFoundCard';
 // Mock useCluster to return a controlled cluster value
 vi.mock('@/app/providers/cluster', () => ({
     useCluster: vi.fn(() => ({ cluster: Cluster.MainnetBeta })),
+    useFirstAvailableBlock: vi.fn(() => undefined),
 }));
 
 // Mock useClusterPath to return a simple path string
@@ -74,9 +76,10 @@ describe('TransactionNotFoundCard', () => {
         expect(retry).toHaveBeenCalledTimes(1);
     });
 
-    it('should show firstAvailableBlock note when provided and positive', async () => {
+    it('should show the first available block note once the search comes back empty', async () => {
         mockSend.mockResolvedValue({ value: [null] });
-        render(<TransactionNotFoundCard signature={TEST_SIGNATURE} firstAvailableBlock={100n} />);
+        vi.mocked(useFirstAvailableBlock).mockReturnValue(100n);
+        render(<TransactionNotFoundCard signature={TEST_SIGNATURE} />);
 
         // Advance past the 700ms sleep per cluster (3 clusters × 700ms)
         await act(async () => {
@@ -90,9 +93,10 @@ describe('TransactionNotFoundCard', () => {
         });
     });
 
-    it('should not show firstAvailableBlock note when block is 0n', async () => {
+    it('should not show the first available block note when the block is 0n', async () => {
         mockSend.mockResolvedValue({ value: [null] });
-        render(<TransactionNotFoundCard signature={TEST_SIGNATURE} firstAvailableBlock={0n} />);
+        vi.mocked(useFirstAvailableBlock).mockReturnValue(0n);
+        render(<TransactionNotFoundCard signature={TEST_SIGNATURE} />);
 
         await act(async () => {
             await vi.advanceTimersByTimeAsync(3000);

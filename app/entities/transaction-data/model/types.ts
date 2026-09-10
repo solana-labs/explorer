@@ -27,6 +27,8 @@ export type TransactionWithMeta = Omit<ParsedTransactionWithMeta, 'version'> & {
 };
 
 type RawTransactionBase = {
+    /** Seconds since the epoch, as the cluster recorded the block. Absent until the block is confirmed. */
+    blockTime?: number;
     messageBytes: Uint8Array;
     meta?: {
         innerInstructions?: CompiledInnerInstruction[];

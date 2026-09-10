@@ -1,6 +1,6 @@
 import { EpochSchedule } from '@utils/epoch-schedule';
 
-interface EpochInfo {
+export interface EpochInfo {
     absoluteSlot: bigint;
     blockHeight: bigint;
     epoch: bigint;
@@ -8,10 +8,9 @@ interface EpochInfo {
     slotsInEpoch: bigint;
 }
 
-// Live ledger info. Fetched lazily by useClusterInfo(), decoupled from connection
-// status so routes that don't render it (e.g. the transaction inspector) never fetch it.
+// The two epoch values together, for pages that render both. Each half is fetched by its own hook,
+// so a page that needs only the schedule never asks for the live epoch.
 export interface ClusterInfo {
-    firstAvailableBlock: bigint;
     epochSchedule: EpochSchedule;
     epochInfo: EpochInfo;
 }

@@ -47,8 +47,11 @@ export {
     useCluster,
     useClusterConnectionFailed,
     useClusterInfo,
-    type ClusterInfoResult,
-    useClusterInfoResult,
+    type ClusterQueryResult,
     useClusterModal,
+    useEpochInfo,
+    useEpochSchedule,
+    useEpochScheduleResult,
+    useFirstAvailableBlock,
     useSolanaRpc,
 } from '@entities/cluster';

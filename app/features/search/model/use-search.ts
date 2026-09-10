@@ -1,4 +1,4 @@
-import { useCluster, useClusterInfo } from '@providers/cluster';
+import { useCluster, useEpochInfo } from '@providers/cluster';
 import useSWR from 'swr';
 
 import { Logger } from '@/app/shared/lib/logger';
@@ -16,7 +16,7 @@ export function useSearch(query: string) {
     // search never re-runs when epoch info resolves. When disabled, currentEpoch stays undefined and
     // drops out of the SWR key below.
     const isNumericQuery = parseNaturalNumber(trimmed) !== undefined;
-    const currentEpoch = useClusterInfo({ enabled: isNumericQuery })?.epochInfo.epoch;
+    const currentEpoch = useEpochInfo({ enabled: isNumericQuery })?.epoch;
 
     return useSWR(
         trimmed.length > 0 ? ['search', trimmed, cluster, genesisHash, currentEpoch?.toString()] : null,

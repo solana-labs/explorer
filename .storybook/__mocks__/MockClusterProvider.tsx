@@ -1,4 +1,4 @@
-// Skips ClusterProvider's mount-time health check (getGenesisHash) and seeds useClusterInfo()'s
+// Skips ClusterProvider's mount-time health check (getGenesisHash) and seeds the epoch hooks'
 // SWR cache so consumers render epoch/schedule data without any network call.
 
 import { toConnectableUrl } from '@entities/cluster';
@@ -30,13 +30,12 @@ const defaultClusterInfo: ClusterInfo = {
         firstNormalSlot: 524_256n,
         slotsPerEpoch: 432_000n,
     },
-    firstAvailableBlock: 0n,
 };
 
 type Props = {
     children: ReactNode;
     state?: ClusterState;
-    /** Seeds useClusterInfo()'s SWR cache. Pass `null` to leave it empty (loading state). */
+    /** Seeds the epoch hooks' SWR cache. Pass `null` to leave it empty (loading state). */
     clusterInfo?: ClusterInfo | null;
     modalOpen?: boolean;
 };
@@ -51,7 +50,13 @@ export function MockClusterProvider({
     // Seed the modal atom into the ambient jotai store (the story's own store, or the default one).
     useHydrateAtoms([[clusterModalOpenAtom, modalOpen]]);
     const url = clusterUrl(current.selection);
-    const fallback = clusterInfo ? { [unstable_serialize(['cluster-info', url])]: clusterInfo } : {};
+    // Each value has its own SWR entry, so both have to be seeded or a consumer of either sits in loading.
+    const fallback = clusterInfo
+        ? {
+              [unstable_serialize(['epoch-info', url])]: clusterInfo.epochInfo,
+              [unstable_serialize(['epoch-schedule', url])]: clusterInfo.epochSchedule,
+          }
+        : {};
     return (
         <SWRConfig value={{ fallback }}>
             <StateContext.Provider value={current}>{children}</StateContext.Provider>

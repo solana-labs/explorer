@@ -1,5 +1,5 @@
 import { toConnectableUrl } from '@entities/cluster';
-import { useCluster, useClusterInfo } from '@providers/cluster';
+import { useCluster, useEpochInfo } from '@providers/cluster';
 import { renderHook } from '@testing-library/react';
 import useSWR from 'swr';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -13,7 +13,7 @@ import { createSearchContext } from './provider-test-utils';
 
 vi.mock('@providers/cluster', () => ({
     useCluster: vi.fn(),
-    useClusterInfo: vi.fn(),
+    useEpochInfo: vi.fn(),
 }));
 vi.mock('swr', () => ({ default: vi.fn() }));
 
@@ -243,20 +243,20 @@ describe('useSearch', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         vi.mocked(useCluster).mockReturnValue(clusterState);
-        vi.mocked(useClusterInfo).mockReturnValue(undefined);
+        vi.mocked(useEpochInfo).mockReturnValue(undefined);
     });
 
-    it('should not fetch cluster info for a non-numeric query', () => {
+    it('should not fetch the epoch for a non-numeric query', () => {
         renderHook(() => useSearch('So11111111111111111111111111111111111111112'));
 
         // Only numeric epoch searches need the epoch bound, so address/signature searches skip the fetch.
-        expect(useClusterInfo).toHaveBeenCalledWith({ enabled: false });
+        expect(useEpochInfo).toHaveBeenCalledWith({ enabled: false });
     });
 
-    it('should fetch cluster info for a numeric epoch query', () => {
+    it('should fetch the epoch for a numeric epoch query', () => {
         renderHook(() => useSearch('600'));
 
-        expect(useClusterInfo).toHaveBeenCalledWith({ enabled: true });
+        expect(useEpochInfo).toHaveBeenCalledWith({ enabled: true });
     });
 
     it('should omit the epoch from the SWR key for a non-numeric query', () => {
@@ -267,10 +267,12 @@ describe('useSearch', () => {
     });
 
     it('should include the current epoch in the SWR key for a numeric query', () => {
-        vi.mocked(useClusterInfo).mockReturnValue({
-            epochInfo: { absoluteSlot: 0n, blockHeight: 0n, epoch: 500n, slotIndex: 0n, slotsInEpoch: 432_000n },
-            epochSchedule: { firstNormalEpoch: 0n, firstNormalSlot: 0n, slotsPerEpoch: 432_000n },
-            firstAvailableBlock: 0n,
+        vi.mocked(useEpochInfo).mockReturnValue({
+            absoluteSlot: 0n,
+            blockHeight: 0n,
+            epoch: 500n,
+            slotIndex: 0n,
+            slotsInEpoch: 432_000n,
         });
 
         renderHook(() => useSearch('600'));
