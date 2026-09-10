@@ -156,7 +156,7 @@ function DetailsSection({ signature }: SignatureProps) {
 
     return (
         <>
-            <BaseNavigationTabs scrollSpy tabs={tabs} buildHref={path => `#${path}`} className="gap-5" />
+            <BaseNavigationTabs scrollSpy tabs={tabs} buildHref={path => `#${path}`} />
             <Suspense fallback={<LoadingCard message="Loading accounts" />}>
                 <AccountsCard signature={signature} />
             </Suspense>

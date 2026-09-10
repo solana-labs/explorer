@@ -655,7 +655,6 @@ function LoadedView({
                 scrollSpy
                 tabs={tabs}
                 buildHref={path => `#${path}`}
-                className="gap-5"
                 disabledHint="Run the simulation to load this tab's content."
             />
             {signatures && (

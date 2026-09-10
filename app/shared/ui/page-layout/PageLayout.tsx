@@ -3,16 +3,6 @@ import * as React from 'react';
 
 import { cnPrefixed } from '@/app/components/shared/utils';
 
-// The shell of a detail page (Transaction / Block / Account): centres the content column, caps its
-// width and applies the page's horizontal + top padding. It does NOT own the vertical rhythm between
-// blocks — that lives in <PageSections>, so a page composes the two (see the story). Splitting them
-// lets the block page keep its header outside the rhythm while the transaction page keeps it inside.
-//
-// Project breakpoints switch the wide values at `lg` (992px): the mobile/tablet values run through
-// `md`, the desktop values begin at `lg`.
-//
-// The `selection:*` utilities give every detail page the same translucent text-selection highlight,
-// derived from the shared `accent` token, so callers never re-declare it.
 const pageLayoutVariants = cva(
     'mx-auto flex flex-col px-4 pt-3 selection:bg-accent/25 selection:text-inherit lg:px-6 lg:pt-5',
     {

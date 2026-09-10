@@ -30,13 +30,6 @@ export type BaseNavigationTabsProps = {
      * Implies `sticky` (scroll-spy tabs are always pinned).
      */
     scrollSpy?: boolean;
-    /**
-     * Wraps the tab bar in a sticky, full-bleed container that raises a shadow once it sticks to the
-     * top. Use for route-based tabs that should pin (the block page); `scrollSpy` turns this on too.
-     * The wrapper owns its own background (`bg-heavy-metal-900`) so a sticky bar can't render
-     * transparent, and its spacing to the surrounding blocks comes from the page's `PageSections`
-     * rhythm — a sticky tab bar carries no per-page margins.
-     */
     sticky?: boolean;
     tabs: NavigationTab[];
 };
@@ -150,11 +143,7 @@ export function BaseNavigationTabs({
 
     const tabBar = (
         <NavigationTabsContext.Provider value={contextValue}>
-            <div
-                ref={tablistRef}
-                role="tablist"
-                className={cn('inline-flex w-full gap-[18px] overflow-hidden', className)}
-            >
+            <div ref={tablistRef} role="tablist" className={cn('inline-flex w-full gap-5 overflow-hidden', className)}>
                 {visibleTabs.map(tab => (
                     <TabLink
                         key={tab.path}

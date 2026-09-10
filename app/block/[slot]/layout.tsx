@@ -96,9 +96,7 @@ function MoreSection({ children, slot }: { children: React.ReactNode; slot: numb
 
     return (
         <>
-            {/* Sticky, full-bleed tab bar with a shadow on stuck — the same wrapper the transaction page
-                gets from `scrollSpy`, shared here via `sticky` so both pages pin and shadow identically. */}
-            <NavigationTabs buildHref={buildHref} className="gap-5" sticky tabs={TABS} />
+            <NavigationTabs buildHref={buildHref} sticky tabs={TABS} />
             {children}
         </>
     );

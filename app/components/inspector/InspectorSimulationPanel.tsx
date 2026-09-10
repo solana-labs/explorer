@@ -30,9 +30,6 @@ function SimulatedTitle({ children }: { children: React.ReactNode }) {
     );
 }
 
-// Card surface for the simulation-derived blocks (Logs / CU profiling): the card OUTLINE with no
-// filled backing — border only, transparent inside. `border-outer-space-800` matches the other
-// card outlines on the page.
 const OUTLINE_ONLY_CARD = 'rounded-lg border border-solid border-outer-space-800';
 
 // Empty state for a Logs / CU profiling card before a simulation has run: the card exists so its tab has
