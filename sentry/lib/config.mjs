@@ -9,7 +9,7 @@ import { vitalsTraceSampleRate } from './vitals.mjs';
 // TODO(rollout): client 1e-6 → 1e-4 → 1e-2 → 1; each ×100 step bounds the next volume at 100× the measured
 // one, advance when that still fits quota. Restore 1 when the beforeSend opt-in gate (feat/feedback-widget)
 // lands and becomes the quota guard.
-const SAMPLE_RATES = {
+const ERROR_SAMPLE_RATES = {
     client: 1 / 1000000,
     edge: 1,
     server: 1,
@@ -24,6 +24,12 @@ const TRACE_SAMPLE_RATES = {
     server: 1 / 100000,
 };
 
+// Never-sample name substrings: categories that are noise at any rate, excluded before every other rule.
+const TRACE_EXCLUDES = [
+    '/.well-known', // bot and devtools probes
+    'suspense-cache.vercel-infra.com', // Vercel infra, e.g. GET https://iad1.suspense-cache.vercel-infra.com/v1/*
+];
+
 /**
  * Creates the common Sentry configuration for all runtimes
  * @param {RuntimeContext} context - The runtime context (client, server, or edge)
@@ -33,18 +39,11 @@ export function createSentryConfig(context) {
     return {
         dsn: context === 'client' ? clientSentryDsn() : serverSentryDsn(),
 
-        sampleRate: SAMPLE_RATES[context],
+        sampleRate: ERROR_SAMPLE_RATES[context],
 
         // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
         tracesSampler: (/** @type {import('@sentry/core').TracesSamplerSamplingContext} */ samplingContext) => {
-            // Don't sample .well-known
-            if (samplingContext.name.includes('/.well-known')) {
-                return 0;
-            }
-
-            // Don't sample infrastructure requests:
-            // - GET https://iad1.suspense-cache.vercel-infra.com/v1/suspense-cache/*
-            if (samplingContext.name.includes('suspense-cache.vercel-infra.com')) {
+            if (TRACE_EXCLUDES.some(exclude => samplingContext.name.includes(exclude))) {
                 return 0;
             }
 

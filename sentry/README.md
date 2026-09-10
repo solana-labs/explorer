@@ -35,6 +35,6 @@ variable in Vercel and redeploy. Rollback at any point: restore the previous val
 
 ## Where the rates live
 
-Code-owned baselines sit in `lib/config.mjs`: `SAMPLE_RATES` (error events) and `TRACE_SAMPLE_RATES` (traces), each
+Code-owned baselines sit in `lib/config.mjs`: `ERROR_SAMPLE_RATES` (error events) and `TRACE_SAMPLE_RATES` (traces), each
 with a `TODO(rollout)` ladder describing the next steps. The vitals ceiling is `VITALS_TRACE_SAMPLE_RATE` in
 `lib/vitals.mjs`.
