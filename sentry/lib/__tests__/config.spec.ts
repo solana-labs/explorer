@@ -125,6 +125,25 @@ describe('createSentryConfig dsn', () => {
     });
 });
 
+describe('createSentryConfig environment', () => {
+    it('should report the Vercel environment on every runtime', () => {
+        vi.stubEnv('VERCEL_ENV', 'preview');
+        vi.stubEnv('NEXT_PUBLIC_VERCEL_ENV', 'preview');
+        expect(createSentryConfig('client').environment).toBe('preview');
+        expect(createSentryConfig('server').environment).toBe('preview');
+        expect(createSentryConfig('edge').environment).toBe('preview');
+    });
+
+    it('should fall back to NODE_ENV outside Vercel', () => {
+        vi.stubEnv('VERCEL_ENV', undefined);
+        vi.stubEnv('NEXT_PUBLIC_VERCEL_ENV', undefined);
+        vi.stubEnv('NODE_ENV', 'development');
+        expect(createSentryConfig('client').environment).toBe('development');
+        expect(createSentryConfig('server').environment).toBe('development');
+        expect(createSentryConfig('edge').environment).toBe('development');
+    });
+});
+
 describe('sampleRate', () => {
     it('should keep error events at full sample on every runtime', () => {
         expect(createSentryConfig('client').sampleRate).toBe(1);

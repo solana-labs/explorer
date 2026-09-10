@@ -17,6 +17,18 @@ export function serverSentryDsn() {
 }
 
 /**
+ * Deployment environment; VERCEL_ENV keeps previews out of production stats, NODE_ENV covers local runs.
+ * @param {'client' | 'server' | 'edge'} context
+ * @returns {string | undefined}
+ */
+export function sentryEnvironment(context) {
+    if (context === 'client') {
+        return process.env.NEXT_PUBLIC_VERCEL_ENV || process.env.NODE_ENV;
+    }
+    return process.env.VERCEL_ENV || process.env.NODE_ENV;
+}
+
+/**
  * @param {string | undefined} raw
  * @returns {number | undefined} value clamped to [0, 1]; undefined when unset or unparsable
  */
