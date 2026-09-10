@@ -45,8 +45,10 @@ import { UnknownDetailsCard } from './UnknownDetailsCard';
 
 const INSPECTOR_RESULT = { err: null };
 const INSPECTOR_SIGNATURE = '';
-// Same wording the tx page uses when it cannot render an instruction.
-const UNDISPLAYABLE_INSTRUCTION = 'Could not display this instruction, please report';
+// The tx page's wording, plus the position, since this card draws no index badge of its own.
+function undisplayableInstruction(index: number, childIndex: number): string {
+    return `Could not display instruction #${index + 1}.${childIndex + 1}, please report`;
+}
 // A pasted or linked message carries no metadata, so it has no CPIs to show.
 const NO_INNER_INSTRUCTIONS: ReturnType<typeof resolveInnerInstructions> = new Map();
 
@@ -75,6 +77,7 @@ export function InstructionsSection({
     message: VersionedMessage;
     compiledInnerInstructions?: CompiledInnerInstruction[];
 }) {
+    const { cluster } = useCluster();
     const hydratedTables = useAddressLookupTables(
         message.addressTableLookups.map(lookup => lookup.accountKey.toString()),
     );
@@ -115,16 +118,27 @@ export function InstructionsSection({
         <CollapsibleSection id="instructions" title="Instructions" className="">
             <InstructionSurfaceProvider surface={INSPECTOR_SURFACE}>
                 {transactionMessage.instructions.map((ix, index) => {
-                    // A child that cannot be decompiled, or whose card throws, keeps its slot so the
-                    // siblings after it stay on the numbers their positions give them.
+                    // A child that fails keeps its slot, so the siblings after it stay on the numbers
+                    // their positions give them, and it says which number it holds.
                     const innerCards = innerByIndex.get(index)?.map((innerIx, childIndex) => {
-                        const failed = <ErrorCard key={childIndex} text={UNDISPLAYABLE_INSTRUCTION} />;
                         if (!innerIx) {
-                            return failed;
+                            return <ErrorCard key={childIndex} text={undisplayableInstruction(index, childIndex)} />;
                         }
 
                         return (
-                            <ErrorBoundary key={childIndex} fallback={failed}>
+                            <ErrorBoundary
+                                key={childIndex}
+                                // The card carries the badge and the scroll anchor, so a throwing child
+                                // stays numbered and linkable.
+                                fallback={
+                                    <UnknownDetailsCard
+                                        index={index}
+                                        childIndex={childIndex}
+                                        ix={innerIx}
+                                        programName={getProgramName(innerIx.programId.toBase58(), cluster)}
+                                    />
+                                }
+                            >
                                 <InspectorInstructionCard
                                     index={index}
                                     childIndex={childIndex}

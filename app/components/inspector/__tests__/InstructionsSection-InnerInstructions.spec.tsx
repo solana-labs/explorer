@@ -110,6 +110,32 @@ describe('Inspector InstructionsSection with inner instructions', () => {
         expect(await screen.findByText(/Token Program: Batch \(1 instruction\)/i)).toBeInTheDocument();
     });
 
+    test('should number a child it cannot decompile so the siblings keep their positions', async () => {
+        render(
+            <ScrollAnchorProvider>
+                <ClusterProvider>
+                    <TransactionsProvider>
+                        <AccountsProvider>
+                            <InstructionParserProvider dispatcher={instructionParserDispatcher}>
+                                <InstructionsSection
+                                    message={buildMessage()}
+                                    compiledInnerInstructions={INNER_WITH_BAD_ACCOUNT}
+                                />
+                            </InstructionParserProvider>
+                        </AccountsProvider>
+                    </TransactionsProvider>
+                </ClusterProvider>
+            </ScrollAnchorProvider>,
+        );
+
+        expect(await screen.findByText(/Could not display instruction #1\.2, please report/i)).toBeInTheDocument();
+
+        // The child after the hole still reads as the third, not the second.
+        const rendered = document.body.textContent ?? '';
+        expect(rendered).toContain('#1.1');
+        expect(rendered).toContain('#1.3');
+    });
+
     test('should render no inner cards when the transaction carries no metadata', async () => {
         render(
             <ScrollAnchorProvider>
@@ -177,6 +203,22 @@ const INNER_BATCH: CompiledInnerInstruction[] = [
                 accounts: [1, 2, 0],
                 data: encodeBase58([255, 3, 9, 3, 100, 0, 0, 0, 0, 0, 0, 0]),
                 programIdIndex: 6,
+            },
+        ],
+    },
+];
+
+// Three CPIs whose middle one names an account index the message does not have.
+const INNER_WITH_BAD_ACCOUNT: CompiledInnerInstruction[] = [
+    {
+        index: 0,
+        instructions: [
+            { accounts: [4], data: '84eT', programIdIndex: 6 },
+            { accounts: [0, 99], data: 'P', programIdIndex: 6 },
+            {
+                accounts: [0, 2],
+                data: '11119os1e9qSs2u7TsThXqkBSRVFxhmYaFKFZ1waB2X7armDmvK3p5GmLdUxYdg3h7QSrL',
+                programIdIndex: 3,
             },
         ],
     },
