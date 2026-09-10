@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
+Allow: /mcp/start
 Disallow: /api/
 Disallow: /mcp
 
