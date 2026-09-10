@@ -28,7 +28,8 @@ import dynamic from 'next/dynamic';
 import React, { useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
-import { isTokenBatchInstruction, resolveInnerBatchInstructions, TokenBatchCard } from '@/app/features/token-batch';
+import { resolveInnerInstructions } from '@/app/entities/transaction-data';
+import { isTokenBatchInstruction, TokenBatchCard } from '@/app/features/token-batch';
 import { useAddressLookupTables } from '@/app/providers/accounts';
 import { FetchStatus } from '@/app/providers/cache';
 
@@ -44,6 +45,10 @@ import { UnknownDetailsCard } from './UnknownDetailsCard';
 
 const INSPECTOR_RESULT = { err: null };
 const INSPECTOR_SIGNATURE = '';
+// Same wording the tx page uses when it cannot render an instruction.
+const UNDISPLAYABLE_INSTRUCTION = 'Could not display this instruction, please report';
+// A pasted or linked message carries no metadata, so it has no CPIs to show.
+const NO_INNER_INSTRUCTIONS: ReturnType<typeof resolveInnerInstructions> = new Map();
 
 // The PMP card carries the generated client plus pako/yaml/smol-toml (~35 kB gzip), which only a transaction that
 // actually touches the program needs. `isProgramMetadataInstruction` comes from the light `/detection` entry so
@@ -98,28 +103,37 @@ export function InstructionsSection({
     );
     const transactionMessage = TransactionMessage.decompile(message, { addressLookupTableAccounts });
 
-    const batchByIndex = compiledInnerInstructions
-        ? resolveInnerBatchInstructions(
+    const innerByIndex = compiledInnerInstructions
+        ? resolveInnerInstructions(
               compiledInnerInstructions,
               message.getAccountKeys({ addressLookupTableAccounts }),
               message,
           )
-        : {};
+        : NO_INNER_INSTRUCTIONS;
 
     return (
         <CollapsibleSection id="instructions" title="Instructions" className="">
             <InstructionSurfaceProvider surface={INSPECTOR_SURFACE}>
                 {transactionMessage.instructions.map((ix, index) => {
-                    const batchInnerCards = batchByIndex[index]?.map((innerIx, childIndex) => (
-                        <ErrorBoundary key={childIndex} fallback={null}>
-                            <TokenBatchCard
-                                index={index}
-                                childIndex={childIndex}
-                                ix={innerIx}
-                                result={INSPECTOR_RESULT}
-                            />
-                        </ErrorBoundary>
-                    ));
+                    // A child that cannot be decompiled, or whose card throws, keeps its slot so the
+                    // siblings after it stay on the numbers their positions give them.
+                    const innerCards = innerByIndex.get(index)?.map((innerIx, childIndex) => {
+                        const failed = <ErrorCard key={childIndex} text={UNDISPLAYABLE_INSTRUCTION} />;
+                        if (!innerIx) {
+                            return failed;
+                        }
+
+                        return (
+                            <ErrorBoundary key={childIndex} fallback={failed}>
+                                <InspectorInstructionCard
+                                    index={index}
+                                    childIndex={childIndex}
+                                    ix={innerIx}
+                                    message={message}
+                                />
+                            </ErrorBoundary>
+                        );
+                    });
 
                     return (
                         <InspectorInstructionCard
@@ -127,7 +141,7 @@ export function InstructionsSection({
                             index={index}
                             ix={ix}
                             message={message}
-                            innerCards={batchInnerCards}
+                            innerCards={innerCards}
                         />
                     );
                 })}
@@ -140,12 +154,14 @@ function InspectorInstructionCard({
     message,
     ix,
     index,
+    childIndex,
     innerCards,
 }: {
     message: VersionedMessage;
     ix: TransactionInstruction;
     index: number;
-    innerCards?: React.ReactNode[];
+    childIndex?: number;
+    innerCards?: JSX.Element[];
 }) {
     const { cluster } = useCluster();
     const dispatcher = useInstructionParser();
@@ -170,8 +186,9 @@ function InspectorInstructionCard({
                 ix={ix}
                 index={index}
                 result={INSPECTOR_RESULT}
-                innerCards={innerCards}
                 InstructionCardComponent={BaseInstructionCard}
+                childIndex={childIndex}
+                innerCards={innerCards}
                 // The card cannot import the IDL feature (boundaries/dependencies), so this surface decides what
                 // a non-content PMP instruction falls back to. Same two outcomes as before the branch existed.
                 fallback={
@@ -182,12 +199,47 @@ function InspectorInstructionCard({
                             index={index}
                             result={INSPECTOR_RESULT}
                             signature={INSPECTOR_SIGNATURE}
+                            childIndex={childIndex}
+                            innerCards={innerCards}
                         />
                     ) : (
-                        <UnknownDetailsCard index={index} ix={ix} programName={programName} innerCards={innerCards} />
+                        <UnknownDetailsCard
+                            index={index}
+                            ix={ix}
+                            programName={programName}
+                            childIndex={childIndex}
+                            innerCards={innerCards}
+                        />
                     )
                 }
             />
+        );
+    }
+
+    // Ahead of the IDL tier on purpose: no Token IDL declares the batch discriminator, so that tier
+    // resolves a batch as `unknown` and draws a raw card over the curated one.
+    if (isTokenBatchInstruction(ix)) {
+        return (
+            <ErrorBoundary
+                fallback={
+                    <UnknownDetailsCard
+                        key={index}
+                        index={index}
+                        ix={ix}
+                        programName={programName}
+                        childIndex={childIndex}
+                        innerCards={innerCards}
+                    />
+                }
+            >
+                <TokenBatchCard
+                    index={index}
+                    ix={ix}
+                    result={INSPECTOR_RESULT}
+                    childIndex={childIndex}
+                    innerCards={innerCards}
+                />
+            </ErrorBoundary>
         );
     }
 
@@ -199,17 +251,9 @@ function InspectorInstructionCard({
                 index={index}
                 result={INSPECTOR_RESULT}
                 signature={INSPECTOR_SIGNATURE}
+                childIndex={childIndex}
+                innerCards={innerCards}
             />
-        );
-    }
-
-    if (isTokenBatchInstruction(ix)) {
-        return (
-            <ErrorBoundary
-                fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
-            >
-                <TokenBatchCard index={index} ix={ix} result={INSPECTOR_RESULT} />
-            </ErrorBoundary>
         );
     }
 
@@ -225,13 +269,22 @@ function InspectorInstructionCard({
                 result={INSPECTOR_RESULT}
                 signature={INSPECTOR_SIGNATURE}
                 InstructionCardComponent={BaseInstructionCard}
+                childIndex={childIndex}
+                innerCards={innerCards}
             />
         );
     }
 
     if (!parsedIx) {
         return (
-            <UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} innerCards={innerCards} />
+            <UnknownDetailsCard
+                key={index}
+                index={index}
+                ix={ix}
+                programName={programName}
+                childIndex={childIndex}
+                innerCards={innerCards}
+            />
         );
     }
 
@@ -239,7 +292,16 @@ function InspectorInstructionCard({
         if (parsedIx.programLabel === 'mpl-token-metadata') {
             return (
                 <ErrorBoundary
-                    fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
+                    fallback={
+                        <UnknownDetailsCard
+                            key={index}
+                            index={index}
+                            ix={ix}
+                            programName={programName}
+                            childIndex={childIndex}
+                            innerCards={innerCards}
+                        />
+                    }
                 >
                     <MetaplexTokenMetadataDetailsCard
                         key={index}
@@ -247,12 +309,21 @@ function InspectorInstructionCard({
                         index={index}
                         result={INSPECTOR_RESULT}
                         InstructionCardComponent={BaseInstructionCard}
+                        childIndex={childIndex}
+                        innerCards={innerCards}
                     />
                 </ErrorBoundary>
             );
         }
         return (
-            <UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} innerCards={innerCards} />
+            <UnknownDetailsCard
+                key={index}
+                index={index}
+                ix={ix}
+                programName={programName}
+                childIndex={childIndex}
+                innerCards={innerCards}
+            />
         );
     }
 
@@ -261,7 +332,14 @@ function InspectorInstructionCard({
     // to narrow its type for the switch below — TS can't relate the two useMemos.
     if (!parsedTx) {
         return (
-            <UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} innerCards={innerCards} />
+            <UnknownDetailsCard
+                key={index}
+                index={index}
+                ix={ix}
+                programName={programName}
+                childIndex={childIndex}
+                innerCards={innerCards}
+            />
         );
     }
 
@@ -276,6 +354,8 @@ function InspectorInstructionCard({
                     index={index}
                     result={INSPECTOR_RESULT}
                     raw={ix}
+                    childIndex={childIndex}
+                    innerCards={innerCards}
                 />
             );
         case SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_LABEL:
@@ -289,12 +369,23 @@ function InspectorInstructionCard({
                     InstructionCardComponent={InspectorInstructionCardComponent}
                     AddressComponent={AddressWithContextCell}
                     showProgramField={false}
+                    childIndex={childIndex}
+                    innerCards={innerCards}
                 />
             );
         case BPF_UPGRADEABLE_LOADER_PROGRAM_LABEL:
             return (
                 <ErrorBoundary
-                    fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
+                    fallback={
+                        <UnknownDetailsCard
+                            key={index}
+                            index={index}
+                            ix={ix}
+                            programName={programName}
+                            childIndex={childIndex}
+                            innerCards={innerCards}
+                        />
+                    }
                 >
                     <BpfUpgradeableLoaderDetailsCard
                         key={index}
@@ -303,13 +394,24 @@ function InspectorInstructionCard({
                         index={index}
                         result={INSPECTOR_RESULT}
                         raw={ix}
+                        childIndex={childIndex}
+                        innerCards={innerCards}
                     />
                 </ErrorBoundary>
             );
         case SPL_TOKEN_PROGRAM_LABEL:
             return (
                 <ErrorBoundary
-                    fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
+                    fallback={
+                        <UnknownDetailsCard
+                            key={index}
+                            index={index}
+                            ix={ix}
+                            programName={programName}
+                            childIndex={childIndex}
+                            innerCards={innerCards}
+                        />
+                    }
                 >
                     <TokenDetailsCard
                         key={index}
@@ -319,13 +421,24 @@ function InspectorInstructionCard({
                         result={INSPECTOR_RESULT}
                         InstructionCardComponent={InspectorInstructionCardComponent}
                         raw={ix}
+                        childIndex={childIndex}
+                        innerCards={innerCards}
                     />
                 </ErrorBoundary>
             );
         case SPL_TOKEN_2022_PROGRAM_LABEL:
             return (
                 <ErrorBoundary
-                    fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
+                    fallback={
+                        <UnknownDetailsCard
+                            key={index}
+                            index={index}
+                            ix={ix}
+                            programName={programName}
+                            childIndex={childIndex}
+                            innerCards={innerCards}
+                        />
+                    }
                 >
                     <TokenDetailsCard
                         key={index}
@@ -335,13 +448,24 @@ function InspectorInstructionCard({
                         result={INSPECTOR_RESULT}
                         InstructionCardComponent={InspectorInstructionCardComponent}
                         raw={ix}
+                        childIndex={childIndex}
+                        innerCards={innerCards}
                     />
                 </ErrorBoundary>
             );
         case 'mpl-token-metadata':
             return (
                 <ErrorBoundary
-                    fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
+                    fallback={
+                        <UnknownDetailsCard
+                            key={index}
+                            index={index}
+                            ix={ix}
+                            programName={programName}
+                            childIndex={childIndex}
+                            innerCards={innerCards}
+                        />
+                    }
                 >
                     <MetaplexTokenMetadataDetailsCard
                         key={index}
@@ -350,18 +474,46 @@ function InspectorInstructionCard({
                         index={index}
                         result={INSPECTOR_RESULT}
                         InstructionCardComponent={BaseInstructionCard}
+                        childIndex={childIndex}
+                        innerCards={innerCards}
                     />
                 </ErrorBoundary>
             );
         case 'lighthouse':
             return (
                 <ErrorBoundary
-                    fallback={<UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} />}
+                    fallback={
+                        <UnknownDetailsCard
+                            key={index}
+                            index={index}
+                            ix={ix}
+                            programName={programName}
+                            childIndex={childIndex}
+                            innerCards={innerCards}
+                        />
+                    }
                 >
-                    <LighthouseDetailsCard key={index} ix={parsedIx} raw={ix} index={index} result={INSPECTOR_RESULT} />
+                    <LighthouseDetailsCard
+                        key={index}
+                        ix={parsedIx}
+                        raw={ix}
+                        index={index}
+                        result={INSPECTOR_RESULT}
+                        childIndex={childIndex}
+                        innerCards={innerCards}
+                    />
                 </ErrorBoundary>
             );
     }
 
-    return <UnknownDetailsCard key={index} index={index} ix={ix} programName={programName} innerCards={innerCards} />;
+    return (
+        <UnknownDetailsCard
+            key={index}
+            index={index}
+            ix={ix}
+            programName={programName}
+            childIndex={childIndex}
+            innerCards={innerCards}
+        />
+    );
 }

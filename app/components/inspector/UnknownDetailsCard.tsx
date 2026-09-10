@@ -12,16 +12,20 @@ import { BaseRawDetails } from '../common/BaseRawDetails';
 
 export function UnknownDetailsCard({
     index,
+    childIndex,
     ix,
     programName,
     innerCards,
 }: {
     index: number;
+    childIndex?: number;
     ix: TransactionInstruction;
     programName: string;
     innerCards?: React.ReactNode[];
 }) {
-    const scrollAnchorRef = useScrollAnchor(getInstructionCardScrollAnchorId([index + 1]));
+    const scrollAnchorRef = useScrollAnchor(
+        getInstructionCardScrollAnchorId(childIndex === undefined ? [index + 1] : [index + 1, childIndex + 1]),
+    );
 
     return (
         <CollapsibleCard
@@ -31,6 +35,7 @@ export function UnknownDetailsCard({
                 <span className="flex min-w-0 flex-1 items-center">
                     <Badge ui="dashkit" variant="info" className="mr-1.5 flex-none">
                         #{index + 1}
+                        {childIndex !== undefined ? `.${childIndex + 1}` : ''}
                     </Badge>
                     <span className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
                         {programName}

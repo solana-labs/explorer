@@ -21,7 +21,7 @@ export function compiledToTransactionInstruction(
 ): TransactionInstruction | undefined {
     const programId = accountKeys.get(ix.programIdIndex);
     if (!programId) {
-        Logger.warn('[token-batch] Program ID index out of range', {
+        Logger.warn('[transaction-data] Program ID index out of range', {
             index: ix.programIdIndex,
             total: accountKeys.length,
         });
@@ -32,7 +32,10 @@ export function compiledToTransactionInstruction(
     for (const accountIndex of ix.accounts) {
         const pubkey = accountKeys.get(accountIndex);
         if (!pubkey) {
-            Logger.warn('[token-batch] Account index out of range', { index: accountIndex, total: accountKeys.length });
+            Logger.warn('[transaction-data] Account index out of range', {
+                index: accountIndex,
+                total: accountKeys.length,
+            });
             return undefined;
         }
         keys.push({
