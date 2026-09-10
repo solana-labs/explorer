@@ -22,7 +22,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const TableRow = () => (
-    <div className="rounded-dk border border-solid border-dk-card-outline-dark bg-dk-gray-800-dark p-3">
+    <div className="rounded-dk border border-solid border-outer-space-800 bg-dk-gray-800-dark p-3">
         <h3 className="mb-2 text-dk-sm text-dk-gray-700">In-table status (parent 13px → badge ≈10px)</h3>
         <BaseTable ui="dashkit" variant="card" nowrap>
             <BaseTable.Head>
@@ -54,7 +54,7 @@ const TableRow = () => (
 );
 
 const InlineMetaRow = () => (
-    <div className="rounded-dk border border-solid border-dk-card-outline-dark bg-dk-gray-800-dark p-3">
+    <div className="rounded-dk border border-solid border-outer-space-800 bg-dk-gray-800-dark p-3">
         <h3 className="mb-2 text-dk-sm text-dk-gray-700">Inline meta tags (wrap)</h3>
         <div className="flex flex-col gap-2">
             <div>
@@ -82,7 +82,7 @@ const InlineMetaRow = () => (
 );
 
 const HeaderPillsRow = () => (
-    <div className="rounded-dk border border-solid border-dk-card-outline-dark bg-dk-gray-800-dark p-3">
+    <div className="rounded-dk border border-solid border-outer-space-800 bg-dk-gray-800-dark p-3">
         <h3 className="mb-2 text-dk-sm text-dk-gray-700">Header pills (solid, e.g. NFT metadata)</h3>
         <div className="flex flex-wrap gap-1.5">
             <Badge ui="dashkit" variant="dark" tone="solid">
@@ -105,7 +105,7 @@ const HeaderPillsRow = () => (
 );
 
 const StatusToggleRow = () => (
-    <div className="rounded-dk border border-solid border-dk-card-outline-dark bg-dk-gray-800-dark p-3">
+    <div className="rounded-dk border border-solid border-outer-space-800 bg-dk-gray-800-dark p-3">
         <h3 className="mb-2 text-dk-sm text-dk-gray-700">Feature activation status (solid)</h3>
         <div className="flex flex-wrap gap-1.5">
             <Badge ui="dashkit" variant="success" tone="solid">
@@ -119,7 +119,7 @@ const StatusToggleRow = () => (
 );
 
 const TitleBadgeRow = () => (
-    <div className="rounded-dk border border-solid border-dk-card-outline-dark bg-dk-gray-800-dark p-3">
+    <div className="rounded-dk border border-solid border-outer-space-800 bg-dk-gray-800-dark p-3">
         <h3 className="mb-2 text-dk-sm text-dk-gray-700">Title with leading index badge (truncation)</h3>
         <div className="flex min-w-0 items-center">
             <Badge ui="dashkit" variant="info" className="mr-1.5 flex-none">

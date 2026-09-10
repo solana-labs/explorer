@@ -15,6 +15,6 @@ export const CARD_TABLE_HEADER = cn(
 // add a card surface there (otherwise per-row cards sit inside a second card). At lg+ the rows form a
 // grid table, so the dashkit card surface frames it. Used by the Account List and Address Lookups.
 export const LG_ONLY_CARD = cn(
-    'lg:rounded-lg lg:border lg:border-solid lg:border-dk-card-outline-dark',
+    'lg:rounded-lg lg:border lg:border-solid lg:border-outer-space-800',
     'lg:bg-dk-gray-800-dark lg:shadow-dk-card',
 );

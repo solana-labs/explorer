@@ -19,7 +19,7 @@ export function EmptySecurityTxtCard({ programAddress }: { programAddress: strin
                         This program did not provide Security.txt information yet. If you are the maintainer of this
                         program you can use the following command to add your information.
                     </p>
-                    <div className="flex items-start rounded-dk border border-solid border-dk-card-outline-dark p-1.5 text-left md:items-center">
+                    <div className="flex items-start rounded-dk border border-solid border-outer-space-800 p-1.5 text-left md:items-center">
                         <Copyable text={copyableTxt}>
                             <code className="min-w-0 flex-1 break-all font-mono text-sm text-dk-gray-700 md:overflow-x-auto md:whitespace-nowrap md:break-normal">
                                 {copyableTxt}

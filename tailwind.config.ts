@@ -53,7 +53,6 @@ export const dkColors = {
     'rainbow-5': '#1dd79b',
     'popover-bg': '#1A1A1A',
     'popover-border': 'rgba(255,255,255,0.1)',
-    'card-outline-dark': 'oklch(33.501% 0.01351 189.14)', // = outer-space-800; matches the tx-inspector card outline
     'input-placeholder-dark': '#ccc',
 };
 
