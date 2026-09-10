@@ -6,6 +6,7 @@ import {
     withMockTransactions,
     withScrollAnchor,
     withTokenInfoBatch,
+    withTxInstructionSurface,
 } from '@storybook-config/decorators';
 import { INITIAL_VIEWPORTS, withViewportFromGlobal } from '@storybook-config/responsive-decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
@@ -37,7 +38,14 @@ const tx = {
 
 const meta: Meta<typeof Ed25519DetailsCard> = {
     component: Ed25519DetailsCard,
-    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withMockTransactions, withViewportFromGlobal],
+    decorators: [
+        withCluster,
+        withScrollAnchor,
+        withTokenInfoBatch,
+        withMockTransactions,
+        withTxInstructionSurface,
+        withViewportFromGlobal,
+    ],
     parameters: {
         ...nextjsParameters,
         viewport: { options: INITIAL_VIEWPORTS },
@@ -49,7 +57,7 @@ const meta: Meta<typeof Ed25519DetailsCard> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const args = { childIndex: undefined, index: 0, innerCards: undefined, ix, result: { err: null }, tx };
+const args = { childIndex: undefined, index: 0, innerCards: undefined, ix, tx };
 
 export const Mobile: Story = { args, globals: { viewport: { value: 'iphonex' } } };
 export const TabletPortrait: Story = { args, globals: { viewport: { value: 'ipad' } } };

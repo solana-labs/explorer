@@ -789,7 +789,6 @@ export default tseslint.config(
             'app/components/instruction/ProgramEventsCard.tsx',
             'app/components/instruction/codama/CodamaInstructionDetailsCard.tsx',
             'app/components/instruction/codama/codamaUtils.tsx',
-            'app/components/instruction/ed25519/Ed25519DetailsCard.tsx',
             'app/components/instruction/program-metadata-idl/ProgramMetadataIdlInstructionDetailsCard.tsx',
             'app/components/instruction/token/TokenDetailsCard.tsx',
             'app/components/shared/StatusBadge.tsx',
@@ -957,7 +956,6 @@ export default tseslint.config(
             'app/components/instruction/bpf-upgradeable-loader/BpfUpgradeableLoaderDetailsCard.tsx',
             'app/components/instruction/codama/codamaUtils.tsx',
             'app/components/instruction/program-metadata-idl/ProgramMetadataIdlInstructionDetailsCard.tsx',
-            'app/components/instruction/sas/SolanaAttestationDetailsCard.tsx',
             'app/components/instruction/token/TokenDetailsCard.tsx',
 
             // app/providers (pre-FSD legacy)

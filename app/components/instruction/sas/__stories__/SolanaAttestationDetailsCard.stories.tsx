@@ -6,6 +6,7 @@ import {
     withMockTransactions,
     withScrollAnchor,
     withTokenInfoBatch,
+    withTxInstructionSurface,
 } from '@storybook-config/decorators';
 import type { Meta, StoryObj } from '@storybook-config/types';
 
@@ -27,7 +28,7 @@ const sasIx = {
 
 const meta: Meta<typeof SolanaAttestationDetailsCard> = {
     component: SolanaAttestationDetailsCard,
-    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withMockTransactions],
+    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withMockTransactions, withTxInstructionSurface],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Instruction/SolanaAttestationDetailsCard',
@@ -37,5 +38,5 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-    args: { childIndex: undefined, index: 0, innerCards: undefined, ix: sasIx, result: { err: null } },
+    args: { childIndex: undefined, index: 0, innerCards: undefined, ix: sasIx },
 };

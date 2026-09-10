@@ -12,7 +12,10 @@ export type FieldAddress = PublicKey | Address;
  * it. That split is what lets the inspector swap the address renderer without
  * every card taking an `AddressComponent` prop.
  */
-export type InstructionField =
+export type InstructionField = InstructionValueField | InstructionHeadingField;
+
+/** A label paired with a value, which is every row except a group's heading. */
+export type InstructionValueField =
     | { kind: 'address'; label: string; pubkey: FieldAddress }
     | { kind: 'sol'; label: string; lamports: number | bigint }
     | { kind: 'bytes'; label: string; size: number }
@@ -21,6 +24,9 @@ export type InstructionField =
     | { kind: 'timestamp'; label: string; unixSeconds: number }
     | { kind: 'preformatted'; label: string; value: string | ReadonlyArray<string | number> }
     | { kind: 'custom'; label: string; value: ReactElement };
+
+/** Names the rows that follow it, so it fills the row instead of pairing a label with a value. */
+export type InstructionHeadingField = { kind: 'heading'; label: string };
 
 /**
  * Falsy entries are dropped, so optional fields read as `cond && address(...)`.
@@ -67,6 +73,14 @@ export function timestamp(label: string, unixSeconds: number): InstructionField 
  */
 export function preformatted(label: string, value: string | ReadonlyArray<string | number>): InstructionField {
     return { kind: 'preformatted', label, value };
+}
+
+/**
+ * A divider that names the rows below it, for a card whose fields fall into repeated
+ * groups. It labels the group rather than a value, so it takes the whole row.
+ */
+export function heading(label: string): InstructionField {
+    return { kind: 'heading', label };
 }
 
 /**

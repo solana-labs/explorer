@@ -258,7 +258,15 @@ function InstructionCard({
             case STAKE_PROGRAM_LABEL:
                 return <StakeDetailsCard {...props} key={key} />;
             case SPL_MEMO_PROGRAM_LABEL:
-                return <MemoDetailsCard {...props} key={key} />;
+                return (
+                    <MemoDetailsCard
+                        key={key}
+                        ix={parsedIx}
+                        index={index}
+                        innerCards={innerCards}
+                        childIndex={childIndex}
+                    />
+                );
             case SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_LABEL:
                 return (
                     <AssociatedTokenDetailsCard
@@ -293,7 +301,16 @@ function InstructionCard({
     };
 
     if (isEd25519Instruction(transactionIx)) {
-        return <Ed25519DetailsCard key={key} {...props} tx={tx} />;
+        return (
+            <Ed25519DetailsCard
+                key={key}
+                tx={tx}
+                ix={transactionIx}
+                index={index}
+                innerCards={innerCards}
+                childIndex={childIndex}
+            />
+        );
     }
     if (isMangoInstruction(transactionIx)) {
         return (
@@ -378,7 +395,12 @@ function InstructionCard({
     if (isSolanaAttestationInstruction(transactionIx)) {
         return (
             <ErrorBoundary fallback={<UnknownDetailsCard {...props} />} key={key}>
-                <SolanaAttestationDetailsCard {...props} />
+                <SolanaAttestationDetailsCard
+                    ix={transactionIx}
+                    index={index}
+                    innerCards={innerCards}
+                    childIndex={childIndex}
+                />
             </ErrorBoundary>
         );
     }

@@ -1,5 +1,12 @@
+import {
+    InstructionCardView,
+    type InstructionNode,
+    ProgramField,
+    useInstructionSurface,
+} from '@entities/instruction-card';
 import { AccountMeta } from '@solana/kit';
-import { PublicKey, SignatureResult, TransactionInstruction } from '@solana/web3.js';
+import { PublicKey, TransactionInstruction } from '@solana/web3.js';
+import { capitalizeFirstLetter } from '@utils/index';
 import {
     identifySolanaAttestationServiceInstruction,
     parseChangeAuthorizedSignersInstruction,
@@ -21,110 +28,66 @@ import {
 import { toKitInstruction } from '@/app/shared/lib/web3js-compat';
 import { BaseTable } from '@/app/shared/ui/Table';
 
-import { Address } from '../../common/Address';
 import { mapCodamaIxArgsToRows } from '../codama/codamaUtils';
-import { InstructionCard } from '../InstructionCard';
 
 export function isSolanaAttestationInstruction(transactionIx: TransactionInstruction) {
     return transactionIx.programId.toBase58() === SAS_PROGRAM_ID;
 }
 
+/** Every SAS instruction parses to accounts plus an argument struct; only the struct's shape differs. */
+type ParsedSasInstruction = {
+    accounts: Record<string, AccountMeta>;
+    data: Record<string, unknown>;
+};
+
+const SECTION_ROW_CLASS =
+    'bg-dark-background text-dk-xs font-semibold uppercase tracking-[0.08em] text-dark-muted-foreground';
+
+/** Counts the discriminator the struct always carries, so a single argument still reads as none. */
+const ARGUMENT_KEY_THRESHOLD = 2;
+
+/**
+ * Draws its own rows rather than declaring `InstructionField` descriptors: the argument
+ * table is three columns wide (name, type, value) and generated from a Codama struct, so
+ * the account rows have to span the extra column to stay flush right.
+ */
 export function SolanaAttestationDetailsCard({
     ix,
     index,
-    result,
     innerCards,
     childIndex,
 }: {
     ix: TransactionInstruction;
     index: number;
-    result: SignatureResult;
     innerCards?: JSX.Element[];
     childIndex?: number;
 }) {
-    const kitIx = toKitInstruction(ix);
-    const ixType = identifySolanaAttestationServiceInstruction(ix);
-    let title = 'Unknown';
-    let parsed: any;
-    switch (ixType) {
-        case SolanaAttestationServiceInstruction.CreateCredential:
-            title = 'Create Credential';
-            parsed = parseCreateCredentialInstruction(kitIx);
-            break;
-        case SolanaAttestationServiceInstruction.CreateSchema:
-            title = 'Create Schema';
-            parsed = parseCreateSchemaInstruction(kitIx);
-            break;
-        case SolanaAttestationServiceInstruction.ChangeSchemaStatus:
-            title = 'Change Schema Status';
-            parsed = parseChangeSchemaStatusInstruction(kitIx);
-            break;
-        case SolanaAttestationServiceInstruction.ChangeAuthorizedSigners:
-            title = 'Change Authorized Signers';
-            parsed = parseChangeAuthorizedSignersInstruction(kitIx);
-            break;
-        case SolanaAttestationServiceInstruction.ChangeSchemaDescription:
-            title = 'Change Schema Description';
-            parsed = parseChangeSchemaDescriptionInstruction(kitIx);
-            break;
-        case SolanaAttestationServiceInstruction.ChangeSchemaVersion:
-            title = 'Change Schema Version';
-            parsed = parseChangeSchemaVersionInstruction(kitIx);
-            break;
-        case SolanaAttestationServiceInstruction.CreateAttestation:
-            title = 'Create Attestation';
-            parsed = parseCreateAttestationInstruction(kitIx);
-            break;
-        case SolanaAttestationServiceInstruction.CloseAttestation:
-            title = 'Close Attestation';
-            parsed = parseCloseAttestationInstruction(kitIx);
-            break;
-        case SolanaAttestationServiceInstruction.EmitEvent:
-            title = 'Emit Event';
-            parsed = parseEmitEventInstruction(kitIx);
-            break;
-        case SolanaAttestationServiceInstruction.TokenizeSchema:
-            title = 'Tokenize Schema';
-            parsed = parseTokenizeSchemaInstruction(kitIx);
-            break;
-        case SolanaAttestationServiceInstruction.CreateTokenizedAttestation:
-            title = 'Create Tokenized Attestation';
-            parsed = parseCreateTokenizedAttestationInstruction(kitIx);
-            break;
-        case SolanaAttestationServiceInstruction.CloseTokenizedAttestation:
-            title = 'Close Tokenized Attestation';
-            parsed = parseCloseTokenizedAttestationInstruction(kitIx);
-            break;
-    }
+    const node: InstructionNode = { childIndex, index, innerCards, ix, programId: ix.programId };
+    const { Address, showProgramField } = useInstructionSurface();
+    const { name, parsed } = parseSolanaAttestationInstruction(ix);
+    const hasArguments = Object.keys(parsed.data).length > ARGUMENT_KEY_THRESHOLD;
+
     return (
-        <InstructionCard title={`Solana Attestation: ${title}`} {...{ childIndex, index, innerCards, ix, result }}>
-            <BaseTable.Row>
-                <BaseTable.Cell>Program</BaseTable.Cell>
-                <BaseTable.Cell className="text-right" colSpan={2}>
-                    <Address pubkey={new PublicKey(SAS_PROGRAM_ID)} alignRight link raw />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-            <BaseTable.Row className="bg-dark-background text-dk-xs font-semibold uppercase tracking-[0.08em] text-dark-muted-foreground">
+        <InstructionCardView node={node} title={`Solana Attestation: ${name}`}>
+            {showProgramField && <ProgramField programId={node.programId} colSpan={2} />}
+            <BaseTable.Row className={SECTION_ROW_CLASS}>
                 <BaseTable.Cell>Account Name</BaseTable.Cell>
                 <BaseTable.Cell className="text-right" colSpan={2}>
                     Address
                 </BaseTable.Cell>
             </BaseTable.Row>
-            {parsed &&
-                parsed.accounts &&
-                Object.entries(parsed.accounts as Record<string, AccountMeta>).map(([key, value], idx: number) => (
-                    <BaseTable.Row key={idx}>
-                        <BaseTable.Cell>{key.charAt(0).toUpperCase() + key.slice(1)}</BaseTable.Cell>
-                        <BaseTable.Cell className="text-right" colSpan={2}>
-                            <Address pubkey={new PublicKey(value.address)} alignRight link />
-                        </BaseTable.Cell>
-                    </BaseTable.Row>
-                ))}
+            {Object.entries(parsed.accounts).map(([accountName, account]) => (
+                <BaseTable.Row key={accountName}>
+                    <BaseTable.Cell>{capitalizeFirstLetter(accountName)}</BaseTable.Cell>
+                    <BaseTable.Cell className="text-right" colSpan={2}>
+                        <Address pubkey={new PublicKey(account.address)} />
+                    </BaseTable.Cell>
+                </BaseTable.Row>
+            ))}
 
-            {/* Need to make sure there's one other field besides the discriminator */}
-            {parsed.data && Object.keys(parsed.data).length > 2 && (
+            {hasArguments && (
                 <>
-                    <BaseTable.Row className="bg-dark-background text-dk-xs font-semibold uppercase tracking-[0.08em] text-dark-muted-foreground">
+                    <BaseTable.Row className={SECTION_ROW_CLASS}>
                         <BaseTable.Cell>Argument Name</BaseTable.Cell>
                         <BaseTable.Cell>Type</BaseTable.Cell>
                         <BaseTable.Cell className="text-right">Value</BaseTable.Cell>
@@ -132,6 +95,41 @@ export function SolanaAttestationDetailsCard({
                     {mapCodamaIxArgsToRows(parsed.data)}
                 </>
             )}
-        </InstructionCard>
+        </InstructionCardView>
     );
+}
+
+/** Throws for an instruction the program does not define; the caller's error boundary owns the fallback. */
+function parseSolanaAttestationInstruction(ix: TransactionInstruction): {
+    name: string;
+    parsed: ParsedSasInstruction;
+} {
+    const kitIx = toKitInstruction(ix);
+
+    switch (identifySolanaAttestationServiceInstruction(ix)) {
+        case SolanaAttestationServiceInstruction.CreateCredential:
+            return { name: 'Create Credential', parsed: parseCreateCredentialInstruction(kitIx) };
+        case SolanaAttestationServiceInstruction.CreateSchema:
+            return { name: 'Create Schema', parsed: parseCreateSchemaInstruction(kitIx) };
+        case SolanaAttestationServiceInstruction.ChangeSchemaStatus:
+            return { name: 'Change Schema Status', parsed: parseChangeSchemaStatusInstruction(kitIx) };
+        case SolanaAttestationServiceInstruction.ChangeAuthorizedSigners:
+            return { name: 'Change Authorized Signers', parsed: parseChangeAuthorizedSignersInstruction(kitIx) };
+        case SolanaAttestationServiceInstruction.ChangeSchemaDescription:
+            return { name: 'Change Schema Description', parsed: parseChangeSchemaDescriptionInstruction(kitIx) };
+        case SolanaAttestationServiceInstruction.ChangeSchemaVersion:
+            return { name: 'Change Schema Version', parsed: parseChangeSchemaVersionInstruction(kitIx) };
+        case SolanaAttestationServiceInstruction.CreateAttestation:
+            return { name: 'Create Attestation', parsed: parseCreateAttestationInstruction(kitIx) };
+        case SolanaAttestationServiceInstruction.CloseAttestation:
+            return { name: 'Close Attestation', parsed: parseCloseAttestationInstruction(kitIx) };
+        case SolanaAttestationServiceInstruction.EmitEvent:
+            return { name: 'Emit Event', parsed: parseEmitEventInstruction(kitIx) };
+        case SolanaAttestationServiceInstruction.TokenizeSchema:
+            return { name: 'Tokenize Schema', parsed: parseTokenizeSchemaInstruction(kitIx) };
+        case SolanaAttestationServiceInstruction.CreateTokenizedAttestation:
+            return { name: 'Create Tokenized Attestation', parsed: parseCreateTokenizedAttestationInstruction(kitIx) };
+        case SolanaAttestationServiceInstruction.CloseTokenizedAttestation:
+            return { name: 'Close Tokenized Attestation', parsed: parseCloseTokenizedAttestationInstruction(kitIx) };
+    }
 }

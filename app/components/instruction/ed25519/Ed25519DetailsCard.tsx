@@ -1,211 +1,81 @@
-import { getBase58Encoder } from '@solana/kit';
 import {
-    ParsedTransaction,
-    PartiallyDecodedInstruction,
-    PublicKey,
-    SignatureResult,
-    TransactionInstruction,
-} from '@solana/web3.js';
+    address,
+    custom,
+    defineInstructionCard,
+    heading,
+    type InstructionFieldList,
+    type InstructionNode,
+    text,
+} from '@entities/instruction-card';
+import { ParsedTransaction, TransactionInstruction } from '@solana/web3.js';
 import React from 'react';
 
-import { readUint8, readUint16LE, toBase64 } from '@/app/shared/lib/bytes';
-import { BaseTable } from '@/app/shared/ui/Table';
+import { toBase64 } from '@/app/shared/lib/bytes';
 
-import { Address } from '../../common/Address';
 import { Copyable } from '../../common/Copyable';
-import { InstructionCard } from '../InstructionCard';
-import { PROGRAM_ID as ED25519_PROGRAM_ID } from './types';
+import { type Ed25519SignatureDetails, resolveEd25519Signatures } from './decode';
 
-const BASE58_ENCODER = getBase58Encoder();
+const INVALID_REFERENCE = 'Invalid reference';
 
-const ED25519_SELF_REFERENCE_INSTRUCTION_INDEX = 65535;
+const Ed25519VerifyCard = defineInstructionCard<Ed25519SignatureDetails[]>({
+    fields: signatures => signatures.flatMap(signatureFields),
+    title: 'Ed25519: Verify Signature',
+});
 
-type DetailsProps = {
+export function Ed25519DetailsCard({
+    tx,
+    ix,
+    index,
+    innerCards,
+    childIndex,
+}: {
     tx: ParsedTransaction;
     ix: TransactionInstruction;
     index: number;
-    result: SignatureResult;
     innerCards?: JSX.Element[];
     childIndex?: number;
-};
+}) {
+    const node: InstructionNode = { childIndex, index, innerCards, ix, programId: ix.programId };
 
-interface Ed25519SignatureOffsets {
-    signatureOffset: number; // offset to ed25519 signature of 64 bytes
-    signatureInstructionIndex: number; // instruction index to find signature
-    publicKeyOffset: number; // offset to public key of 32 bytes
-    publicKeyInstructionIndex: number; // instruction index to find public key
-    messageDataOffset: number; // offset to start of message data
-    messageDataSize: number; // size of message data
-    messageInstructionIndex: number; // index of instruction data to get message data
+    return <Ed25519VerifyCard node={node} info={resolveEd25519Signatures(tx, ix.data)} />;
 }
 
-// See https://docs.anza.xyz/runtime/programs/#ed25519-program
-function decodeEd25519Instruction(data: Uint8Array): Ed25519SignatureOffsets[] {
-    const count = readUint8(data, 0);
-    const offsets: Ed25519SignatureOffsets[] = [];
-
-    let cursor = 2; // Skip count and padding byte
-
-    for (let i = 0; i < count; i++) {
-        const offset: Ed25519SignatureOffsets = {
-            messageDataOffset: readUint16LE(data, cursor + 8),
-            messageDataSize: readUint16LE(data, cursor + 10),
-            messageInstructionIndex: readUint16LE(data, cursor + 12),
-            publicKeyInstructionIndex: readUint16LE(data, cursor + 6),
-            publicKeyOffset: readUint16LE(data, cursor + 4),
-            signatureInstructionIndex: readUint16LE(data, cursor + 2),
-            signatureOffset: readUint16LE(data, cursor),
-        };
-        offsets.push(offset);
-        cursor += 14; // Number of bytes in one Ed25519SignatureOffsets struct
-    }
-
-    return offsets;
+/** One instruction verifies any number of signatures, so each gets its own group of rows. */
+function signatureFields(
+    { signature, publicKey, message }: Ed25519SignatureDetails,
+    index: number,
+): InstructionFieldList {
+    return [
+        heading(`Signature #${index + 1}`),
+        text('Signature Reference', referenceText(signature)),
+        signature.bytes
+            ? custom('Signature', <Base64Value value={toBase64(signature.bytes)} />)
+            : text('Signature', INVALID_REFERENCE),
+        text('Public Key Reference', referenceText(publicKey)),
+        publicKey.pubkey ? address('Public Key', publicKey.pubkey) : text('Public Key', INVALID_REFERENCE),
+        text('Message Reference', `${referenceText(message)}, Size ${message.size}`),
+        message.bytes
+            ? custom('Message', <Base64Value value={toBase64(message.bytes)} wrapped />)
+            : text('Message', INVALID_REFERENCE),
+    ];
 }
 
-const extractData = (
-    tx: ParsedTransaction,
-    instructionIndex: number,
-    sourceData: Uint8Array,
-    dataOffset: number,
-    dataLength: number,
-): Uint8Array | null => {
-    if (instructionIndex === ED25519_SELF_REFERENCE_INSTRUCTION_INDEX) {
-        return sourceData.slice(dataOffset, dataOffset + dataLength);
-    }
+function referenceText({ instructionIndex, offset }: { instructionIndex?: number; offset: number }): string {
+    const source = instructionIndex === undefined ? 'This instruction' : `Instruction ${instructionIndex}`;
+    return `${source}, Offset ${offset}`;
+}
 
-    const targetIx = tx.message.instructions[instructionIndex] as PartiallyDecodedInstruction;
-    try {
-        return BASE58_ENCODER.encode(targetIx.data).slice(dataOffset, dataOffset + dataLength);
-    } catch (_err) {
-        return null;
-    }
-};
-
-export function Ed25519DetailsCard(props: DetailsProps) {
-    const { tx, ix, index, result, innerCards, childIndex } = props;
-
-    const offsets = decodeEd25519Instruction(ix.data);
-
-    return (
-        <InstructionCard
-            ix={ix}
-            index={index}
-            result={result}
-            title="Ed25519: Verify Signature"
-            innerCards={innerCards}
-            childIndex={childIndex}
-        >
-            <BaseTable.Row>
-                <BaseTable.Cell>Program</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={ED25519_PROGRAM_ID} alignRight link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
-
-            {offsets.map((offset, index) => {
-                const signature = extractData(
-                    tx,
-                    offset.signatureInstructionIndex,
-                    ix.data,
-                    offset.signatureOffset,
-                    64,
-                );
-
-                const pubkey = extractData(tx, offset.publicKeyInstructionIndex, ix.data, offset.publicKeyOffset, 32);
-
-                const message = extractData(
-                    tx,
-                    offset.messageInstructionIndex,
-                    ix.data,
-                    offset.messageDataOffset,
-                    offset.messageDataSize,
-                );
-
-                return (
-                    <React.Fragment key={index}>
-                        <BaseTable.Row className="bg-dark-background text-dk-xs font-semibold uppercase tracking-[0.08em] text-dark-muted-foreground">
-                            <BaseTable.Cell colSpan={2} className="lg:text-left" align="left">
-                                Signature #{index + 1}
-                            </BaseTable.Cell>
-                        </BaseTable.Row>
-                        <BaseTable.Row>
-                            <BaseTable.Cell>Signature Reference</BaseTable.Cell>
-                            <BaseTable.Cell className="text-right">
-                                {offset.signatureInstructionIndex === ED25519_SELF_REFERENCE_INSTRUCTION_INDEX
-                                    ? 'This instruction'
-                                    : `Instruction ${offset.signatureInstructionIndex}`}
-                                {', '}
-                                Offset {offset.signatureOffset}
-                            </BaseTable.Cell>
-                        </BaseTable.Row>
-                        <BaseTable.Row>
-                            <BaseTable.Cell>Signature</BaseTable.Cell>
-                            <BaseTable.Cell className="text-right">
-                                {signature ? (
-                                    <Copyable text={toBase64(signature)}>
-                                        <span className="font-mono">{toBase64(signature)}</span>
-                                    </Copyable>
-                                ) : (
-                                    'Invalid reference'
-                                )}
-                            </BaseTable.Cell>
-                        </BaseTable.Row>
-                        <BaseTable.Row>
-                            <BaseTable.Cell>Public Key Reference</BaseTable.Cell>
-                            <BaseTable.Cell className="text-right">
-                                {offset.publicKeyInstructionIndex === ED25519_SELF_REFERENCE_INSTRUCTION_INDEX
-                                    ? 'This instruction'
-                                    : `Instruction ${offset.publicKeyInstructionIndex}`}
-                                {', '}
-                                Offset {offset.publicKeyOffset}
-                            </BaseTable.Cell>
-                        </BaseTable.Row>
-                        <BaseTable.Row>
-                            <BaseTable.Cell>Public Key</BaseTable.Cell>
-                            <BaseTable.Cell className="text-right">
-                                {pubkey ? (
-                                    <Address pubkey={new PublicKey(pubkey)} alignRight link />
-                                ) : (
-                                    'Invalid reference'
-                                )}
-                            </BaseTable.Cell>
-                        </BaseTable.Row>
-                        <BaseTable.Row>
-                            <BaseTable.Cell>Message Reference</BaseTable.Cell>
-                            <BaseTable.Cell className="text-right">
-                                {offset.messageInstructionIndex === ED25519_SELF_REFERENCE_INSTRUCTION_INDEX
-                                    ? 'This instruction'
-                                    : `Instruction ${offset.messageInstructionIndex}`}
-                                {', '}
-                                Offset {offset.messageDataOffset}, Size {offset.messageDataSize}
-                            </BaseTable.Cell>
-                        </BaseTable.Row>
-                        <BaseTable.Row>
-                            <BaseTable.Cell>Message</BaseTable.Cell>
-                            <BaseTable.Cell
-                                className="text-right"
-                                style={{
-                                    fontSize: '0.85rem',
-                                    lineHeight: '1.2',
-                                    maxWidth: '100%',
-                                    overflowWrap: 'break-word',
-                                    whiteSpace: 'normal',
-                                    wordBreak: 'break-all',
-                                }}
-                            >
-                                {message ? (
-                                    <Copyable text={toBase64(message)}>
-                                        <span className="font-mono">{toBase64(message)}</span>
-                                    </Copyable>
-                                ) : (
-                                    'Invalid reference'
-                                )}
-                            </BaseTable.Cell>
-                        </BaseTable.Row>
-                    </React.Fragment>
-                );
-            })}
-        </InstructionCard>
+/**
+ * `wrapped` is for the message, the only field long enough that breaking it beats scrolling. It has
+ * to be a block: on an inline span the tighter line-height is inert, because the cell's own
+ * line-height still sets each line box.
+ */
+function Base64Value({ value, wrapped }: { value: string; wrapped?: boolean }) {
+    const copyable = (
+        <Copyable text={value}>
+            <span className="font-mono">{value}</span>
+        </Copyable>
     );
+    if (!wrapped) return copyable;
+    return <span className="block whitespace-normal break-all text-[0.85rem] leading-[1.2]">{copyable}</span>;
 }

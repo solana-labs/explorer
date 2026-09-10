@@ -1,48 +1,26 @@
-import { Address } from '@components/common/Address';
-import { ParsedInstruction, SignatureResult } from '@solana/web3.js';
+import { defineInstructionCard, type InstructionNode, preformatted } from '@entities/instruction-card';
+import { ParsedInstruction } from '@solana/web3.js';
 import { wrap } from '@utils/index';
 import React from 'react';
 
-import { BaseTable } from '@/app/shared/ui/Table';
-
-import { InstructionCard } from './InstructionCard';
+/** The RPC parses a memo down to its UTF-8 payload, so the payload is the card's whole content. */
+const MemoCard = defineInstructionCard<string>({
+    fields: memo => [preformatted('Data (UTF-8)', wrap(memo, 50))],
+    title: 'Memo Program: Memo',
+});
 
 export function MemoDetailsCard({
     ix,
     index,
-    result,
     innerCards,
     childIndex,
 }: {
     ix: ParsedInstruction;
     index: number;
-    result: SignatureResult;
     innerCards?: JSX.Element[];
     childIndex?: number;
 }) {
-    const data = wrap(ix.parsed, 50);
-    return (
-        <InstructionCard
-            ix={ix}
-            index={index}
-            result={result}
-            title="Memo Program: Memo"
-            innerCards={innerCards}
-            childIndex={childIndex}
-        >
-            <BaseTable.Row>
-                <BaseTable.Cell>Program</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <Address pubkey={ix.programId} alignRight link />
-                </BaseTable.Cell>
-            </BaseTable.Row>
+    const node: InstructionNode = { childIndex, index, innerCards, ix, programId: ix.programId };
 
-            <BaseTable.Row>
-                <BaseTable.Cell>Data (UTF-8)</BaseTable.Cell>
-                <BaseTable.Cell className="text-right">
-                    <pre className="mb-0 inline-block text-left">{data}</pre>
-                </BaseTable.Cell>
-            </BaseTable.Row>
-        </InstructionCard>
-    );
+    return <MemoCard node={node} info={ix.parsed} />;
 }
