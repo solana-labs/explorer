@@ -1,5 +1,7 @@
 User-agent: *
 Allow: /
+Allow: /mcp/start
 Disallow: /api/
+Disallow: /mcp
 
 Sitemap: https://explorer.solana.com/sitemap.xml
