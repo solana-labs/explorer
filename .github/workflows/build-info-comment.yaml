@@ -1,0 +1,59 @@
+name: Build Info Comment
+
+# Posts the bundle-change report from CI's Build-Info job as a sticky PR comment. Split from ci.yaml
+# because fork PRs run CI with a read-only token; this workflow runs in the base repo with write
+# access and never checks out or executes PR code.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: read
+  pull-requests: write
+
+jobs:
+  Comment:
+    # Any conclusion: the report uploads even when the bench/BUILD.md freshness gate fails.
+    if: github.event.workflow_run.event == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      # Default-branch code only, and just the one file — safe in this privileged context.
+      - name: Checkout locate script
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: |
+            scripts/build-info-locate-pr.mjs
+          sparse-checkout-cone-mode: false
+
+      # The report artifact is missing when CI failed before Build-Info uploaded it; the PR number
+      # comes from the head SHA (workflow_run.pull_requests is empty for fork PRs).
+      - name: Locate report and pull request
+        id: locate
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const { locatePullRequest } = await import('${{ github.workspace }}/scripts/build-info-locate-pr.mjs');
+            await locatePullRequest({ context, core, github });
+
+      # Outside the workspace on purpose: the artifact is fork-controlled and must not be able to
+      # plant files where later steps could pick them up.
+      - name: Download report
+        if: steps.locate.outputs.found == 'true'
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: build-info-comment
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/build-info-comment
+
+      - name: Post sticky comment
+        if: steps.locate.outputs.found == 'true'
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
+        with:
+          header: build-info
+          path: ${{ runner.temp }}/build-info-comment/bundle-report.md
+          number_force: ${{ steps.locate.outputs.pr }}
