@@ -3,7 +3,7 @@ import { withBotId } from 'botid/next/config';
 import { fileURLToPath } from 'url';
 
 import { buildRedirects } from './config/redirects.mjs';
-import { createSentryBuildConfig } from './sentry/config.mjs';
+import { createSentryBuildConfig } from './sentry/lib/config.mjs';
 
 // Pin both file-tracing and Turbopack to the project root; otherwise Next walks up to a parent
 // pnpm-workspace.yaml (e.g. in git worktrees) and the two roots disagree.

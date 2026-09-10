@@ -5,7 +5,7 @@ import type { SentryBuildOptions } from '@sentry/nextjs';
 import {
     createSentryBuildConfig as createSentryBuildConfigMjs,
     createSentryConfig as createSentryConfigMjs,
-} from './config.mjs';
+} from './lib/config.mjs';
 
 type RuntimeContext = 'client' | 'server' | 'edge';
 

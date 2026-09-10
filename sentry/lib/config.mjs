@@ -1,6 +1,16 @@
+import { clientSentryDsn, serverSentryDsn, traceSampleRateMultiplier } from './env.mjs';
+import { vitalsTraceSampleRate } from './vitals.mjs';
+
 /**
  * @typedef {'client' | 'server' | 'edge'} RuntimeContext
  */
+
+// Error events are rare and load-bearing; every runtime keeps them all.
+const SAMPLE_RATES = {
+    client: 1,
+    edge: 1,
+    server: 1,
+};
 
 // Server traces are ~5 spans each; browser pageloads emit hundreds, so client/edge stay near zero.
 const TRACE_SAMPLE_RATES = {
@@ -16,7 +26,9 @@ const TRACE_SAMPLE_RATES = {
  */
 export function createSentryConfig(context) {
     return {
-        sampleRate: 1,
+        dsn: context === 'client' ? clientSentryDsn() : serverSentryDsn(),
+
+        sampleRate: SAMPLE_RATES[context],
 
         // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
         tracesSampler: (/** @type {import('@sentry/core').TracesSamplerSamplingContext} */ samplingContext) => {
@@ -31,17 +43,23 @@ export function createSentryConfig(context) {
                 return 0;
             }
 
-            // Don't sample health checks or monitoring endpoints
-            if (samplingContext.name.includes('/api/ping')) {
-                return 0;
+            // Vitals sampling off → the baseline map rate applies.
+            if (context === 'client') {
+                const vitalsRate = vitalsTraceSampleRate(samplingContext);
+                if (vitalsRate !== undefined) {
+                    return vitalsRate;
+                }
             }
 
-            // Don't sample all other api endpoints as we should rely on logging
-            if (samplingContext.name.includes('/api/')) {
-                return 0;
-            }
+            // TODO: enable once a client DSN exists so a sampled client trace keeps its server half; callers
+            // can force sampling via sentry-trace headers, so weigh that first:
+            // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/sampling/#inheritance
+            // if (samplingContext.parentSampled !== undefined) {
+            //     return samplingContext.parentSampled;
+            // }
 
-            return TRACE_SAMPLE_RATES[context];
+            // Env multiplier dampens a runtime's baseline in an emergency (0 mutes); unset = unchanged.
+            return TRACE_SAMPLE_RATES[context] * (traceSampleRateMultiplier(context) ?? 1);
         },
 
         // Enable logs to be sent to Sentry

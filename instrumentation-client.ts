@@ -4,7 +4,7 @@
 
 import * as Sentry from '@sentry/nextjs';
 
-import { createSentryConfig } from './sentry/config';
+import { createSentryConfig } from './sentry';
 
 Sentry.init(createSentryConfig('client'));
 
