@@ -17,7 +17,6 @@ const specWorkspace = (name = 'specs') => ({
             inline: [
                 '@noble',
                 'change-case',
-                '@react-hook/previous',
                 '@solana/kit',
                 '@solana/rpc',
                 '@solana/rpc-spec',

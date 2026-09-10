@@ -1,7 +1,7 @@
 'use client';
 
 import { approveRpcOriginAtom, parseRpcEndpoint, useCluster } from '@entities/cluster';
-import { useDebounceCallback } from '@react-hook/debounce';
+import { useDebouncedCallback } from '@mantine/hooks';
 import { Cluster } from '@utils/cluster';
 import { useSetAtom } from 'jotai';
 import { useRouter } from 'next/navigation';
@@ -63,7 +63,7 @@ export function useCustomUrlDraft(): CustomUrlDraft {
 
     // `replace` rather than `push`: editing one field should not leave a history entry per typing pause,
     // each holding a half-typed URL.
-    const commit = useDebounceCallback((url: string) => {
+    const commit = useDebouncedCallback((url: string) => {
         // An empty field clears the endpoint instead of leaving the previous one in the URL.
         if (url.trim() === '') {
             setSentUrl(undefined);

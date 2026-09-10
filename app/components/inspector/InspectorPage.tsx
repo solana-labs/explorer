@@ -4,10 +4,10 @@ import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { SolBalance } from '@components/common/SolBalance';
 import { cn } from '@components/shared/utils';
+import { usePrevious } from '@mantine/hooks';
 import { useFetchAccountInfo } from '@providers/accounts';
 import { FetchStatus } from '@providers/cache';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@providers/transactions/raw';
-import usePrevious from '@react-hook/previous';
 import { getBase58Decoder, getBase58Encoder } from '@solana/kit';
 import {
     type CompiledInnerInstruction,

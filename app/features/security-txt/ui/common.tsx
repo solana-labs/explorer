@@ -1,8 +1,8 @@
-import classNames from 'classnames';
 import { ExternalLink as ExternalLinkIcon } from 'react-feather';
 
 import { Badge } from '@/app/components/shared/ui/badge';
 import { ExternalLink } from '@/app/components/shared/ui/external-link';
+import { cn } from '@/app/components/shared/utils';
 import { BaseTable } from '@/app/shared/ui/Table';
 
 import type { SecurityTxtVersion } from './types';
@@ -111,7 +111,7 @@ export function StringCell({ value }: { value: string }) {
 export function RenderCode({ value, alignRight = true }: { value: any; alignRight?: boolean }) {
     return (
         <div className="flex items-end">
-            <pre className={classNames('max-w-[500px] overflow-x-auto', { 'lg:ml-auto': alignRight })}>
+            <pre className={cn('max-w-[500px] overflow-x-auto', { 'lg:ml-auto': alignRight })}>
                 {parseCodeValue(value)}
             </pre>
         </div>
