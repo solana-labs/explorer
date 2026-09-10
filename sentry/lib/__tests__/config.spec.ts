@@ -62,6 +62,12 @@ describe('traceSampleRateMultiplier', () => {
         expect(traceSampleRateMultiplier('edge')).toBe(0.25);
     });
 
+    it('should fall back to the server var when the edge var is unparsable', () => {
+        vi.stubEnv('TELEMETRY_TRACE_SAMPLE_RATE_EDGE', 'garbage');
+        vi.stubEnv('TELEMETRY_TRACE_SAMPLE_RATE_SERVER', '0.25');
+        expect(traceSampleRateMultiplier('edge')).toBe(0.25);
+    });
+
     it('should let an explicit edge var override the server fallback', () => {
         vi.stubEnv('TELEMETRY_TRACE_SAMPLE_RATE_SERVER', '0.25');
         vi.stubEnv('TELEMETRY_TRACE_SAMPLE_RATE_EDGE', '0');

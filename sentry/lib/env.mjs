@@ -63,8 +63,10 @@ export function traceSampleRateMultiplier(context) {
             return parseMultiplier(process.env.NEXT_PUBLIC_TELEMETRY_TRACE_SAMPLE_RATE_CLIENT);
         case 'edge':
             // Edge is "just server" to developers; the EDGE var exists only for targeted overrides.
-            return parseMultiplier(
-                process.env.TELEMETRY_TRACE_SAMPLE_RATE_EDGE || process.env.TELEMETRY_TRACE_SAMPLE_RATE_SERVER,
+            // Parse each var separately so an unparsable EDGE value falls back to SERVER instead of masking it.
+            return (
+                parseMultiplier(process.env.TELEMETRY_TRACE_SAMPLE_RATE_EDGE) ??
+                parseMultiplier(process.env.TELEMETRY_TRACE_SAMPLE_RATE_SERVER)
             );
         case 'server':
             return parseMultiplier(process.env.TELEMETRY_TRACE_SAMPLE_RATE_SERVER);
