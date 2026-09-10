@@ -31,7 +31,7 @@ import { SimulateButton } from '@/app/features/instruction-simulation/ui/Simulat
 import { SimulatedBadge } from '@/app/features/instruction-simulation/ui/SimulatedBadge';
 import { Section } from '@/app/features/transaction/ui/Section';
 
-import { AccountDetailSlideover } from './AccountDetailSlideover';
+import { AccountDetailDrawer } from './AccountDetailDrawer';
 import { AddressFromLookupTableWithContext } from './AddressWithContext';
 import { LG_ONLY_CARD } from './inspector-table';
 import { hasReliableChanges, simulationFailureMessage } from './simulation-changes';
@@ -340,8 +340,8 @@ function ChangeDash() {
 //
 // `interactive` controls whether the reason is shown here via a tooltip:
 //   • desktop rows and the mobile detail drawer pass `interactive` — the tooltip carries the reason
-//     (hover on desktop, tap on touch). In the drawer it must sit above the Slideover, so its content is
-//     lifted past the slideover's z-index.
+//     (hover on desktop, tap on touch). In the drawer it must sit above the Drawer, so its content is
+//     lifted past the drawer's z-index.
 //   • the mobile list summary leaves it off — there the whole card is a tap target, so the label stays a
 //     plain, non-interactive marker and a tap falls through to open the detail drawer (which shows the
 //     full reason).
@@ -360,7 +360,7 @@ function ChangeFailed({ message, interactive = false }: { message: string; inter
             <TooltipTrigger asChild>
                 <span className="inline-flex cursor-default">{label}</span>
             </TooltipTrigger>
-            {/* z above the mobile detail Slideover (z-[1201]) so the reason is visible when the tooltip
+            {/* z above the mobile detail Drawer (z-[1201]) so the reason is visible when the tooltip
                 lives inside the drawer. */}
             <TooltipContent side="top" className="z-[1300] max-w-56 break-words">
                 {message}
@@ -584,7 +584,7 @@ function AccountRowLayout({
                 same fields as the list — Owner, Change, Balance, Size — with the Simulate button living in
                 its Change row (`mode="action"`). */}
             {pubkey && (
-                <AccountDetailSlideover
+                <AccountDetailDrawer
                     open={drawerOpen}
                     onOpenChange={setDrawerOpen}
                     index={index}
