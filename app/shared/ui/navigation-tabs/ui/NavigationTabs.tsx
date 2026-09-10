@@ -12,7 +12,7 @@ type NavigationTabsProps = {
     children?: React.ReactNode;
     className?: string;
     /** Pin the tab bar to the top with a shadow on stuck (see BaseNavigationTabs `sticky`). */
-    sticky?: boolean | { className?: string };
+    sticky?: boolean;
     tabs: NavigationTab[];
 };
 

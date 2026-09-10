@@ -55,9 +55,6 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
                     childSlot={childSlot}
                     childLeader={childLeader}
                     parentLeader={parentLeader}
-                    // Tighten the mobile gap down to the tab bar. `!` overrides the `space-y-9`
-                    // margin-bottom:0 set on non-first children; reset at `lg`.
-                    className="!-mb-6 lg:!mb-0"
                 />
                 <MoreSection slot={slotNumber}>{children}</MoreSection>
             </>

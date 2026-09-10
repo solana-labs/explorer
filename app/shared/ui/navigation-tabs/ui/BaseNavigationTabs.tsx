@@ -34,9 +34,10 @@ export type BaseNavigationTabsProps = {
      * Wraps the tab bar in a sticky, full-bleed container that raises a shadow once it sticks to the
      * top. Use for route-based tabs that should pin (the block page); `scrollSpy` turns this on too.
      * The wrapper owns its own background (`bg-heavy-metal-900`) so a sticky bar can't render
-     * transparent. Pass the object form to position the wrapper, e.g. `{ className: 'mt-3 lg:mt-0' }`.
+     * transparent, and its spacing to the surrounding blocks comes from the page's `PageSections`
+     * rhythm — a sticky tab bar carries no per-page margins.
      */
-    sticky?: boolean | { className?: string };
+    sticky?: boolean;
     tabs: NavigationTab[];
 };
 
@@ -55,7 +56,6 @@ export function BaseNavigationTabs({
     // Scroll-spy tabs are always pinned; `sticky` pins route-based tabs too. Both share the same
     // sticky wrapper + shadow-on-stuck; only the active-tab tracking below is scroll-spy specific.
     const isSticky = scrollSpy || Boolean(sticky);
-    const stickyClassName = typeof sticky === 'object' ? sticky.className : undefined;
     const { registeredTabs, registerTab, unregisterTab } = useTabRegistration();
 
     const wrapperRef = useRef<HTMLDivElement>(null);
@@ -102,14 +102,13 @@ export function BaseNavigationTabs({
 
     useEffect(() => {
         if (!isSticky) return;
-        const el = wrapperRef.current;
-        if (!el) return;
         const update = () => {
             // Stuck = the sticky bar has reached the top of the viewport (top: 0). Deriving this from the
             // bar's vertical position — rather than an IntersectionObserver with threshold 1 — keeps the
             // shadow correct even when the bar is full-bleed (100vw): a hairline of horizontal overflow
             // would otherwise drop the intersection ratio below 1 and pin `stuck` on permanently.
-            setStuck(el.getBoundingClientRect().top <= 0);
+            const el = wrapperRef.current;
+            if (el) setStuck(el.getBoundingClientRect().top <= 0);
         };
         window.addEventListener('scroll', update, { passive: true });
         update();
@@ -201,7 +200,6 @@ export function BaseNavigationTabs({
                     'transition-[box-shadow] duration-200',
                     'bg-heavy-metal-900',
                     stuck && 'shadow-[0_6px_16px_rgba(0,0,0,0.45)]',
-                    stickyClassName,
                 )}
             >
                 {tabBar}
