@@ -12,7 +12,11 @@ vi.unmock('@/app/shared/lib/sentry');
 vi.mock('@sentry/nextjs', async () => vi.importActual('@sentry/core'));
 vi.mock('@/app/shared/lib/sentry/client', async () => {
     const { captureFeedback } = await vi.importActual<typeof import('@sentry/core')>('@sentry/core');
-    return { sendFeedback: async (params: Parameters<typeof captureFeedback>[0]) => captureFeedback(params) };
+    // The url default is mirrored, not exercised: this pins our param spread, not the SDK's fill
+    return {
+        sendFeedback: async (params: Parameters<typeof captureFeedback>[0]) =>
+            captureFeedback({ url: window.location.href, ...params }),
+    };
 });
 vi.mock('@entities/cluster', () => ({
     clusterSlug: () => 'mainnet-beta',
@@ -56,7 +60,7 @@ describe('FeedbackWidget — real captureFeedback envelope', () => {
         vi.unstubAllEnvs();
     });
 
-    it('should deliver message, rating, contact, and cluster inside a feedback envelope', async () => {
+    it('should deliver message, rating, contact, cluster, source, and url inside a feedback envelope', async () => {
         render(<FeedbackWidget />);
         await userEvent.click(await screen.findByRole('button', { name: 'Feedback' }));
         await userEvent.click(await screen.findByText('Share feedback'));
@@ -73,7 +77,12 @@ describe('FeedbackWidget — real captureFeedback envelope', () => {
 
         expect(itemHeader.type).toBe('feedback');
         expect(event.type).toBe('feedback');
-        expect(event.contexts?.feedback).toMatchObject({ message: 'Great explorer!', name: '@fren' });
+        expect(event.contexts?.feedback).toMatchObject({
+            message: 'Great explorer!',
+            name: '@fren',
+            source: 'widget',
+            url: window.location.href,
+        });
         expect(event.tags).toMatchObject({ cluster: 'mainnet-beta', rating: 4, source: 'widget', type: 'feedback' });
     });
 });

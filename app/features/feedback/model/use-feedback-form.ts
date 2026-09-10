@@ -8,6 +8,8 @@ import { sendFeedback } from '@/app/shared/lib/sentry/client';
 
 import type { FeedbackFormValues } from '../ui/BaseFeedbackForm';
 
+const FEEDBACK_SOURCE = 'widget';
+
 export function useFeedbackForm() {
     const [isOpen, setIsOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -22,7 +24,14 @@ export function useFeedbackForm() {
                 sendFeedback({
                     message: values.message,
                     name: values.contact,
-                    tags: { cluster: clusterSlug(cluster), rating: values.rating, source: 'widget', type: 'feedback' },
+                    // Left unset, the SDK stamps the entry's source as 'api'
+                    source: FEEDBACK_SOURCE,
+                    tags: {
+                        cluster: clusterSlug(cluster),
+                        rating: values.rating,
+                        source: FEEDBACK_SOURCE,
+                        type: 'feedback',
+                    },
                 }),
             );
             setIsOpen(false);

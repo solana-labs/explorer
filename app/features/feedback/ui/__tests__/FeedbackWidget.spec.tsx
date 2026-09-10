@@ -59,7 +59,7 @@ describe('FeedbackWidget', () => {
         expect(screen.queryByText('Share feedback')).toBeNull();
     });
 
-    it('should submit message, rating, contact, and cluster through sendFeedback and close the form', async () => {
+    it('should submit message, rating, contact, cluster, and source through sendFeedback and close the form', async () => {
         vi.stubEnv('NEXT_PUBLIC_SENTRY_DSN', SENTRY_DSN_FIXTURE);
         render(<FeedbackWidget />);
         await openForm();
@@ -72,6 +72,7 @@ describe('FeedbackWidget', () => {
         expect(sendFeedback).toHaveBeenCalledWith({
             message: 'Great explorer!',
             name: '@fren',
+            source: 'widget',
             tags: { cluster: 'mainnet-beta', rating: 4, source: 'widget', type: 'feedback' },
         });
         await waitFor(() => expect(screen.queryByRole('heading', { name: 'Give feedback' })).toBeNull());
