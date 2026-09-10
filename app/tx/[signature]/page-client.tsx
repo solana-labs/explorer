@@ -86,12 +86,9 @@ export function TransactionDetailsPageClient({ params: { signature: raw } }: Pro
     }
 
     return (
-        // The translucent-green text-selection highlight (`#13d89b` at 25% alpha) is a one-off colour,
-        // not a token; kept as a literal so the transaction and block pages stay visually in step.
-        <PageLayout className="selection:bg-[#13d89b40] selection:text-inherit">
+        <PageLayout>
+            <PageHeader eyebrow="Details" title="Transaction" />
             <PageSections>
-                <PageHeader eyebrow="Details" title="Transaction" />
-
                 {signature === undefined ? (
                     <ErrorCard text={`Signature "${raw}" is not valid`} />
                 ) : clusterStatus === ClusterStatus.Failure ? (
@@ -159,13 +156,7 @@ function DetailsSection({ signature }: SignatureProps) {
 
     return (
         <>
-            <BaseNavigationTabs
-                scrollSpy
-                tabs={tabs}
-                buildHref={path => `#${path}`}
-                wrapperClassName="bg-heavy-metal-900"
-                className="gap-5"
-            />
+            <BaseNavigationTabs scrollSpy tabs={tabs} buildHref={path => `#${path}`} className="gap-5" />
             <Suspense fallback={<LoadingCard message="Loading accounts" />}>
                 <AccountsCard signature={signature} />
             </Suspense>

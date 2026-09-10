@@ -22,9 +22,8 @@ const meta = {
                     '- `PageLayout` — the page shell: content max-width + horizontal/top padding. The wide',
                     '  values switch at `lg` (992px). It does not own the between-blocks rhythm.',
                     '- `PageSections` — the between-blocks vertical rhythm, as a stack that wraps the blocks.',
-                    '- `PageHeader` — the eyebrow + title. `spacing="inline"` (default, transaction page) sits',
-                    '  inside the rhythm and carries the negative margin that tightens it against the sticky',
-                    '  tabs; `spacing="standalone"` (block page) sits above the rhythm and owns its own gap.',
+                    '- `PageHeader` — the eyebrow + title. It sits above `PageSections` as a direct child of',
+                    '  `PageLayout`, owning its own padding and the gap down to the first block.',
                     '',
                     '## References',
                     '',
@@ -65,33 +64,17 @@ const SPACING_REFERENCE: { name: string; label: string; values: Record<'mobile' 
     { label: 'Between blocks', name: 'space-y-9 lg:space-y-12', values: { desktop: '48px', mobile: '36px' } },
 ];
 
-// The transaction-page shape: the header sits inside <PageSections> as the first block (inline
-// spacing), so it participates in the rhythm. This is the common case.
+// The detail-page shape, shared by every page: the header sits above <PageSections> as a direct child
+// of <PageLayout> and owns its own gap down to the first block.
 export const Default: Story = {
     render: () => (
         <div className="min-h-screen bg-heavy-metal-900 py-8">
             <PageLayout>
+                <PageHeader eyebrow="Details" title="Transaction" />
                 <PageSections>
-                    <PageHeader eyebrow="Details" title="Transaction" />
                     <Block>Summary</Block>
                     <Block>Accounts</Block>
                     <Block>Instructions</Block>
-                </PageSections>
-            </PageLayout>
-        </div>
-    ),
-};
-
-// The block-page shape: the header sits above <PageSections> (standalone spacing) and owns its own
-// gap to the first section.
-export const StandaloneHeader: Story = {
-    render: () => (
-        <div className="min-h-screen bg-heavy-metal-900 py-8">
-            <PageLayout>
-                <PageHeader eyebrow="Details" spacing="standalone" title="Block" />
-                <PageSections>
-                    <Block>Overview</Block>
-                    <Block>Transactions</Block>
                 </PageSections>
             </PageLayout>
         </div>
@@ -103,8 +86,8 @@ export const FullWidth: Story = {
     render: () => (
         <div className="min-h-screen bg-heavy-metal-900 py-8">
             <PageLayout width="full">
+                <PageHeader eyebrow="width=full" title="Full-width column" />
                 <PageSections>
-                    <PageHeader eyebrow="width=full" title="Full-width column" />
                     <Block>Spans the parent instead of capping at max-w-5xl.</Block>
                 </PageSections>
             </PageLayout>
@@ -169,8 +152,8 @@ function AnnotatedView() {
                 <span className="select-none text-sm text-white">Show layout outlines</span>
             </div>
             <PageLayout className={ring}>
+                <PageHeader className={ring} eyebrow="Details" title="Transaction" />
                 <PageSections className={ring}>
-                    <PageHeader className={ring} eyebrow="Details" title="Transaction" />
                     <div className={ring}>
                         <Block>Summary</Block>
                     </div>

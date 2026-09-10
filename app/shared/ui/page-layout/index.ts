@@ -3,5 +3,5 @@ export type { PageLayoutProps } from './PageLayout';
 
 export { PageSections } from './PageSections';
 
-export { PageHeader, pageHeaderVariants, pageTitleVariants } from './PageHeader';
+export { PageHeader, pageTitleVariants } from './PageHeader';
 export type { PageHeaderProps } from './PageHeader';

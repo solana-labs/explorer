@@ -19,14 +19,8 @@ describe('PageHeader', () => {
         expect(screen.queryByText('Details')).not.toBeInTheDocument();
     });
 
-    it('should default to the inline spacing that tightens it against the sticky tabs', () => {
-        render(<PageHeader title="Transaction" />);
-
-        expect(screen.getByRole('banner')).toHaveClass('-mb-6', 'lg:mb-0', 'gap-1.5');
-    });
-
-    it('should use standalone spacing (own padding, no negative margin) when requested', () => {
-        render(<PageHeader spacing="standalone" title="Block" />);
+    it('should own its vertical padding and the gap down to the first section', () => {
+        render(<PageHeader title="Block" />);
         const header = screen.getByRole('banner');
 
         expect(header).toHaveClass('mb-3', 'py-6', 'gap-1.5');

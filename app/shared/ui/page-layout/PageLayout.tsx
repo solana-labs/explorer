@@ -10,16 +10,22 @@ import { cnPrefixed } from '@/app/components/shared/utils';
 //
 // Project breakpoints switch the wide values at `lg` (992px): the mobile/tablet values run through
 // `md`, the desktop values begin at `lg`.
-const pageLayoutVariants = cva('mx-auto flex flex-col px-4 pt-3 lg:px-6 lg:pt-5', {
-    defaultVariants: { width: 'default' },
-    variants: {
-        // Content column max-width. `default` caps at the detail-page width; `full` spans the parent.
-        width: {
-            default: 'max-w-5xl',
-            full: 'max-w-none',
+//
+// The `selection:*` utilities give every detail page the same translucent text-selection highlight,
+// derived from the shared `accent` token, so callers never re-declare it.
+const pageLayoutVariants = cva(
+    'mx-auto flex flex-col px-4 pt-3 selection:bg-accent/25 selection:text-inherit lg:px-6 lg:pt-5',
+    {
+        defaultVariants: { width: 'default' },
+        variants: {
+            // Content column max-width. `default` caps at the detail-page width; `full` spans the parent.
+            width: {
+                default: 'max-w-5xl',
+                full: 'max-w-none',
+            },
         },
     },
-});
+);
 
 export interface PageLayoutProps
     extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof pageLayoutVariants> {}

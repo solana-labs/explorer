@@ -3,24 +3,11 @@ import * as React from 'react';
 
 import { cnPrefixed } from '@/app/components/shared/utils';
 
-// The eyebrow + title header of a detail page. The typography and eyebrow → title gap are constant
-// (the design-system part); `spacing` picks how the header sits relative to the page's block rhythm:
-//
-// - `inline` (transaction page): the header is the first child of <PageLayout gap="default">, so it
-//   participates in the between-blocks rhythm. The negative bottom margin (`-mb-6`, reset to `mb-0`
-//   from `lg`) offsets part of that gap so the block below sits close under the title. It's paired
-//   with the layout gap on purpose — keep the two together when adjusting page spacing.
-// - `standalone` (block page): the header sits outside the rhythm, directly under
-//   <PageLayout gap="none">, and owns its own vertical padding + bottom gap to the first section.
-const pageHeaderVariants = cva('flex flex-col gap-1.5', {
-    defaultVariants: { spacing: 'inline' },
-    variants: {
-        spacing: {
-            inline: '-mb-6 pb-3 pt-2 lg:mb-0',
-            standalone: 'mb-3 py-6',
-        },
-    },
-});
+// The eyebrow + title header of a detail page (Transaction / Block / Inspector). It sits above the
+// page's <PageSections> block rhythm as a direct child of <PageLayout>, owning its own vertical
+// padding (`py-6`) and the gap down to the first section (`mb-3`). The typography and the
+// eyebrow → title gap are constant across every page — that's the design-system part.
+const pageHeaderClassName = 'mb-3 flex flex-col gap-1.5 py-6';
 
 // The title font scales up one step from `md`, matching the transaction page.
 const pageTitleVariants = cva('m-0 font-normal leading-none text-white', {
@@ -34,10 +21,7 @@ const pageTitleVariants = cva('m-0 font-normal leading-none text-white', {
 });
 
 export interface PageHeaderProps
-    extends
-        Omit<React.HTMLAttributes<HTMLElement>, 'title'>,
-        VariantProps<typeof pageHeaderVariants>,
-        VariantProps<typeof pageTitleVariants> {
+    extends Omit<React.HTMLAttributes<HTMLElement>, 'title'>, VariantProps<typeof pageTitleVariants> {
     /** Small uppercased label above the title (e.g. "Details"). Omitted when not provided. */
     eyebrow?: React.ReactNode;
     /** The page title, rendered as the page's single `<h1>`. */
@@ -45,8 +29,8 @@ export interface PageHeaderProps
 }
 
 const PageHeader = React.forwardRef<HTMLElement, PageHeaderProps>(
-    ({ children, className, eyebrow, size, spacing, title, ...props }, ref) => (
-        <header ref={ref} className={cnPrefixed(pageHeaderVariants({ spacing }), className)} {...props}>
+    ({ children, className, eyebrow, size, title, ...props }, ref) => (
+        <header ref={ref} className={cnPrefixed(pageHeaderClassName, className)} {...props}>
             {eyebrow != undefined && eyebrow !== false && (
                 <span className="text-xs font-normal uppercase text-muted">{eyebrow}</span>
             )}
@@ -57,4 +41,4 @@ const PageHeader = React.forwardRef<HTMLElement, PageHeaderProps>(
 );
 PageHeader.displayName = 'PageHeader';
 
-export { PageHeader, pageHeaderVariants, pageTitleVariants };
+export { PageHeader, pageTitleVariants };

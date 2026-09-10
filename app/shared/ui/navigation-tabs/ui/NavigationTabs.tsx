@@ -12,20 +12,11 @@ type NavigationTabsProps = {
     children?: React.ReactNode;
     className?: string;
     /** Pin the tab bar to the top with a shadow on stuck (see BaseNavigationTabs `sticky`). */
-    sticky?: boolean;
+    sticky?: boolean | { className?: string };
     tabs: NavigationTab[];
-    /** Applied to the sticky wrapper. Use for background color. */
-    wrapperClassName?: string;
 };
 
-export function NavigationTabs({
-    buildHref,
-    tabs,
-    children,
-    className,
-    sticky,
-    wrapperClassName,
-}: NavigationTabsProps) {
+export function NavigationTabs({ buildHref, tabs, children, className, sticky }: NavigationTabsProps) {
     const segment = useSelectedLayoutSegment();
     const activeValue = segment ?? '';
     const router = useRouter();
@@ -45,7 +36,6 @@ export function NavigationTabs({
             buildHref={buildHref}
             className={className}
             sticky={sticky}
-            wrapperClassName={wrapperClassName}
         >
             {children}
         </BaseNavigationTabs>

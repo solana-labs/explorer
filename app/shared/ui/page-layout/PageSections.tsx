@@ -7,9 +7,8 @@ import { cnPrefixed } from '@/app/components/shared/utils';
 export const PAGE_SECTION_GAP = 'space-y-9 lg:space-y-12';
 
 // A vertical stack of a detail page's blocks with the standard between-blocks rhythm. Pair it with
-// <PageLayout>: put it inside the shell and drop the page's blocks in. A page keeps its header inside
-// the stack (transaction page — the header participates in the rhythm) or above it (block page — the
-// header owns its own gap), depending on the <PageHeader spacing> it uses.
+// <PageLayout>: put it inside the shell and drop the page's blocks in. The page's <PageHeader> sits
+// above this stack (a direct child of <PageLayout>), owning its own gap down to the first block.
 const PageSections = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
     ({ className, ...props }, ref) => (
         <div ref={ref} className={cnPrefixed('flex flex-col', PAGE_SECTION_GAP, className)} {...props} />

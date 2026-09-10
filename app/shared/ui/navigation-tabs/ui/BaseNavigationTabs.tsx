@@ -33,12 +33,11 @@ export type BaseNavigationTabsProps = {
     /**
      * Wraps the tab bar in a sticky, full-bleed container that raises a shadow once it sticks to the
      * top. Use for route-based tabs that should pin (the block page); `scrollSpy` turns this on too.
-     * Provide the background color via `wrapperClassName` (e.g. "bg-heavy-metal-900").
+     * The wrapper owns its own background (`bg-heavy-metal-900`) so a sticky bar can't render
+     * transparent. Pass the object form to position the wrapper, e.g. `{ className: 'mt-3 lg:mt-0' }`.
      */
-    sticky?: boolean;
+    sticky?: boolean | { className?: string };
     tabs: NavigationTab[];
-    /** Applied to the sticky wrapper (when `sticky` or `scrollSpy`). Use for background color. */
-    wrapperClassName?: string;
 };
 
 export function BaseNavigationTabs({
@@ -52,11 +51,11 @@ export function BaseNavigationTabs({
     disabledHint,
     scrollSpy,
     sticky,
-    wrapperClassName,
 }: BaseNavigationTabsProps) {
     // Scroll-spy tabs are always pinned; `sticky` pins route-based tabs too. Both share the same
     // sticky wrapper + shadow-on-stuck; only the active-tab tracking below is scroll-spy specific.
-    const isSticky = scrollSpy || sticky;
+    const isSticky = scrollSpy || Boolean(sticky);
+    const stickyClassName = typeof sticky === 'object' ? sticky.className : undefined;
     const { registeredTabs, registerTab, unregisterTab } = useTabRegistration();
 
     const wrapperRef = useRef<HTMLDivElement>(null);
@@ -200,8 +199,9 @@ export function BaseNavigationTabs({
                     'pl-[calc(50vw-50%)] pr-[calc(50vw-50%)]',
                     'overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
                     'transition-[box-shadow] duration-200',
+                    'bg-heavy-metal-900',
                     stuck && 'shadow-[0_6px_16px_rgba(0,0,0,0.45)]',
-                    wrapperClassName,
+                    stickyClassName,
                 )}
             >
                 {tabBar}

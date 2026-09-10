@@ -64,8 +64,8 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
         );
     }
     return (
-        <PageLayout className="selection:bg-[#13d89b40] selection:text-inherit">
-            <PageHeader eyebrow="Details" spacing="standalone" title="Block" />
+        <PageLayout>
+            <PageHeader eyebrow="Details" title="Block" />
             <PageSections>{content}</PageSections>
         </PageLayout>
     );
@@ -101,13 +101,7 @@ function MoreSection({ children, slot }: { children: React.ReactNode; slot: numb
         <>
             {/* Sticky, full-bleed tab bar with a shadow on stuck — the same wrapper the transaction page
                 gets from `scrollSpy`, shared here via `sticky` so both pages pin and shadow identically. */}
-            <NavigationTabs
-                buildHref={buildHref}
-                className="gap-5"
-                sticky
-                tabs={TABS}
-                wrapperClassName="bg-heavy-metal-900"
-            />
+            <NavigationTabs buildHref={buildHref} className="gap-5" sticky tabs={TABS} />
             {children}
         </>
     );
