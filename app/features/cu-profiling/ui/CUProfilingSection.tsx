@@ -2,7 +2,7 @@ import { CollapsibleCard } from '@components/shared/ui/collapsible-card';
 import { BaseCUProfilingCard, formatInstructionLogs } from '@entities/compute-unit';
 import { type NamedInstruction, resolveInstructionNames, type TransactionWithMeta } from '@entities/transaction-data';
 import { useResolvedInstructionNames } from '@entities/transaction-data/client';
-import { useCluster, useClusterInfoResult } from '@providers/cluster';
+import { useCluster, useEpochScheduleResult } from '@providers/cluster';
 import { useTransactionDetails } from '@providers/transactions';
 import type { Cluster } from '@utils/cluster';
 import { getEpochForSlot } from '@utils/epoch-schedule';
@@ -17,7 +17,7 @@ import { baseCardVariants, CardBody } from '@/app/shared/ui/Card';
 export function CUProfilingSection({ signature }: SignatureProps) {
     const details = useTransactionDetails(signature);
     const { cluster } = useCluster();
-    const { data: clusterInfo, error: clusterInfoError } = useClusterInfoResult();
+    const { data: epochSchedule, error: epochScheduleError } = useEpochScheduleResult();
 
     const transactionWithMeta = details?.data?.transactionWithMeta;
     const logMessages = transactionWithMeta?.meta?.logMessages || undefined;
@@ -45,30 +45,30 @@ export function CUProfilingSection({ signature }: SignatureProps) {
     const instructions = useResolvedInstructionNames(named);
 
     const instructionsForCU = useMemo(() => {
-        if (!slot || !clusterInfo) return [];
+        if (!slot || !epochSchedule) return [];
 
-        const epoch = getEpochForSlot(clusterInfo.epochSchedule, BigInt(slot));
+        const epoch = getEpochForSlot(epochSchedule, BigInt(slot));
 
         return formatInstructionLogs({ cluster, epoch, instructionLogs, instructions });
-    }, [instructions, instructionLogs, cluster, slot, clusterInfo]);
+    }, [instructions, instructionLogs, cluster, slot, epochSchedule]);
 
     // Keyed on the error, so this reports the fetch actually failing rather than the ordinary first
     // render, where the schedule has simply not arrived yet. An effect, not the render body: the render
     // body repeats the report on every render and doubles it under StrictMode.
     useEffect(() => {
-        if (!clusterInfoError) return;
+        if (!epochScheduleError) return;
         Logger.warn('[cu-profiling] epoch schedule unavailable; CU profiling cannot render', {
             sentry: true,
-            sentryExtras: { reason: String(clusterInfoError), signature },
+            sentryExtras: { reason: String(epochScheduleError), signature },
         });
-    }, [clusterInfoError, signature]);
+    }, [epochScheduleError, signature]);
 
     if (!logMessages || logMessages.length === 0) return undefined;
 
     // The transaction logged something, so this section owes the user a card — saying why it is empty
     // beats vanishing. Guarded on the value too: SWR keeps `error` beside a cached schedule, and a chart
     // we can still draw beats an excuse.
-    if (clusterInfoError && !clusterInfo) {
+    if (epochScheduleError && !epochSchedule) {
         return (
             <CollapsibleCard title="CU profiling" className={baseCardVariants({ ui: 'dashkit' })}>
                 <CardBody ui="dashkit">

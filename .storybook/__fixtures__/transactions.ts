@@ -16,7 +16,6 @@ type StatusOverrides = Partial<{
     err: TransactionStatus['info'] extends infer T ? (T extends { result: { err: infer E } } ? E : null) : null;
     confirmations: number | 'max';
     confirmationStatus: 'processed' | 'confirmed' | 'finalized';
-    timestamp: number | 'unavailable';
 }>;
 
 export function mockTransactionStatus(overrides: StatusOverrides = {}): CacheEntry<TransactionStatus> {
@@ -26,11 +25,10 @@ export function mockTransactionStatus(overrides: StatusOverrides = {}): CacheEnt
         err = null,
         confirmations = 'max',
         confirmationStatus = 'finalized',
-        timestamp = 1_716_000_000,
     } = overrides;
     return {
         data: {
-            info: { confirmationStatus, confirmations, result: { err }, slot, timestamp },
+            info: { confirmationStatus, confirmations, result: { err }, slot },
             signature,
         },
         status: FetchStatus.Fetched,

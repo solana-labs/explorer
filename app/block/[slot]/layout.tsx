@@ -4,7 +4,7 @@ import { BlockOverviewCard } from '@components/block/BlockOverviewCard';
 import { ErrorCard } from '@components/common/ErrorCard';
 import { LoadingCard } from '@components/common/LoadingCard';
 import { BlockProvider, FetchStatus, useBlock, useFetchBlock } from '@providers/block';
-import { useCluster, useClusterInfo } from '@providers/cluster';
+import { useCluster, useEpochSchedule } from '@providers/cluster';
 import { ClusterStatus } from '@utils/cluster';
 import { notFound } from 'next/navigation';
 import React, { PropsWithChildren, use } from 'react';
@@ -25,7 +25,7 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
     const confirmedBlock = useBlock(slotNumber);
     const fetchBlock = useFetchBlock();
     const { status } = useCluster();
-    const clusterInfo = useClusterInfo();
+    const epochSchedule = useEpochSchedule();
     const refresh = () => fetchBlock(slotNumber);
 
     // Fetch block on load
@@ -42,7 +42,7 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
         content = <ErrorCard retry={refresh} text={`Block ${slotNumber} was not found`} />;
     } else {
         const { block, blockLeader, childSlot, childLeader, parentLeader } = confirmedBlock.data;
-        const epoch = clusterInfo ? getEpochForSlot(clusterInfo.epochSchedule, BigInt(slotNumber)) : undefined;
+        const epoch = epochSchedule ? getEpochForSlot(epochSchedule, BigInt(slotNumber)) : undefined;
 
         content = (
             <>

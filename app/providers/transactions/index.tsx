@@ -20,12 +20,11 @@ export { useTransactionDetails } from './parsed';
 
 export type Confirmations = number | 'max';
 
-export type Timestamp = number | 'unavailable';
-
+// No timestamp here: `getTransaction` already answers with the block time, so the page reads it from
+// the transaction it is fetching anyway rather than paying a `getBlockTime` for the same slot.
 export interface TransactionStatusInfo {
     slot: number;
     result: SignatureResult;
-    timestamp: Timestamp;
     confirmations: Confirmations;
     confirmationStatus?: TransactionConfirmationStatus;
 }
@@ -93,25 +92,12 @@ export async function fetchTransactionStatus(
 
         let info = null;
         if (value !== null) {
-            const confirmations: Confirmations =
-                typeof value.confirmations === 'bigint' ? Number(value.confirmations) : 'max';
-            let blockTime: bigint | null = null;
-            try {
-                blockTime = await rpc.getBlockTime(value.slot).send();
-            } catch (error) {
-                if (cluster === Cluster.MainnetBeta && confirmations === 'max') {
-                    Logger.error(error, { slot: `${value.slot}` });
-                }
-            }
-            const timestamp: Timestamp = blockTime !== null ? Number(blockTime) : 'unavailable';
-
             info = {
                 confirmationStatus: value.confirmationStatus ?? undefined,
-                confirmations,
+                confirmations: typeof value.confirmations === 'bigint' ? Number(value.confirmations) : 'max',
                 result: { err: withNumbersInsteadOfBigInts(value.err) },
                 slot: Number(value.slot),
-                timestamp,
-            };
+            } satisfies TransactionStatusInfo;
         }
         data = { info, signature };
         fetchStatus = FetchStatus.Fetched;

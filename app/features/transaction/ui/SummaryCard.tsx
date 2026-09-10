@@ -18,7 +18,7 @@ import {
 } from '@entities/transaction-fee';
 import { ViewReceiptButton } from '@features/receipt';
 import { FetchStatus } from '@providers/cache';
-import { useCluster, useClusterInfo } from '@providers/cluster';
+import { useCluster, useEpochSchedule } from '@providers/cluster';
 import {
     TransactionStatusInfo,
     useFetchTransactionStatus,
@@ -27,20 +27,21 @@ import {
 } from '@providers/transactions';
 import type { TransactionVersion } from '@solana/kit';
 import { PACKET_DATA_SIZE, ParsedTransaction, SystemInstruction, SystemProgram } from '@solana/web3.js';
-import { ClusterStatus } from '@utils/cluster';
+import { Cluster, ClusterStatus } from '@utils/cluster';
 import { displayTimestamp, displayTimestampUtc } from '@utils/date';
 import { SignatureProps } from '@utils/index';
 import { getTransactionInstructionError } from '@utils/program-err';
 import { intoTransactionInstruction } from '@utils/tx';
 import { useBuildClusterPath, useClusterPath } from '@utils/url';
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { ZoomIn } from 'react-feather';
 
 import { Label, Row, Value } from '@/app/components/shared/ui/detail-row';
 import { useFetchRawTransaction, useRawTransactionDetails } from '@/app/providers/transactions/raw';
 import { DownloadDropdown } from '@/app/shared/components/DownloadDropdown';
-import { AUTO_REFRESH_INTERVAL, AutoRefresh, WithAutoRefreshProp } from '@/app/shared/lib/use-auto-refresh';
+import { Logger } from '@/app/shared/lib/logger';
+import { AutoRefresh, useAutoRefreshInterval, WithAutoRefreshProp } from '@/app/shared/lib/use-auto-refresh';
 import { V1_TRANSACTION_SIZE_LIMIT } from '@/app/shared/lib/v1-message-bridge';
 import { Card } from '@/app/shared/ui/Card';
 import { getEpochForSlot } from '@/app/utils/epoch-schedule';
@@ -79,7 +80,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
     const details = useTransactionDetails(signature);
     const rawDetails = useRawTransactionDetails(signature);
     const { cluster, status: clusterStatus } = useCluster();
-    const clusterInfo = useClusterInfo();
+    const epochSchedule = useEpochSchedule();
     const inspectPath = useClusterPath({ pathname: `/tx/${signature}/inspect` });
     // The error link's target is only known inside the render below, so this needs the callback form.
     const buildClusterPath = useBuildClusterPath();
@@ -93,6 +94,22 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
     // Read the version off the raw details rather than the parsed ones, so the size and the limit it
     // is compared against always come from the same fetch.
     const rawVersion = rawDetails?.data?.raw?.version;
+    // Both fetches carry the block time; the raw one lands first, and the parsed one covers the window
+    // where a commitment difference leaves the raw response null.
+    const blockTime = rawDetails?.data?.raw?.blockTime ?? details?.data?.transactionWithMeta?.blockTime ?? undefined;
+
+    // A finalized mainnet transaction always has a block time. Losing one means the cluster answered
+    // without it, which is worth knowing about; every other cluster and commitment can legitimately lack it.
+    const isFinalizedOnMainnet = cluster === Cluster.MainnetBeta && status?.data?.info?.confirmations === 'max';
+    const hasSettledWithoutBlockTime =
+        isFinalizedOnMainnet && blockTime === undefined && Boolean(rawDetails?.data) && Boolean(details?.data);
+    useEffect(() => {
+        if (!hasSettledWithoutBlockTime) return;
+        Logger.warn('[transaction] finalized transaction has no block time', {
+            sentry: true,
+            sentryExtras: { signature },
+        });
+    }, [hasSettledWithoutBlockTime, signature]);
 
     useEffect(() => {
         if (!rawDetails && clusterStatus === ClusterStatus.Connected) {
@@ -106,31 +123,30 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
         }
     }, [signature, clusterStatus]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    useEffect(() => {
-        if (autoRefresh === AutoRefresh.Active) {
-            const intervalHandle: NodeJS.Timeout = setInterval(() => fetchStatus(signature), AUTO_REFRESH_INTERVAL);
-            return () => {
-                clearInterval(intervalHandle);
-            };
-        }
-    }, [autoRefresh, fetchStatus, signature]);
+    // `getTransaction` answers null until the block is confirmed, so a transaction that is merely processed
+    // has no wire bytes and no block time yet. Retry it alongside the status until one arrives; auto-refresh
+    // only runs while confirmations are short of max, so this stops on its own.
+    //
+    // Read the entry through a ref: the hook needs a stable callback, and the entry changes on every
+    // fetch, so a dependency would rebuild the interval and push the next status refresh out.
+    const rawEntryRef = useRef(rawDetails);
+    rawEntryRef.current = rawDetails;
+    const refresh = useCallback(() => {
+        fetchStatus(signature);
+        const entry = rawEntryRef.current;
+        // Never open a second request while one is still running. The cache keeps whichever response
+        // lands last, so a slow null would replace a transaction a later request had already found, and
+        // auto-refresh can stop on the very next status before anything retries.
+        if (!entry?.data?.raw && entry?.status !== FetchStatus.Fetching) fetchRaw(signature);
+    }, [fetchStatus, fetchRaw, signature]);
+    useAutoRefreshInterval(autoRefresh, refresh);
 
     if (!status || (status.status === FetchStatus.Fetching && autoRefresh === AutoRefresh.Inactive)) {
         return <LoadingCard />;
     } else if (status.status === FetchStatus.FetchFailed) {
         return <ErrorCard retry={() => fetchStatus(signature)} text="Fetch Failed" />;
     } else if (!status.data?.info) {
-        return (
-            <TransactionNotFoundCard
-                signature={signature}
-                retry={() => fetchStatus(signature)}
-                firstAvailableBlock={
-                    clusterInfo?.firstAvailableBlock && clusterInfo.firstAvailableBlock > 0n
-                        ? clusterInfo.firstAvailableBlock
-                        : undefined
-                }
-            />
-        );
+        return <TransactionNotFoundCard signature={signature} retry={() => fetchStatus(signature)} />;
     }
 
     const { info } = status.data;
@@ -147,7 +163,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
         (transactionWithMeta?.transaction && transactionWithMeta.version !== 1
             ? estimateRequestedComputeUnitsForParsedTransaction(
                   transactionWithMeta.transaction,
-                  clusterInfo ? getEpochForSlot(clusterInfo.epochSchedule, BigInt(info.slot)) : undefined,
+                  epochSchedule ? getEpochForSlot(epochSchedule, BigInt(info.slot)) : undefined,
                   cluster,
               )
             : undefined);
@@ -414,18 +430,18 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
                 )}
 
                 {/* Timestamp */}
-                {info.timestamp !== 'unavailable' ? (
+                {blockTime ? (
                     <>
                         <Row divider>
                             <Label>Timestamp (Local)</Label>
                             <Value>
-                                <span className="font-mono">{displayTimestamp(info.timestamp * 1000, true)}</span>
+                                <span className="font-mono">{displayTimestamp(blockTime * 1000, true)}</span>
                             </Value>
                         </Row>
                         <Row>
                             <Label>Timestamp (UTC)</Label>
                             <Value>
-                                <span className="font-mono">{displayTimestampUtc(info.timestamp * 1000, true)}</span>
+                                <span className="font-mono">{displayTimestampUtc(blockTime * 1000, true)}</span>
                             </Value>
                         </Row>
                     </>

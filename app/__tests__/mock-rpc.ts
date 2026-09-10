@@ -38,7 +38,9 @@ export const mockGenesisHash = (hash?: string): string => hash ?? GENESIS_HASHES
 export const mockFirstAvailableBlock = (block?: bigint): bigint => block ?? gen.slot();
 
 /** Creates a mock RPC object matching the shape returned by createSolanaRpc() */
-export const mockSolanaRpc = (overrides?: Partial<ClusterInfo> & { genesisHash?: string }) => ({
+export const mockSolanaRpc = (
+    overrides?: Partial<ClusterInfo> & { firstAvailableBlock?: bigint; genesisHash?: string },
+) => ({
     getEpochInfo: () => ({
         send: vi.fn().mockResolvedValue(mockEpochInfo(overrides?.epochInfo)),
     }),

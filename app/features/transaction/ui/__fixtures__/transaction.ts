@@ -1,4 +1,5 @@
 import { DEFAULT_SIGNATURE } from '@__fixtures__/gen';
+import type { RawTransaction } from '@entities/transaction-data';
 import { createWeb3TransactionBytes } from '@entities/transaction-data/__fixtures__/wire-transactions';
 import { getBase58Decoder } from '@solana/kit';
 import type { ParsedTransactionWithMeta } from '@solana/web3.js';
@@ -110,6 +111,11 @@ const BASE_TX = {
 
 export const MOCK_PARSED_TX = mockParsedTransactionDetails({ transactionWithMeta: BASE_TX });
 
+/** A transaction the cluster has not timestamped yet, so the summary renders its "Unavailable" row. */
+export const MOCK_PARSED_TX_NO_BLOCK_TIME = mockParsedTransactionDetails({
+    transactionWithMeta: { ...BASE_TX, blockTime: null },
+});
+
 /**
  * A Compute Budget `SetComputeUnitLimit` instruction in the shape the RPC serves it: a partially
  * decoded instruction whose data is base58, which is what the requested-CU estimator reads.
@@ -174,16 +180,19 @@ const RAW_TX_BYTES = createWeb3TransactionBytes('legacy');
 const RAW_MESSAGE_BYTES = parseTransactionBytes(RAW_TX_BYTES).messageBytes;
 const RAW_MESSAGE = VersionedMessage.deserialize(RAW_MESSAGE_BYTES);
 
-export const MOCK_RAW_TX = mockRawTransactionDetails({
-    raw: {
-        message: RAW_MESSAGE,
-        messageBytes: RAW_MESSAGE_BYTES,
-        serializedSize: RAW_TX_BYTES.length,
-        signatures: [DEFAULT_SIGNATURE],
-        transaction: TransactionMessage.decompile(RAW_MESSAGE),
-        version: 'legacy',
-    },
-});
+const RAW_TX: RawTransaction = {
+    message: RAW_MESSAGE,
+    messageBytes: RAW_MESSAGE_BYTES,
+    serializedSize: RAW_TX_BYTES.length,
+    signatures: [DEFAULT_SIGNATURE],
+    transaction: TransactionMessage.decompile(RAW_MESSAGE),
+    version: 'legacy',
+};
+
+export const MOCK_RAW_TX = mockRawTransactionDetails({ raw: { ...RAW_TX, blockTime: 1_716_000_000 } });
+
+/** The same wire bytes before the block is confirmed, when the RPC reports no time yet. */
+export const MOCK_RAW_TX_NO_BLOCK_TIME = mockRawTransactionDetails({ raw: RAW_TX });
 
 export const MOCK_NO_LOGS_TX = mockParsedTransactionDetails({
     transactionWithMeta: {

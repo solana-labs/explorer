@@ -11,9 +11,9 @@ import { Cluster } from '@utils/cluster';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Chart.js needs a canvas that jsdom does not have; the legend is plain DOM, which is where names show.
-const { Bar, useTransactionDetails, useProgramIdlNames, useClusterInfoResult, warn } = vi.hoisted(() => ({
+const { Bar, useTransactionDetails, useProgramIdlNames, useEpochScheduleResult, warn } = vi.hoisted(() => ({
     Bar: vi.fn(() => null),
-    useClusterInfoResult: vi.fn(),
+    useEpochScheduleResult: vi.fn(),
     useProgramIdlNames: vi.fn(),
     useTransactionDetails: vi.fn(),
     warn: vi.fn(),
@@ -25,15 +25,15 @@ vi.mock('@entities/idl/@x/transaction-data', () => ({ useProgramIdlNames }));
 vi.mock('@/app/shared/lib/logger', () => ({ Logger: { error: vi.fn(), warn } }));
 vi.mock('@providers/cluster', () => ({
     useCluster: () => ({ cluster: Cluster.MainnetBeta, url: MAINNET_URL }),
-    useClusterInfoResult,
+    useEpochScheduleResult,
 }));
 
 const EPOCH_SCHEDULE = { firstNormalEpoch: 0n, firstNormalSlot: 0n, slotsPerEpoch: 432000n };
 
 // The schedule has landed unless a test says otherwise.
 beforeEach(() =>
-    useClusterInfoResult.mockReturnValue({
-        data: { epochSchedule: EPOCH_SCHEDULE },
+    useEpochScheduleResult.mockReturnValue({
+        data: EPOCH_SCHEDULE,
         error: undefined,
         isLoading: false,
     }),
@@ -139,11 +139,11 @@ describe('CUProfilingSection', () => {
     /**
      * The epoch schedule sets the CU reserve, so no schedule means no card. An empty card body is what
      * the user would otherwise get with no explanation, and only the error tells "failed" apart from
-     * "still loading" — `useClusterInfo` returns undefined for both.
+     * "still loading" — `useEpochSchedule` returns undefined for both.
      */
     describe('when the epoch schedule cannot be loaded', () => {
         beforeEach(() => {
-            useClusterInfoResult.mockReturnValue({
+            useEpochScheduleResult.mockReturnValue({
                 data: undefined,
                 error: new Error('rpc unavailable'),
                 isLoading: false,
@@ -160,8 +160,8 @@ describe('CUProfilingSection', () => {
 
         // SWR keeps a cached value beside a later error.
         it('should still render the chart when a cached schedule is available', () => {
-            useClusterInfoResult.mockReturnValue({
-                data: { epochSchedule: EPOCH_SCHEDULE },
+            useEpochScheduleResult.mockReturnValue({
+                data: EPOCH_SCHEDULE,
                 error: new Error('rpc unavailable'),
                 isLoading: false,
             });
@@ -200,7 +200,7 @@ describe('CUProfilingSection', () => {
 
     // The ordinary first render, before the schedule arrives. No card and no report — nothing has failed.
     it('should render nothing and report nothing while the schedule is still loading', () => {
-        useClusterInfoResult.mockReturnValue({ data: undefined, error: undefined, isLoading: true });
+        useEpochScheduleResult.mockReturnValue({ data: undefined, error: undefined, isLoading: true });
         mockTransaction([transferChecked()], [invocation(TOKEN_PROGRAM, 105)]);
 
         const { container } = renderSection();

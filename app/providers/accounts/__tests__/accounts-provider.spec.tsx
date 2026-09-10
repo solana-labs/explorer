@@ -1,5 +1,6 @@
+import { FetchStatus } from '@providers/cache';
 import { PublicKey } from '@solana/web3.js';
-import { act, render, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import { Cluster, clusterSelection, clusterUrl } from '@utils/cluster';
 import React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -8,9 +9,10 @@ import { Logger } from '@/app/shared/lib/logger';
 
 vi.mock('next/navigation');
 
-const { useClusterMock, getMultipleAccounts, getRpc } = vi.hoisted(() => {
+const { useClusterMock, getMultipleAccounts, getRpc, fetchNftData } = vi.hoisted(() => {
     const getMultipleAccounts = vi.fn();
     return {
+        fetchNftData: vi.fn(),
         getMultipleAccounts,
         getRpc: vi.fn((_url: string) => ({
             getMultipleAccounts: (...args: unknown[]) => ({ send: () => getMultipleAccounts(...args) }),
@@ -29,7 +31,12 @@ vi.mock('@entities/cluster', async importOriginal => {
     return { ...actual, getRpc };
 });
 
-import { AccountsProvider, FetchersContext, useFetchAccountInfo } from '..';
+vi.mock('@entities/nft', async importOriginal => {
+    const actual = await importOriginal<typeof import('@entities/nft')>();
+    return { ...actual, fetchNftData };
+});
+
+import { AccountsProvider, FetchersContext, type State, StateContext, useFetchAccountInfo } from '..';
 
 type Captured = NonNullable<React.ContextType<typeof FetchersContext>>;
 
@@ -231,5 +238,163 @@ describe('AccountsProvider: fetch and mount', () => {
 
         // A custom endpoint fails for reasons we do not control, so its failures are not ours to report.
         expect(vi.mocked(Logger.error)).not.toHaveBeenCalled();
+    });
+});
+
+describe('AccountsProvider: NFT metadata', () => {
+    const MINT_A = new PublicKey('So11111111111111111111111111111111111111112');
+    const MINT_B = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
+    const WALLET = new PublicKey('GsbwXfJraMomNxBcpR3DBr9yoWR2PmN93PEaYJz7MSTN');
+
+    function mintAccount() {
+        return {
+            data: { parsed: { info: {}, type: 'mint' }, program: 'spl-token', space: 82n },
+            executable: false,
+            lamports: 1_461_600n,
+            owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+            space: 82n,
+        };
+    }
+
+    function systemAccount() {
+        return {
+            data: ['', 'base64'],
+            executable: false,
+            lamports: 1n,
+            owner: '11111111111111111111111111111111',
+            space: 0n,
+        };
+    }
+
+    function fetchOnMount(pubkeys: PublicKey[]) {
+        return function FetchOnMount() {
+            const fetchAccount = useFetchAccountInfo();
+            React.useEffect(() => {
+                for (const pubkey of pubkeys) fetchAccount(pubkey, 'parsed');
+            }, []); // eslint-disable-line react-hooks/exhaustive-deps -- must fetch on the first commit only
+            return null;
+        };
+    }
+
+    /** Reads `StateContext` rather than `useAccountInfo`, which also needs a real `ClusterProvider`. */
+    function EntryStatus({ pubkey }: { pubkey: PublicKey }) {
+        const state = React.useContext(StateContext);
+        const key = pubkey.toBase58();
+        return <span data-testid={key}>{state?.entries[key]?.status ?? 'absent'}</span>;
+    }
+
+    function statusOf(pubkey: PublicKey) {
+        return screen.getByTestId(pubkey.toBase58()).textContent;
+    }
+
+    let entries: State['entries'] = {};
+    function CaptureEntries() {
+        const state = React.useContext(StateContext);
+        React.useEffect(() => {
+            entries = state?.entries ?? {};
+        }, [state]);
+        return null;
+    }
+    function capturedEntry(pubkey: PublicKey) {
+        return entries[pubkey.toBase58()];
+    }
+
+    async function flushDebounce() {
+        await act(async () => {
+            await vi.advanceTimersByTimeAsync(PAST_DEBOUNCE_MS);
+        });
+    }
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+        vi.useFakeTimers();
+        mockCluster(Cluster.Devnet, DEVNET_ENDPOINT);
+        getMultipleAccounts.mockResolvedValue({ value: [mintAccount(), mintAccount()] });
+        fetchNftData.mockResolvedValue(undefined);
+    });
+
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
+    it('should not read NFT metadata by default', async () => {
+        const FetchMints = fetchOnMount([MINT_A, MINT_B]);
+        render(
+            <AccountsProvider>
+                <FetchMints />
+            </AccountsProvider>,
+        );
+        await flushDebounce();
+
+        // Two round trips per mint plus an off-chain read, for data only the address page renders.
+        expect(fetchNftData).not.toHaveBeenCalled();
+    });
+
+    it('should read NFT metadata once per mint when asked', async () => {
+        const FetchMints = fetchOnMount([MINT_A, MINT_B]);
+        render(
+            <AccountsProvider fetchNftMetadata>
+                <FetchMints />
+            </AccountsProvider>,
+        );
+        await flushDebounce();
+
+        expect(fetchNftData).toHaveBeenCalledTimes(2);
+        expect(fetchNftData).toHaveBeenCalledWith(MINT_A, DEVNET_ENDPOINT, expect.anything());
+        expect(fetchNftData).toHaveBeenCalledWith(MINT_B, DEVNET_ENDPOINT, expect.anything());
+    });
+
+    it('should start every mint in a batch without waiting for the one before it', async () => {
+        fetchNftData.mockReturnValue(new Promise(() => {}));
+        const FetchMints = fetchOnMount([MINT_A, MINT_B]);
+
+        render(
+            <AccountsProvider fetchNftMetadata>
+                <FetchMints />
+            </AccountsProvider>,
+        );
+        await flushDebounce();
+
+        // Awaited inside the loop, the second mint's read only started once the first had resolved.
+        expect(fetchNftData).toHaveBeenCalledTimes(2);
+    });
+
+    it('should settle a non-mint account while a mint is still reading its metadata', async () => {
+        fetchNftData.mockReturnValue(new Promise(() => {}));
+        getMultipleAccounts.mockResolvedValue({ value: [mintAccount(), systemAccount()] });
+        const FetchBoth = fetchOnMount([MINT_A, WALLET]);
+
+        render(
+            <AccountsProvider fetchNftMetadata>
+                <FetchBoth />
+                <EntryStatus pubkey={MINT_A} />
+                <EntryStatus pubkey={WALLET} />
+            </AccountsProvider>,
+        );
+        await flushDebounce();
+
+        expect(statusOf(WALLET)).toBe(String(FetchStatus.Fetched));
+        expect(statusOf(MINT_A)).toBe(String(FetchStatus.Fetching));
+    });
+
+    it('should settle a mint with its metadata already attached', async () => {
+        const metadata = { editionInfo: {}, json: undefined, metadata: { name: 'Test' } };
+        getMultipleAccounts.mockResolvedValue({ value: [mintAccount()] });
+        fetchNftData.mockResolvedValue(metadata);
+        const FetchMint = fetchOnMount([MINT_A]);
+
+        render(
+            <AccountsProvider fetchNftMetadata>
+                <FetchMint />
+                <EntryStatus pubkey={MINT_A} />
+                <CaptureEntries />
+            </AccountsProvider>,
+        );
+        await flushDebounce();
+
+        // One settle carrying the metadata, never a settle before it followed by a second one replaying
+        // the pre-metadata snapshot over whatever landed in between.
+        expect(statusOf(MINT_A)).toBe(String(FetchStatus.Fetched));
+        expect(capturedEntry(MINT_A)?.data?.data.parsed).toMatchObject({ nftData: metadata });
     });
 });

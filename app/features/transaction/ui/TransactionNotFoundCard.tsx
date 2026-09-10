@@ -1,23 +1,18 @@
 'use client';
 
 import { AdjacentClusterLink, SearchingClusterIndicator } from '@entities/cluster';
-import { useCluster } from '@providers/cluster';
+import { useCluster, useFirstAvailableBlock } from '@providers/cluster';
 import React from 'react';
 
 import { useClusterTransactionSearch } from '../model/use-cluster-transaction-search';
 import { BaseTransactionNotFoundCard } from './BaseTransactionNotFoundCard';
 
-export function TransactionNotFoundCard({
-    signature,
-    retry,
-    firstAvailableBlock,
-}: {
-    signature: string;
-    retry?: () => void;
-    firstAvailableBlock?: bigint;
-}) {
+export function TransactionNotFoundCard({ signature, retry }: { signature: string; retry?: () => void }) {
     const { cluster } = useCluster();
     const { status, searchingCluster, foundCluster } = useClusterTransactionSearch(signature, cluster);
+    // The oldest served block only explains a transaction the other clusters do not have either, so it is
+    // fetched at that point rather than on every transaction page.
+    const firstAvailableBlock = useFirstAvailableBlock({ enabled: status === 'not-found' });
 
     let subtext: React.ReactNode = undefined;
     if (status === 'searching' && searchingCluster !== undefined) {
