@@ -29,6 +29,15 @@ export function sentryEnvironment(context) {
 }
 
 /**
+ * True unless this is a Vercel production deployment or ENABLE_SENTRY_SOURCEMAPS_AT_PREVIEW opts a preview in.
+ * Reads VERCEL_ENV raw, not sentryEnvironment(): a local production build must never attempt uploads.
+ * @returns {boolean}
+ */
+export function sourcemapUploadsDisabled() {
+    return process.env.VERCEL_ENV !== 'production' && process.env.ENABLE_SENTRY_SOURCEMAPS_AT_PREVIEW !== 'true';
+}
+
+/**
  * @param {string | undefined} raw
  * @returns {number | undefined} value clamped to [0, 1]; undefined when unset or unparsable
  */

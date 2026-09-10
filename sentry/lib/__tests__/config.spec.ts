@@ -2,7 +2,13 @@ import type { TracesSamplerSamplingContext } from '@sentry/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { createSentryConfig } from '../config.mjs';
-import { clientSentryDsn, serverSentryDsn, traceSampleRateMultiplier, vitalsSampleRateMultiplier } from '../env.mjs';
+import {
+    clientSentryDsn,
+    serverSentryDsn,
+    sourcemapUploadsDisabled,
+    traceSampleRateMultiplier,
+    vitalsSampleRateMultiplier,
+} from '../env.mjs';
 
 const samplingContext = (name: string, op?: string): TracesSamplerSamplingContext => ({
     attributes: op ? { 'sentry.op': op } : {},
@@ -147,6 +153,26 @@ describe('createSentryConfig environment', () => {
         expect(createSentryConfig('client').environment).toBe('development');
         expect(createSentryConfig('server').environment).toBe('development');
         expect(createSentryConfig('edge').environment).toBe('development');
+    });
+});
+
+describe('sourcemapUploadsDisabled', () => {
+    it('should keep uploads on Vercel production only', () => {
+        vi.stubEnv('VERCEL_ENV', 'production');
+        expect(sourcemapUploadsDisabled()).toBe(false);
+    });
+
+    it('should disable uploads on previews and local builds', () => {
+        vi.stubEnv('VERCEL_ENV', 'preview');
+        expect(sourcemapUploadsDisabled()).toBe(true);
+        vi.stubEnv('VERCEL_ENV', undefined);
+        expect(sourcemapUploadsDisabled()).toBe(true);
+    });
+
+    it('should let the preview override opt uploads back in', () => {
+        vi.stubEnv('VERCEL_ENV', 'preview');
+        vi.stubEnv('ENABLE_SENTRY_SOURCEMAPS_AT_PREVIEW', 'true');
+        expect(sourcemapUploadsDisabled()).toBe(false);
     });
 });
 
