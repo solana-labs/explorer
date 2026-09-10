@@ -1,3 +1,4 @@
+import { TxInstructionSurface } from '@entities/instruction-card';
 import { getBase58Decoder } from '@solana/kit';
 import { ParsedTransaction, PublicKey } from '@solana/web3.js';
 import {
@@ -6,8 +7,9 @@ import {
     withMockTransactions,
     withScrollAnchor,
     withTokenInfoBatch,
+    withTxInstructionSurface,
 } from '@storybook-config/decorators';
-import type { Meta, StoryObj } from '@storybook-config/types';
+import type { Decorator, Meta, StoryObj } from '@storybook-config/types';
 
 import { Ed25519DetailsCard } from '../Ed25519DetailsCard';
 
@@ -39,9 +41,16 @@ const tx = {
     signatures: [],
 } as unknown as ParsedTransaction;
 
+/** The transaction's result reaches the card through the surface, so a failed one needs its own. */
+const withFailedInstructionSurface: Decorator = Story => (
+    <TxInstructionSurface result={{ err: { InstructionError: [0, 'Custom'] } }}>
+        <Story />
+    </TxInstructionSurface>
+);
+
 const meta: Meta<typeof Ed25519DetailsCard> = {
     component: Ed25519DetailsCard,
-    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withMockTransactions],
+    decorators: [withCluster, withScrollAnchor, withTokenInfoBatch, withMockTransactions, withTxInstructionSurface],
     parameters: nextjsParameters,
     tags: ['autodocs', 'test'],
     title: 'Components/Instruction/Ed25519DetailsCard',
@@ -50,17 +59,8 @@ const meta: Meta<typeof Ed25519DetailsCard> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const SingleSignature: Story = {
-    args: { childIndex: undefined, index: 0, innerCards: undefined, ix, result: { err: null }, tx },
-};
+const args = { childIndex: undefined, index: 0, innerCards: undefined, ix, tx };
 
-export const Failed: Story = {
-    args: {
-        childIndex: undefined,
-        index: 0,
-        innerCards: undefined,
-        ix,
-        result: { err: { InstructionError: [0, 'Custom'] } },
-        tx,
-    },
-};
+export const SingleSignature: Story = { args };
+
+export const Failed: Story = { args, decorators: [withFailedInstructionSurface] };
