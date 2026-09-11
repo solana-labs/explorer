@@ -202,12 +202,6 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: 1.1.8
         version: 1.1.8(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
-      '@react-hook/debounce':
-        specifier: 4.0.0
-        version: 4.0.0(react@19.2.6)
-      '@react-hook/previous':
-        specifier: 1.0.1
-        version: 1.0.1(react@19.2.6)
       '@sentry/core':
         specifier: 10.39.0
         version: 10.39.0
@@ -292,9 +286,6 @@ importers:
       class-variance-authority:
         specifier: 0.7.1
         version: 0.7.1
-      classnames:
-        specifier: 2.3.1
-        version: 2.3.1
       client-only:
         specifier: 0.0.1
         version: 0.0.1
@@ -3943,21 +3934,6 @@ packages:
   '@radix-ui/rect@1.1.1':
     resolution: {integrity: sha512-HPwpGIzkl28mWyZqG52jiqDJ12waP11Pa1lGoiyUkIEuMLBP0oeK/C89esbXrxsky5we7dfd8U58nm0SgAWpVw==}
 
-  '@react-hook/debounce@4.0.0':
-    resolution: {integrity: sha512-706Xcg+KKWHk9BuZQUQ0ZQKp9zhv3/MbqFenWVfHcynYpSGRVwQTzJRGvPxvsdtXxJv+HfgKTY/O/hEejakwmA==}
-    peerDependencies:
-      react: '>=16.8'
-
-  '@react-hook/latest@1.0.3':
-    resolution: {integrity: sha512-dy6duzl+JnAZcDbNTfmaP3xHiKtbXYOaz3G51MGVljh548Y8MWzTr+PHLOfvpypEVW9zwvl+VyKjbWKEVbV1Rg==}
-    peerDependencies:
-      react: '>=16.8'
-
-  '@react-hook/previous@1.0.1':
-    resolution: {integrity: sha512-O7VaRLDEHRy1hxh03CmtWRxDhCwIVQBBkf1kYdYqUP3KNrPnQMIVIYYYQpHIIiNcS1BO6zmBKM4bugFDNgP8Iw==}
-    peerDependencies:
-      react: '>=16.8'
-
   '@rollup/plugin-babel@6.0.3':
     resolution: {integrity: sha512-fKImZKppa1A/gX73eg4JGo+8kQr/q1HBQaCGKECZ0v4YBBv3lFqi14+7xyApECzvkLTHCifx+7ntcrvtBIRcpg==}
     engines: {node: '>=14.0.0'}
@@ -6608,9 +6584,6 @@ packages:
 
   class-variance-authority@0.7.1:
     resolution: {integrity: sha512-Ka+9Trutv7G8M6WT6SeiRWz792K5qEqIGEGzXKhAE6xOWAY6pPH8U+9IY3oCMv6kqTmLsv7Xh/2w2RigkePMsg==}
-
-  classnames@2.3.1:
-    resolution: {integrity: sha512-OlQdbZ7gLfGarSqxesMesDa5uz7KFbID8Kpq/SxIoNGDqY8lSYs0D+hhtBXhcdB3rcbXArFr7vlHheLk1voeNA==}
 
   clean-regexp@1.0.0:
     resolution: {integrity: sha512-GfisEZEJvzKrmGWkvfhgzcz/BllN1USeqD2V6tg14OAOgaCD2Z/PUEuxnAZ/nPvmaHRG7a8y77p1T/IRQ4D1Hw==}
@@ -13734,19 +13707,6 @@ snapshots:
 
   '@radix-ui/rect@1.1.1': {}
 
-  '@react-hook/debounce@4.0.0(react@19.2.6)':
-    dependencies:
-      '@react-hook/latest': 1.0.3(react@19.2.6)
-      react: 19.2.6
-
-  '@react-hook/latest@1.0.3(react@19.2.6)':
-    dependencies:
-      react: 19.2.6
-
-  '@react-hook/previous@1.0.1(react@19.2.6)':
-    dependencies:
-      react: 19.2.6
-
   '@rollup/plugin-babel@6.0.3(@babel/core@7.29.7)(@types/babel__core@7.20.5)(rollup@4.59.0)':
     dependencies:
       '@babel/core': 7.29.7
@@ -16867,8 +16827,6 @@ snapshots:
   class-variance-authority@0.7.1:
     dependencies:
       clsx: 2.1.1
-
-  classnames@2.3.1: {}
 
   clean-regexp@1.0.0:
     dependencies:
