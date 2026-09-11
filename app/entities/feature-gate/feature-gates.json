@@ -2258,7 +2258,7 @@
     "description": "Allow validators to specify custom commission collector accounts where block revenue and inflation rewards commissions will be deposited.",
     "devnet_activation_epoch": 1138,
     "key": "3HcSrCTGXTUnrTueHi4DAwNuMxZSsm5xui2Ax3mgxHqf",
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 1031,
     "min_agave_versions": [
       "v4.2.0-beta.0"
     ],
