@@ -30,10 +30,7 @@ function SimulatedTitle({ children }: { children: React.ReactNode }) {
     );
 }
 
-// Card surface for the simulation-derived blocks (Logs / CU profiling): the dashkit card OUTLINE with no
-// filled backing — border only, transparent inside. The page container remaps
-// `border-dk-card-outline-dark` → `border-outer-space-800`, so this matches the other outlines.
-const OUTLINE_ONLY_CARD = 'rounded-lg border border-solid border-dk-card-outline-dark';
+const OUTLINE_ONLY_CARD = 'rounded-lg border border-solid border-outer-space-800';
 
 // Empty state for a Logs / CU profiling card before a simulation has run: the card exists so its tab has
 // a scroll target. The Simulate button is revealed on hover/focus of the enclosing card (the `group`).

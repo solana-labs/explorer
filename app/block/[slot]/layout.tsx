@@ -10,6 +10,7 @@ import { notFound } from 'next/navigation';
 import React, { PropsWithChildren, use } from 'react';
 
 import { type NavigationTab, NavigationTabs } from '@/app/shared/ui/navigation-tabs';
+import { PageHeader, PageLayout, PageSections } from '@/app/shared/ui/page-layout';
 import { getEpochForSlot } from '@/app/utils/epoch-schedule';
 import { useBuildClusterPath } from '@/app/utils/url';
 
@@ -54,27 +55,16 @@ function BlockLayoutInner({ children, params: { slot } }: InnerProps) {
                     childSlot={childSlot}
                     childLeader={childLeader}
                     parentLeader={parentLeader}
-                    // Tighten the mobile gap down to the tab bar. `!` overrides the `space-y-9`
-                    // margin-bottom:0 set on non-first children; reset at `lg`.
-                    className="!-mb-6 lg:!mb-0"
                 />
                 <MoreSection slot={slotNumber}>{children}</MoreSection>
             </>
         );
     }
     return (
-        // Translucent-green text-selection highlight, matched exactly to the transaction page
-        // (app/tx/[signature]/page-client.tsx). `#13d89b` is a one-off selection colour (not a token),
-        // and `40` is its alpha (25%), kept as a literal so both pages stay visually in step.
-        <div className="mx-auto flex max-w-5xl flex-col px-4 pt-3 selection:bg-[#13d89b40] selection:text-inherit lg:px-6 lg:pt-5">
-            <header className="mb-3 flex flex-col gap-1.5 py-6">
-                <span className="text-xs font-normal uppercase text-muted">Details</span>
-                <h1 className="m-0 text-2xl font-normal leading-none text-white md:text-3xl">Block</h1>
-            </header>
-            {/* Section rhythm lives on this inner wrapper so the header sits outside the `space-y` and its
-                own `mb-3` controls the gap to the first section — mirroring the inspector page. */}
-            <div className="flex flex-col space-y-9 lg:space-y-12">{content}</div>
-        </div>
+        <PageLayout>
+            <PageHeader eyebrow="Details" title="Block" />
+            <PageSections>{content}</PageSections>
+        </PageLayout>
     );
 }
 
@@ -106,11 +96,7 @@ function MoreSection({ children, slot }: { children: React.ReactNode; slot: numb
 
     return (
         <>
-            {/* Full-bleed sticky tab bar, mirroring the transaction page: the negative margins stretch the
-                background edge-to-edge while the matching padding pulls the tabs back onto the content column. */}
-            <div className="sticky top-0 z-10 ml-[calc(50%-50vw)] mr-[calc(50%-50vw)] overflow-x-auto bg-heavy-metal-900 pl-[calc(50vw-50%)] pr-[calc(50vw-50%)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                <NavigationTabs buildHref={buildHref} tabs={TABS} className="gap-5" />
-            </div>
+            <NavigationTabs buildHref={buildHref} sticky tabs={TABS} />
             {children}
         </>
     );

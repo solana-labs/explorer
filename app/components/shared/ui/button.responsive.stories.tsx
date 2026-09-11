@@ -21,7 +21,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const ToolbarRow = () => (
-    <div className="rounded-dk border border-solid border-dk-card-outline-dark bg-dk-gray-800-dark p-3">
+    <div className="rounded-dk border border-solid border-outer-space-800 bg-dk-gray-800-dark p-3">
         <h3 className="mb-2 text-dk-sm text-dk-gray-700">Card-header toolbar</h3>
         <div className="flex flex-wrap items-center gap-1.5">
             <span className="mr-auto text-dk-h4 font-medium">Program Account</span>
@@ -39,7 +39,7 @@ const ToolbarRow = () => (
 );
 
 const ToggleRow = () => (
-    <div className="rounded-dk border border-solid border-dk-card-outline-dark bg-dk-gray-800-dark p-3">
+    <div className="rounded-dk border border-solid border-outer-space-800 bg-dk-gray-800-dark p-3">
         <h3 className="mb-2 text-dk-sm text-dk-gray-700">Toggle group</h3>
         <div className="flex flex-wrap gap-1.5">
             <Button ui="dashkit" variant="black" active size="sm">
@@ -59,7 +59,7 @@ const ToggleRow = () => (
 );
 
 const FooterRow = () => (
-    <div className="rounded-dk border border-solid border-dk-card-outline-dark bg-dk-gray-800-dark p-3">
+    <div className="rounded-dk border border-solid border-outer-space-800 bg-dk-gray-800-dark p-3">
         <h3 className="mb-2 text-dk-sm text-dk-gray-700">Footer (full-width Load More)</h3>
         <Button ui="dashkit" variant="primary" className="w-full">
             Load More
@@ -68,7 +68,7 @@ const FooterRow = () => (
 );
 
 const DropdownTriggerRow = () => (
-    <div className="rounded-dk border border-solid border-dk-card-outline-dark bg-dk-gray-800-dark p-3">
+    <div className="rounded-dk border border-solid border-outer-space-800 bg-dk-gray-800-dark p-3">
         <h3 className="mb-2 text-dk-sm text-dk-gray-700">Dropdown triggers</h3>
         <div className="flex flex-wrap gap-1.5">
             <Button ui="dashkit" variant="dark" size="sm" className="w-[150px]">
@@ -82,7 +82,7 @@ const DropdownTriggerRow = () => (
 );
 
 const ModalFooterRow = () => (
-    <div className="rounded-dk border border-solid border-dk-card-outline-dark bg-dk-gray-800-dark p-3">
+    <div className="rounded-dk border border-solid border-outer-space-800 bg-dk-gray-800-dark p-3">
         <h3 className="mb-2 text-dk-sm text-dk-gray-700">Modal-style action row</h3>
         <div className="flex justify-between gap-1.5">
             <Button ui="dashkit" variant="outline-danger" size="sm">

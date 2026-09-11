@@ -11,7 +11,7 @@ const formControlVariants = cva(['block', 'w-full', 'bg-transparent', 'text-inhe
             // Bootstrap .form-control baseline equivalent: bordered, padded, rounded.
             // No focus chrome to match production (Bootstrap's .form-control:focus set `outline: 0`).
             default:
-                'rounded-lg border border-solid border-dk-card-outline-dark px-3 py-2 focus:outline-none focus-visible:outline-none',
+                'rounded-lg border border-solid border-outer-space-800 px-3 py-2 focus:outline-none focus-visible:outline-none',
             // .form-control-flush: no border, no horizontal padding, no focus chrome.
             flush: 'resize-none border-0 px-0 py-2 focus:outline-none focus-visible:outline-none',
             // .form-control-flush + .form-control-auto: no border, no padding, auto height, no focus chrome.

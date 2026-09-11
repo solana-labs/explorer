@@ -39,7 +39,7 @@ import {
 } from '@/app/shared/lib/v1-message-bridge';
 import { Card, CardHeader, CardTitle } from '@/app/shared/ui/Card';
 import { BaseNavigationTabs } from '@/app/shared/ui/navigation-tabs/ui/BaseNavigationTabs';
-import { PageContainer } from '@/app/shared/ui/page-container/PageContainer';
+import { PageHeader, PageLayout, PageSections } from '@/app/shared/ui/page-layout';
 import { useClusterPath } from '@/app/utils/url';
 
 import { AccountsCard } from './AccountsCard';
@@ -448,31 +448,30 @@ export function TransactionInspectorPage({
     }, [currentPathname, currentSearchParams, router]);
 
     return (
-        <PageContainer width="fluid" className="mt-6 [&_.border-dk-card-outline-dark]:border-outer-space-800">
-            <header className="mb-3 mt-4 flex flex-col gap-1.5 py-6">
-                <span className="text-xs font-normal uppercase text-muted">Transaction</span>
-                <h1 className="m-0 text-2xl font-normal leading-none text-white md:text-3xl">Inspector</h1>
-            </header>
-            {signature ? (
-                <PermalinkView
-                    signature={signature}
-                    reset={resetToInspectorPage}
-                    showTokenBalanceChanges={showTokenBalanceChanges}
-                />
-            ) : inspectorData ? (
-                isSquadsProposalAccountData(inspectorData) ? (
-                    <SquadsProposalInspectorCard account={inspectorData.account} onClear={resetParams} />
-                ) : (
-                    <LoadedView
-                        transaction={inspectorData}
-                        onClear={resetParams}
+        <PageLayout>
+            <PageHeader eyebrow="Transaction" title="Inspector" />
+            <PageSections>
+                {signature ? (
+                    <PermalinkView
+                        signature={signature}
+                        reset={resetToInspectorPage}
                         showTokenBalanceChanges={showTokenBalanceChanges}
                     />
-                )
-            ) : (
-                <RawInput value={paramString} setTransactionData={setInspectorData} />
-            )}
-        </PageContainer>
+                ) : inspectorData ? (
+                    isSquadsProposalAccountData(inspectorData) ? (
+                        <SquadsProposalInspectorCard account={inspectorData.account} onClear={resetParams} />
+                    ) : (
+                        <LoadedView
+                            transaction={inspectorData}
+                            onClear={resetParams}
+                            showTokenBalanceChanges={showTokenBalanceChanges}
+                        />
+                    )
+                ) : (
+                    <RawInput value={paramString} setTransactionData={setInspectorData} />
+                )}
+            </PageSections>
+        </PageLayout>
     );
 }
 
@@ -656,39 +655,35 @@ function LoadedView({
                 scrollSpy
                 tabs={tabs}
                 buildHref={path => `#${path}`}
-                wrapperClassName="mt-3 bg-heavy-metal-900 lg:mt-0"
-                className="gap-5"
                 disabledHint="Run the simulation to load this tab's content."
             />
-            <div className="mt-9 flex flex-col space-y-9 lg:mt-12 lg:space-y-12">
-                {signatures && (
-                    <div id="signatures">
-                        <TransactionSignatures message={message} signatures={signatures} rawMessage={rawMessage} />
-                    </div>
-                )}
-                {/* Account List with the SOL Balance Changes merged in as a "Change" column; the per-row
-                    Simulate affordance drives the same simulation the panel below uses. */}
-                <div id="accounts">
-                    <AccountsCard message={message} simulation={simulation} />
+            {signatures && (
+                <div id="signatures">
+                    <TransactionSignatures message={message} signatures={signatures} rawMessage={rawMessage} />
                 </div>
-                {/* Token balance changes from the simulation. TokenBalancesCardInner brings its own
+            )}
+            {/* Account List with the SOL Balance Changes merged in as a "Change" column; the per-row
+                    Simulate affordance drives the same simulation the panel below uses. */}
+            <div id="accounts">
+                <AccountsCard message={message} simulation={simulation} />
+            </div>
+            {/* Token balance changes from the simulation. TokenBalancesCardInner brings its own
                     `#tokens` section anchor; it renders only once a run has produced token rows (matching
                     the gated Tokens tab above). */}
-                {tokenBalanceRows && tokenBalanceRows.length > 0 && <TokenBalancesCardInner rows={tokenBalanceRows} />}
-                {/* Renders (with its own `#address-lookups` anchor) only when the message references lookup
+            {tokenBalanceRows && tokenBalanceRows.length > 0 && <TokenBalancesCardInner rows={tokenBalanceRows} />}
+            {/* Renders (with its own `#address-lookups` anchor) only when the message references lookup
                     tables — otherwise it returns null, matching the gated tab above. A v1 message carries
                     static accounts only, so there are no lookups to render. */}
-                {version !== 1 && <AddressTableLookupsCard message={message} />}
-                {/* Programs & Logs — the two-column row copied from the TX details page. At xxl it goes
+            {version !== 1 && <AddressTableLookupsCard message={message} />}
+            {/* Programs & Logs — the two-column row copied from the TX details page. At xxl it goes
                     full-bleed to the viewport: Instructions (Programs) on the left, and the Simulation
                     control + Logs + CU profiling in the sticky right column. */}
-                <div className="flex flex-col space-y-9 pb-10 xxl:relative xxl:left-1/2 xxl:w-screen xxl:-translate-x-1/2 xxl:flex-row xxl:items-start xxl:gap-6 xxl:space-y-0 xxl:px-6">
-                    <div id="programs" className="xxl:min-w-0 xxl:flex-[1_1_0%] xxl:overflow-hidden">
-                        <InstructionsSection message={message} compiledInnerInstructions={compiledInnerInstructions} />
-                    </div>
-                    <div className="scrollbar-hide xxl:sticky xxl:top-[70px] xxl:max-h-[calc(100vh-90px)] xxl:min-w-0 xxl:flex-[1_1_0%] xxl:overflow-y-auto xxl:rounded-b-lg">
-                        <InspectorSimulationPanel simulation={simulation} message={message} />
-                    </div>
+            <div className="flex flex-col space-y-9 pb-10 xxl:relative xxl:left-1/2 xxl:w-screen xxl:-translate-x-1/2 xxl:flex-row xxl:items-start xxl:gap-6 xxl:space-y-0 xxl:px-6">
+                <div id="programs" className="xxl:min-w-0 xxl:flex-[1_1_0%] xxl:overflow-hidden">
+                    <InstructionsSection message={message} compiledInnerInstructions={compiledInnerInstructions} />
+                </div>
+                <div className="scrollbar-hide xxl:sticky xxl:top-[70px] xxl:max-h-[calc(100vh-90px)] xxl:min-w-0 xxl:flex-[1_1_0%] xxl:overflow-y-auto xxl:rounded-b-lg">
+                    <InspectorSimulationPanel simulation={simulation} message={message} />
                 </div>
             </div>
         </>

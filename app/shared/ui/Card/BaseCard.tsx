@@ -24,8 +24,7 @@ const cardVariants = cva(['relative flex min-w-0 flex-col break-words'], {
             sm: 'mb-2',
         },
         ui: {
-            dashkit:
-                'mb-6 rounded-lg border border-solid border-dk-card-outline-dark bg-dk-gray-800-dark shadow-dk-card',
+            dashkit: 'mb-6 rounded-lg border border-solid border-outer-space-800 bg-dk-gray-800-dark shadow-dk-card',
             tw: 'rounded-xl border border-solid border-heavy-metal-950 bg-heavy-metal-800 text-neutral-200',
         },
         // Card-level padding; only meaningful when ui="tw" (matches the legacy OKLCH Card's `variant` prop).
