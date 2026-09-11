@@ -203,8 +203,25 @@ const config: Config = {
                     from: { opacity: '0' },
                     to: { opacity: '1' },
                 },
+                // Bottom-sheet drawer: slide up on open, down on close.
+                'drawer-in': {
+                    from: { transform: 'translateY(100%)' },
+                    to: { transform: 'translateY(0)' },
+                },
+                'drawer-out': {
+                    from: { transform: 'translateY(0)' },
+                    to: { transform: 'translateY(100%)' },
+                },
+                // One-shot green blink over a copy tile the moment the copy lands.
+                'copy-flash': {
+                    '0%': { backgroundColor: 'rgba(29, 215, 155, 0.45)', borderColor: '#1dd79b' },
+                    '100%': { backgroundColor: 'transparent', borderColor: 'transparent' },
+                },
             },
             animation: {
+                'copy-flash': 'copy-flash 0.6s ease-out',
+                'drawer-in': 'drawer-in 0.15s ease-out',
+                'drawer-out': 'drawer-out 0.125s ease-in forwards',
                 'dropdown-menu': 'dropdown-menu 0.15s',
             },
         },

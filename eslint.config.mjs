@@ -584,7 +584,7 @@ export default tseslint.config(
             'app/features/search/api/discover-with-utl.ts',
             'app/features/search/api/resolve-search-tokens.ts',
             'app/features/stake/ui/StakeAccountSection.tsx',
-            'app/features/transaction/ui/AccountDetailSlideover.tsx',
+            'app/features/transaction/ui/AccountDetailDrawer.tsx',
             'app/features/transaction/ui/AccountExpandedSections.tsx',
             'app/features/transaction/ui/InstructionsSection.tsx',
             'app/features/transaction/ui/SummaryCard.tsx',

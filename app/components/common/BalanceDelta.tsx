@@ -19,20 +19,20 @@ export function BalanceDelta({ delta, isSol = false }: { delta: DeltaValue; isSo
 
     if (deltaValue.gt(0)) {
         return (
-            <Badge ui="dashkit" variant="success" font="mono">
+            <Badge ui="dashkit" variant="success" className="font-mono">
                 +{isSol ? sols : deltaValue.toString()}
             </Badge>
         );
     } else if (deltaValue.lt(0)) {
         return (
-            <Badge ui="dashkit" variant="warning" font="mono">
+            <Badge ui="dashkit" variant="warning" className="font-mono">
                 -{isSol ? sols : deltaValue.abs().toString()}
             </Badge>
         );
     }
 
     return (
-        <Badge ui="dashkit" variant="secondary" font="mono">
+        <Badge ui="dashkit" variant="default" className="bg-outer-space-800 font-mono text-outer-space-300">
             +0
         </Badge>
     );

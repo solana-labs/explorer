@@ -38,6 +38,24 @@ if (!globalThis.matchMedia) {
     });
 }
 
+// @solana/keys' signBytes()/verifySignature() pass crypto.subtle the ArrayBuffer that its
+// toArrayBuffer() helper returns. jsdom's SubtleCrypto rejects a bare ArrayBuffer — it accepts only
+// TypedArray/DataView — so Ed25519 signing and verification throw under the specs (jsdom) project.
+// Coerce ArrayBuffer arguments to a Uint8Array view before delegating. A harmless passthrough in
+// the Storybook (real browser) project, whose native SubtleCrypto already accepts both. Guarded so
+// re-evaluating this setup (Vitest 4 can import it more than once per realm) does not double-wrap.
+const subtle = globalThis.crypto?.subtle;
+const ARRAYBUFFER_COERCION = Symbol.for('explorer.subtle.arraybuffer-coercion');
+if (subtle && !Object.getOwnPropertyDescriptor(subtle, ARRAYBUFFER_COERCION)) {
+    const coerce = (data: BufferSource): BufferSource => (data instanceof ArrayBuffer ? new Uint8Array(data) : data);
+    const { digest, sign, verify } = subtle;
+    subtle.sign = (algorithm, key, data) => sign.call(subtle, algorithm, key, coerce(data));
+    subtle.verify = (algorithm, key, signature, data) =>
+        verify.call(subtle, algorithm, key, coerce(signature), coerce(data));
+    subtle.digest = (algorithm, data) => digest.call(subtle, algorithm, coerce(data));
+    Object.defineProperty(subtle, ARRAYBUFFER_COERCION, { value: true });
+}
+
 if (!AbortSignal.timeout) {
     AbortSignal.timeout = ms => {
         const controller = new AbortController();

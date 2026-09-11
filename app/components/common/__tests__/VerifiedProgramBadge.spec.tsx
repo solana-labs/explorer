@@ -11,9 +11,6 @@ import { VerifiedProgramBadge } from '../VerifiedProgramBadge';
 vi.mock('@/app/providers/cluster', () => ({
     useCluster: vi.fn(),
 }));
-vi.mock('@/app/utils/url', () => ({
-    useClusterPath: vi.fn(() => '/address/mock/verified-build'),
-}));
 
 // Mock only the useIsProgramVerified hook; keep the real cluster-support helpers.
 vi.mock('@/app/utils/verified-builds', async importOriginal => ({
@@ -67,7 +64,7 @@ describe('VerifiedProgramBadge (mocked useIsProgramVerified)', () => {
         expect(screen.getByText(/Error fetching verified build information/i)).toBeInTheDocument();
     });
 
-    it('should show loading badge when isLoading is true', () => {
+    it('should show a loading skeleton when isLoading is true', () => {
         (useCluster as unknown as ReturnType<typeof vi.fn>).mockReturnValue({ cluster: Cluster.MainnetBeta });
         (useIsProgramVerified as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
             data: false,
@@ -75,7 +72,9 @@ describe('VerifiedProgramBadge (mocked useIsProgramVerified)', () => {
             isLoading: true,
         });
         render(<VerifiedProgramBadge programData={mockProgramData} pubkey={mockPubkey} />);
-        expect(screen.getByText(/Loading/i)).toBeInTheDocument();
+        // Loading now renders a Skeleton (no text) instead of a "Loading..." badge.
+        expect(screen.getByTestId('verified-build-loading')).toBeInTheDocument();
+        expect(screen.queryByText(/Program Source Verified|Program Not Verified/i)).not.toBeInTheDocument();
     });
 
     it('should show the verified badge on devnet (a supported cluster)', () => {

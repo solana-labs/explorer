@@ -13,13 +13,13 @@ import { useTransactionDetails } from '@providers/transactions';
 import type { ParsedMessage, ParsedMessageAccount } from '@solana/web3.js';
 import { SignatureProps } from '@utils/index';
 import { BigNumber } from 'bignumber.js';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ChevronDown } from 'react-feather';
 
 import { useBreakpoint } from '@/app/shared/lib/use-breakpoint';
 
 import { AccountBadges } from './AccountBadges';
-import { AccountDetailSlideover } from './AccountDetailSlideover';
+import { AccountDetailDrawer } from './AccountDetailDrawer';
 import { AccountExpandedContent } from './AccountExpandedContent';
 import {
     CELL_PADDING,
@@ -34,6 +34,7 @@ type TransactionAccountRowProps = {
     accountInfo?: AccountInfo;
     accountInfoLoading: boolean;
     index: number;
+    isDesktop: boolean;
     message: ParsedMessage;
     post: number;
     pre: number;
@@ -44,14 +45,22 @@ function TransactionAccountRow({
     accountInfo,
     accountInfoLoading,
     index,
+    isDesktop,
     message,
     post,
     pre,
 }: TransactionAccountRowProps) {
     const [expanded, setExpanded] = useState(false);
-    const [slideoverOpen, setSlideoverOpen] = useState(false);
-    const { isLandscape, isLg } = useBreakpoint();
-    const isDesktop = isLg || isLandscape;
+    const [drawerOpen, setDrawerOpen] = useState(false);
+    // Mount the mobile drawer only once the row is first tapped — otherwise every account row mounts a
+    // closed drawer up front.
+    const [drawerMounted, setDrawerMounted] = useState(false);
+
+    // If the viewport crosses to desktop while the drawer is open, close it gracefully (Radix runs its
+    // exit animation + scroll-lock/focus teardown) instead of the render gate unmounting it abruptly.
+    useEffect(() => {
+        if (isDesktop) setDrawerOpen(false);
+    }, [isDesktop]);
 
     const pubkey = account.pubkey;
     const key = pubkey.toBase58();
@@ -68,7 +77,8 @@ function TransactionAccountRow({
         if (isDesktop) {
             setExpanded(v => !v);
         } else {
-            setSlideoverOpen(true);
+            setDrawerMounted(true);
+            setDrawerOpen(true);
         }
     };
 
@@ -159,16 +169,17 @@ function TransactionAccountRow({
                 </div>
             </div>
 
-            {/* Mobile: slideover */}
-            <AccountDetailSlideover
-                account={account}
-                accountInfo={accountInfo}
-                accountInfoLoading={accountInfoLoading}
-                index={index}
-                message={message}
-                onOpenChange={setSlideoverOpen}
-                open={slideoverOpen}
-            />
+            {drawerMounted && (
+                <AccountDetailDrawer
+                    account={account}
+                    accountInfo={accountInfo}
+                    accountInfoLoading={accountInfoLoading}
+                    index={index}
+                    message={message}
+                    onOpenChange={setDrawerOpen}
+                    open={drawerOpen}
+                />
+            )}
         </>
     );
 }
@@ -176,6 +187,10 @@ function TransactionAccountRow({
 export function AccountsCard({ signature }: SignatureProps) {
     const details = useTransactionDetails(signature);
     const { url } = useCluster();
+    // One breakpoint subscription for the whole card — rows read `isDesktop` as a prop instead of each
+    // registering its own matchMedia listeners.
+    const { isLandscape, isLg } = useBreakpoint();
+    const isDesktop = isLg || isLandscape;
 
     const transactionWithMeta = details?.data?.transactionWithMeta;
     const message = transactionWithMeta?.transaction.message;
@@ -211,6 +226,7 @@ export function AccountsCard({ signature }: SignatureProps) {
                 accountInfo={accounts.get(pubkeyStr)}
                 accountInfoLoading={loading}
                 index={index}
+                isDesktop={isDesktop}
                 message={message}
                 post={meta.postBalances[index]}
                 pre={meta.preBalances[index]}

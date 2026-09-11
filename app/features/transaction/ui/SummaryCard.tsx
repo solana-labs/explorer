@@ -256,7 +256,7 @@ export function SummaryCard({ signature, autoRefresh }: SignatureProps & WithAut
                             <Badge
                                 ui="dashkit"
                                 variant={statusClass}
-                                className="whitespace-normal break-words text-left"
+                                className="min-w-0 max-w-full !whitespace-normal break-words !text-left"
                             >
                                 {errorLink ? <Link href={errorLink}>{errorReason}</Link> : errorReason}
                             </Badge>

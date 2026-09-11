@@ -42,14 +42,14 @@ const tableVariants = cva([], {
         variant: 'plain',
     },
     variants: {
-        // `body` mirrors `head` for the data rows: `subtle` sets 8px vertical / 12px horizontal padding.
+        // `body` mirrors `head` for the data rows: `subtle` sets 10px vertical / 12px horizontal padding.
         // Same specificity story as `head` — `tbody tr td` (0,1,3) beats base `td` (0,1,1); the edge
         // overrides add `:first-child`/`:last-child` (0,2,3) to beat the card variant's `pl-6`/`pr-6`.
         // Row text colour is left untouched so the data stays readable.
         body: {
             default: '',
             subtle: [
-                '[&_tbody_tr_td]:px-3 [&_tbody_tr_td]:py-2',
+                '[&_tbody_tr_td]:px-3 [&_tbody_tr_td]:py-2.5',
                 '[&_tbody_tr_td:first-child]:pl-3 [&_tbody_tr_td:last-child]:pr-3',
             ].join(' '),
         },
@@ -70,14 +70,14 @@ const tableVariants = cva([], {
         // `head` restyles just the header row while keeping the `<table>` structure. `subtle` takes
         // the transaction Token Balances table header's muted colour (`outer-space-300`), drops the
         // header's own `bg-dark-background` so it shares the transparent tbody/card surface, and sets
-        // 8px vertical / 12px horizontal padding — colours and spacing only. Base overrides use
+        // 10px vertical / 12px horizontal padding — colours and spacing only. Base overrides use
         // `thead tr th` (specificity 0,1,3 > base 0,1,2); the edge padding overrides add `:first-child`/
         // `:last-child` (0,2,3) to beat the card variant's `thead th:first-child` (0,2,2) `pl-6`/`pr-6`.
         head: {
             default: '',
             subtle: [
                 '[&_thead_tr_th]:bg-transparent [&_thead_tr_th]:text-outer-space-300',
-                '[&_thead_tr_th]:px-3 [&_thead_tr_th]:py-2',
+                '[&_thead_tr_th]:px-3 [&_thead_tr_th]:py-2.5',
                 '[&_thead_tr_th:first-child]:pl-3 [&_thead_tr_th:last-child]:pr-3',
             ].join(' '),
         },

@@ -3,7 +3,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import type { ComponentProps } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { AccountDetailSlideover } from '../AccountDetailSlideover';
+import { AccountDetailDrawer } from '../AccountDetailDrawer';
 
 vi.mock('next/link', () => ({
     default: ({ children, href, ...props }: ComponentProps<'a'> & { href: string }) => (
@@ -52,20 +52,20 @@ afterEach(() => {
 
 const pubkey = new PublicKey('11111111111111111111111111111111');
 
-describe('AccountDetailSlideover', () => {
-    it('should close the slideover on Escape when the nickname editor is closed', () => {
+describe('AccountDetailDrawer', () => {
+    it('should close the drawer on Escape when the nickname editor is closed', () => {
         const onOpenChange = vi.fn();
 
-        renderSlideover({ onOpenChange });
+        renderDrawer({ onOpenChange });
         fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
 
         expect(onOpenChange).toHaveBeenCalledWith(false);
     });
 
-    it('should keep the slideover open when Escape closes the nickname editor', () => {
+    it('should keep the drawer open when Escape closes the nickname editor', () => {
         const onOpenChange = vi.fn();
 
-        renderSlideover({ onOpenChange });
+        renderDrawer({ onOpenChange });
         fireEvent.click(screen.getByRole('button', { name: 'Nickname' }));
 
         const input = screen.getByLabelText(`Nickname input for ${pubkey.toBase58()}`);
@@ -76,9 +76,9 @@ describe('AccountDetailSlideover', () => {
     });
 });
 
-function renderSlideover({ onOpenChange = vi.fn() }: { onOpenChange?: (open: boolean) => void } = {}) {
+function renderDrawer({ onOpenChange = vi.fn() }: { onOpenChange?: (open: boolean) => void } = {}) {
     render(
-        <AccountDetailSlideover
+        <AccountDetailDrawer
             account={{
                 pubkey,
                 signer: false,

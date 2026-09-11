@@ -15,6 +15,7 @@ import { composeOnchainRepoUrl, normalizeRepoUrl, safeRepoUrl } from './verified
 
 const OSEC_REGISTRY_URL = 'https://verify.osec.io';
 const OSEC_DEVNET_REGISTRY_URL = 'https://verify-devnet.osec.io';
+export const OSEC_URL = 'https://osec.io';
 const VERIFY_PROGRAM_ID = 'verifycLy8mB96wd9wqq3WDXQwM4oU6r42Th37Db9fC';
 
 export function supportsVerifiedBuilds(cluster: Cluster): boolean {

@@ -266,6 +266,10 @@ export function HistoryFilterTrigger({ address, ...filters }: HistoryFilters & {
                 size="sm"
                 variant="outline"
                 disabled
+                // Re-enable pointer events on the disabled control so the cursor shows it's
+                // unavailable and the explanatory title tooltip appears; the native `disabled`
+                // attribute still blocks clicks.
+                className="disabled:!pointer-events-auto disabled:cursor-not-allowed"
                 aria-label="Filters unavailable"
                 title="Transaction filtering is unavailable for this account or RPC endpoint"
             >
