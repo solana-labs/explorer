@@ -20,7 +20,7 @@ catalogs:
     eslint-plugin-storybook: 10.5.7
     storybook: 10.5.7
   tooling:
-    '@eslint/js': 9.39.4
+    '@eslint/js': 10.0.1
     eslint: 9.39.4
     prettier: 3.9.6
     typescript: 5.7.3
