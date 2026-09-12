@@ -2284,7 +2284,7 @@
     "description": "Reduce lamports_per_byte incrementally from 6960 to 696 via five steps: 6333, 5080, 2575, 1322, and 696. This proposal supersedes SIMD-0436, providing a more granular reduction schedule.",
     "devnet_activation_epoch": 1141,
     "key": "61BtM7BkDEE8Yq5fskEVAQT9mYA8qCejJWoLe5apqg81",
-    "mainnet_activation_epoch": null,
+    "mainnet_activation_epoch": 1033,
     "min_agave_versions": [
       "v4.2.0-beta.1"
     ],
